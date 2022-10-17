@@ -10,6 +10,7 @@ import optcgcons
 import shims
 import shims_mp
 import aco
+import aco_mp
 import greedy
 
 
@@ -183,11 +184,11 @@ if __name__ == "__main__":
     # methods.DATA = "data50"
     # methods.DATA = "data100"
 
-    scenario = 2
+    scenario = 1
 
     if scenario == 1:
-        instances = [1,2,3,4,5,6,7]
-        # instances = [1]
+        # instances = [1,2,3,4,5,6,7]
+        instances = [1]
     if scenario == 2:
         # instances = [1,2,3,4,5,6,7]
         instances = [1]

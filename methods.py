@@ -124,7 +124,7 @@ class Solution(object):
         # builds a greedy solution until the limited capacity is attained
         if limit > 0:
             for ce in self.Edges:
-                if not ce.InSol and self.isFeasible(ce, limit, cfg, k): # All constraints
+                if self.isFeasible(ce, cfg, k): # All constraints
                     self.includeEdge(ce)
                 
     def includeEdge(self, e):
@@ -142,7 +142,10 @@ class Solution(object):
         self.Edges[e.ID].InSol = True
 
     # check constraints for greedy, Shims and metaheuristics
-    def isFeasible(self, ce, limit, cfg, k):
+    def isFeasible(self, ce, cfg, k):
+
+        if ce.InSol:
+            return False
 
         if ce.Item.ID > len(self.Included)-1:
             return False # this item was already inserted. Equation 19        
@@ -158,7 +161,7 @@ class Solution(object):
              return False #this item weight would exceed pallet weight limit. Equation 17
         
         # Pallet Acumulated Volume
-        if self.PAV[ce.Pallet.ID] + ce.Item.V > ce.Pallet.V * limit:
+        if self.PAV[ce.Pallet.ID] + ce.Item.V > ce.Pallet.V:
             return False #this item volume would exceed pallet volumetric limit. Equation 18
         
         # if this inclusion increases torque and is turns it greater than the maximum
@@ -505,6 +508,8 @@ def writeTourSol(method, scenario, instance, pi, tour, cfg, pallets, cons, write
 
     if write:
         sol = '\\begin{tabular}{c c c c} \n'
+    else:
+        sol = "\n"
 
     for k, node in enumerate(tour.nodes[:cfg.numNodes]):
 
@@ -553,6 +558,11 @@ def writeTourSol(method, scenario, instance, pi, tour, cfg, pallets, cons, write
             sol += f"Weight: {wNodeAccum/cfg.weiCap:.2f} & "
             sol += f"Volume: {vNodeAccum/cfg.volCap:.2f} & "
             sol += f"Torque: {epsilom:.2f} \\\\ \n"
+        else:
+            sol += f"Score: {sNodeAccum}\t"
+            sol += f"Weight: {wNodeAccum/cfg.weiCap:.2f}\t"
+            sol += f"Volume: {vNodeAccum/cfg.volCap:.2f}\t"
+            sol += f"Torque: {epsilom:.2f}\n"            
 
         sTourAccum += sNodeAccum
 
@@ -565,28 +575,26 @@ def writeTourSol(method, scenario, instance, pi, tour, cfg, pallets, cons, write
 
 
     tour.score = float(sTourAccum)
-
-    if write:
             
-        timeString = getTimeString(tour.elapsed, 1) # 1 instance            
 
+    if write:                 
+        timeString = getTimeString(tour.elapsed, 1, inSecs=True) # 1 instance   
         sol += f"\ \ \ \ \ elapsed: {timeString}\ \ \ \ \ method:\ {method}" + '} \\\\ \n'
-
         sol += '\\bottomrule \n'
         sol += '\end{tabular} \n'
 
-        dirname = f"./results/{method}_{scenario}"
-        try:
-            os.makedirs(dirname)
-        except FileExistsError:
-            pass    
+    dirname = f"./results/{method}_{scenario}"
+    try:
+        os.makedirs(dirname)
+    except FileExistsError:
+        pass    
 
-        fname = f"{dirname}/res_{method}_{scenario}_{instance}_{pi}.txt"
-        writer = open(fname, "w+") 
-        try:
-            writer.write(sol)
-        finally:
-            writer.close() 
+    fname = f"{dirname}/res_{method}_{scenario}_{instance}_{pi}.txt"
+    writer = open(fname, "w+") 
+    try:
+        writer.write(sol)
+    finally:
+        writer.close() 
   
 
 
