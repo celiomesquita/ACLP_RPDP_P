@@ -1,8 +1,7 @@
 #/usr/bin/python3
 import numpy as np
 from tabulate import tabulate
-from time import time
-from os import path
+import time
 import os
 
 # local packages
@@ -99,7 +98,7 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
         print(f"-> {numItems} items with {numKept} kept on board in {node.ICAO}")
 
         E = []
-        startNodeTime = time()
+        startNodeTime = time.perf_counter()
 
         if method == "Shims":
             E = shims.Solve(pallets, items, cfg, k)
@@ -108,13 +107,15 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
             E = shims_mp.Solve(pallets, items, cfg, k)
 
         if method == "ACO":
-            # E = aco.Solve(pallets, items, startNodeTime, cfg, k) 
-            E = aco.teamSolve(pallets, items, startNodeTime, cfg, k)           
+            E = aco.Solve(pallets, items, startNodeTime, cfg, k)
+
+        if method == "ACO_mp":
+            E = aco.teamSolve(pallets, items, startNodeTime, cfg, k)  
 
         if method == "Greedy":
             E = greedy.Solve(pallets, items, cfg, k)  
 
-        nodeElapsed = time() - startNodeTime
+        nodeElapsed = time.perf_counter() - startNodeTime
 
         tour.elapsed += nodeElapsed
 
@@ -176,6 +177,7 @@ if __name__ == "__main__":
     # find . | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
 
     methods.SEC_BREAK = 0.7
+    # methods.SEC_BREAK = 1
 
     methods.DATA = "data20"
     # methods.DATA = "data50"
@@ -208,8 +210,8 @@ if __name__ == "__main__":
         for j, value in enumerate(cols):
             costs[i][j] = cfg.aircraft.kmCost*value
 
-    # for method in ["GRB","TS","GRASP","ACO","NMO","Shims"]:
-    for method in ["Shims"]:
+    # for method in ["ACO","ACO_mp","Shims","Shims_mp","Greedy"]:
+    for method in ["Greedy"]:
 
         pallets = methods.loadPallets(cfg)
 
@@ -260,7 +262,7 @@ if __name__ == "__main__":
 
         numInst = float(len(instances))
 
-        timeString = methods.getTimeString(avgInstTime, numInst)
+        timeString = methods.getTimeString(avgInstTime, numInst, inSecs=True)
 
         avgInstSC /= numInst
 

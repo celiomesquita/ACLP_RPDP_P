@@ -1,10 +1,24 @@
 
-from os import path
 import os
 import math
 import itertools
 import numpy as np
-from time import time
+import time
+import itertools
+import copy
+
+
+# 1) Iterate with enumerate instead or np.arange(len(x))
+# 2) Use list comprehension instead of raw for loops
+# 3) Sort complex iterables with sorted()
+# 4) Store unique values with Sets
+# 5) Save memory with Generators
+# 6) Define default values in Dictionaries with .get() and .setdefault()
+# 7) Count hashable objects with collections.Counter
+# 8) Format strings with f-Strings (Python 3.6+)
+# 9) Concatenate strings with .join()
+# 10) Merge dictionaries with {**d1, **d2} (Python 3.5+)
+# 11) Simplify if-statements with if x in list
 
 SEC_BREAK = 0.7
 
@@ -42,7 +56,6 @@ class Pallet(object):
         self.D  = d  # centroid distance to CG
         self.V  = v  # volume limit
         self.W  = w  # weight limit
-        # self.Dests = [-1 for _ in range(numNodes)] # one destination for node
         self.Dests = np.full(shape=numNodes, fill_value=-1)
 
 # Edge connecting a pallet and an item
@@ -62,17 +75,32 @@ class Edge(object):
 
         self.Pheromone = 0.5# for ACO
         self.Attract   = self.Heuristic# for ACO
-        self.Tested    = 0
+        self.Tested    = False
         self.InSol     = False
 
     # for ACO
     def updateAttract(self, Alpha, Beta):
         self.Attract = self.Pheromone**Alpha + self.Heuristic**Beta
 
+def edges_copy(edges):
+    output = edges.copy()
+    for i, e in enumerate(edges):
+        output[i].ID        = e.ID
+        output[i].Pallet    = e.Pallet 
+        output[i].Item      = e.Item 
+        output[i].Torque    = e.Torque 
+        output[i].Heuristic = e.Heuristic 
+        output[i].Pheromone = e.Pheromone 
+        output[i].Attract   = e.Attract 
+        output[i].Tested    = e.Tested 
+        output[i].InSol     = e.InSol       
+    return output        
+
 class Solution(object):
     def __init__(self, edges, pallets, items, limit, cfg, k):
        
-        self.Edges = edges # set of edges
+        self.Edges = edges_copy(edges) #0.49
+        # self.Edges = edges[:]
 
         self.S = 0 # solution total score
         self.W = 0 # solution total weight
@@ -83,9 +111,6 @@ class Solution(object):
 
         # pallets initial torque: 140kg times pallet CG distance
         self.T = sum(140 * p.D for p in pallets)  # solution total torque
-
-        # self.PAW = [ 0   for _ in pallets] # set of pallets accumulated weights
-        # self.PAV = [ 0.0 for _ in pallets] # set of pallets accumulated volumes
 
         self.PAW = np.full(shape=len(pallets), fill_value=0)
         self.PAV = np.full(shape=len(pallets), fill_value=0.0)
@@ -143,13 +168,62 @@ class Solution(object):
         return True
 
 
+def setPalletsDestinations(items, pallets, nodes, k, L_k):
+
+    import numpy as np
+
+    vol       = np.zeros(len(nodes))
+    PalConsol = np.zeros(len(nodes))
+
+    max   = 0
+    total = 0
+    # all items from all nodes
+    for it in items:
+        # the items from this node
+        if it.Frm == nodes[k].ID and it.P == -1:
+            d = it.To
+            if d in L_k:
+                vol[d] += it.V
+                total  += it.V
+                if vol[d] > max:
+                    max = d
+    # all items from all nodes
+    for it in items:
+        # the consolidated from this node
+        if it.Frm == nodes[k].ID and it.P == -2:    
+            d = it.To
+            PalConsol[d] += 1
+            if d in L_k:
+                vol[d] += it.V
+                total  += it.V
+                if vol[d] > max:
+                    max = d
+    for n in nodes:
+        if vol[n.ID] > 0:
+            np = math.floor( len(pallets) * vol[n.ID] / total)
+            # quant = max(1, np - PalConsol[n.ID])
+            quant = np - PalConsol[n.ID]
+            count = 0
+            for p in pallets:
+                if count == quant:
+                    break
+                if p.Dests[k] == -1:
+                    pallets[p.ID].Dests[k] = n.ID
+                    count += 1
+    for p in pallets:
+        if p.Dests[k] == -1:
+            pallets[p.ID].Dests[k] = max
+
 def mountEdges(pallets, items, cfg, k):
+
+    # from operator import attrgetter
     
     # items include kept on board, are from this node (k), and destined to unattended nodes
     m = len(pallets)
     n = len(items)
 
-    edges = np.full(shape=m*n, fill_value=None)
+    # edges = np.full(shape=m*n, fill_value=None)
+    edges = [None for _ in range(m*n)]
 
     id = 0
     for p in pallets:           
@@ -158,9 +232,12 @@ def mountEdges(pallets, items, cfg, k):
             edges[id] = e
             id += 1
 
-    inds = np.array([e.Heuristic for e in edges])
-    sort_inds = np.argsort(inds)
-    edges = [edges[ind] for ind in sort_inds]
+    # sorted(edges, key=attrgetter('Heuristic'), reverse=True)
+    edges.sort(key=lambda x: x.Heuristic, reverse=True) # best result
+
+    # inds = np.array([e.Heuristic for e in edges])
+    # sort_inds = np.argsort(inds)
+    # edges = [edges[ind] for ind in sort_inds]
 
     return edges
 
@@ -193,7 +270,7 @@ def select(values, sumVal, greediness, sense):
     return int(n * RNG.random())
 
 def loadDistances():
-    fname =  f"distances.txt"      
+    fname =  f"./params/distances.txt"      
     with open(fname, 'r') as f:
         distances = [ [ float(num) for num in line.split(' ') ] for line in f ] 
     return distances 
@@ -274,7 +351,7 @@ def loadPallets(cfg):
     """
     Load pallets attributes based on aircraft size
     """
-    fname = f"{cfg.aircraft.size}.txt"
+    fname = f"./params/{cfg.aircraft.size}.txt"
       
     reader = open(fname,"r")
     lines = reader.readlines()    
@@ -298,8 +375,7 @@ def loadPallets(cfg):
 
 def writeNodeCons(scenario, instance, cons, pi, node):
 
-    two_up = path.abspath(path.join(__file__, "../..")) + f"/{DATA}"
-    dirname = f"/{two_up}/scenario_{scenario}/instance_{instance}"
+    dirname = f"./{DATA}/scenario_{scenario}/instance_{instance}"
 
     try:
         os.makedirs(dirname)
@@ -324,8 +400,7 @@ def loadNodeCons(scenario, instance, pi, node, id):
     """
     Loads consolidated contents file for this instance, tour and node k
     """
-    two_up = path.abspath(path.join(__file__, "../..")) + f"/{DATA}"
-    dirname = f"/{two_up}/scenario_{scenario}/instance_{instance}"
+    dirname = f"./{DATA}/scenario_{scenario}/instance_{instance}"
     try:
         os.makedirs(dirname)
     except FileExistsError:
@@ -354,55 +429,12 @@ def loadNodeCons(scenario, instance, pi, node, id):
 
     return cons
 
-# used in systemic mode, the base case
-def loadItems(scenario, instance, id, type): # -1: items, -2: consolidated
-    """
-    Load this node items attributes
-    """
-    two_up = path.abspath(path.join(__file__, "../..")) + f"/{DATA}"
-
-    dirname = f"/{two_up}/scenario_{scenario}/instance_{instance}"
-
-    try:
-        os.makedirs(dirname)
-    except FileExistsError:
-        pass    
-
-    fname = "%s/items.txt" % (dirname)
-
-    if not os.path.exists(fname):
-        with open(fname, "r"):
-            pass
-
-    reader = open(fname)
-    lines = reader.readlines() 
-
-    items = []
-
-    try:
-        for line in lines:
-            cols = line.split()
-            w   =   int(cols[0])
-            s   =   int(cols[1])
-            v   = float(cols[2])
-            frm = int(cols[3])
-            to  =   int(cols[4])
-            items.append( Item(id, type, w, s, v, frm, to) ) # type: -1 items -2 consolidated, >=0 pallet position
-            id += 1
-
-    finally:
-        reader.close()    
-
-    return items
-
 # used in sequential mode
 def loadNodeItems(scenario, instance, node, unatended): # unatended,future nodes
     """
     Load this node items attributes
     """
-    two_up = path.abspath(path.join(__file__, "../..")) + f"/{DATA}"
-
-    dirname = f"/{two_up}/scenario_{scenario}/instance_{instance}"
+    dirname = f"./{DATA}/scenario_{scenario}/instance_{instance}"
     fname = f"{dirname}/items.txt"
 
     reader = open(fname, "r")
@@ -426,96 +458,36 @@ def loadNodeItems(scenario, instance, node, unatended): # unatended,future nodes
 
     return items
 
-def setPalletsDestinations(items, pallets, nodes, k, L_k):
-
-    # vol       = np.full(shape=len(nodes), fill_value=0)
-    # PalConsol = np.full(shape=len(nodes), fill_value=0)
-
-    vol       = [0]*len(nodes)
-    PalConsol = [0]*len(nodes)
-
-    max   = 0
-    total = 0
-    # all items from all nodes
-    for it in items:
-        # the items from this node
-        if it.Frm == nodes[k].ID and it.P == -1:
-            d = it.To
-            if d in L_k:
-                vol[d] += it.V
-                total  += it.V
-                if vol[d] > max:
-                    max = d
-    # all items from all nodes
-    for it in items:
-        # the consolidated from this node
-        if it.Frm == nodes[k].ID and it.P == -2:    
-            d = it.To
-            PalConsol[d] += 1
-            if d in L_k:
-                vol[d] += it.V
-                total  += it.V
-                if vol[d] > max:
-                    max = d
-    for n in nodes:
-        if vol[n.ID] > 0:
-            np = math.floor( len(pallets) * vol[n.ID] / total)
-            # quant = max(1, np - PalConsol[n.ID])
-            quant = np - PalConsol[n.ID]
-            count = 0
-            for p in pallets:
-                if count == quant:
-                    break
-                if p.Dests[k] == -1:
-                    pallets[p.ID].Dests[k] = n.ID
-                    count += 1
-    for p in pallets:
-        if p.Dests[k] == -1:
-            pallets[p.ID].Dests[k] = max
-
-def loadFloats(fname):
-
-    reader = open(fname,"r")
-    vector = []
-    try:
-        line = reader.readline() # read line by line
-        while line != '':
-            vector.append(float(line))
-            line = reader.readline()
-    finally:
-        reader.close()
-    return(vector)
   
-def writeBestInFile(fname, value, elapsed, opt):
-    """
-    If value is greater than first column in file, update the file
-    """
-    reader = open(fname, "r+")
-    best = 0
-    try:
-        line = reader.readline()
-        if line != '':
-            cols = line.split()
-            best = int(cols[0])
-    finally:
-        reader.close()   
-
-    if value > best:
-        writer = open(fname, "w") 
-        try:
-            writer.write("%d %d %d" % (value, elapsed, opt))
-        finally:
-            writer.close()
-
 def writeResult(fname, value):
 
     writer = open(fname, "w+") 
     try:
         writer.write(value)
     finally:
-        writer.close()        
+        writer.close()   
 
+def getTimeString(totTime, denom, inSecs):
 
+    totTime = totTime / denom
+    totTimeS = f"{totTime:.2f}s"
+
+    if inSecs:
+        return totTimeS
+
+    if totTime > 60:
+        totTime /= 60
+        int_part  = math.floor(totTime)
+        frac_part = totTime - int_part
+        totTimeS = f"{int_part}min {frac_part*60:.0f}s"
+
+        if totTime > 60.0:
+            totTime /= 60
+            int_part  = math.floor(totTime)
+            frac_part = totTime - int_part
+            totTimeS = f"{int_part}h {frac_part*60:.0f}min"
+
+    return totTimeS
 
 def writeTourSol(method, scenario, instance, pi, tour, cfg, pallets, cons, write):
 
@@ -618,247 +590,4 @@ def writeTourSol(method, scenario, instance, pi, tour, cfg, pallets, cons, write
   
 
 
-# for latex table --------------
-class Cell(object):
-    """
-    Cell solution
-    """
-    def __init__(self, scenario, instance, pi, node, time, score, weight, opt):
-        self.scenario = scenario
-        self.instance = instance
-        self.pi      = pi
-        self.node    = node
-        self.time     = time
-        self.score    = score
-        self.weight   = weight
-        self.opt      = opt
-     
 
-def getLine(n, cell, maxi, len_inst):
-
-    line = ""
-
-    celltime = "%d" % (cell.time)
-    if cell.time > 60000:
-        celltime = "\\bf{%s}" % (celltime)
-
-    if maxi == "s":
-        if cell.instance == 1:
-            if n == 0:
-                line += " %d & %d & %s & %d & %d &" % (cell.scenario, cell.node, celltime, cell.score, cell.opt)
-            else:
-                line += "    & %d & %s & %d & %d &" % (               cell.node, celltime, cell.score, cell.opt)
-        
-        if len_inst == 1:
-            line += "\n"
-
-        if cell.instance > 1 and cell.instance < 5:
-            line += " %s & %d & %d &" % (celltime, cell.score, cell.opt)
-
-        if len_inst > 1 and len_inst < 5:
-            line += "\n"
-
-        if cell.instance == 5:
-            line += " %s & %d & %d " % (celltime, cell.score, cell.opt)
-            line += "\\\\\n"
-
-    if maxi == "w":
-        if cell.instance == 1:
-            if n == 0:
-                line += " %d & %d & %s & %d & %d &" % (cell.scenario, cell.node, celltime, cell.weight, cell.opt)
-            else:
-                line += "    & %d & %s & %d & %d &" % (               cell.node, celltime, cell.weight, cell.opt)
-        
-            if len_inst == 1:
-                line += "\n"  
-                  
-        if cell.instance > 1 and cell.instance < 5:
-            line += " %s & %d & %d &" % (celltime, cell.weight, cell.opt)
-
-            if len_inst > 1 and len_inst < 5:
-                line += "\n"
-
-        if cell.instance == 5:
-            line += " %s & %d & %d " % (celltime, cell.weight, cell.opt)
-            line += "\\\\\n"
-
-    return line
-
-
-def getLine2(n, cell, len_inst):
-
-    line = ""
-
-    if cell.instance == 1:
-        line += "%d %d %d " % (cell.scenario, cell.node, cell.time)
-    
-    if len_inst == 1:
-        line += "\n"
-
-    if cell.instance > 1 and cell.instance < 5:
-        line += "%d " % (cell.time)
-
-    if len_inst > 1 and len_inst < 5:
-        line += "\n"
-
-    if cell.instance == 5:
-        line += "%d" % (cell.time)
-        line += "\n"
-
-    return line 
-
-def getTimeString(totTime, denom):
-
-    totTime = totTime / denom
-    totTimeS = f"{totTime:.2f}s"
-
-    if totTime > 60:
-        totTime /= 60
-        int_part  = math.floor(totTime)
-        frac_part = totTime - int_part
-        totTimeS = f"{int_part}min {frac_part*60:.0f}s"
-
-        if totTime > 60.0:
-            totTime /= 60
-            int_part  = math.floor(totTime)
-            frac_part = totTime - int_part
-            totTimeS = f"{int_part}h {frac_part*60:.0f}min"
-
-    return totTimeS
-
-if __name__ == "__main__":
-
-    scenario = 6
-
-    instances = 1
-
-    dists = loadDistances()
-
-    cfg = Config(scenario)
-
-    tours = getTours(cfg.numNodes, dists)
-
-    for pi, tour in enumerate(tours):
-
-        print(f"{pi}: ", end='')
-        for node in tour.nodes:
-            print(f"{node.ICAO} ", end='')
-        print(f" {tour.cost}")
-
-
-'''
-      GRU     GIG     SSA     CNF     CWB     BSB     REC
-GRU     0	 6741	28118	 9477	 6898	16922	41289
-GIG  6741	    0	23683	 6644	13190	18016	36462
-SSA 28118	23683	    0	18895	46428	20732	13170
-CNF  9477	 6644	18895	    0	16179	12017	31890
-CWB  6898	13190	46428	16179	    0	21123	48089
-BSB 16922	18016	20732	12017	21123	    0	32398
-REC 41289	36462	13170	31890	48089	32398	    0
-'''
-
-
-'''
-    # FOR TESTING ONLY
-    # DO NOT CHANGE THESE PARAMETERS
-    scenario = 4
-    instance = 1
-    pi      = 0  # tour index in the permutations
-    tour     = [0, 1, 2, 3, 4, 0]
-
-    # this node ID may be 0 or 1 for testing    
-    node = Node(0, 0.0)
-
-    cfg = Config(scenario)
-
-    pallets = loadPallets(cfg)
-
-    print("len(pallets)", len(pallets))
-
-    k = tour.index(node)  # node index in the tour
-    unattended = []
-    for node in tour[k+1:]:
-        unattended.append(node.ID)
-
-    print("len(unattended)", len(unattended))
-
-    items = loadNodeItems(scenario, instance, node, unattended)
-
-    print("len(items)", len(items))
-
-    # pallets capacity
-    weiCap = 0
-    volCap = 0
-    for p in pallets:
-        weiCap += p.W
-        volCap += p.V
-
-    # smaller aircrafts may have a payload lower than pallets capacity
-    if weiCap > cfg.aircraft.payload:
-        weiCap = cfg.aircraft.payload
-
-
-# 1) Iterate with enumerate instead or np.arange(len(x))
-# 2) Use list comprehension instead of raw for loops
-# 3) Sort complex iterables with sorted()
-# 4) Store unique values with Sets
-# 5) Save memory with Generators
-# 6) Define default values in Dictionaries with .get() and .setdefault()
-# 7) Count hashable objects with collections.Counter
-# 8) Format strings with f-Strings (Python 3.6+)
-# 9) Concatenate strings with .join()
-# 10) Merge dictionaries with {**d1, **d2} (Python 3.5+)
-# 11) Simplify if-statements with if x in list
-
-
-# Roullete selection testing
-    # values = [
-    #     0.0136, 0.0439, 0.1051, 0.2356, 0.2940, 0.3122, 0.3658,
-    #     0.4455, 0.4459, 0.4650, 0.4976, 0.6192, 0.6497, 0.7206,
-    #     0.7377, 0.8407, 0.8659, 0.9898, 1.1237, 1.2347, 1.3457 ]
-'''
-
-'''
-    values = [None]*len(items)
-    for i, it in enumerate(items):
-        values[i] = float(it.S)**2 / 1500*it.V
-
-    sumVal = sum(values)
-    maxVal = max(values)
-
-    counts = [0]*len(values)
-    startTime = time()
-
-    for _ in range(len(items)):
-        i = randomProportionalSelection(values, maxVal)
-        counts[i] += 1
-
-    end = time() - startTime
-
-    print(f"\nProportional elapsed: {math.ceil(1000*end)}")
-    for c in counts:
-        if c > 0:
-            print(f"{c} ", end='')
-    print()
-
-    var = np.var(counts)
-    print(f"Proportional counts variance: {var:.2f}")
-
-    counts = [0]*len(values)
-    startTime = time()
-
-    for _ in range(len(items)):
-        i = select(values, sumVal, 0.1)
-        counts[i] += 1
-
-    end = time() - startTime
-
-    print(f"\nRoulette elapsed: {math.ceil(1000*end)}")
-    for c in counts:
-        if c > 0:
-            print(f"{c} ", end='')
-    print()
-
-    var = np.var(counts)
-    print(f"Roulette counts variance: {var:.2f}")
-'''
