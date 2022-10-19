@@ -12,11 +12,10 @@ def Solve(pallets, items, cfg, k): # items include kept on board
 
     sol = methods.Solution(edges, pallets, items, 1.0, cfg, k)
 
-    X = np.zeros((numPallets,numItems)) # needs 2 parenthesis
-
+    # decision matrix for which items will be put in which pallets
+    X = np.zeros((numPallets,numItems))
     for e in sol.Edges:
-        if e.InSol == 1:
-            X[e.Pallet.ID][e.Item.ID] = 1
+        X[e.Pallet.ID][e.Item.ID] = 1
 
     return X
         

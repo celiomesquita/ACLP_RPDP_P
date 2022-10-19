@@ -1,6 +1,6 @@
 import methods
 import numpy as np
-import time
+import math
 
 # A Shim is a thin and often tapered or wedged piece of material, used to fill small gaps or spaces between objects.
 # Set are typically used in order to support, adjust for better fit, or provide a level surface.
@@ -37,8 +37,8 @@ class Shim(object):
             return False #item and pallet destinations are different. Equation 21
         
         # Pallet Acumulated Weight
-        # if sol.PAW[ce.Pallet.ID] + self.W + ce.Item.W > ce.Pallet.W:
-            # return False #this item weight would exceed pallet weight limit. Equation 17
+        if sol.PAW[ce.Pallet.ID] + self.W + ce.Item.W > ce.Pallet.W:
+            return False #this item weight would exceed pallet weight limit. Equation 17
         
         # Pallet Acumulated Volume
         if sol.PAV[ce.Pallet.ID] + self.V + ce.Item.V > ce.Pallet.V:
@@ -88,16 +88,17 @@ def getBestShim(p, notInSol, sol, limit, numItems, maxTorque, k):
 
     outter.sort(key=lambda x: x.Item.V, reverse=True)
 
-    if type =="FFD":
-        # First Fit Decrease - equivalente ao KP, mas mais rápido
-        for i, oe in enumerate(outter):
-            for sh in Set:
-                if sh.shimIsFeasible(oe, sol, maxTorque, k):
-                    sh.AppendEdge(oe)
-                    break
-            else:
-                sh = Shim(numItems) # create a new Shim
-                Set.append(sh)
+    # First Fit Decrease - equivalente ao KP, mas mais rápido
+    for i, oe in enumerate(outter):
+        for sh in Set:
+            if sh.shimIsFeasible(oe, sol, maxTorque, k):
+                sh.AppendEdge(oe)
+                break
+        else:
+            sh = Shim(numItems) # create a new Shim
+            Set.append(sh)
+
+
 
 
     # all Set of edges are feasible, but one has a better score
@@ -133,12 +134,12 @@ def getBestShim(p, notInSol, sol, limit, numItems, maxTorque, k):
     return []
 
 
-def Compute(pallets, numItems, sol, limit, cfg, k) :
+def Compute(pallets, numItems, maxTorque, sol, limit, k) :
 
     notInSol = [ [] for _ in range(len(pallets))]
 
     for p in (pallets):
-        notInSol[p.ID] = [e for e in sol.Edges if not e.InSol and e.Pallet.ID == p.ID  ]
+        notInSol[p.ID] = [edge for edge in sol.Nbhood if edge.Pallet.ID == p.ID  ]
 
 	# pallets closer to the CG are completed first
     pallets.sort(key=lambda x: abs(x.D), reverse=False)
@@ -147,29 +148,28 @@ def Compute(pallets, numItems, sol, limit, cfg, k) :
     for p in (pallets):
 
 		# get shim sh edges                      greedy limit
-        sedges = getBestShim(p, notInSol[p.ID], sol, limit, numItems, cfg.aircraft.maxTorque, k)
+        sedges = getBestShim(p, notInSol[p.ID], sol, limit, numItems, maxTorque, k)
 
         # move shim sh edges to solution
         for be in sedges:
-            sol.includeEdge(be)
+            sol.AppendEdge(be)
             notInSol[p.ID].remove(be)
 
-    for nis in notInSol:
+    return notInSol
+
+
+def tryInsert(sol, notInSol, cfg, k):
+    cnt = 0
+    for nis in notInSol: # for each row in the matrix +slacks[ce.Pallet.ID]
         for ce in nis:
             if sol.isFeasible(ce, 1.0, cfg, k):
-                sol.includeEdge(ce)
+                sol.AppendEdge(ce)
+                cnt += 1
+    return cnt
 
-    return sol
-
-def Solve(pallets, items, cfg, k): # items include kept on board and are from this node (k) and to not attended nodes
-
-    t0 = time.perf_counter()
+def Solve(pallets, items, cfg, k): # items include kept on board
 
     print(f"\nShims, a new Heuristic for ACLP+RPDP")
-
-    edges = methods.mountEdges(pallets, items, cfg, k)
-
-    #sol = methods.Solution(edges, pallets, items, 1.0, cfg, k)
 
     numItems   = len(items)
     numPallets = len(pallets)
@@ -190,18 +190,21 @@ def Solve(pallets, items, cfg, k): # items include kept on board and are from th
 
     print(f"Limit: {limit:.2f}")
 
+    edges = methods.mountEdges(pallets, items, cfg, k)
+
     sol = methods.Solution(edges, pallets, items, limit, cfg, k)
 
-    sol = Compute(pallets, numItems, sol, limit, cfg, k) 
+    # notInSol is a matrix with one row of edges for pallet
+    notInSol = Compute(pallets, numItems, cfg.aircraft.maxTorque, sol, limit, k) 
+    # Compute(pallets, numItems, maxTorque, sol, limit) 
+
+    cnt = tryInsert(sol, notInSol, cfg, k)
+    print(f"\n---- {cnt} new edges inserted -----\n")
 
     # decision matrix for which items will be put in which pallet
-    X = np.zeros((numPallets,numItems)) # needs 2 parenthesis
+    X = [[0 for _ in np.arange(numItems)] for _ in np.arange(numPallets)] 
     for e in sol.Edges:
-        if e.InSol == 1:
-            X[e.Pallet.ID][e.Item.ID] = 1
-
-    t1 = time.perf_counter()
-    print(f"duration {t1-t0:.3f}")
+        X[e.Pallet.ID][e.Item.ID] = 1
 
     return X
         

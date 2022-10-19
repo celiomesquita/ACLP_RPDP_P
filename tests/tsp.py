@@ -8,6 +8,7 @@ import random
 import time
 import multiprocessing as mp
 import ray
+import os
 
 def check_tour( tour, n ):
     # sanity check a tour to make sure it has each city represented once
@@ -170,7 +171,7 @@ def printResult(method, tours, n, t):
 #---------------------------------
 def main():
 
-    num_ants = 8
+    num_ants = os.cpu_count()
 
 
     # weights = loadDistances()

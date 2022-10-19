@@ -1,0 +1,35 @@
+
+
+# --------Go installation--------------------------------------------------- 
+
+--- in the server ---
+sudo apt-get update
+sudo apt-get -y upgrade
+wget https://dl.google.com/go/go1.19.2.linux-amd64.tar.gz
+tar -xvf go1.19.2.linux-amd64.tar.gz
+sudo rm -rvf /usr/local/go/
+sudo mv go /usr/local
+export PATH=$PATH:/usr/local/go/bin
+go version
+
+-- in the developing machine ---
+cd /home/celio/Downloads
+tar -xvf go1.19.2.linux-amd64.tar.gz
+sudo rm -rvf /usr/local/go/
+sudo mv go /usr/local
+go version
+
+
+
+--- if not in ITA ---
+sudo openvpn --config vpnita-linux.ovpn
+- sudo pwd
+- ITA e-mail username and pwd
+
+--- Send files to the server ---
+rsync -avze "ssh -p 2222" /home/celio/Projects/ACLP_RPDP_P/  celio@161.24.2.247:/home/celio/Projects/ACLP_RPDP_P/
+
+--- Go to the server ---
+ssh 161.24.2.247 -p2222
+S&l10w&$k
+

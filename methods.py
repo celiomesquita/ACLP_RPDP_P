@@ -1,24 +1,10 @@
 
+from os import path
 import os
 import math
 import itertools
 import numpy as np
-import time
-import itertools
-import copy
-
-
-# 1) Iterate with enumerate instead or np.arange(len(x))
-# 2) Use list comprehension instead of raw for loops
-# 3) Sort complex iterables with sorted()
-# 4) Store unique values with Sets
-# 5) Save memory with Generators
-# 6) Define default values in Dictionaries with .get() and .setdefault()
-# 7) Count hashable objects with collections.Counter
-# 8) Format strings with f-Strings (Python 3.6+)
-# 9) Concatenate strings with .join()
-# 10) Merge dictionaries with {**d1, **d2} (Python 3.5+)
-# 11) Simplify if-statements with if x in list
+from time import time
 
 SEC_BREAK = 0.7
 
@@ -56,7 +42,7 @@ class Pallet(object):
         self.D  = d  # centroid distance to CG
         self.V  = v  # volume limit
         self.W  = w  # weight limit
-        self.Dests = np.full(shape=numNodes, fill_value=-1)
+        self.Dests = np.full(numNodes,-1)
 
 # Edge connecting a pallet and an item
 class Edge(object):
@@ -75,8 +61,7 @@ class Edge(object):
 
         self.Pheromone = 0.5# for ACO
         self.Attract   = self.Heuristic# for ACO
-        self.Tested    = False
-        self.InSol     = False
+        self.Tested    = 0
 
     # for ACO
     def updateAttract(self, Alpha, Beta):
@@ -92,60 +77,69 @@ def edges_copy(edges):
         output[i].Heuristic = e.Heuristic 
         output[i].Pheromone = e.Pheromone 
         output[i].Attract   = e.Attract 
-        output[i].Tested    = e.Tested 
-        output[i].InSol     = e.InSol       
-    return output        
+    return output
+
 
 class Solution(object):
     def __init__(self, edges, pallets, items, limit, cfg, k):
-       
-        self.Edges = edges_copy(edges) #0.49
-        # self.Edges = edges[:]
+
+        self.Edges  = [] # set of edges in solution
+        self.Nbhood = edges_copy(edges) # set of edges that did not enter the solution
 
         self.S = 0 # solution total score
         self.W = 0 # solution total weight
         self.V = 0 # solution total volume
 
         # set of number of times items were included in solution
-        self.Included = np.full(shape=len(items), fill_value=0)
+        self.Included = [ 0  for _ in np.arange(len(items)) ] 
 
         # pallets initial torque: 140kg times pallet CG distance
         self.T = sum(140 * p.D for p in pallets)  # solution total torque
 
-        self.PAW = np.full(shape=len(pallets), fill_value=0)
-        self.PAV = np.full(shape=len(pallets), fill_value=0.0)
+        self.PAW = [ 0   for _ in pallets] # set of pallets accumulated weights
+        self.PAV = [ 0.0 for _ in pallets] # set of pallets accumulated volumes
 
-        for e in edges:           
+        id = 0
+        for p in pallets:           
             # insert consolidated in the solution
-            # if defined by OptCGCons MIP procedure for optimal consolidated positions
-            if e.Item.P == e.Pallet.ID:
-                self.includeEdge(e) # does not ask if consolidated inclusion is feasible
+            for it in items:
+                e = Edge(id, p, it, cfg)
+                id += 1
+                # if defined by OptCGCons MIP procedure for optimal consolidated positions
+                if it.P == p.ID: # if an item is in a pallet ...
+                    self.AppendEdge(e) # ... does not ask if consolidated inclusion is feasible
+                # else:
+                    # self.Nbhood.append(e)
 
         # builds a greedy solution until the limited capacity is attained
         if limit > 0:
-            for ce in self.Edges:
-                if self.isFeasible(ce, cfg, k): # All constraints
-                    self.includeEdge(ce)
-                
-    def includeEdge(self, e):
+            for ce in self.Nbhood: # candidate Pallet-Item edges from neighborhood
+                if self.isFeasible(ce, limit, cfg, k): # All constraints
+                    self.AppendEdge(ce)
+                    self.Nbhood.remove(ce)
+
+
+    def AppendEdge(self, e):
+
         if e.Item.ID > len(self.Included)-1:
             return
+
         if e.Pallet.ID > len(self.PAW)-1:
             return
+
         self.Included[e.Item.ID] += 1
         self.PAW[e.Pallet.ID] += e.Item.W
         self.PAV[e.Pallet.ID] += e.Item.V
+
         self.S += e.Item.S
         self.W += e.Item.W
         self.V += e.Item.V
         self.T += e.Torque
-        self.Edges[e.ID].InSol = True
+
+        self.Edges.append(e)
 
     # check constraints for greedy, Shims and metaheuristics
-    def isFeasible(self, ce, cfg, k):
-
-        if ce.InSol:
-            return False
+    def isFeasible(self, ce, limit, cfg, k):
 
         if ce.Item.ID > len(self.Included)-1:
             return False # this item was already inserted. Equation 19        
@@ -161,7 +155,7 @@ class Solution(object):
              return False #this item weight would exceed pallet weight limit. Equation 17
         
         # Pallet Acumulated Volume
-        if self.PAV[ce.Pallet.ID] + ce.Item.V > ce.Pallet.V:
+        if self.PAV[ce.Pallet.ID] + ce.Item.V > ce.Pallet.V * limit:
             return False #this item volume would exceed pallet volumetric limit. Equation 18
         
         # if this inclusion increases torque and is turns it greater than the maximum
@@ -171,81 +165,8 @@ class Solution(object):
         return True
 
 
-def setPalletsDestinations(items, pallets, nodes, k, L_k):
-
-    import numpy as np
-
-    vol       = np.zeros(len(nodes))
-    PalConsol = np.zeros(len(nodes))
-
-    max   = 0
-    total = 0
-    # all items from all nodes
-    for it in items:
-        # the items from this node
-        if it.Frm == nodes[k].ID and it.P == -1:
-            d = it.To
-            if d in L_k:
-                vol[d] += it.V
-                total  += it.V
-                if vol[d] > max:
-                    max = d
-    # all items from all nodes
-    for it in items:
-        # the consolidated from this node
-        if it.Frm == nodes[k].ID and it.P == -2:    
-            d = it.To
-            PalConsol[d] += 1
-            if d in L_k:
-                vol[d] += it.V
-                total  += it.V
-                if vol[d] > max:
-                    max = d
-    for n in nodes:
-        if vol[n.ID] > 0:
-            np = math.floor( len(pallets) * vol[n.ID] / total)
-            # quant = max(1, np - PalConsol[n.ID])
-            quant = np - PalConsol[n.ID]
-            count = 0
-            for p in pallets:
-                if count == quant:
-                    break
-                if p.Dests[k] == -1:
-                    pallets[p.ID].Dests[k] = n.ID
-                    count += 1
-    for p in pallets:
-        if p.Dests[k] == -1:
-            pallets[p.ID].Dests[k] = max
-
-def mountEdges(pallets, items, cfg, k):
-
-    # from operator import attrgetter
-    
-    # items include kept on board, are from this node (k), and destined to unattended nodes
-    m = len(pallets)
-    n = len(items)
-
-    # edges = np.full(shape=m*n, fill_value=None)
-    edges = [None for _ in range(m*n)]
-
-    id = 0
-    for p in pallets:           
-        for it in items:
-            e = Edge(id, p, it, cfg)
-            edges[id] = e
-            id += 1
-
-    # sorted(edges, key=attrgetter('Heuristic'), reverse=True)
-    edges.sort(key=lambda x: x.Heuristic, reverse=True) # best result
-
-    # inds = np.array([e.Heuristic for e in edges])
-    # sort_inds = np.argsort(inds)
-    # edges = [edges[ind] for ind in sort_inds]
-
-    return edges
-
 # Proportional Roulette Selection (biased if greediness > 0)
-def select(values, sumVal, greediness, sense):
+def rouletteSelection(values, sumVal, greediness, sense):
 
     n = len(values)
     if n == 0:
@@ -272,6 +193,7 @@ def select(values, sumVal, greediness, sense):
     # just in case ....
     return int(n * RNG.random())
 
+
 def loadDistances():
     fname =  f"./params/distances.txt"      
     with open(fname, 'r') as f:
@@ -283,7 +205,7 @@ class Tour(object):
     def __init__(self, nodes, costs):
         self.nodes = nodes
         self.cost  = 0.0 # sum of legs costs plus CG deviation costs
-        self.legsCosts = [0 for _ in nodes]
+        self.legsCosts = [0]*len(nodes)
         self.score   = -1 # sum of nodes scores
         self.elapsed = -1 # seconds
         self.numOpts = 0 # sum of nodes eventual optima solutions
@@ -315,6 +237,8 @@ def getTours(numNodes, costs):
         nodes.append( Node(0, tau) ) # the base
 
         tours.append( Tour(nodes, costs) )
+
+    # tours.sort(key=lambda x: x.cost, reverse=False)
 
     return tours
 
@@ -349,7 +273,33 @@ class Config(object):
             6:Aircraft("larger", 18, 75_000, 1.170, 4.9)  # 7 nodes, 18 pallets, 600s
             }[scenario]
 
+def mountEdges(pallets, items, cfg, k):
 
+    # from operator import attrgetter
+    
+    # items include kept on board, are from this node (k), and destined to unattended nodes
+    m = len(pallets)
+    n = len(items)
+
+    # edges = np.full(shape=m*n, fill_value=None)
+    edges = [None for _ in np.arange(m*n)]
+
+    id = 0
+    for p in pallets:           
+        for it in items:
+            e = Edge(id, p, it, cfg)
+            edges[id] = e
+            id += 1
+
+    # greater heuristic's attractivity are included first
+    edges.sort(key=lambda x: x.Heuristic, reverse=True) # best result
+
+    # inds = np.array([e.Heuristic for e in edges])
+    # sort_inds = np.argsort(inds)
+    # edges = [edges[ind] for ind in sort_inds]
+
+    return edges
+    
 def loadPallets(cfg):
     """
     Load pallets attributes based on aircraft size
@@ -461,16 +411,65 @@ def loadNodeItems(scenario, instance, node, unatended): # unatended,future nodes
 
     return items
 
-  
+
+def setPalletsDestinations(items, pallets, nodes, k, L_k):
+
+    vol       = [0]*len(nodes)
+    PalConsol = [0]*len(nodes)
+    max   = 0
+    total = 0
+
+    # all items from all nodes
+    for it in items:
+        # the items from this node
+        if it.Frm == nodes[k].ID and it.P == -1:
+            d = it.To
+            if d in L_k:
+                vol[d] += it.V
+                total  += it.V
+                if vol[d] > max:
+                    max = d
+    # all items from all nodes
+    for it in items:
+        # the consolidated from this node
+        if it.Frm == nodes[k].ID and it.P == -2:    
+            d = it.To
+            PalConsol[d] += 1
+            if d in L_k:
+                vol[d] += it.V
+                total  += it.V
+                if vol[d] > max:
+                    max = d
+        
+    for n in nodes:
+        if vol[n.ID] > 0:
+            np = math.floor( len(pallets) * vol[n.ID] / total)
+            # quant = max(1, np - PalConsol[n.ID])
+            quant = np - PalConsol[n.ID]
+            count = 0
+            for p in pallets:
+                if count == quant:
+                    break
+                if p.Dests[k] == -1:
+                    pallets[p.ID].Dests[k] = n.ID
+                    count += 1
+
+    for p in pallets:
+        if p.Dests[k] == -1:
+            pallets[p.ID].Dests[k] = max
+
+
+ 
 def writeResult(fname, value):
 
     writer = open(fname, "w+") 
     try:
         writer.write(value)
     finally:
-        writer.close()   
+        writer.close()        
 
-def getTimeString(totTime, denom, inSecs):
+
+def getTimeString(totTime, denom, inSecs=False):
 
     totTime = totTime / denom
     totTimeS = f"{totTime:.2f}s"
@@ -491,6 +490,7 @@ def getTimeString(totTime, denom, inSecs):
             totTimeS = f"{int_part}h {frac_part*60:.0f}min"
 
     return totTimeS
+
 
 def writeTourSol(method, scenario, instance, pi, tour, cfg, pallets, cons, write):
 
@@ -583,7 +583,9 @@ def writeTourSol(method, scenario, instance, pi, tour, cfg, pallets, cons, write
         sol += '\\bottomrule \n'
         sol += '\end{tabular} \n'
 
-    dirname = f"./results/{method}_{scenario}"
+    print(sol)
+
+    dirname = f"./results/{DATA}/{method}_{scenario}"
     try:
         os.makedirs(dirname)
     except FileExistsError:
@@ -595,7 +597,7 @@ def writeTourSol(method, scenario, instance, pi, tour, cfg, pallets, cons, write
         writer.write(sol)
     finally:
         writer.close() 
-  
 
+if __name__ == "__main__":
 
-
+    print("----- Please execute module main_test -----")

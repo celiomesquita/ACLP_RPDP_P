@@ -1,11 +1,12 @@
 import methods
 import numpy as np
-# import math
+import math
 # import copy
 import multiprocessing as mp
 import time
+import os
 
-NCPU = 8
+NCPU = os.cpu_count()
 
 # A Shim is a thin and often tapered or wedged piece of material, used to fill small gaps or spaces between objects.
 # Set are typically used in order to support, adjust for better fit, or provide a level surface.
@@ -142,7 +143,7 @@ def Compute(edges, pallets, items, limit, cfg, k) :
     notInSol = [ [] for _ in range(len(pallets))]
 
     for p in (pallets):
-        notInSol[p.ID] = [e for e in sol.Edges if not e.InSol and e.Pallet.ID == p.ID  ]
+        notInSol[p.ID] = [e for e in sol.Edges if e.Pallet.ID == p.ID  ]
 
 	# pallets closer to the CG are completed first
     pallets.sort(key=lambda x: abs(x.D), reverse=False)
@@ -172,7 +173,7 @@ def Solve(pallets, items, cfg, k): # items include kept on board
 
     t0 = time.perf_counter()
 
-    print(f"\nShims, a new Heuristic for ACLP+RPDP")
+    print(f"\nShims_mp, a new multiprocessing Heuristic for ACLP+RPDP")
 
     edges = methods.mountEdges(pallets, items, cfg, k)
 
@@ -180,11 +181,13 @@ def Solve(pallets, items, cfg, k): # items include kept on board
     numPallets = len(pallets)
 
     # as greater is the number of edges, closest to 1 is the limit
-    num = [600+100*(i+1) for i in range(NCPU)]
+    step = math.floor(800/NCPU)
+    num = [600+(step*i) for i in range(NCPU)]
     if methods.DATA == "data50":
-        num = [1600+100*(i+1) for i in range(NCPU)]
-    if methods.DATA == "data100":
-        num = [2600+100*(i+1) for i in range(NCPU)]
+        num = [1600+(step*i) for i in range(NCPU)]
+    if methods.DATA == "data50":
+        num = [2600+(step*i) for i in range(NCPU)]
+
 
     lims = []
     for i in range(NCPU):
@@ -200,7 +203,7 @@ def Solve(pallets, items, cfg, k): # items include kept on board
 
     t1 = time.perf_counter()
 
-        # wait for all computations
+    # wait for all computations to finish
     sols = [out_queue.get() for _ in procs]
 
     t2 = time.perf_counter()
@@ -215,8 +218,7 @@ def Solve(pallets, items, cfg, k): # items include kept on board
     # decision matrix for which items will be put in which pallet
     X = np.zeros((numPallets,numItems)) # needs 2 parenthesis
     for e in edges:
-        if e.InSol == 1:
-            X[e.Pallet.ID][e.Item.ID] = 1
+        X[e.Pallet.ID][e.Item.ID] = 1
 
     print(f"durations\t{t1-t0:.3f}\t{t2-t1:.3f}\n")
 

@@ -83,7 +83,7 @@ def selectInNbhood(nbhood, values, sumVal, greediness):
 
 def Solve( pallets, items, startTime, cfg, k):  # items include kept on board
 
-    print("\nAnt Colony Optimization for ACLP+RPDP")
+    print("\nParallel Ant Colony Optimization for ACLP+RPDP")
 
     edges = methods.mountEdges(pallets, items, cfg, k)
 
