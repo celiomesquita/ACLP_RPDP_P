@@ -132,8 +132,9 @@ def getBestShim(p, notInSol, sol, limit, numItems, maxTorque, k):
         
     return []
 
+def Compute(edges, pallets, items, limit, cfg, k) :
 
-def Compute(pallets, numItems, maxTorque, sol, limit, k) :
+    sol = methods.Solution(edges, pallets, items, limit, cfg, k)
 
     notInSol = [ [] for _ in range(len(pallets))]
 
@@ -147,24 +148,28 @@ def Compute(pallets, numItems, maxTorque, sol, limit, k) :
     for p in (pallets):
 
 		# get shim sh edges                      greedy limit
-        sedges = getBestShim(p, notInSol[p.ID], sol, limit, numItems, maxTorque, k)
+        sedges = getBestShim(p, notInSol[p.ID], sol, limit, len(items), cfg.aircraft.maxTorque, k)
 
         # move shim sh edges to solution
         for be in sedges:
             sol.AppendEdge(be)
             notInSol[p.ID].remove(be)
 
-    return notInSol
-
-
-def tryInsert(sol, notInSol, cfg, k):
-    cnt = 0
     for nis in notInSol: # for each row in the matrix +slacks[ce.Pallet.ID]
         for ce in nis:
             if sol.isFeasible(ce, 1.0, cfg, k):
                 sol.AppendEdge(ce)
-                cnt += 1
-    return cnt
+    return sol
+
+
+# def tryInsert(sol, notInSol, cfg, k):
+#     cnt = 0
+#     for nis in notInSol: # for each row in the matrix +slacks[ce.Pallet.ID]
+#         for ce in nis:
+#             if sol.isFeasible(ce, 1.0, cfg, k):
+#                 sol.AppendEdge(ce)
+#                 cnt += 1
+#     return cnt
 
 def Solve(pallets, items, cfg, k): # items include kept on board
 
@@ -191,14 +196,7 @@ def Solve(pallets, items, cfg, k): # items include kept on board
 
     edges = methods.mountEdges(pallets, items, cfg, k)
 
-    sol = methods.Solution(edges, pallets, items, limit, cfg, k)
-
-    # notInSol is a matrix with one row of edges for pallet
-    notInSol = Compute(pallets, numItems, cfg.aircraft.maxTorque, sol, limit, k) 
-    # Compute(pallets, numItems, maxTorque, sol, limit) 
-
-    cnt = tryInsert(sol, notInSol, cfg, k)
-    print(f"\n---- {cnt} new edges inserted -----\n")
+    sol = Compute(edges, pallets, items, limit, cfg, k) 
 
     # decision matrix for which items will be put in which pallet
     X = [[0 for _ in np.arange(numItems)] for _ in np.arange(numPallets)] 
