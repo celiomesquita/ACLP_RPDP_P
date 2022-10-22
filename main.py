@@ -1,8 +1,6 @@
 import numpy as np
 from tabulate import tabulate
-from time import time
-import math
-from os import path
+import time
 import os
 # local packages
 import methods
@@ -99,7 +97,7 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
         print(f"-> {numItems} items with {numKept} kept on board in {node.ICAO}")
 
         E = []
-        startNodeTime = time()
+        startNodeTime = time.perf_counter()
 
         if method == "Shims":
             E = shims.Solve(pallets, items, cfg, k)
@@ -116,7 +114,7 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
         if method == "Greedy":
             E = greedy.Solve(pallets, items, cfg, k)  
 
-        nodeElapsed = time() - startNodeTime
+        nodeElapsed = time.perf_counter() - startNodeTime
 
         tour.elapsed += nodeElapsed
 
@@ -175,13 +173,15 @@ if __name__ == "__main__":
 
     import sys
 
-    scenario = int(sys.argv[1])
-    method   = f"{sys.argv[2]}"
+    scenario     = int(sys.argv[1])
+    method       =  f"{sys.argv[2]}"
+    methods.NCPU = int(sys.argv[3])
 
     # clear cache
     # find . | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
 
     methods.SEC_BREAK = 0.7
+    # methods.SEC_BREAK = 10
 
     methods.DATA = "data20"
     # methods.DATA = "data50"
@@ -190,8 +190,8 @@ if __name__ == "__main__":
     # scenario = 1
 
     if scenario == 1:
-        # instances = [1,2,3,4,5,6,7]
-        instances = [1]
+        instances = [1,2,3,4,5,6,7]
+        # instances = [1]
     if scenario == 2:
         instances = [1,2,3,4,5,6,7]
     if scenario == 3:

@@ -1,6 +1,5 @@
 import methods
 import numpy as np
-import math
 
 # A Shim is a thin and often tapered or wedged piece of material, used to fill small gaps or spaces between objects.
 # Set are typically used in order to support, adjust for better fit, or provide a level surface.
@@ -175,13 +174,13 @@ def Solve(pallets, items, cfg, k): # items include kept on board
     numPallets = len(pallets)
 
     # as greater is the number of edges, closest to 1 is the limit
-    num = 0
-    if methods.DATA == "data20":
-        num = 1000
+
+    num = 1100
+
     if methods.DATA == "data50":
-        num = 2000
+        num *= 2
     if methods.DATA == "data100":
-        num = 3000
+        num *= 3
 
     limit = 1.0 - num/float(numItems*numPallets)
 
@@ -205,6 +204,8 @@ def Solve(pallets, items, cfg, k): # items include kept on board
     X = [[0 for _ in np.arange(numItems)] for _ in np.arange(numPallets)] 
     for e in sol.Edges:
         X[e.Pallet.ID][e.Item.ID] = 1
+
+    print(f"lim: {limit:.2f}\n")
 
     return X
         

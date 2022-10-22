@@ -6,6 +6,8 @@ import itertools
 import numpy as np
 from time import time
 
+NCPU = os.cpu_count()-1
+
 SEC_BREAK = 0.7
 
 RNG = np.random.default_rng()

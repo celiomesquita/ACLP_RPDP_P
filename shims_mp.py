@@ -6,7 +6,6 @@ import multiprocessing as mp
 import time
 import os
 
-NCPU = os.cpu_count()
 
 # A Shim is a thin and often tapered or wedged piece of material, used to fill small gaps or spaces between objects.
 # Set are typically used in order to support, adjust for better fit, or provide a level surface.
@@ -181,22 +180,26 @@ def Solve(pallets, items, cfg, k): # items include kept on board
     numPallets = len(pallets)
 
     # as greater is the number of edges, closest to 1 is the limit
-    step = math.floor(800/NCPU)
-    num = [600+(step*i) for i in range(NCPU)]
-    if methods.DATA == "data50":
-        num = [1600+(step*i) for i in range(NCPU)]
-    if methods.DATA == "data50":
-        num = [2600+(step*i) for i in range(NCPU)]
 
+    NUM = 35
+    # NUM = 1100
+
+    if methods.DATA == "data50":
+        NUM *= 2
+    if methods.DATA == "data100":
+        NUM *= 3
+
+    step = math.floor(NUM/methods.NCPU)
+    num = [NUM/2+(step*(i+1)) for i in range(methods.NCPU)]
 
     lims = []
-    for i in range(NCPU):
+    for i in range(methods.NCPU):
         lims.append(1.0 - num[i]/float(numItems*numPallets))
 
-    procs = [None for _ in range(NCPU)]
+    procs = [None for _ in range(methods.NCPU)]
     out_queue = mp.Queue()
 
-    for i in range(NCPU):
+    for i in range(methods.NCPU):
         procs[i] = mp.Process(target=comp_queue,args=(edges, pallets, items, lims[i], cfg, k, out_queue))
     for p in procs:
         p.start()
@@ -220,7 +223,7 @@ def Solve(pallets, items, cfg, k): # items include kept on board
     for e in edges:
         X[e.Pallet.ID][e.Item.ID] = 1
 
-    print(f"durations\t{t1-t0:.3f}\t{t2-t1:.3f}\n")
+    print(f"durations\t{t1-t0:.3f}\t{t2-t1:.3f}\tlim: {lims[0]:.2f}\n")
 
     return X
         
