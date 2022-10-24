@@ -161,16 +161,6 @@ def Compute(edges, pallets, items, limit, cfg, k) :
                 sol.AppendEdge(ce)
     return sol
 
-
-# def tryInsert(sol, notInSol, cfg, k):
-#     cnt = 0
-#     for nis in notInSol: # for each row in the matrix +slacks[ce.Pallet.ID]
-#         for ce in nis:
-#             if sol.isFeasible(ce, 1.0, cfg, k):
-#                 sol.AppendEdge(ce)
-#                 cnt += 1
-#     return cnt
-
 def Solve(pallets, items, cfg, k): # items include kept on board
 
     print(f"\nShims, a new Heuristic for ACLP+RPDP")

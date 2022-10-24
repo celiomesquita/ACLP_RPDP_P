@@ -85,12 +85,15 @@ def edges_copy(edges):
 class Solution(object):
     def __init__(self, edges, pallets, items, limit, cfg, k):
 
+        self.Limit = limit
+
         self.Edges  = [] # set of edges in solution
         self.Nbhood = edges_copy(edges) # set of edges that did not enter the solution
 
         self.S = 0 # solution total score
         self.W = 0 # solution total weight
         self.V = 0 # solution total volume
+        self.Heuristic = 0 
 
         # set of number of times items were included in solution
         self.Included = [ 0  for _ in np.arange(len(items)) ] 
@@ -110,8 +113,6 @@ class Solution(object):
                 # if defined by OptCGCons MIP procedure for optimal consolidated positions
                 if it.P == p.ID: # if an item is in a pallet ...
                     self.AppendEdge(e) # ... does not ask if consolidated inclusion is feasible
-                # else:
-                    # self.Nbhood.append(e)
 
         # builds a greedy solution until the limited capacity is attained
         if limit > 0:
@@ -137,6 +138,7 @@ class Solution(object):
         self.W += e.Item.W
         self.V += e.Item.V
         self.T += e.Torque
+        self.Heuristic += e.Heuristic  
 
         self.Edges.append(e)
 
@@ -167,7 +169,7 @@ class Solution(object):
         return True
 
 
-# Proportional Roulette Selection (biased if greediness > 0)
+# ACO - Proportional Roulette Selection (biased if greediness > 0)
 def rouletteSelection(values, sumVal, greediness, sense):
 
     n = len(values)
