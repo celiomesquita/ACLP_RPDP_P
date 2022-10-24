@@ -7,6 +7,7 @@ import methods
 import optcgcons
 import shims
 import shims_mp
+import shims_cuda
 import aco
 import aco_mp
 import greedy
@@ -105,6 +106,9 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
         if method == "Shims_mp":
             E = shims_mp.Solve(pallets, items, cfg, k)            
 
+        if method == "Shims_cuda":
+            E = shims_cuda.Solve(pallets, items, cfg, k) 
+
         if method == "ACO":
             E = aco.Solve(pallets, items, startNodeTime, cfg, k)            
         
@@ -190,8 +194,8 @@ if __name__ == "__main__":
     # scenario = 1
 
     if scenario == 1:
-        instances = [1,2,3,4,5,6,7]
-        # instances = [1]
+        # instances = [1,2,3,4,5,6,7]
+        instances = [1]
     if scenario == 2:
         instances = [1,2,3,4,5,6,7]
     if scenario == 3:
