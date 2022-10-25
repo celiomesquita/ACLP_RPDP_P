@@ -6,7 +6,6 @@ from timeit import default_timer as timer
 
 
 # Shim fits in a slack in a pallet
-@jit
 class Shim(object):
     def __init__(self, numItems):
         self.W        = 0   # total weight of the shim set (must fit the slack)
