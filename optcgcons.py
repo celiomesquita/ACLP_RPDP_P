@@ -3,7 +3,7 @@ import methods
 from os import path
 from time import time
 import math
-from mip import Model, xsum, minimize, BINARY, CBC, OptimizationStatus, GRB
+from mip import Model, xsum, minimize, BINARY, CBC, OptimizationStatus
 
 # optimize consolidated positions to minimize CG deviation
 def OptCGCons(kept, pallets, maxTorque, method, k):

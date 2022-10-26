@@ -1,8 +1,14 @@
 import numpy as np
-from numba import cuda, jit
+from numba import cuda
 from timeit import default_timer as timer
 
-@jit
+# import logging
+# logger = logging.getLogger("numba")
+# logger.setLevel(logging.ERROR)
+# logging.disable(logging.WARNING)
+
+"""
+@cuda.jit
 def add_array(a, b, c):
     i = cuda.grid(1)
     if i < a.size:
@@ -26,12 +32,12 @@ add_array[blocks_per_grid, threads_per_block](dev_a, dev_b, dev_c)
 
 c = dev_c.copy_to_host()
 np.allclose(a + b, c)
-
+"""
 #  True
 
 """
 # Example 1.3: Add arrays with cuda.grid
-@jit
+@cuda.jit
 def add_array(a, b, c):
     i = cuda.grid(1)
     if i < a.size:
@@ -56,7 +62,7 @@ print(c)
 
 """
 # Example 1.2: Add arrays
-@jit
+@cuda.jit
 def add_array(a, b, c):
     i = cuda.threadIdx.x + cuda.blockDim.x * cuda.blockIdx.x
     if i < a.size:
@@ -80,46 +86,89 @@ print(c)
 # print(numba.__version__)
 
 # cuda.detect()
-"""
+
 # Example 1.1: Add scalars
-@jit
+@cuda.jit
 def add_scalars(a, b, c):
     c[0] = a + b
 
-dev_c = cuda.device_array((1,), np.float32)
+if __name__=="__main__":
 
-add_scalars[1, 1](2.0, 7.0, dev_c)
+    a = 2.
+    b = 7.
 
-c = dev_c.copy_to_host()
-print(f"2.0 + 7.0 = {c[0]}")
-"""
+    dev_c = cuda.device_array(1, float)
 
+    add_scalars[1, 1](a, b, dev_c)
 
-"""
+    c = dev_c.copy_to_host()
+    print(f"{a} + {b} = {c[0]}")
+
 
 # To run on CPU
 def func(a):
     for i in range(len(a)):
         a[i] += 1
+    return sum(a)
 
 # To run on GPU
-@jit
+@cuda.jit
 def func2(x):
     return x+1
 
-if __name__=="__main__":
+@cuda.jit
+def my_kernel(io_array):
+    # Thread id in a 1D block
+    tx = cuda.threadIdx.x
+    # Block id in a 1D grid
+    ty = cuda.blockIdx.x
+    # Block width, i.e. number of threads per block
+    bw = cuda.blockDim.x
+    # Compute flattened index inside the array
+    pos = tx + ty * bw
+    if pos < io_array.size:  # Check array boundaries
+        io_array[pos] *= 2 # do the computation
 
-    n = 10000000
-    a = np.ones(n, dtype = np.float64)
+# if __name__=="__main__":
 
-    start = timer()
+#     print(cuda.gpus) # <Managed Device 0>
 
-    func(a)
-    print(f"CPU {timer()-start:.2f}s")
+#     # Launch a terminal shell and type the commands for a machine without CUDA:
+#     # export NUMBA_ENABLE_CUDASIM=1    
 
-    start = timer()
+#     # Create the data array - usually initialized some other way
+#     data = np.ones(256)
 
-    func2(a)
-    cuda.profile_stop()
-    print(f"GPU {timer()-start:.2f}s")
-"""
+#     # Set the number of threads in a block
+#     threadsperblock = 32 
+
+#     # Calculate the number of thread blocks in the grid
+#     blockspergrid = (data.size + (threadsperblock - 1)) # threadsperblock
+
+#     # Now start the kernel
+#     my_kernel[blockspergrid, threadsperblock](data)
+
+#     # Print the result
+#     print(data)    
+
+# if __name__=="__main__":
+
+#     n = 10000000
+#     a = np.ones(n, float)
+
+#     b = cuda.device_array(n, float)
+
+#     start = timer()
+
+#     sum_a = func(a)
+#     print(f"CPU {timer()-start:.2f}s\t{sum_a}")
+
+#     start = timer()
+
+#     func2(b)
+
+#     sum_b = sum(b.copy_to_host())
+
+#     # cuda.profile_stop()
+
+#     print(f"GPU {timer()-start:.2f}s\t{sum_b}")
