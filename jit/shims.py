@@ -1,5 +1,6 @@
-import methods
+import methods as mjit
 import numpy as np
+from numba import njit
 
 # A Shim is a thin and often tapered or wedged piece of material, used to fill small gaps or spaces between objects.
 # Set are typically used in order to support, adjust for better fit, or provide a level surface.
@@ -60,6 +61,7 @@ class Shim(object):
 
 # solve a Subset Selection Problem for this pallet, by selecting
 # the best shim and including its edges in solution.
+# @njit
 def getBestShim(p, notInSol, sol, limit, numItems, maxTorque, k):
 
     # create the first shim
@@ -135,7 +137,7 @@ def getBestShim(p, notInSol, sol, limit, numItems, maxTorque, k):
 
 def Compute(edges, pallets, items, limit, cfg, k) :
 
-    sol = methods.Solution(edges, pallets, items, limit, cfg, k)
+    sol = mjit.Solution(edges, pallets, items, limit, cfg, k)
 
     notInSol = [ [] for _ in range(len(pallets))]
 
@@ -149,7 +151,7 @@ def Compute(edges, pallets, items, limit, cfg, k) :
     for p in (pallets):
 
 		# get shim sh edges                      greedy limit
-        sedges = getBestShim(p, notInSol[p.ID], sol, limit, len(items), cfg.aircraft.maxTorque, k)
+        sedges = getBestShim(p, notInSol[p.ID], sol, limit, len(items), cfg.maxTorque, k)
 
         # move shim sh edges to solution
         for be in sedges:
@@ -164,7 +166,7 @@ def Compute(edges, pallets, items, limit, cfg, k) :
 
 def Solve(pallets, items, cfg, k): # items include kept on board
 
-    print(f"\nShims, a new Heuristic for ACLP+RPDP")
+    print(f"\nShims with numba jit, a new Heuristic for ACLP+RPDP")
 
     numItems   = len(items)
     numPallets = len(pallets)
@@ -173,9 +175,9 @@ def Solve(pallets, items, cfg, k): # items include kept on board
 
     num = 1100
 
-    if methods.DATA == "data50":
+    if mjit.DATA == "data50":
         num *= 2
-    if methods.DATA == "data100":
+    if mjit.DATA == "data100":
         num *= 3
 
     limit = 1.0 - num/float(numItems*numPallets)
@@ -185,7 +187,7 @@ def Solve(pallets, items, cfg, k): # items include kept on board
 
     print(f"Limit: {limit:.2f}")
 
-    edges = methods.mountEdges(pallets, items, cfg, k)
+    edges = mjit.mountEdges(pallets, items, cfg, k)
 
     sol = Compute(edges, pallets, items, limit, cfg, k) 
 

@@ -5,6 +5,10 @@ import math
 import itertools
 import numpy as np
 from time import time
+from numba import njit
+from numba.experimental import jitclass
+from numba import int32, float32, types # import the types
+
 
 NCPU = os.cpu_count()-1
 
@@ -16,12 +20,13 @@ CITIES = ["GRU", "GIG", "SSA", "CNF", "CWB", "BSB", "REC"]
 
 DATA = "data20"
 
+@jitclass
 class Node(object):
     def __init__(self, id, tau):
         self.ID      = id
         self.tau     = tau # node sum of torques
         self.ICAO    = CITIES[id]
-
+@jitclass
 class Item(object):
     """
     A candidate item "j" to be loaded on a pallet "i" if X_ij == 1
@@ -35,6 +40,14 @@ class Item(object):
         self.Frm = frm  # from
         self.To = to # destination
 
+spec = [
+    ('ID', int32), 
+    ('D', float32),
+    ('V', float32),
+    ('W', int32),
+    ('Dests', int32[:]),
+]
+@jitclass(spec)
 class Pallet(object):
     """
     A flat metal surface to hold items to be transported in a airplane
@@ -44,9 +57,10 @@ class Pallet(object):
         self.D  = d  # centroid distance to CG
         self.V  = v  # volume limit
         self.W  = w  # weight limit
-        self.Dests = np.full(numNodes,-1)
+        self.Dests = np.full(numNodes, -1, dtype=int32)
 
 # Edge connecting a pallet and an item
+@jitclass
 class Edge(object):
     def __init__(self, id, pallet, item, cfg):
         self.ID        = id
@@ -81,7 +95,7 @@ def edges_copy(edges):
         output[i].Attract   = e.Attract 
     return output
 
-
+@jitclass
 class Solution(object):
     def __init__(self, edges, pallets, items, limit, cfg, k):
 
@@ -163,13 +177,14 @@ class Solution(object):
             return False #this item volume would exceed pallet volumetric limit. Equation 18
         
         # if this inclusion increases torque and is turns it greater than the maximum
-        if  abs(self.T) < abs(self.T + ce.Torque) and abs(self.T + ce.Torque) > cfg.aircraft.maxTorque:
+        if  abs(self.T) < abs(self.T + ce.Torque) and abs(self.T + ce.Torque) > cfg.maxTorque:
             return False #this item/pallet torque would extend the CG shift beyond backward limit. Equation 15
 
         return True
 
 
 # ACO - Proportional Roulette Selection (biased if greediness > 0)
+@njit
 def rouletteSelection(values, sumVal, greediness, sense):
 
     n = len(values)
@@ -199,12 +214,13 @@ def rouletteSelection(values, sumVal, greediness, sense):
 
 
 def loadDistances():
-    fname =  f"./params/distances.txt"      
+    fname =  f"./../params/distances.txt"      
     with open(fname, 'r') as f:
         distances = [ [ float(num) for num in line.split(' ') ] for line in f ] 
     return distances 
 
 # tour is pi in the mathematical formulation
+@jitclass
 class Tour(object):
     def __init__(self, nodes, costs):
         self.nodes = nodes
@@ -223,11 +239,37 @@ class Tour(object):
                 self.legsCosts[k] = costs[frm][to]
                 self.cost += self.legsCosts[k]
 
+# @njit(forceobj=True)
+def factorial(x):
+    result = 1
+    # for i in range(1,x+1):
+    for i in range(x):
+        result *= (i+1)
+    return result
+
+# @njit(forceobj=True)
+def getPermuts(n):
+    fac = factorial(n)
+    a = np.zeros((fac, n), int32)
+    f = 1
+    for m in range(2, n+1):
+        b = a[:f, n-m+1:] 
+        for i in range(1, m):
+            a[i*f:(i+1)*f, n-m] = i
+            a[i*f:(i+1)*f, n-m+1:] = b + (b >= i)
+        b += 1
+        f *= m
+    return a
+
+# @njit
 def getTours(numNodes, costs):
 
     last = numNodes - 1
-    ids = [i+1 for i in range(last)]
-    permuts = itertools.permutations(ids)
+    ids = np.zeros(last)
+    for i, _ in enumerate(ids):
+        ids[i] = i+1
+    
+    permuts = getPermuts(ids)
 
     tours = []
 
@@ -242,19 +284,32 @@ def getTours(numNodes, costs):
 
         tours.append( Tour(nodes, costs) )
 
-    # tours.sort(key=lambda x: x.cost, reverse=False)
+    # if numNodes > 3:
+    minCost = min(tours, key=lambda x: x.cost)
+    # maxCost = max(tours, key=lambda x: x.cost)
+    # threshold = minCost + (maxCost-minCost)/5
+
+    for i, t in enumerate(tours):
+        if t.cost > minCost*1.05: # greater then the 5% lowests costs
+            tours.pop(i)
 
     return tours
 
-class Aircraft(object):
-    def __init__(self, size, numPallets, payload, maxShift, kmCost):
-        self.size       = size
-        self.numPallets = numPallets
-        self.payload    = payload
-        self.maxTorque  = payload * maxShift
-        self.kmCost     = kmCost
+spec = [
+    ('weiCap', int32),  
+    ('volCap', float32),
+    ('maxD', float32),
+    ('scenario', int32),
+    ('numNodes', int32),
+    ('Sce', int32),
+    ('size', types.unicode_type),  
+    ('numPallets', int32),
+    ('payload', int32),
+    ('maxTorque', float32),
+    ('kmCost', float32),
+]
 
-
+@jitclass(spec)
 class Config(object):
     """
     Problem configuration
@@ -268,22 +323,19 @@ class Config(object):
         self.numNodes = {0:3,   1:3,   2:3,   3:4,   4:5,   5:6,   6:7}[scenario]
         self.Sce      = {0:1,   1:1,   2:2,   3:3,   4:4,   5:5,   6:6}[scenario]
 
-        self.aircraft = None
-        if scenario < 2:
-            self.aircraft = Aircraft("smaller", 7, 26_000, 0.556, 1.1)
-        else:
-            self.aircraft = Aircraft("larger", 18, 75_000, 1.170, 4.9)
+        self.size       = "smaller"
+        self.numPallets = 7
+        self.payload    = 26_000
+        self.maxTorque  = 26_000 * 0.556
+        self.kmCost     = 1.1
+        if scenario > 1:
+            self.size       = "larger"
+            self.numPallets = 18
+            self.payload    = 75_000
+            self.maxTorque  = 75_000 * 1.170
+            self.kmCost     = 4.9           
 
-        # self.aircraft = {
-        #     0:Aircraft("smaller", 7, 26_000, 0.556, 1.1),
-        #     1:Aircraft("smaller", 7, 26_000, 0.556, 1.1),
-        #     2:Aircraft("larger", 18, 75_000, 1.170, 4.9),
-        #     3:Aircraft("larger", 18, 75_000, 1.170, 4.9),
-        #     4:Aircraft("larger", 18, 75_000, 1.170, 4.9),
-        #     5:Aircraft("larger", 18, 75_000, 1.170, 4.9),
-        #     6:Aircraft("larger", 18, 75_000, 1.170, 4.9) 
-        #     }[scenario]
-
+# @njit
 def mountEdges(pallets, items, cfg, k):
 
     # from operator import attrgetter
@@ -315,7 +367,7 @@ def loadPallets(cfg):
     """
     Load pallets attributes based on aircraft size
     """
-    fname = f"./params/{cfg.aircraft.size}.txt"
+    fname = f"./../params/{cfg.size}.txt"
       
     reader = open(fname,"r")
     lines = reader.readlines()    
@@ -339,7 +391,7 @@ def loadPallets(cfg):
 
 def writeNodeCons(scenario, instance, cons, pi, node):
 
-    dirname = f"./{DATA}/scenario_{scenario}/instance_{instance}"
+    dirname = f"./../{DATA}/scenario_{scenario}/instance_{instance}"
 
     try:
         os.makedirs(dirname)
@@ -364,7 +416,7 @@ def loadNodeCons(scenario, instance, pi, node, id):
     """
     Loads consolidated contents file for this instance, tour and node k
     """
-    dirname = f"./{DATA}/scenario_{scenario}/instance_{instance}"
+    dirname = f"./../{DATA}/scenario_{scenario}/instance_{instance}"
     try:
         os.makedirs(dirname)
     except FileExistsError:
@@ -398,7 +450,7 @@ def loadNodeItems(scenario, instance, node, unatended): # unatended,future nodes
     """
     Load this node items attributes
     """
-    dirname = f"./{DATA}/scenario_{scenario}/instance_{instance}"
+    dirname = f"./../{DATA}/scenario_{scenario}/instance_{instance}"
     fname = f"{dirname}/items.txt"
 
     reader = open(fname, "r")
@@ -513,7 +565,7 @@ def writeTourSol(method, scenario, instance, pi, tour, cfg, pallets, cons, write
         cfg.volCap += p.V
         palletsWei += p.W
 
-    cfg.weiCap = float(min(cfg.aircraft.payload, palletsWei))
+    cfg.weiCap = float(min(cfg.payload, palletsWei))
 
     sTourAccum = 0
 
@@ -561,7 +613,7 @@ def writeTourSol(method, scenario, instance, pi, tour, cfg, pallets, cons, write
             if write:
                 sol += f"{wspace}{cons[i][k].W} & {vspace}{cons[i][k].V:.1f} \\\\ \n"
 
-        epsilom = tau/cfg.aircraft.maxTorque
+        epsilom = tau/cfg.maxTorque
 
         if write:
             sol += '\midrule \n'

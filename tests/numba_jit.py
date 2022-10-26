@@ -32,5 +32,5 @@ if __name__=="__main__":
 
     t1 = timeit.Timer(CODE, SETUP)
 
-    print(f"time: {t1.timeit(number=10):.3f} s/10") 
+    print(f"time: {t1.timeit(number=10):.3f}/10 seconds") 
                     
