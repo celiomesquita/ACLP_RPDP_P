@@ -246,33 +246,42 @@ def getTours(A, costs, threshold):
 
     p = permutations(A)
 
-    mcosts = np.full(len(p), 0.)
+    # create the matrix of tours IDs
     toursInt = [[0 for _ in range(len(p[0])+2)] for _ in range(len(p))]
 
     for i, row in enumerate(p):
         for j, col in enumerate(row):
             toursInt[i][j+1] = col+1
 
+    # calculates the tour costs and eliminate costly
+    # (more expensive than the threshold) tours
+    tourCosts = np.full(len(p), 0.)
     minCost = 9999999999999.
 
     for i, tour in enumerate(toursInt):
         for j, node in enumerate(tour):
             if j > 0:
                 prev = tour[j-1]
-                mcosts[i] += costs[node][prev]
+                tourCosts[i] += costs[node][prev]
 
-        if mcosts[i] < minCost:
-            minCost = mcosts[i]
+        if tourCosts[i] < minCost:
+            minCost = tourCosts[i]
 
-    for i, cost in enumerate(mcosts):
+    for i, cost in enumerate(tourCosts):
         if cost > (1+threshold) * minCost:
             toursInt.pop(i)
 
-    tours = [[None for _ in range(len(toursInt[0]))] for _ in range(len(toursInt))]
+    # generate tours from Node and Tour classes
+    tours = [None for _ in range(len(toursInt))]
+    nodes = [None for _ in range(len(toursInt[0])-1)] # except the return to the base
 
     for i, tour in enumerate(toursInt):
+        baseIx = len(tour)-1 # the last node is the base
         for j, node in enumerate(tour):
-            tours[i][j] = Node(node, 0.)
+            if j < baseIx: # the last node before the return to the base
+                nodes[j] = Node(node, 0.)
+
+        tours[i] = Tour(nodes, costs)
 
     return tours
 

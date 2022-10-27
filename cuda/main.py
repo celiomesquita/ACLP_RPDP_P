@@ -4,7 +4,7 @@ import time
 import os
 # local packages
 import methods as mcuda
-import optcgcons
+# import optcgcons
 import shims
 import greedy
 
@@ -68,9 +68,9 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
                     kept.append(c)
                     
             # optimize consolidated positions to minimize CG deviation
-            if len(kept) > 0 and method != "GRB":
-                print("\n----- optimize consolidated positions -----")
-                optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, "CBC", k)
+            # if len(kept) > 0 and method != "GRB":
+                # print("\n----- optimize consolidated positions -----")
+                # optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, "CBC", k)
 
             print(f"\n-----Consolidated contents from tour {pi}, {mcuda.CITIES[prevNode.ID]} kept on board -----")
 
@@ -221,7 +221,7 @@ if __name__ == "__main__":
     if cfg.weiCap > cfg.payload:
         cfg.weiCap = cfg.payload
 
-    tours = mcuda.getTours(cfg.numNodes, costs)
+    tours = mcuda.getTours(cfg.numNodes, costs, 0.05)
 
     broke = 0
     avgInstTime = 0.
