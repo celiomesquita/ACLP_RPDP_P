@@ -5,7 +5,8 @@ import os
 # local packages
 import methods as mjit
 import optcgcons
-import shims as shims
+import shims
+import greedy
 
 def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
     """
@@ -98,18 +99,6 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
         if method == "Shims":
             E = shims.Solve(pallets, items, cfg, k)
 
-        if method == "Shims_mp":
-            E = shims_mp.Solve(pallets, items, cfg, k)            
-
-        if method == "Shims_jit":
-            E = shims.Solve(pallets, items, cfg, k) 
-
-        if method == "ACO":
-            E = aco.Solve(pallets, items, startNodeTime, cfg, k)            
-        
-        if method == "ACO_mp":
-            E = aco_mp.Solve(pallets, items, startNodeTime, cfg, k) 
-
         if method == "Greedy":
             E = greedy.Solve(pallets, items, cfg, k)  
 
@@ -172,9 +161,9 @@ if __name__ == "__main__":
 
     import sys
 
-    scenario     = int(sys.argv[1])
-    method       =  f"{sys.argv[2]}"
-    mjit.NCPU = int(sys.argv[3])
+    scenario  = int(sys.argv[1])
+    method    =  f"{sys.argv[2]}"
+    # mjit.NCPU = int(sys.argv[3])
 
     # clear cache
     # find . | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
@@ -185,10 +174,7 @@ if __name__ == "__main__":
     mjit.DATA = "data20"
     # mjit.DATA = "data50"
     # mjit.DATA = "data100"
-
-    mjit.DATA = "data20"
-    # mjit.DATA = "data50"
-    # mjit.DATA = "data100"    
+  
 
     # scenario = 1
 

@@ -239,21 +239,18 @@ class Tour(object):
                 self.legsCosts[k] = costs[frm][to]
                 self.cost += self.legsCosts[k]
 
-# @njit(forceobj=True)
 def factorial(x):
     result = 1
-    # for i in range(1,x+1):
     for i in range(x):
-        result *= (i+1)
+        result *= i+1
     return result
 
-# @njit(forceobj=True)
 def getPermuts(n):
     fac = factorial(n)
-    a = np.zeros((fac, n), int32)
+    a = np.zeros((fac, n), np.uint32) # no jit
     f = 1
     for m in range(2, n+1):
-        b = a[:f, n-m+1:] 
+        b = a[:f, n-m+1:]      # the block of permutations of range(m-1)
         for i in range(1, m):
             a[i*f:(i+1)*f, n-m] = i
             a[i*f:(i+1)*f, n-m+1:] = b + (b >= i)
@@ -261,19 +258,26 @@ def getPermuts(n):
         f *= m
     return a
 
-# @njit
-def getTours(numNodes, costs):
+def getTours(numNodes):
+    p = permutations(numNodes)
+    tours = np.zeros( ( len(p), len(p[0])+2 ), np.uint32)
+    for i, row in enumerate(p):
+        for j, col in enumerate(row):
+            tours[i][j+1] = col+1
+    return tours
 
-    last = numNodes - 1
-    ids = np.zeros(last)
-    for i, _ in enumerate(ids):
-        ids[i] = i+1
+def getTours2(numNodes, costs):
+
+    # last = numNodes - 1
+    # ids = np.zeros(last)
+    # for i, _ in enumerate(ids):
+    #     ids[i] = i+1
     
-    permuts = getPermuts(ids)
+    permuts = getPermuts(numNodes)
 
     tours = []
 
-    for p in permuts:
+    for p in permuts[1:]:
 
         tau = 0 
         nodes = []

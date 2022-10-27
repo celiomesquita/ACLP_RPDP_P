@@ -1,19 +1,19 @@
-from numba import njit
+# from numba import njit
 import numpy as np
-from numba import int32
+# from numba import int32
+from timeit import default_timer as timer
 
-@njit
+# @njit
 def factorial(x):
     result = 1
-    for i in range(1,x+1):
-        result *= i
+    for i in range(x):
+        result *= i+1
     return result
 
-@njit
+# @njit
 def permutations(n):
     fac = factorial(n)
-    # a = np.zeros((fac, n), np.uint32) # no jit
-    a = np.zeros((fac, n), int32)
+    a = np.zeros((fac, n), np.uint32) # no jit
     f = 1
     for m in range(2, n+1):
         b = a[:f, n-m+1:]      # the block of permutations of range(m-1)
@@ -24,11 +24,20 @@ def permutations(n):
         f *= m
     return a
 
-def test(A):
-    for i in permutations(A):
-        print(i)
+def getTours(A):
+    p = permutations(A)
+    tours = np.zeros( ( len(p), len(p[0])+2 ), np.uint32)
+    for i, row in enumerate(p):
+        for j, col in enumerate(row):
+            tours[i][j+1] = col+1
+    return tours
 
+# t0 = timer()
 
-r = test(4)
+tours = getTours(3)
 
-print(r)
+# t1 = timer()
+
+# print(t1-t0)
+
+print(tours)
