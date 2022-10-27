@@ -4,7 +4,7 @@ import time
 import os
 # local packages
 import methods as mcuda
-# import optcgcons
+import optcgcons
 import shims
 import greedy
 
@@ -68,9 +68,10 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
                     kept.append(c)
                     
             # optimize consolidated positions to minimize CG deviation
-            # if len(kept) > 0 and method != "GRB":
-                # print("\n----- optimize consolidated positions -----")
-                # optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, "CBC", k)
+            # it is not necessary with the MIP solver
+            if len(kept) > 0 and method != "GRB":
+                print("\n----- optimize consolidated positions -----")
+                optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, "GRB", k)
 
             print(f"\n-----Consolidated contents from tour {pi}, {mcuda.CITIES[prevNode.ID]} kept on board -----")
 
@@ -159,8 +160,8 @@ def writeAvgResults(method, scenario, line):
 
 if __name__ == "__main__":
 
-    from numba import cuda
-    print(cuda.gpus)    
+    # from numba import cuda
+    # print(cuda.gpus)    
 
     import sys
 
