@@ -164,7 +164,7 @@ def Compute(edges, pallets, items, limit, cfg, k) :
 
 def Solve(pallets, items, cfg, k): # items include kept on board
 
-    print(f"\nShims with numba jit, a new Heuristic for ACLP+RPDP")
+    print(f"\nShims with numba cuda for ACLP+RPDP")
 
     numItems   = len(items)
     numPallets = len(pallets)
