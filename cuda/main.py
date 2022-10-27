@@ -3,7 +3,7 @@ from tabulate import tabulate
 import time
 import os
 # local packages
-import methods as mjit
+import methods as mcuda
 import optcgcons
 import shims
 import greedy
@@ -19,7 +19,7 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
     sol = f"Tour {pi}, with {cfg.numNodes} nodes and the {cfg.size} aircraft\n"
 
     consJK = [
-                [ mjit.Item(-1, -2, 0, 0, 0., -1, -1)
+                [ mcuda.Item(-1, -2, 0, 0, 0., -1, -1)
                   for _ in tour.nodes ]
                 for _ in pallets
              ]          
@@ -36,7 +36,7 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
             break
 
         # load items parameters from this node and problem instance, that go to unnatended
-        items = mjit.loadNodeItems(scenario, instance, node, unattended)
+        items = mcuda.loadNodeItems(scenario, instance, node, unattended)
 
         numItems = len(items)
         numKept = 0
@@ -53,13 +53,13 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
 
             # load consolidated generated in the previous node
             prevNode = tour.nodes[k-1]
-            cons = mjit.loadNodeCons( scenario, instance, pi, prevNode, numItems ) # numItems = first cons ID
+            cons = mcuda.loadNodeCons( scenario, instance, pi, prevNode, numItems ) # numItems = first cons ID
 
-            print(f"\n-----Loaded from tour {pi} {mjit.CITIES[prevNode.ID]} -----")
+            print(f"\n-----Loaded from tour {pi} {mcuda.CITIES[prevNode.ID]} -----")
             print("P\tW\tS\tV\tFROM\tTO")
             for c in cons:
                 print("%d\t%d\t%d\t%.1f\t%s\t%s" % (
-                        c.P, c.W, c.S, c.V, mjit.CITIES[c.Frm], mjit.CITIES[c.To]))
+                        c.P, c.W, c.S, c.V, mcuda.CITIES[c.Frm], mcuda.CITIES[c.To]))
 
             # consolidated contents not destined to this point are kept on board
             kept = []
@@ -72,7 +72,7 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
                 print("\n----- optimize consolidated positions -----")
                 optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, "CBC", k)
 
-            print(f"\n-----Consolidated contents from tour {pi}, {mjit.CITIES[prevNode.ID]} kept on board -----")
+            print(f"\n-----Consolidated contents from tour {pi}, {mcuda.CITIES[prevNode.ID]} kept on board -----")
 
             print("P\tW\tS\tV\tFROM\tTO")
             for c in kept:
@@ -80,15 +80,15 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
                 numItems += 1
                 numKept  += 1
                 print("%d\t%d\t%d\t%.1f\t%s\t%s" % (
-                    c.P,c.W, c.S, c.V, mjit.CITIES[c.Frm], mjit.CITIES[c.To]))
+                    c.P,c.W, c.S, c.V, mcuda.CITIES[c.Frm], mcuda.CITIES[c.To]))
 
         # set pallets destinations with items and consolidated to be delivered
         print("\n----- setPalletsDestinations, Carlos' version -----")
-        mjit.setPalletsDestinations(items, pallets, tour.nodes, k, unattended)                
+        mcuda.setPalletsDestinations(items, pallets, tour.nodes, k, unattended)                
 
         print("Dests: ",end="")
         for p in pallets:
-            print(f"{mjit.CITIES[p.Dests[k]]} ", end='')
+            print(f"{mcuda.CITIES[p.Dests[k]]} ", end='')
         print()
 
         print(f"-> {numItems} items with {numKept} kept on board in {node.ICAO}")
@@ -132,9 +132,9 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
             print(f"----- TOUR {pi} {node.ICAO} END -----\n")
 
             # write consolidated contents from this node in file
-            mjit.writeNodeCons(scenario, instance, consNodeT, pi, node)
+            mcuda.writeNodeCons(scenario, instance, consNodeT, pi, node)
 
-    mjit.writeTourSol(method, scenario, instance, pi, tour, cfg, pallets, consJK, False) # False -  does not generate latex table
+    mcuda.writeTourSol(method, scenario, instance, pi, tour, cfg, pallets, consJK, False) # False -  does not generate latex table
             
     return broke
 
@@ -142,7 +142,7 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
 
 def writeAvgResults(method, scenario, line):
 
-    dirname = f"./results/{mjit.DATA}/{method}_{scenario}"
+    dirname = f"./results/{mcuda.DATA}/{method}_{scenario}"
     try:
         os.makedirs(dirname)
     except FileExistsError:
@@ -159,21 +159,24 @@ def writeAvgResults(method, scenario, line):
 
 if __name__ == "__main__":
 
+    from numba import cuda
+    print(cuda.gpus)    
+
     import sys
 
     scenario  = int(sys.argv[1])
     method    =  f"{sys.argv[2]}"
-    # mjit.NCPU = int(sys.argv[3])
+    # mcuda.NCPU = int(sys.argv[3])
 
     # clear cache
     # find . | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
 
-    mjit.SEC_BREAK = 0.7
-    # mjit.SEC_BREAK = 10
+    mcuda.SEC_BREAK = 0.7
+    # mcuda.SEC_BREAK = 10
 
-    mjit.DATA = "data20"
-    # mjit.DATA = "data50"
-    # mjit.DATA = "data100"
+    mcuda.DATA = "data20"
+    # mcuda.DATA = "data50"
+    # mcuda.DATA = "data100"
   
 
     # scenario = 1
@@ -192,11 +195,11 @@ if __name__ == "__main__":
     if scenario == 6:
         instances = [1,2,3]                                        
 
-    dists = mjit.loadDistances()
+    dists = mcuda.loadDistances()
 
     costs = [[0.0 for _ in dists] for _ in dists]
 
-    cfg = mjit.Config(scenario)
+    cfg = mcuda.Config(scenario)
     
     for i, cols in enumerate(dists):
         for j, value in enumerate(cols):
@@ -205,7 +208,7 @@ if __name__ == "__main__":
     # for method in ["ACO","ACO_mp","Greedy","Shims","Shims_mp"]:
     # for method in ["Shims_mp"]:
 
-    pallets = mjit.loadPallets(cfg)
+    pallets = mcuda.loadPallets(cfg)
 
     # pallets capacity
     cfg.weiCap = 0
@@ -218,7 +221,7 @@ if __name__ == "__main__":
     if cfg.weiCap > cfg.payload:
         cfg.weiCap = cfg.payload
 
-    tours = mjit.getTours(cfg.numNodes, costs)
+    tours = mcuda.getTours(cfg.numNodes, costs)
 
     broke = 0
     avgInstTime = 0.
@@ -254,7 +257,7 @@ if __name__ == "__main__":
 
     numInst = float(len(instances))
 
-    timeString = mjit.getTimeString(avgInstTime, numInst)
+    timeString = mcuda.getTimeString(avgInstTime, numInst)
 
     avgInstSC /= numInst
 

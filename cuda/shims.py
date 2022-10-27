@@ -1,6 +1,5 @@
-import methods as mjit
+import methods as mcuda
 import numpy as np
-from numba import njit
 
 # A Shim is a thin and often tapered or wedged piece of material, used to fill small gaps or spaces between objects.
 # Set are typically used in order to support, adjust for better fit, or provide a level surface.
@@ -61,7 +60,6 @@ class Shim(object):
 
 # solve a Subset Selection Problem for this pallet, by selecting
 # the best shim and including its edges in solution.
-# @njit
 def getBestShim(p, notInSol, sol, limit, numItems, maxTorque, k):
 
     # create the first shim
@@ -137,7 +135,7 @@ def getBestShim(p, notInSol, sol, limit, numItems, maxTorque, k):
 
 def Compute(edges, pallets, items, limit, cfg, k) :
 
-    sol = mjit.Solution(edges, pallets, items, limit, cfg, k)
+    sol = mcuda.Solution(edges, pallets, items, limit, cfg, k)
 
     notInSol = [ [] for _ in range(len(pallets))]
 
@@ -175,9 +173,9 @@ def Solve(pallets, items, cfg, k): # items include kept on board
 
     num = 1100
 
-    if mjit.DATA == "data50":
+    if mcuda.DATA == "data50":
         num *= 2
-    if mjit.DATA == "data100":
+    if mcuda.DATA == "data100":
         num *= 3
 
     limit = 1.0 - num/float(numItems*numPallets)
@@ -187,7 +185,7 @@ def Solve(pallets, items, cfg, k): # items include kept on board
 
     print(f"Limit: {limit:.2f}")
 
-    edges = mjit.mountEdges(pallets, items, cfg, k)
+    edges = mcuda.mountEdges(pallets, items, cfg, k)
 
     sol = Compute(edges, pallets, items, limit, cfg, k) 
 

@@ -2,12 +2,8 @@
 from os import path
 import os
 import math
-import itertools
 import numpy as np
 from time import time
-from numba import njit
-from numba.experimental import jitclass
-from numba import int32, float32, types # import the types
 
 
 NCPU = os.cpu_count()-1
@@ -20,13 +16,12 @@ CITIES = ["GRU", "GIG", "SSA", "CNF", "CWB", "BSB", "REC"]
 
 DATA = "data20"
 
-@jitclass
 class Node(object):
     def __init__(self, id, tau):
         self.ID      = id
         self.tau     = tau # node sum of torques
         self.ICAO    = CITIES[id]
-@jitclass
+
 class Item(object):
     """
     A candidate item "j" to be loaded on a pallet "i" if X_ij == 1
@@ -40,14 +35,6 @@ class Item(object):
         self.Frm = frm  # from
         self.To = to # destination
 
-spec = [
-    ('ID', int32), 
-    ('D', float32),
-    ('V', float32),
-    ('W', int32),
-    ('Dests', int32[:]),
-]
-@jitclass(spec)
 class Pallet(object):
     """
     A flat metal surface to hold items to be transported in a airplane
@@ -57,10 +44,9 @@ class Pallet(object):
         self.D  = d  # centroid distance to CG
         self.V  = v  # volume limit
         self.W  = w  # weight limit
-        self.Dests = np.full(numNodes, -1, dtype=int32)
+        self.Dests = np.full(numNodes, -1, np.uint32)
 
 # Edge connecting a pallet and an item
-@jitclass
 class Edge(object):
     def __init__(self, id, pallet, item, cfg):
         self.ID        = id
@@ -95,7 +81,6 @@ def edges_copy(edges):
         output[i].Attract   = e.Attract 
     return output
 
-@jitclass
 class Solution(object):
     def __init__(self, edges, pallets, items, limit, cfg, k):
 
@@ -184,7 +169,6 @@ class Solution(object):
 
 
 # ACO - Proportional Roulette Selection (biased if greediness > 0)
-@njit
 def rouletteSelection(values, sumVal, greediness, sense):
 
     n = len(values)
@@ -220,7 +204,6 @@ def loadDistances():
     return distances 
 
 # tour is pi in the mathematical formulation
-@jitclass
 class Tour(object):
     def __init__(self, nodes, costs):
         self.nodes = nodes
@@ -245,7 +228,7 @@ def factorial(x):
         result *= i+1
     return result
 
-def getPermuts(n):
+def permutations(n):
     fac = factorial(n)
     a = np.zeros((fac, n), np.uint32) # no jit
     f = 1
@@ -257,63 +240,43 @@ def getPermuts(n):
         b += 1
         f *= m
     return a
+    
+#getTours(cfg.numNodes-1, costs, 0.05)
+def getTours(A, costs, threshold):
 
-def getTours(numNodes):
-    p = permutations(numNodes)
-    tours = np.zeros( ( len(p), len(p[0])+2 ), np.uint32)
+    p = permutations(A)
+
+    mcosts = np.full(len(p), 0.)
+    toursInt = [[0 for _ in range(len(p[0])+2)] for _ in range(len(p))]
+
     for i, row in enumerate(p):
         for j, col in enumerate(row):
-            tours[i][j+1] = col+1
-    return tours
+            toursInt[i][j+1] = col+1
 
-def getTours2(numNodes, costs):
+    minCost = 9999999999999.
 
-    # last = numNodes - 1
-    # ids = np.zeros(last)
-    # for i, _ in enumerate(ids):
-    #     ids[i] = i+1
-    
-    permuts = getPermuts(numNodes)
+    for i, tour in enumerate(toursInt):
+        for j, node in enumerate(tour):
+            if j > 0:
+                prev = tour[j-1]
+                mcosts[i] += costs[node][prev]
 
-    tours = []
+        if mcosts[i] < minCost:
+            minCost = mcosts[i]
 
-    for p in permuts[1:]:
+    for i, cost in enumerate(mcosts):
+        if cost > (1+threshold) * minCost:
+            toursInt.pop(i)
 
-        tau = 0 
-        nodes = []
-        nodes.append( Node(0, tau) ) # the base
-        for i in p:
-            nodes.append( Node(i, tau) )
-        nodes.append( Node(0, tau) ) # the base
+    tours = [[None for _ in range(len(toursInt[0]))] for _ in range(len(toursInt))]
 
-        tours.append( Tour(nodes, costs) )
-
-    # if numNodes > 3:
-    minCost = min(tours, key=lambda x: x.cost)
-    # maxCost = max(tours, key=lambda x: x.cost)
-    # threshold = minCost + (maxCost-minCost)/5
-
-    for i, t in enumerate(tours):
-        if t.cost > minCost*1.05: # greater then the 5% lowests costs
-            tours.pop(i)
+    for i, tour in enumerate(toursInt):
+        for j, node in enumerate(tour):
+            tours[i][j] = Node(node, 0.)
 
     return tours
 
-spec = [
-    ('weiCap', int32),  
-    ('volCap', float32),
-    ('maxD', float32),
-    ('scenario', int32),
-    ('numNodes', int32),
-    ('Sce', int32),
-    ('size', types.unicode_type),  
-    ('numPallets', int32),
-    ('payload', int32),
-    ('maxTorque', float32),
-    ('kmCost', float32),
-]
 
-@jitclass(spec)
 class Config(object):
     """
     Problem configuration
@@ -339,7 +302,6 @@ class Config(object):
             self.maxTorque  = 75_000 * 1.170
             self.kmCost     = 4.9           
 
-# @njit
 def mountEdges(pallets, items, cfg, k):
 
     # from operator import attrgetter
