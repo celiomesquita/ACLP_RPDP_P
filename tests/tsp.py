@@ -34,20 +34,17 @@ def check_tours( tours, n ):
 #------------------------------------
 # Serial version.
 
-def iroulette( weights ): # This function requires the 1d array of weights that has been constructed in the for loop 
-                          # within the contruct_tour function right below. 
-    # Independent roulette - multiply weights by random numbers and return index of highest product
-    num_weights = len(weights) # num_weights is the size of the 1d array weights. 
-    imax = -1; # imax is initialised to -1. It is intended to keep the index of the weights' element 
-               # that yielded max. product.
-    vmax = 0 #vmax is initialised to 0. It is intended to keep the maximum product. 
-    for i in range(num_weights): #for loop to iterate over the elements of weights.  
-        val = weights[i]* random.random() # val is assigned the calculation of the product: weights' elements 
-                                          # to a uniformly distributed random number.  
-        if val > vmax:   # evaluates True if the new calculated product (val) is strictly bigger than vmax.
-            vmax = val # in case val>vmax, vmax will be updated by the new product.
-            imax = i #imax is updated by assigning the index of the corresponding highest product. 
-    return imax # This function outputs the index of the highest product. 
+def iroulette( weights ): 
+    num_weights = len(weights) 
+    imax = -1 
+    vmax = 0 
+    for i in range(num_weights):
+        # the greater the weight, the more likely it is to be more than vmax
+        val = weights[i] * random.random()
+        if val > vmax:
+            vmax = val
+            imax = i
+    return imax
     
 def construct_tour( weights ): # The construct_tour's input is the weights matrix defined in the main() function. 
     # plain python version - construct a tour using the iroulette function

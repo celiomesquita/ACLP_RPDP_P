@@ -1,11 +1,30 @@
 import numpy as np
+import numba as nb
 from numba import cuda
 from timeit import default_timer as timer
 
-# import logging
-# logger = logging.getLogger("numba")
-# logger.setLevel(logging.ERROR)
-# logging.disable(logging.WARNING)
+import logging
+logger = logging.getLogger("numba")
+logger.setLevel(logging.ERROR)
+logging.disable(logging.WARNING)
+
+# cuda.detect()
+
+@cuda.jit
+def add_scalars(a, b, c):
+    c[0] = a + b
+
+if __name__=="__main__":
+
+    a = 2.
+    b = 7.
+
+    dev_c = cuda.device_array(1, float)
+
+    add_scalars[1, 1](a, b, dev_c)
+
+    c = dev_c.copy_to_host()
+    print(f"{a} + {b} = {c[0]}")
 
 """
 @cuda.jit
@@ -82,52 +101,32 @@ print(c)
 """
 
 
-# print(np.__version__)
-# print(numba.__version__)
-
-# cuda.detect()
-
-# Example 1.1: Add scalars
-@cuda.jit
-def add_scalars(a, b, c):
-    c[0] = a + b
-
-if __name__=="__main__":
-
-    a = 2.
-    b = 7.
-
-    dev_c = cuda.device_array(1, float)
-
-    add_scalars[1, 1](a, b, dev_c)
-
-    c = dev_c.copy_to_host()
-    print(f"{a} + {b} = {c[0]}")
 
 
-# To run on CPU
-def func(a):
-    for i in range(len(a)):
-        a[i] += 1
-    return sum(a)
 
-# To run on GPU
-@cuda.jit
-def func2(x):
-    return x+1
+# # To run on CPU
+# def func(a):
+#     for i in range(len(a)):
+#         a[i] += 1
+#     return sum(a)
 
-@cuda.jit
-def my_kernel(io_array):
-    # Thread id in a 1D block
-    tx = cuda.threadIdx.x
-    # Block id in a 1D grid
-    ty = cuda.blockIdx.x
-    # Block width, i.e. number of threads per block
-    bw = cuda.blockDim.x
-    # Compute flattened index inside the array
-    pos = tx + ty * bw
-    if pos < io_array.size:  # Check array boundaries
-        io_array[pos] *= 2 # do the computation
+# # To run on GPU
+# @cuda.jit
+# def func2(x):
+#     return x+1
+
+# @cuda.jit
+# def my_kernel(io_array):
+#     # Thread id in a 1D block
+#     tx = cuda.threadIdx.x
+#     # Block id in a 1D grid
+#     ty = cuda.blockIdx.x
+#     # Block width, i.e. number of threads per block
+#     bw = cuda.blockDim.x
+#     # Compute flattened index inside the array
+#     pos = tx + ty * bw
+#     if pos < io_array.size:  # Check array boundaries
+#         io_array[pos] *= 2 # do the computation
 
 # if __name__=="__main__":
 

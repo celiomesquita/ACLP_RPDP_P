@@ -167,6 +167,23 @@ class Solution(object):
 
         return True
 
+def iroulette( values ):
+
+    n = len(values) 
+    if n == 0:
+        return -1
+    if n == 1:
+        return 0
+
+    imax = -1 
+    vmax = 0 
+    for i in range(n):
+        # the greater the weight, the more likely it is to be more than vmax
+        val = values[i] * RNG.random()
+        if val > vmax:
+            vmax = val
+            imax = i
+    return imax
 
 # ACO - Proportional Roulette Selection (biased if greediness > 0)
 def rouletteSelection(values, sumVal, greediness, sense):
@@ -638,4 +655,31 @@ def writeTourSol(method, scenario, instance, pi, tour, cfg, pallets, cons, write
 
 if __name__ == "__main__":
 
-    print("----- Please execute module main_test -----")
+    import time
+
+    n = 1000
+
+    selections1 = []
+    selections2 = []
+
+    values = [RNG.random() for _ in range(n)]
+
+    t0 = time.perf_counter()
+
+    for _ in range(n):
+        selections1.append(iroulette(values))
+
+    t1 = time.perf_counter()
+
+    sumVal = sum(values)
+    for _ in range(n):
+        selections2.append(rouletteSelection(values, sumVal, 0, 1))
+
+    t2 = time.perf_counter()
+
+    avg1 = sum(selections1)/len(selections1)
+    avg2 = sum(selections2)/len(selections2)
+
+    print(f"{avg1}: {t1-t0:.5f}\t{avg2}: {t2-t1:.5f}")
+
+    # print("----- Please execute module main_test -----")
