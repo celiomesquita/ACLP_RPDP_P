@@ -82,12 +82,12 @@ def edges_copy(edges):
     return output
 
 class Solution(object):
-    def __init__(self, edges, pallets, items, limit, cfg, k):
+    def __init__(self, Nbhood, pallets, items, limit, cfg, k):
 
         self.Limit = limit
 
         self.Edges  = [] # set of edges in solution
-        self.Nbhood = edges_copy(edges) # set of edges that did not enter the solution
+        self.Nbhood = edges_copy(Nbhood) # set of edges that did not enter the solution
 
         self.S = 0 # solution total score
         self.W = 0 # solution total weight
@@ -167,51 +167,13 @@ class Solution(object):
 
         return True
 
-def iroulette( values ):
-
-    n = len(values) 
-    if n == 0:
-        return -1
-    if n == 1:
-        return 0
-
-    imax = -1 
-    vmax = 0 
-    for i in range(n):
-        # the greater the weight, the more likely it is to be more than vmax
-        val = values[i] * RNG.random()
-        if val > vmax:
-            vmax = val
-            imax = i
-    return imax
-
-# ACO - Proportional Roulette Selection (biased if greediness > 0)
-def rouletteSelection(values, sumVal, greediness, sense):
-
-    n = len(values)
-    if n == 0:
-        return -1
-    if n == 1:
-        return 0
-
-    threshold = RNG.random()*(1.0-greediness) + greediness
-    threshold *= sumVal
-
-    maxVal = max(values)
-
-    pointer = 0.0
-    for j, v in enumerate(values):
-
-        if sense == -1: # preference for worst values
-            pointer += maxVal - v
-        else:
-            pointer += v
-
-        if pointer >= threshold: # when pointer reaches the threshold
-            return j # returns the chosen index
-
-    # just in case ....
-    return int(n * RNG.random())
+# mount the decision matrix for which items will be put in which pallets
+def getSolMatrix(edges, numPallets, numItems):
+    X = np.zeros((numPallets,numItems))
+    for e in edges:
+        X[e.Pallet.ID][e.Item.ID] = 1
+    
+    return X
 
 
 def loadDistances():
@@ -438,9 +400,9 @@ def loadNodeCons(scenario, instance, pi, node, id):
     return cons
 
 # used in sequential mode
-def loadNodeItems(scenario, instance, node, unatended): # unatended,future nodes
+def loadNodeItems(scenario, instance, node, unatended): # unatended, future nodes
     """
-    Load this node items attributes
+    Load this node to unnatended items attributes
     """
     dirname = f"./../{DATA}/scenario_{scenario}/instance_{instance}"
     fname = f"{dirname}/items.txt"
@@ -655,31 +617,4 @@ def writeTourSol(method, scenario, instance, pi, tour, cfg, pallets, cons, write
 
 if __name__ == "__main__":
 
-    import time
-
-    n = 1000
-
-    selections1 = []
-    selections2 = []
-
-    values = [RNG.random() for _ in range(n)]
-
-    t0 = time.perf_counter()
-
-    for _ in range(n):
-        selections1.append(iroulette(values))
-
-    t1 = time.perf_counter()
-
-    sumVal = sum(values)
-    for _ in range(n):
-        selections2.append(rouletteSelection(values, sumVal, 0, 1))
-
-    t2 = time.perf_counter()
-
-    avg1 = sum(selections1)/len(selections1)
-    avg2 = sum(selections2)/len(selections2)
-
-    print(f"{avg1}: {t1-t0:.5f}\t{avg2}: {t2-t1:.5f}")
-
-    # print("----- Please execute module main_test -----")
+    print("----- Please execute module main_test -----")

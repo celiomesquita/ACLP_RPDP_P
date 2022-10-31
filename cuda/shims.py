@@ -133,9 +133,9 @@ def getBestShim(p, notInSol, sol, limit, numItems, maxTorque, k):
     return []
 
 
-def Compute(edges, pallets, items, limit, cfg, k) :
+def Compute(Nbhood, pallets, items, limit, cfg, k) :
 
-    sol = mcuda.Solution(edges, pallets, items, limit, cfg, k)
+    sol = mcuda.Solution(Nbhood, pallets, items, limit, cfg, k)
 
     notInSol = [ [] for _ in range(len(pallets))]
 
@@ -185,18 +185,13 @@ def Solve(pallets, items, cfg, k): # items include kept on board
 
     print(f"Limit: {limit:.2f}")
 
-    edges = mcuda.mountEdges(pallets, items, cfg, k)
+    Nbhood = mcuda.mountEdges(pallets, items, cfg, k)
 
-    sol = Compute(edges, pallets, items, limit, cfg, k) 
-
-    # decision matrix for which items will be put in which pallet
-    X = [[0 for _ in np.arange(numItems)] for _ in np.arange(numPallets)] 
-    for e in sol.Edges:
-        X[e.Pallet.ID][e.Item.ID] = 1
+    sol = Compute(Nbhood, pallets, items, limit, cfg, k) 
 
     print(f"lim: {limit:.2f}\n")
 
-    return X
+    return mcuda.getSolMatrix(sol.Edges, numPallets, numItems)
         
 if __name__ == "__main__":
 

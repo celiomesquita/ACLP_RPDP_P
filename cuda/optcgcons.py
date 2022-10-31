@@ -37,25 +37,23 @@ def OptCGCons(kept, pallets, maxTorque, method, k):
 
     if mod.num_solutions:
 
-        tTotAccum = 0
+        accumTorque = 0
         for i, _ in enumerate(pallets):
 
-            tTotAccum += float(140) * pallets[i].D
+            accumTorque += float(140) * pallets[i].D # 140kg, empty pallet weight
 
             for j in KeptRange:
 
                 if X[i][j].x >= 0.99:
 
-                    tTotAccum += float(kept[j].W) * pallets[i].D    
+                    accumTorque += float(kept[j].W) * pallets[i].D    
 
-                    # pallets[i].To = kept[j].To # define pallet destination
                     pallets[i].Dests[k] = kept[j].To
                     kept[j].P = i # put the consolidated in the best position to minimize torque                        
 
-        tTotAccum /= maxTorque
+        accumTorque /= maxTorque
 
-        return tTotAccum
-        # print("\n----- OptCGCons relative torque: %.2f -----" % tTotAccum)
+        return accumTorque
 
 
 if __name__ == "__main__":

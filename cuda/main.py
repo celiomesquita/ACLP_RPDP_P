@@ -21,15 +21,13 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
     consJK = [
                 [ mcuda.Item(-1, -2, 0, 0, 0., -1, -1)
                   for _ in tour.nodes ]
-                for _ in pallets
+                for _ in pallets # a consolidated for each pallet
              ]          
 
     for k, node in enumerate(tour.nodes):  # solve each node sequentialy
 
         # L_k destination nodes set
-        unattended = []
-        for n in tour.nodes[k+1:]:
-            unattended.append(n.ID)
+        unattended = [n.ID for n in tour.nodes[k+1:]]
 
         # all nodes are attended, this node is the base, stops
         if len(unattended) == 0:
@@ -47,7 +45,7 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
 
         # reset pallets destinations
         for i, _ in enumerate(pallets):
-            pallets[i].Dests = [-1]*cfg.numNodes
+            pallets[i].Dests = [-1 for _ in range(cfg.numNodes)]
 
         if k > 0: # not in the base
 
@@ -62,10 +60,7 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
                         c.P, c.W, c.S, c.V, mcuda.CITIES[c.Frm], mcuda.CITIES[c.To]))
 
             # consolidated contents not destined to this point are kept on board
-            kept = []
-            for c in cons:
-                if c.To in unattended:
-                    kept.append(c)
+            kept = [c for c in cons if c.To in unattended]
                     
             # optimize consolidated positions to minimize CG deviation
             # it is not necessary with the MIP solver
@@ -76,7 +71,7 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
             print(f"\n-----Consolidated contents from tour {pi}, {mcuda.CITIES[prevNode.ID]} kept on board -----")
 
             print("P\tW\tS\tV\tFROM\tTO")
-            for c in kept:
+            for c in kept: # kept on board are also items to be transported
                 items.append(c)
                 numItems += 1
                 numKept  += 1
@@ -163,10 +158,10 @@ if __name__ == "__main__":
     # from numba import cuda
     # print(cuda.gpus)    
 
-    import sys
+    # import sys
 
-    scenario  = int(sys.argv[1])
-    method    =  f"{sys.argv[2]}"
+    # scenario  = int(sys.argv[1])
+    # method    =  f"{sys.argv[2]}"
     # mcuda.NCPU = int(sys.argv[3])
 
     # clear cache
@@ -180,7 +175,11 @@ if __name__ == "__main__":
     # mcuda.DATA = "data100"
   
 
-    # scenario = 1
+    # method = "Greedy"
+    method = "ACO"
+    # method = "Shims"
+
+    scenario = 1
 
     if scenario == 1:
         # instances = [1,2,3,4,5,6,7]
@@ -222,7 +221,7 @@ if __name__ == "__main__":
     if cfg.weiCap > cfg.payload:
         cfg.weiCap = cfg.payload
 
-    tours = mcuda.getTours(cfg.numNodes, costs, 0.05)
+    tours = mcuda.getTours(cfg.numNodes, costs, 0.25)
 
     broke = 0
     avgInstTime = 0.

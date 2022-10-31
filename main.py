@@ -3,12 +3,10 @@ from tabulate import tabulate
 import time
 import os
 # local packages
-import methods
-import methods_jit as mjit
+import methods as mcuda
 import optcgcons
 import shims
 import shims_mp
-import shims_jit
 import aco
 import aco_mp
 import greedy
@@ -24,7 +22,7 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
     sol = f"Tour {pi}, with {cfg.numNodes} nodes and the {cfg.aircraft.size} aircraft\n"
 
     consJK = [
-                [ methods.Item(-1, -2, 0, 0, 0., -1, -1)
+                [ mcuda.Item(-1, -2, 0, 0, 0., -1, -1)
                   for _ in tour.nodes ]
                 for _ in pallets
              ]          
@@ -41,7 +39,7 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
             break
 
         # load items parameters from this node and problem instance, that go to unnatended
-        items = methods.loadNodeItems(scenario, instance, node, unattended)
+        items = mcuda.loadNodeItems(scenario, instance, node, unattended)
 
         numItems = len(items)
         numKept = 0
@@ -58,13 +56,13 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
 
             # load consolidated generated in the previous node
             prevNode = tour.nodes[k-1]
-            cons = methods.loadNodeCons( scenario, instance, pi, prevNode, numItems ) # numItems = first cons ID
+            cons = mcuda.loadNodeCons( scenario, instance, pi, prevNode, numItems ) # numItems = first cons ID
 
-            print(f"\n-----Loaded from tour {pi} {methods.CITIES[prevNode.ID]} -----")
+            print(f"\n-----Loaded from tour {pi} {mcuda.CITIES[prevNode.ID]} -----")
             print("P\tW\tS\tV\tFROM\tTO")
             for c in cons:
                 print("%d\t%d\t%d\t%.1f\t%s\t%s" % (
-                        c.P, c.W, c.S, c.V, methods.CITIES[c.Frm], methods.CITIES[c.To]))
+                        c.P, c.W, c.S, c.V, mcuda.CITIES[c.Frm], mcuda.CITIES[c.To]))
 
             # consolidated contents not destined to this point are kept on board
             kept = []
@@ -77,7 +75,7 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
                 print("\n----- optimize consolidated positions -----")
                 optcgcons.OptCGCons(kept, pallets, cfg.aircraft.maxTorque, "CBC", k)
 
-            print(f"\n-----Consolidated contents from tour {pi}, {methods.CITIES[prevNode.ID]} kept on board -----")
+            print(f"\n-----Consolidated contents from tour {pi}, {mcuda.CITIES[prevNode.ID]} kept on board -----")
 
             print("P\tW\tS\tV\tFROM\tTO")
             for c in kept:
@@ -85,15 +83,15 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
                 numItems += 1
                 numKept  += 1
                 print("%d\t%d\t%d\t%.1f\t%s\t%s" % (
-                    c.P,c.W, c.S, c.V, methods.CITIES[c.Frm], methods.CITIES[c.To]))
+                    c.P,c.W, c.S, c.V, mcuda.CITIES[c.Frm], mcuda.CITIES[c.To]))
 
         # set pallets destinations with items and consolidated to be delivered
         print("\n----- setPalletsDestinations, Carlos' version -----")
-        methods.setPalletsDestinations(items, pallets, tour.nodes, k, unattended)                
+        mcuda.setPalletsDestinations(items, pallets, tour.nodes, k, unattended)                
 
         print("Dests: ",end="")
         for p in pallets:
-            print(f"{methods.CITIES[p.Dests[k]]} ", end='')
+            print(f"{mcuda.CITIES[p.Dests[k]]} ", end='')
         print()
 
         print(f"-> {numItems} items with {numKept} kept on board in {node.ICAO}")
@@ -149,9 +147,9 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
             print(f"----- TOUR {pi} {node.ICAO} END -----\n")
 
             # write consolidated contents from this node in file
-            methods.writeNodeCons(scenario, instance, consNodeT, pi, node)
+            mcuda.writeNodeCons(scenario, instance, consNodeT, pi, node)
 
-    methods.writeTourSol(method, scenario, instance, pi, tour, cfg, pallets, consJK, False) # False -  does not generate latex table
+    mcuda.writeTourSol(method, scenario, instance, pi, tour, cfg, pallets, consJK, False) # False -  does not generate latex table
             
     return broke
 
@@ -159,7 +157,7 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
 
 def writeAvgResults(method, scenario, line):
 
-    dirname = f"./results/{methods.DATA}/{method}_{scenario}"
+    dirname = f"./results/{mcuda.DATA}/{method}_{scenario}"
     try:
         os.makedirs(dirname)
     except FileExistsError:
@@ -180,21 +178,21 @@ if __name__ == "__main__":
 
     scenario     = int(sys.argv[1])
     method       =  f"{sys.argv[2]}"
-    methods.NCPU = int(sys.argv[3])
+    mcuda.NCPU = int(sys.argv[3])
 
     # clear cache
     # find . | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
 
-    methods.SEC_BREAK = 0.7
-    # methods.SEC_BREAK = 10
+    mcuda.SEC_BREAK = 0.7
+    # mcuda.SEC_BREAK = 10
 
-    methods.DATA = "data20"
-    # methods.DATA = "data50"
-    # methods.DATA = "data100"
+    mcuda.DATA = "data20"
+    # mcuda.DATA = "data50"
+    # mcuda.DATA = "data100"
 
-    mjit.DATA = "data20"
-    # mjit.DATA = "data50"
-    # mjit.DATA = "data100"    
+    mcuda.DATA = "data20"
+    # mcuda.DATA = "data50"
+    # mcuda.DATA = "data100"    
 
     # scenario = 1
 
@@ -212,11 +210,11 @@ if __name__ == "__main__":
     if scenario == 6:
         instances = [1,2,3]                                        
 
-    dists = methods.loadDistances()
+    dists = mcuda.loadDistances()
 
     costs = [[0.0 for _ in dists] for _ in dists]
 
-    cfg = methods.Config(scenario)
+    cfg = mcuda.Config(scenario)
     
     for i, cols in enumerate(dists):
         for j, value in enumerate(cols):
@@ -225,7 +223,7 @@ if __name__ == "__main__":
     # for method in ["ACO","ACO_mp","Greedy","Shims","Shims_mp"]:
     # for method in ["Shims_mp"]:
 
-    pallets = methods.loadPallets(cfg)
+    pallets = mcuda.loadPallets(cfg)
 
     # pallets capacity
     cfg.weiCap = 0
@@ -238,7 +236,7 @@ if __name__ == "__main__":
     if cfg.weiCap > cfg.aircraft.payload:
         cfg.weiCap = cfg.aircraft.payload
 
-    tours = methods.getTours(cfg.numNodes, costs)
+    tours = mcuda.getTours(cfg.numNodes, costs)
 
     broke = 0
     avgInstTime = 0.
@@ -274,7 +272,7 @@ if __name__ == "__main__":
 
     numInst = float(len(instances))
 
-    timeString = methods.getTimeString(avgInstTime, numInst)
+    timeString = mcuda.getTimeString(avgInstTime, numInst)
 
     avgInstSC /= numInst
 
