@@ -10,7 +10,7 @@ def Solve(pallets, items, cfg, k): # items include kept on board
     numItems   = len(items)
     numPallets = len(pallets)
 
-    sol = mno.Solution(edges, pallets, items, 1.0, cfg, k)
+    sol = mno.Solution(edges, pallets, items, 1.0, cfg, k, True) # True: with torque constraints
 
     return mno.getSolMatrix(sol.Edges, numPallets, numItems)
         

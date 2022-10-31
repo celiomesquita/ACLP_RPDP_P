@@ -5,7 +5,6 @@ import math
 import numpy as np
 from time import time
 
-
 NCPU = os.cpu_count()-1
 
 SEC_BREAK = 0.7
@@ -44,15 +43,16 @@ class Pallet(object):
         self.D  = d  # centroid distance to CG
         self.V  = v  # volume limit
         self.W  = w  # weight limit
-        self.Dests = np.full(numNodes, -1, np.uint32)
+        self.Dests = np.full(numNodes, -1)
 
 # Edge connecting a pallet and an item
 class Edge(object):
     def __init__(self, id, pallet, item, cfg):
-        self.ID        = id
-        self.Pallet    = pallet
-        self.Item      = item
-        self.Torque    = float(item.W) * float(pallet.D)
+
+        self.ID      = id # index in the solution edges (it must be preserved in case of sorting)
+        self.Pallet  = pallet
+        self.Item    = item
+        self.Torque  = float(item.W) * float(pallet.D)
 
         # 1500 to make the heuristic average around 1.0
         # devided by volume, because it is the most constraintive attribute
@@ -83,7 +83,7 @@ def edgesCopy(edges):
     return output
 
 class Solution(object):
-    def __init__(self, edges, pallets, items, limit, cfg, k):
+    def __init__(self, edges, pallets, items, limit, cfg, k, withTorque):
 
         self.Limit = limit
 
@@ -103,34 +103,47 @@ class Solution(object):
         self.PAW = [ 0   for _ in pallets] # set of pallets accumulated weights
         self.PAV = [ 0.0 for _ in pallets] # set of pallets accumulated volumes
 
+        self.extraTorque = []
+
         # builds a greedy solution until the limited capacity is attained
         if limit > 0:
-            for i, ce in enumerate(self.Edges):
-                if not ce.InSol and self.isFeasible(ce, limit, cfg, k): # All constraints
-                    self.putInSol(ce, i)
+            for ce in self.Edges:
+                if not ce.InSol and self.isFeasible(ce, limit, cfg, k, withTorque): # False: not torque constraints
+                    self.putInSol(ce)
 
-    def putInSol(self, e, i):
 
+    def putInSol(self, e):
         if e.Item.ID > len(self.Included)-1:
             return
-
         if e.Pallet.ID > len(self.PAW)-1:
             return
-
         self.Included[e.Item.ID] += 1
         self.PAW[e.Pallet.ID] += e.Item.W
         self.PAV[e.Pallet.ID] += e.Item.V
-
         self.S += e.Item.S
         self.W += e.Item.W
         self.V += e.Item.V
         self.T += e.Torque
         self.Heuristic += e.Heuristic  
+        self.Edges[e.ID].InSol = True
 
-        self.Edges[i].InSol = True
+    def removeFromSol(self, e): # to turn solution feasible by Shims
+        if e.Item.ID > len(self.Included)-1:
+            return
+        if e.Pallet.ID > len(self.PAW)-1:
+            return
+        self.Included[e.Item.ID] -= 1
+        self.PAW[e.Pallet.ID] -= e.Item.W
+        self.PAV[e.Pallet.ID] -= e.Item.V
+        self.S -= e.Item.S
+        self.W -= e.Item.W
+        self.V -= e.Item.V
+        self.T -= e.Torque
+        self.Heuristic -= e.Heuristic  
+        self.Edges[e.ID].InSol = False
 
     # check constraints for greedy, Shims and metaheuristics
-    def isFeasible(self, ce, limit, cfg, k):
+    def isFeasible(self, ce, limit, cfg, k, withTorque):
 
         if ce.Item.ID > len(self.Included)-1:
             return False # this item was already inserted. Equation 19        
@@ -150,8 +163,12 @@ class Solution(object):
             return False #this item volume would exceed pallet volumetric limit. Equation 18
         
         #if this inclusion increases torque and is turns it greater than the maximum
-        if  abs(self.T) < abs(self.T + ce.Torque) and abs(self.T + ce.Torque) > cfg.maxTorque:
+        if withTorque and abs(self.T) < abs(self.T + ce.Torque) and abs(self.T + ce.Torque) > cfg.maxTorque:
             return False #this item/pallet torque would extend the CG shift beyond backward limit. Equation 15
+
+        # if no torque constraints
+        if not withTorque and abs(self.T) < abs(self.T + ce.Torque) and abs(self.T + ce.Torque) > cfg.maxTorque:
+            self.extraTorque.append(ce)           
 
         return True
 
@@ -235,7 +252,7 @@ def getTours(A, costs, threshold):
             minCost = tourCosts[i]
 
     for i, cost in enumerate(tourCosts):
-        if cost > (1+threshold) * minCost:
+        if cost > (1+threshold) * minCost and i < len(toursInt):
             toursInt.pop(i)
 
     # generate tours from Node and Tour classes
@@ -289,15 +306,20 @@ def mountEdges(pallets, items, cfg, k):
     # edges = np.full(shape=m*n, fill_value=None)
     edges = [None for _ in np.arange(m*n)]
 
-    id = 0
+    i = 0
     for p in pallets:           
         for it in items:
-            e = Edge(id, p, it, cfg)
-            edges[id] = e
-            id += 1
+            e = Edge(i, p, it, cfg)
+            edges[i] = e
+            i += 1
 
     # greater heuristic's attractivity are included first
     edges.sort(key=lambda x: x.Heuristic, reverse=True) # best result
+
+    # as edges have its order changed the ID must in the original order
+    # to preserve reference
+    for i, e in enumerate(edges):
+        edges[i].ID = i
 
     # inds = np.array([e.Heuristic for e in edges])
     # sort_inds = np.argsort(inds)

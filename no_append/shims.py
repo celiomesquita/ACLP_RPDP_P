@@ -1,4 +1,4 @@
-import methods as mcuda
+import methods as mno
 import numpy as np
 
 # A Shim is a thin and often tapered or wedged piece of material, used to fill small gaps or spaces between objects.
@@ -15,6 +15,7 @@ class Shim(object):
         self.Edges    = []
         self.Included = [ 0  for _ in np.arange(numItems) ]   # items included in shim set edges
         self.numItems = numItems
+        self.extraTorque = []
 
     def AppendEdge(self, e):
         self.W += e.Item.W
@@ -24,7 +25,7 @@ class Shim(object):
         self.Edges.append(e)
         self.Included[e.Item.ID] = 1        
 
-    def shimIsFeasible(self, ce, sol, maxTorque, k):
+    def shimIsFeasible(self, ce, sol, maxTorque, k, withTorque=True ):
 
         if ce.Item.ID > len(self.Included)-1:
             return False
@@ -46,13 +47,18 @@ class Shim(object):
         # if this inclusion increases torque and ....
         currentTorque = self.T + sol.T
         newTorque = currentTorque + ce.Torque
-        if  abs(currentTorque) < abs(newTorque):
-            # ... it is aft
+
+        if withTorque:
+            if abs(currentTorque) < abs(newTorque):
+                # ... it is aft
+                if newTorque > maxTorque:
+                    return False #this item/pallet torque would extend the CG shift beyond backward limit. Equation 15
+                # ... it is fwd
+                if newTorque < -maxTorque:
+                    return False #this item/pallet torque would extend the CG shift beyond forward limit. Equation 10
+        else: # without torque constraints
             if newTorque > maxTorque:
-                return False #this item/pallet torque would extend the CG shift beyond backward limit. Equation 15
-            # ... it is fwd
-            if newTorque < -maxTorque:
-                return False #this item/pallet torque would extend the CG shift beyond forward limit. Equation 10
+                self.extraTorque.append(ce)            
 
         return True
         
@@ -90,7 +96,7 @@ def getBestShim(p, notInSol, sol, limit, numItems, maxTorque, k):
     # First Fit Decrease - equivalente ao KP, mas mais rápido
     for i, oe in enumerate(outter):
         for sh in Set:
-            if sh.shimIsFeasible(oe, sol, maxTorque, k):
+            if sh.shimIsFeasible(oe, sol, maxTorque, k, False): # False: without torque constraints
                 sh.AppendEdge(oe)
                 break
         else:
@@ -132,7 +138,7 @@ def getBestShim(p, notInSol, sol, limit, numItems, maxTorque, k):
 
 def Compute(edges, pallets, items, limit, cfg, k) :
 
-    sol = mcuda.Solution(edges, pallets, items, limit, cfg, k)
+    sol = mno.Solution(edges, pallets, items, limit, cfg, k, False)
 
     notInSol = [ [] for _ in range(len(pallets))]
 
@@ -150,39 +156,190 @@ def Compute(edges, pallets, items, limit, cfg, k) :
 
         # move shim sh edges to solution
         for be in sedges:
-            sol.putInSol(be, be.ID)
+            sol.putInSol(be)
             notInSol[p.ID].remove(be)
 
     for nis in notInSol: # for each row in the matrix +slacks[ce.Pallet.ID]
         for ce in nis:
-            if sol.isFeasible(ce, 1.0, cfg, k):
-                sol.putInSol(ce, ce.ID)
+            if sol.isFeasible(ce, 1.0, cfg, k, False): # False: without torque constraints
+                sol.putInSol(ce)
+    
     return sol
 
-def Solve(pallets, items, cfg, k): # items include kept on board
+
+def Solve(pallets, items, cfg, k, limit=0.5): # items include kept on board
 
     print(f"\nShims for ACLP+RPDP")
 
     numItems   = len(items)
     numPallets = len(pallets)
 
-    # as greater is the number of edges, closest to 1 is the limit
-
-    limit = 0.50
-
-    if mcuda.DATA == "data50":
-        limit = 0.90
-    if mcuda.DATA == "data100":
-        limit = 0.95
-
     print(f"Limit: {limit:.2f}")
 
-    edges = mcuda.mountEdges(pallets, items, cfg, k)
+    edges = mno.mountEdges(pallets, items, cfg, k)
 
-    sol = Compute(edges, pallets, items, limit, cfg, k) 
+    sol = Compute(edges, pallets, items, limit, cfg, k)
 
-    return mcuda.getSolMatrix(sol.Edges, numPallets, numItems)
+    # turn solution feasible regarding torque
+    for e in sol.extraTorque:
+        if sol.T > cfg.maxTorque:
+            sol.removeFromSol(e)
+
+    return mno.getSolMatrix(sol.Edges, numPallets, numItems)
         
 if __name__ == "__main__":
 
-    print("----- Please execute module main_test -----")
+
+    mno.DATA = "data20"
+    # mno.DATA = "data50"
+    # mno.DATA = "data100"
+  
+    method = "Shims"
+
+    scenario = 1
+
+    cfg = mno.Config(scenario)
+
+    if scenario == 1:
+        # instances = [1,2,3,4,5,6,7]
+        instances = [1]
+    if scenario == 2:
+        instances = [1,2,3,4,5,6,7]
+    if scenario == 3:
+        instances = [1,2,3,4,5,6,7]
+    if scenario == 4:
+        instances = [1,2,3,4,5,6,7]
+    if scenario == 5:
+        instances = [1,2,3,4,5]
+    if scenario == 6:
+        instances = [1,2,3]                                        
+
+    dists = mno.loadDistances()
+
+    costs = [[0.0 for _ in dists] for _ in dists]
+    
+    for i, cols in enumerate(dists):
+        for j, value in enumerate(cols):
+            costs[i][j] = cfg.kmCost*value
+
+    pallets = mno.loadPallets(cfg)
+
+    # pallets capacity
+    cfg.weiCap = 0
+    cfg.volCap = 0
+    for p in pallets:
+        cfg.weiCap += p.W
+        cfg.volCap += p.V
+
+    # smaller aircrafts may have a payload lower than pallets capacity
+    if cfg.weiCap > cfg.payload:
+        cfg.weiCap = cfg.payload   
+
+    tours = mno.getTours(cfg.numNodes, costs, 0.25)
+
+    pi = 0 # the first, not necessarily the best
+
+    tour = tours[pi]
+
+    k = 0 # the base
+
+    # L_k destination nodes set
+    unattended = [n.ID for n in tour.nodes[k+1:]]
+
+    node = tour.nodes[k]
+    print(node.ICAO)
+
+    accumLim = 0.
+    denom = 50
+
+    for instance in instances:
+
+        # load items parameters from this node and problem instance, that go to unnatended
+        items = mno.loadNodeItems(scenario, instance, node, unattended)
+
+        numItems = len(items)
+
+        print(f"{numItems} items")
+
+        mno.setPalletsDestinations(items, pallets, tour.nodes, k, unattended)
+
+        print("Dests: ",end="")
+        for p in pallets:
+            print(f"{mno.CITIES[p.Dests[k]]} ", end='')
+        print()
+
+        heuSum = 0.
+        heuMax = 0.
+        bestLim = 0.
+
+        for v in range(denom):
+
+            limit = (v+1) / float(denom)
+
+            E = Solve(pallets, items, cfg, 0, limit)
+
+            consJK = [
+                        [ mno.Item(-1, -2, 0, 0, 0., -1, -1)
+                        for _ in tour.nodes ]
+                        for _ in pallets # a consolidated for each pallet
+                    ] 
+
+            # print the solution for this node
+            if len(E) > 0:
+
+                consNodeT = [None for _ in pallets]
+
+                pallets.sort(key=lambda x: x.ID)  
+
+                for j, p in enumerate(pallets):
+
+                    consJK[j][k].ID  = j+numItems
+                    consJK[j][k].Frm = node.ID
+                    consJK[j][k].To  = p.Dests[k]
+
+                    for i in np.arange(numItems):
+
+                        if E[j][i] == 1:
+
+                            consJK[j][k].W += items[i].W
+                            consJK[j][k].V += items[i].V
+                            consJK[j][k].S += items[i].S
+
+                    consNodeT[j] = consJK[j][k]
+
+                sNodeAccum = 0.
+                wNodeAccum = 0.
+                vNodeAccum = 0.
+                tau = 0.
+                sol = ""
+
+                for i, p in enumerate(pallets):
+                    sNodeAccum += float(consJK[i][k].S)
+                    wNodeAccum += float(consJK[i][k].W)
+                    vNodeAccum += float(consJK[i][k].V)
+                    tau        += float(consJK[i][k].W) * pallets[i].D
+
+                epsilom = tau/cfg.maxTorque
+
+                Heuristic = (1-abs(epsilom)) * sNodeAccum / vNodeAccum
+                heuSum += Heuristic
+
+                if Heuristic > heuMax:
+                    heuMax = Heuristic
+                    bestLim = limit
+
+                # sol += f"Score: {sNodeAccum}\t"
+                # sol += f"Weight: {wNodeAccum/cfg.weiCap:.2f}\t"
+                # sol += f"Volume: {vNodeAccum/cfg.volCap:.2f}\t"
+                # sol += f"Torque: {epsilom:.2f}\n"
+                # sol += f"Heuristic: {Heuristic:.0f}\n" 
+                # print(sol)
+
+        accumLim += bestLim
+
+    accumLim /= float(len(instances))
+
+    print(f"Best limit = {accumLim:.2f}")
+
+
+    # print("----- Please execute module main_test -----")

@@ -56,6 +56,7 @@ def OptCGCons(kept, pallets, maxTorque, method, k):
         print("\n----- OptCGCons relative torque: %.2f -----" % tTotAccum)
 
 
+
 if __name__ == "__main__":
 
     # two_up = path.abspath(path.join(__file__, "../..")) + "/data"

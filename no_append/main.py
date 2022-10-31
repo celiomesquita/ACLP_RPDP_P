@@ -175,9 +175,9 @@ if __name__ == "__main__":
     # mno.DATA = "data100"
   
 
-    # method = "Greedy"
+    method = "Greedy"
     # method = "ACO"
-    method = "Shims"
+    # method = "Shims"
 
     scenario = 1
 
