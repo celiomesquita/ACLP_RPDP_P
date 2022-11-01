@@ -5,12 +5,12 @@ def Solve(pallets, items, cfg, k): # items include kept on board
 
     print("\nGreedy Heuristic for ACLP+RPDP")
 
-    edges = mno.mountEdges(pallets, items, cfg, k)
+    edges = mno.mountEdges(pallets, items, cfg)
 
     numItems   = len(items)
     numPallets = len(pallets)
 
-    sol = mno.Solution(edges, pallets, items, 1.0, cfg, k, True) # True: with torque constraints
+    sol = mno.Solution(edges, pallets, items, 1.0, cfg, k)
 
     return mno.getSolMatrix(sol.Edges, numPallets, numItems)
         

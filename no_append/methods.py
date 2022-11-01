@@ -83,7 +83,7 @@ def edgesCopy(edges):
     return output
 
 class Solution(object):
-    def __init__(self, edges, pallets, items, limit, cfg, k, withTorque):
+    def __init__(self, edges, pallets, items, limit, cfg, k):
 
         self.Limit = limit
 
@@ -103,12 +103,10 @@ class Solution(object):
         self.PAW = [ 0   for _ in pallets] # set of pallets accumulated weights
         self.PAV = [ 0.0 for _ in pallets] # set of pallets accumulated volumes
 
-        self.extraTorque = []
-
         # builds a greedy solution until the limited capacity is attained
         if limit > 0:
             for ce in self.Edges:
-                if not ce.InSol and self.isFeasible(ce, limit, cfg, k, withTorque): # False: not torque constraints
+                if not ce.InSol and self.isFeasible(ce, limit, cfg, k):
                     self.putInSol(ce)
 
 
@@ -127,23 +125,8 @@ class Solution(object):
         self.Heuristic += e.Heuristic  
         self.Edges[e.ID].InSol = True
 
-    def removeFromSol(self, e): # to turn solution feasible by Shims
-        if e.Item.ID > len(self.Included)-1:
-            return
-        if e.Pallet.ID > len(self.PAW)-1:
-            return
-        self.Included[e.Item.ID] -= 1
-        self.PAW[e.Pallet.ID] -= e.Item.W
-        self.PAV[e.Pallet.ID] -= e.Item.V
-        self.S -= e.Item.S
-        self.W -= e.Item.W
-        self.V -= e.Item.V
-        self.T -= e.Torque
-        self.Heuristic -= e.Heuristic  
-        self.Edges[e.ID].InSol = False
-
     # check constraints for greedy, Shims and metaheuristics
-    def isFeasible(self, ce, limit, cfg, k, withTorque):
+    def isFeasible(self, ce, limit, cfg, k):
 
         if ce.Item.ID > len(self.Included)-1:
             return False # this item was already inserted. Equation 19        
@@ -163,13 +146,10 @@ class Solution(object):
             return False #this item volume would exceed pallet volumetric limit. Equation 18
         
         #if this inclusion increases torque and is turns it greater than the maximum
-        if withTorque and abs(self.T) < abs(self.T + ce.Torque) and abs(self.T + ce.Torque) > cfg.maxTorque:
-            return False #this item/pallet torque would extend the CG shift beyond backward limit. Equation 15
-
-        # if no torque constraints
-        if not withTorque and abs(self.T) < abs(self.T + ce.Torque) and abs(self.T + ce.Torque) > cfg.maxTorque:
-            self.extraTorque.append(ce)           
-
+        newTorque = abs(self.T + ce.Torque)
+        if newTorque > cfg.maxTorque:
+            return False
+ 
         return True
 
 # mount the decision matrix for which items will be put in which pallets
@@ -280,8 +260,8 @@ class Config(object):
         self.volCap = 0
         self.maxD   = 0
 
-        self.numNodes = {0:3,   1:3,   2:3,   3:4,   4:5,   5:6,   6:7}[scenario]
-        self.Sce      = {0:1,   1:1,   2:2,   3:3,   4:4,   5:5,   6:6}[scenario]
+        self.numNodes = {0:3,  1:3,  2:3,    3:4,    4:5,    5:6,    6:7    }[scenario]
+        self.Sce      = {0:1,  1:1,  2:2,    3:3,    4:4,    5:5,    6:6    }[scenario]
 
         self.size       = "smaller"
         self.numPallets = 7
@@ -295,15 +275,12 @@ class Config(object):
             self.maxTorque  = 75_000 * 1.170
             self.kmCost     = 4.9           
 
-def mountEdges(pallets, items, cfg, k):
-
-    # from operator import attrgetter
-    
+def mountEdges(pallets, items, cfg):
+   
     # items include kept on board, are from this node (k), and destined to unattended nodes
     m = len(pallets)
     n = len(items)
 
-    # edges = np.full(shape=m*n, fill_value=None)
     edges = [None for _ in np.arange(m*n)]
 
     i = 0
@@ -320,10 +297,6 @@ def mountEdges(pallets, items, cfg, k):
     # to preserve reference
     for i, e in enumerate(edges):
         edges[i].ID = i
-
-    # inds = np.array([e.Heuristic for e in edges])
-    # sort_inds = np.argsort(inds)
-    # edges = [edges[ind] for ind in sort_inds]
 
     return edges
     

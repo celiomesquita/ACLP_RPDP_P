@@ -7,6 +7,7 @@ import methods as mno
 import optcgcons
 import shims
 import greedy
+import aco
 
 def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
     """
@@ -93,10 +94,16 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
         startNodeTime = time.perf_counter()
 
         if method == "Shims":
-            E = shims.Solve(pallets, items, cfg, k)
+            limit = 0.86
+            if scenario == 1:
+                limit = 1.0
+            E = shims.Solve(pallets, items, cfg, k, limit)
 
         if method == "Greedy":
             E = greedy.Solve(pallets, items, cfg, k)  
+
+        if method == "ACO":
+            E = aco.Solve( pallets, items, startNodeTime, cfg, k)      
 
         nodeElapsed = time.perf_counter() - startNodeTime
 
@@ -175,9 +182,9 @@ if __name__ == "__main__":
     # mno.DATA = "data100"
   
 
-    method = "Greedy"
-    # method = "ACO"
-    # method = "Shims"
+    # method = "Greedy" 
+    method = "ACO"
+    # method = "Shims" 
 
     scenario = 1
 
@@ -267,5 +274,6 @@ if __name__ == "__main__":
     writeAvgResults(method, scenario, latex)
 
     print(f"{method}\t{scenario}\t{latex}")
+    
 
         

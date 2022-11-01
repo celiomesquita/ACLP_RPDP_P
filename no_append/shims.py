@@ -15,7 +15,6 @@ class Shim(object):
         self.Edges    = []
         self.Included = [ 0  for _ in np.arange(numItems) ]   # items included in shim set edges
         self.numItems = numItems
-        self.extraTorque = []
 
     def AppendEdge(self, e):
         self.W += e.Item.W
@@ -25,7 +24,7 @@ class Shim(object):
         self.Edges.append(e)
         self.Included[e.Item.ID] = 1        
 
-    def shimIsFeasible(self, ce, sol, maxTorque, k, withTorque=True ):
+    def shimIsFeasible(self, ce, sol, maxTorque, k ):
 
         if ce.Item.ID > len(self.Included)-1:
             return False
@@ -44,22 +43,10 @@ class Shim(object):
         if sol.PAV[ce.Pallet.ID] + self.V + ce.Item.V > ce.Pallet.V:
             return False #this item volume would exceed pallet volumetric limit. Equation 18
         
-        # if this inclusion increases torque and ....
-        currentTorque = self.T + sol.T
-        newTorque = currentTorque + ce.Torque
-
-        if withTorque:
-            if abs(currentTorque) < abs(newTorque):
-                # ... it is aft
-                if newTorque > maxTorque:
-                    return False #this item/pallet torque would extend the CG shift beyond backward limit. Equation 15
-                # ... it is fwd
-                if newTorque < -maxTorque:
-                    return False #this item/pallet torque would extend the CG shift beyond forward limit. Equation 10
-        else: # without torque constraints
-            if newTorque > maxTorque:
-                self.extraTorque.append(ce)            
-
+        newTorque = self.T + sol.T + ce.Torque
+        if abs(newTorque) > maxTorque:
+            return False
+        
         return True
         
 
@@ -77,10 +64,8 @@ def getBestShim(p, notInSol, sol, limit, numItems, maxTorque, k):
     # of the partial solution's volume.
     # Only a small portion of the notInSol vector is assessed to find the a local best Shim.
 
-    slack = 1 - limit # greedy limit
-
     vol = sol.PAV[p.ID] # current pallet ocupation
-    maxVol = vol * (1.0 + 3.0*slack)
+    maxVol = vol * (2. - limit)
    
     k2 = 0
     for e in notInSol:
@@ -96,7 +81,7 @@ def getBestShim(p, notInSol, sol, limit, numItems, maxTorque, k):
     # First Fit Decrease - equivalente ao KP, mas mais rápido
     for i, oe in enumerate(outter):
         for sh in Set:
-            if sh.shimIsFeasible(oe, sol, maxTorque, k, False): # False: without torque constraints
+            if sh.shimIsFeasible(oe, sol, maxTorque, k):
                 sh.AppendEdge(oe)
                 break
         else:
@@ -138,9 +123,10 @@ def getBestShim(p, notInSol, sol, limit, numItems, maxTorque, k):
 
 def Compute(edges, pallets, items, limit, cfg, k) :
 
-    sol = mno.Solution(edges, pallets, items, limit, cfg, k, False)
+    sol = mno.Solution(edges, pallets, items, limit, cfg, k)
 
-    notInSol = [ [] for _ in range(len(pallets))]
+    #edges not in sol groupped by pallets
+    notInSol = [ [] for _ in range(len(pallets)) ]
 
     for p in (pallets):
         notInSol[p.ID] = [e for e in sol.Edges if e.Pallet.ID == p.ID and not e.InSol  ]
@@ -151,47 +137,45 @@ def Compute(edges, pallets, items, limit, cfg, k) :
 	# get the best shim that fills the slack
     for p in (pallets):
 
-		# get shim sh edges                      greedy limit
+		# get the best shim of edges             greedy limit
         sedges = getBestShim(p, notInSol[p.ID], sol, limit, len(items), cfg.maxTorque, k)
 
-        # move shim sh edges to solution
+        # move the best shim of edges to solution
         for be in sedges:
             sol.putInSol(be)
             notInSol[p.ID].remove(be)
 
-    for nis in notInSol: # for each row in the matrix +slacks[ce.Pallet.ID]
+    counter = 0
+    # local search: Maybe still exists any edge that fit in solution
+    for nis in notInSol: # for each row
         for ce in nis:
-            if sol.isFeasible(ce, 1.0, cfg, k, False): # False: without torque constraints
+            if sol.isFeasible(ce, 1.0, cfg, k):
                 sol.putInSol(ce)
-    
+                counter += 1
+    print(f"{counter} edges included by the local search\n")
+
     return sol
 
 
-def Solve(pallets, items, cfg, k, limit=0.5): # items include kept on board
+def Solve(pallets, items, cfg, k, limit): # items include kept on board
 
     print(f"\nShims for ACLP+RPDP")
 
     numItems   = len(items)
     numPallets = len(pallets)
 
-    print(f"Limit: {limit:.2f}")
-
-    edges = mno.mountEdges(pallets, items, cfg, k)
+    edges = mno.mountEdges(pallets, items, cfg)
 
     sol = Compute(edges, pallets, items, limit, cfg, k)
 
-    # turn solution feasible regarding torque
-    for e in sol.extraTorque:
-        if sol.T > cfg.maxTorque:
-            sol.removeFromSol(e)
-
     return mno.getSolMatrix(sol.Edges, numPallets, numItems)
+        
         
 if __name__ == "__main__":
 
 
-    mno.DATA = "data20"
-    # mno.DATA = "data50"
+    # mno.DATA = "data20"
+    mno.DATA = "data50"
     # mno.DATA = "data100"
   
     method = "Shims"
@@ -201,18 +185,18 @@ if __name__ == "__main__":
     cfg = mno.Config(scenario)
 
     if scenario == 1:
-        # instances = [1,2,3,4,5,6,7]
-        instances = [1]
+        instances = [1,2,3,4,5,6,7]
+        # instances = [1]
     if scenario == 2:
         instances = [1,2,3,4,5,6,7]
     if scenario == 3:
         instances = [1,2,3,4,5,6,7]
     if scenario == 4:
-        instances = [1,2,3,4,5,6,7]
+        instances = [1,2,3,4,5,6,7] 
     if scenario == 5:
-        instances = [1,2,3,4,5]
+        instances = [1,2,3,4,5]     
     if scenario == 6:
-        instances = [1,2,3]                                        
+        instances = [1,2,3]                                          
 
     dists = mno.loadDistances()
 
@@ -268,9 +252,9 @@ if __name__ == "__main__":
             print(f"{mno.CITIES[p.Dests[k]]} ", end='')
         print()
 
-        heuSum = 0.
-        heuMax = 0.
-        bestLim = 0.
+
+        scoreMax = 0.
+        bestLim  = 0.        
 
         for v in range(denom):
 
@@ -315,18 +299,23 @@ if __name__ == "__main__":
 
                 for i, p in enumerate(pallets):
                     sNodeAccum += float(consJK[i][k].S)
-                    wNodeAccum += float(consJK[i][k].W)
-                    vNodeAccum += float(consJK[i][k].V)
-                    tau        += float(consJK[i][k].W) * pallets[i].D
+                    # wNodeAccum += float(consJK[i][k].W)
+                    # vNodeAccum += float(consJK[i][k].V)
+                    # tau        += float(consJK[i][k].W) * pallets[i].D
 
-                epsilom = tau/cfg.maxTorque
+                # epsilom = tau/cfg.maxTorque
 
-                Heuristic = (1-abs(epsilom)) * sNodeAccum / vNodeAccum
-                heuSum += Heuristic
+                # Heuristic = (1-abs(epsilom)) * sNodeAccum / vNodeAccum
+                # heuSum += Heuristic
 
-                if Heuristic > heuMax:
-                    heuMax = Heuristic
-                    bestLim = limit
+                # if Heuristic > heuMax:
+                #     heuMax = Heuristic
+                    # bestLim = limit
+
+
+                if sNodeAccum > scoreMax:
+                    scoreMax = sNodeAccum
+                    bestLim = limit                    
 
                 # sol += f"Score: {sNodeAccum}\t"
                 # sol += f"Weight: {wNodeAccum/cfg.weiCap:.2f}\t"
