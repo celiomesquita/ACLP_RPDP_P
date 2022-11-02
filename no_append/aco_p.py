@@ -1,9 +1,8 @@
-
 import time
 import math
 import numpy as np
 import methods as mno
-import multiprocessing as mp
+from joblib import Parallel, delayed
 
 # Process-based parallelism
 
@@ -84,22 +83,13 @@ def Solve( pallets, items, startTime, cfg, k, limit):  # items include kept on b
     numItems   = len(items)
     # numAnts = 0
     stagnant = 0
-
-    procs = [None for _ in range(NANTS)]
-    outQueue = mp.Queue()    
+   
 
     while stagnant < NANTS:# and (time.perf_counter() - startTime) < mno.SEC_BREAK:
 
         Glocal = Gbest
 
-        for i in range(NANTS):
-            procs[i] = mp.Process(target=antQueue,args=(Ginit, cfg, k, outQueue))
-
-        for p in procs:
-            p.start()
-
-        # wait for all ants to finish
-        sols = [outQueue.get() for _ in procs]
+        sols = Parallel(n_jobs=NANTS)( delayed(antSolve)(Ginit, cfg, k)  for _ in range(NANTS) ) 
 
         for Gant in sols:
             if Gant.S > Glocal.S:
