@@ -4,6 +4,7 @@ import os
 import math
 import numpy as np
 from time import time
+import copy
 
 NCPU = os.cpu_count()-1
 
@@ -71,6 +72,7 @@ class Edge(object):
 
 def edgesCopy(edges):
     output = edges.copy()
+    # output = copy.deepcopy(edges)
     for i, e in enumerate(edges):
         output[i].ID        = e.ID
         output[i].Pallet    = e.Pallet 
@@ -81,6 +83,7 @@ def edgesCopy(edges):
         output[i].Attract   = e.Attract
         output[i].InSol     = e.InSol 
     return output
+  
 
 class Solution(object):
     def __init__(self, edges, pallets, items, limit, cfg, k):
@@ -472,7 +475,7 @@ def writeResult(fname, value):
 def getTimeString(totTime, denom, inSecs=False):
 
     totTime = totTime / denom
-    totTimeS = f"{totTime:.2f}s"
+    totTimeS = f"{totTime:.0f}s"
 
     if inSecs:
         return totTimeS

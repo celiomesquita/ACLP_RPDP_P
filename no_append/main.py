@@ -177,20 +177,20 @@ if __name__ == "__main__":
     mno.SEC_BREAK = 0.7
     # mno.SEC_BREAK = 10
 
-    mno.DATA = "data20"
-    # mno.DATA = "data50"
+    # mno.DATA = "data20"
+    mno.DATA = "data50"
     # mno.DATA = "data100"
   
 
-    # method = "Greedy" 
-    method = "ACO"
-    # method = "Shims" 
+    # method = "Greedy" # 23.708
+    # method = "ACO"    # 26.182
+    method = "Shims"  # 26.177
 
     scenario = 1
 
     if scenario == 1:
-        # instances = [1,2,3,4,5,6,7]
-        instances = [1]
+        instances = [1,2,3,4,5,6,7]
+        # instances = [1]
     if scenario == 2:
         instances = [1,2,3,4,5,6,7]
     if scenario == 3:
@@ -268,7 +268,7 @@ if __name__ == "__main__":
 
     avgInstSC /= numInst
 
-    latex = f"{avgInstSC:.3f}   &   {timeString}\n"
+    latex = f"{avgInstSC:.2f}   &   {timeString}\n"
 
     # instances average
     writeAvgResults(method, scenario, latex)

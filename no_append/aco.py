@@ -3,6 +3,7 @@ import time
 import math
 import numpy as np
 import methods as mno
+import copy
 
 ALPHA = 1   # pheromone exponent (linearly affects attractivity)
 BETA  = 4   # heuristic exponent (exponentialy affects attractivity)
@@ -66,49 +67,40 @@ def Solve( pallets, items, startTime, cfg, k):  # items include kept on board
     print("\nAnt Colony Optimization for ACLP+RPDP")
 
     antsField = mno.mountEdges(pallets, items, cfg)
-    Nbhood    = mno.edgesCopy(antsField)
+    edges     = mno.mountEdges(pallets, items, cfg)
 
-    # initialize the best solution so far        1.0 totally greedy
-    Gbest = mno.Solution(Nbhood, pallets, items, 1.0, cfg, k)
+    # initialize the best solution so far           1.0 totally greedy
+    Gbest = mno.Solution(antsField, pallets, items, 1.00, cfg, k)
+    Ginit = mno.Solution(    edges, pallets, items, 0.85, cfg, k)
 
     numPallets = len(pallets)
     numItems   = len(items)
- 
-    stagnant = 0
     numAnts = 0
-    while stagnant < NANTS:# and (time() - startTime) < mno.SEC_BREAK:
+    stagnant = 0
+
+    while stagnant < NANTS and (time.perf_counter() - startTime) < mno.SEC_BREAK:
 
         Glocal = Gbest
-   
-        for _ in np.arange(NANTS): # sequential ants
 
-            # if (time() - startTime) > mno.SEC_BREAK:
-            #     break
-        
+        for _ in np.arange(NANTS):
+
+            if (time.perf_counter() - startTime) > mno.SEC_BREAK:
+                break
+
             numAnts += 1
             
-            Nbhood = mno.edgesCopy(antsField)
+            Gant = Ginit
 
-            # initilize a solution for each ant
-            Gant = mno.Solution(Nbhood, pallets, items, 0.9, cfg, k)
+            Nbhood   = [ce for ce in Gant.Edges if not ce.InSol]
+            attracts = [ce.Attract for ce in Nbhood]
 
-            # antsField edges are a heritage from previous ants
-            # prepare for the random proportional selection in pickFromNbhood method
-            attracts   = [ce.Attract for ce in antsField]
-
-            # builds or completes a solution by exploring the entire items neighborhood
             while Nbhood:
 
-                # if ((time() - startTime) > mno.SEC_BREAK):
-                #     break                
-
-                # pick a candidate edge from the neighborhood by a random proportional selection
-                # the last argument is the greediness
                 ce = pickFromNbhood(Nbhood, attracts)
 
-                if Gant.isFeasible(ce, 1.00, cfg, k):
-                    Gant.putInSol(ce)
-                    
+                if Gant.isFeasible(ce, 1.0, cfg, k):
+                    Gant.putInSol(ce)            
+
             if Gant.S > Glocal.S:
                 Glocal = Gant
 
@@ -137,8 +129,8 @@ if __name__ == "__main__":
     NANTS = 4   # number of ants for team    
 
 
-    mno.DATA = "data20"
-    # mno.DATA = "data50"
+    # mno.DATA = "data20"
+    mno.DATA = "data50"
     # mno.DATA = "data100"
   
     scenario = 1

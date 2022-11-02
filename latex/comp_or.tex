@@ -1263,60 +1263,42 @@ For each generated $t^k_j$\/ item, its destination is uniformly random selected 
 In the tests performed, we used a 64-bit, 16GB, 3.6GHz, eight-core processor with {\it Linux Ubuntu 22.04.1 LTS 64-bit} as the operational system and {\it Python 3.10.4}\/ as the programming language. We also used the well-known solver {\it Gurobi}\/ (www.gurobi.com), version 9.5.2.
 
 
+\vspace{2.0mm}
+
 \begin{table}[H]
 	\centering
-	\caption{xxx} 
+	\caption{Methods and scenarios with $volume =1.5$}  \label{tab:50}
 	\footnotesize
+	\begin{tabular}{c|c|cccccc|c}
+		\toprule
+		{$method$}                        & {\bf Results}    & {\bf 1}     &  {\bf 2}    & {\bf 3}      & {\bf 4}      & {\bf 5}      & {\bf 6}     & \specialcell{{\bf Normalized}\\{\bf Speed-up}} \\
+		\toprule
+	
+		
+		\multirow{2}{*}{\textbf{ACO}}     & $f$             & 21.93       & {\bf 6.77}& 8.85      & 9.65       & 11.75      & 11.54      &  0.934 \\ %21.927   &   19.65s
+		                                  &{\bf runtime (s)}& 20          & 4        & 17       & 86        & 513       & 3,596     &  2.714 \\ 
+		\midrule[.1pt]	
+		
+		
+		\multirow{2}{*}{\textbf{Shims}}   & $f$             & 22.28       & {\bf 6.77} & 8.92     & 9.60       & 11.78      & 11.61      &  0.948       \\ 
+		                                  &{\bf runtime (s)}& <1         & 2         & 8       & 31        & 166       & 1,087     &  {\bf 8.856} \\ 
 
-\begin{tabular}{c c c c} 
-	\toprule 
-	\rowcolor{Gray}\multicolumn{4}{l}{Node 0: GRU solution} \\ 
-	$Pallet$ & $From:To$ & $Kg$ & $m^3$ \\ 
-	\midrule 
-	1 & GRU:GIG & 2504 & 10.7 \\ 
-	2 & GRU:GIG & 2405 & 10.4 \\ 
-	3 & GRU:GIG & 3710 & 15.2 \\ 
-	4 & GRU:SSA & 3386 & 14.3 \\ 
-	5 & GRU:SSA & 3835 & 15.6 \\ 
-	6 & GRU:SSA & 3124 & 12.6 \\ 
-	7 & GRU:SSA & 3518 & 13.8 \\ 
-	\midrule 
-	Score: 8911.0 & Weight: 0.86 & Volume: 1.10 & Torque: 2.24 \\ 
-	\toprule 
-	\rowcolor{Gray}\multicolumn{4}{l}{Node 1: GIG solution} \\ 
-	$Pallet$ & $From:To$ & $Kg$ & $m^3$ \\ 
-	\midrule 
-	1 & GIG:SSA & 2585 & 12.2 \\ 
-	2 & GIG:SSA & 3603 & 17.0 \\ 
-	3 & GIG:SSA & 2881 & 12.8 \\ 
-	4 & GIG:SSA & 3039 & 13.7 \\ 
-	5 & GIG:GRU & 2075 &  8.9 \\ 
-	6 & GIG:GRU & 3478 & 14.5 \\ 
-	7 & GIG:GRU & 1632 &  7.4 \\ 
-	\midrule 
-	Score: 3546.0 & Weight: 0.74 & Volume: 1.03 & Torque: 3.13 \\ 
-	\toprule 
-	\rowcolor{Gray}\multicolumn{4}{l}{Node 2: SSA solution} \\ 
-	$Pallet$ & $From:To$ & $Kg$ & $m^3$ \\ 
-	\midrule 
-	1 & SSA:GRU & 3027 & 13.2 \\ 
-	2 & SSA:GRU & 1287 &  6.2 \\ 
-	3 & SSA:GRU & 3044 & 15.0 \\ 
-	4 & SSA:GRU & 1939 &  9.1 \\ 
-	5 & SSA:GRU & 2010 &  8.9 \\ 
-	6 & SSA:GRU & 2686 & 11.8 \\ 
-	7 & SSA:GRU & 1410 &  5.8 \\ 
-	\midrule 
-	Score: 3632.0 & Weight: 0.59 & Volume: 0.83 & Torque: 2.50 \\ 
-	\bottomrule 
-	\multicolumn{4}{l}{Tour 0\ \ \ \ \ S/C: 4.291\ \ \ \ \ \ \ \ \ \ elapsed: 0.05s\ \ \ \ \ method:\ Greedy} \\ 
-	\bottomrule 
-\end{tabular} 
+		\midrule[.1pt]
+		
+		\multirow{2}{*}{\textbf{ACO-mp}}  & $f$             & 9.43       & {\bf 6.77}& 8.85      & 9.65       & 11.75      & 11.54      &  0.934 \\ 
+                                          &{\bf runtime (s)}& 3         & 4        & 17       & 86        & 513       & 3,596     &  2.714 \\ 
+        \midrule[.1pt]	
 
+        \multirow{2}{*}{\textbf{Shims-mp}} & $f$             & 10.18       & {\bf 6.77} & 8.92     & 9.60       & 11.78      & 11.61      &  0.948       \\ 
+                                           &{\bf runtime (s)}& $< 1$         & 2         & 8       & 31        & 166       & 1,087     &  {\bf 8.856} \\ 
 
+        \bottomrule		
+	\end{tabular}
+	
 	\normalsize
-
+	
 \end{table}
+
 
 \section{Conclusions}
 \label{sec7}

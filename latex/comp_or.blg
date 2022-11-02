@@ -3,7 +3,7 @@ Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: comp_or.aux
 The style file: elsarticle-harv.bst
 I couldn't open database file references.bib
----line 263 of file comp_or.aux
+---line 252 of file comp_or.aux
  : \bibdata{references
  :                    }
 I'm skipping whatever remains of this command
