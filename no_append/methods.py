@@ -8,7 +8,7 @@ import copy
 
 NCPU = os.cpu_count()-1
 
-SEC_BREAK = 0.7
+SEC_BREAK = 3.0
 
 RNG = np.random.default_rng()
 

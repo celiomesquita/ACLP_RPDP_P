@@ -62,7 +62,7 @@ def pickFromNbhood(nbhood, values):
     values.pop(i)
     return e
 
-def Solve( pallets, items, startTime, cfg, k):  # items include kept on board
+def Solve( pallets, items, startTime, cfg, k, limit):  # items include kept on board
 
     print("\nAnt Colony Optimization for ACLP+RPDP")
 
@@ -71,7 +71,7 @@ def Solve( pallets, items, startTime, cfg, k):  # items include kept on board
 
     # initialize the best solution so far           1.0 totally greedy
     Gbest = mno.Solution(antsField, pallets, items, 1.00, cfg, k)
-    Ginit = mno.Solution(    edges, pallets, items, 0.85, cfg, k)
+    Ginit = mno.Solution(    edges, pallets, items, limit, cfg, k)
 
     numPallets = len(pallets)
     numItems   = len(items)
@@ -122,24 +122,20 @@ def Solve( pallets, items, startTime, cfg, k):  # items include kept on board
         
 if __name__ == "__main__":
 
-    method = "ACO"
 
-    ALPHA = 1   # pheromone exponent (linearly affects attractivity)
-    BETA  = 4   # heuristic exponent (exponentialy affects attractivity)
-    NANTS = 4   # number of ants for team    
-
-
-    # mno.DATA = "data20"
-    mno.DATA = "data50"
+    # mno.DATA = "data20" # 0.41 sce 1 | 0. sce 2
+    mno.DATA = "data50" # 0.55 sce 1 | 0. sce 2
     # mno.DATA = "data100"
   
-    scenario = 1
+    method = "ACO"
+
+    scenario = 2
 
     cfg = mno.Config(scenario)
 
     if scenario == 1:
-        # instances = [1,2,3,4,5,6,7]
-        instances = [1]
+        instances = [1,2,3,4,5,6,7]
+        # instances = [1]
     if scenario == 2:
         instances = [1,2,3,4,5,6,7]
     if scenario == 3:
@@ -186,8 +182,9 @@ if __name__ == "__main__":
     node = tour.nodes[k]
     print(node.ICAO)
 
-    scoreAverage = 0
-  
+    accumLim = 0.
+    denom = 50
+
     for instance in instances:
 
         # load items parameters from this node and problem instance, that go to unnatended
@@ -204,54 +201,67 @@ if __name__ == "__main__":
             print(f"{mno.CITIES[p.Dests[k]]} ", end='')
         print()
 
-        startTime = time.perf_counter()
 
-        E = Solve( pallets, items, startTime, cfg, k)
+        scoreMax = 0.
+        bestLim  = 0.        
 
-        nodeElapsed = time.perf_counter() - startTime
+        for v in range(denom):
 
-        consJK = [
-                    [ mno.Item(-1, -2, 0, 0, 0., -1, -1)
-                    for _ in tour.nodes ]
-                    for _ in pallets # a consolidated for each pallet
-                ] 
+            limit = (v+1) / float(denom)
 
-        # print the solution for this node
-        if len(E) > 0:
+            startNodeTime = time.perf_counter()
 
-            consNodeT = [None for _ in pallets]
+            E = Solve( pallets, items, startNodeTime, cfg, k, limit)
 
-            pallets.sort(key=lambda x: x.ID)  
+            consJK = [
+                        [ mno.Item(-1, -2, 0, 0, 0., -1, -1)
+                        for _ in tour.nodes ]
+                        for _ in pallets # a consolidated for each pallet
+                    ] 
 
-            for j, p in enumerate(pallets):
+            # print the solution for this node
+            if len(E) > 0:
 
-                consJK[j][k].ID  = j+numItems
-                consJK[j][k].Frm = node.ID
-                consJK[j][k].To  = p.Dests[k]
+                consNodeT = [None for _ in pallets]
 
-                for i in np.arange(numItems):
+                pallets.sort(key=lambda x: x.ID)  
 
-                    if E[j][i] == 1:
+                for j, p in enumerate(pallets):
 
-                        consJK[j][k].W += items[i].W
-                        consJK[j][k].V += items[i].V
-                        consJK[j][k].S += items[i].S
+                    consJK[j][k].ID  = j+numItems
+                    consJK[j][k].Frm = node.ID
+                    consJK[j][k].To  = p.Dests[k]
 
-                consNodeT[j] = consJK[j][k]
+                    for i in np.arange(numItems):
 
-            sNodeAccum = 0.
+                        if E[j][i] == 1:
 
-            for i, p in enumerate(pallets):
-                sNodeAccum += float(consJK[i][k].S)
+                            consJK[j][k].W += items[i].W
+                            consJK[j][k].V += items[i].V
+                            consJK[j][k].S += items[i].S
 
-            scoreAverage += sNodeAccum
+                    consNodeT[j] = consJK[j][k]
 
-            # False -  does not generate latex table
-            mno.writeTourSol(method, scenario, instance, pi, tour, cfg, pallets, consJK, False)
+                sNodeAccum = 0.
+                wNodeAccum = 0.
+                vNodeAccum = 0.
+                tau = 0.
+                sol = ""
 
-    sNodeAccum /= float(len(instances))
+                for i, p in enumerate(pallets):
+                    sNodeAccum += float(consJK[i][k].S)  
 
-    print(f"{sNodeAccum} {BETA} {NANTS} {nodeElapsed:.2f}s")
+                if sNodeAccum > scoreMax:
+                    scoreMax = sNodeAccum
+                    bestLim = limit                    
 
+        accumLim += bestLim
+
+    accumLim /= float(len(instances))
+
+    print(f"Best limit = {accumLim:.2f}")
+
+
+    # print("----- Please execute module main_test -----")
 
 
