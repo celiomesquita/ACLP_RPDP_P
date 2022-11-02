@@ -3,12 +3,10 @@ import time
 import math
 import numpy as np
 import methods as mno
-import copy
 
 ALPHA = 1   # pheromone exponent (linearly affects attractivity)
 BETA  = 4   # heuristic exponent (exponentialy affects attractivity)
 NANTS = 4   # number of ants for team
-
 
 def rouletteSelection(values):
   
@@ -122,146 +120,6 @@ def Solve( pallets, items, startTime, cfg, k, limit):  # items include kept on b
         
 if __name__ == "__main__":
 
-
-    # mno.DATA = "data20" # 0.41 sce 1 | 0. sce 2
-    mno.DATA = "data50" # 0.55 sce 1 | 0. sce 2
-    # mno.DATA = "data100"
-  
-    method = "ACO"
-
-    scenario = 2
-
-    cfg = mno.Config(scenario)
-
-    if scenario == 1:
-        instances = [1,2,3,4,5,6,7]
-        # instances = [1]
-    if scenario == 2:
-        instances = [1,2,3,4,5,6,7]
-    if scenario == 3:
-        instances = [1,2,3,4,5,6,7]
-    if scenario == 4:
-        instances = [1,2,3,4,5,6,7] 
-    if scenario == 5:
-        instances = [1,2,3,4,5]     
-    if scenario == 6:
-        instances = [1,2,3]                                          
-
-    dists = mno.loadDistances()
-
-    costs = [[0.0 for _ in dists] for _ in dists]
-    
-    for i, cols in enumerate(dists):
-        for j, value in enumerate(cols):
-            costs[i][j] = cfg.kmCost*value
-
-    pallets = mno.loadPallets(cfg)
-
-    # pallets capacity
-    cfg.weiCap = 0
-    cfg.volCap = 0
-    for p in pallets:
-        cfg.weiCap += p.W
-        cfg.volCap += p.V
-
-    # smaller aircrafts may have a payload lower than pallets capacity
-    if cfg.weiCap > cfg.payload:
-        cfg.weiCap = cfg.payload   
-
-    tours = mno.getTours(cfg.numNodes, costs, 0.25)
-
-    pi = 0 # the first, not necessarily the best
-
-    tour = tours[pi]
-
-    k = 0 # the base
-
-    # L_k destination nodes set
-    unattended = [n.ID for n in tour.nodes[k+1:]]
-
-    node = tour.nodes[k]
-    print(node.ICAO)
-
-    accumLim = 0.
-    denom = 50
-
-    for instance in instances:
-
-        # load items parameters from this node and problem instance, that go to unnatended
-        items = mno.loadNodeItems(scenario, instance, node, unattended)
-
-        numItems = len(items)
-
-        print(f"{numItems} items")
-
-        mno.setPalletsDestinations(items, pallets, tour.nodes, k, unattended)
-
-        print("Dests: ",end="")
-        for p in pallets:
-            print(f"{mno.CITIES[p.Dests[k]]} ", end='')
-        print()
-
-
-        scoreMax = 0.
-        bestLim  = 0.        
-
-        for v in range(denom):
-
-            limit = (v+1) / float(denom)
-
-            startNodeTime = time.perf_counter()
-
-            E = Solve( pallets, items, startNodeTime, cfg, k, limit)
-
-            consJK = [
-                        [ mno.Item(-1, -2, 0, 0, 0., -1, -1)
-                        for _ in tour.nodes ]
-                        for _ in pallets # a consolidated for each pallet
-                    ] 
-
-            # print the solution for this node
-            if len(E) > 0:
-
-                consNodeT = [None for _ in pallets]
-
-                pallets.sort(key=lambda x: x.ID)  
-
-                for j, p in enumerate(pallets):
-
-                    consJK[j][k].ID  = j+numItems
-                    consJK[j][k].Frm = node.ID
-                    consJK[j][k].To  = p.Dests[k]
-
-                    for i in np.arange(numItems):
-
-                        if E[j][i] == 1:
-
-                            consJK[j][k].W += items[i].W
-                            consJK[j][k].V += items[i].V
-                            consJK[j][k].S += items[i].S
-
-                    consNodeT[j] = consJK[j][k]
-
-                sNodeAccum = 0.
-                wNodeAccum = 0.
-                vNodeAccum = 0.
-                tau = 0.
-                sol = ""
-
-                for i, p in enumerate(pallets):
-                    sNodeAccum += float(consJK[i][k].S)  
-
-                if sNodeAccum > scoreMax:
-                    scoreMax = sNodeAccum
-                    bestLim = limit                    
-
-        accumLim += bestLim
-
-    accumLim /= float(len(instances))
-
-    print(f"Best limit = {accumLim:.2f}")
-
-
-    # print("----- Please execute module main_test -----")
+    print("----- Please execute module main -----")
 
 

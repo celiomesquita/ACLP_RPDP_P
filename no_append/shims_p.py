@@ -159,7 +159,7 @@ def Compute(edges, pallets, items, limit, cfg, k) :
 
 def Solve(pallets, items, cfg, k, limit): # items include kept on board
 
-    print(f"\nShims for ACLP+RPDP")
+    print(f"\nParallel Shims for ACLP+RPDP")
 
     numItems   = len(items)
     numPallets = len(pallets)

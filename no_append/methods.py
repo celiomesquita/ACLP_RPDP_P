@@ -7,7 +7,6 @@ from time import time
 import copy
 from numba import njit
 
-
 NCPU = os.cpu_count()-1
 
 SEC_BREAK = 3.0
