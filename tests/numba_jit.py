@@ -32,5 +32,9 @@ if __name__=="__main__":
 
     t1 = timeit.Timer(CODE, SETUP)
 
-    print(f"time: {t1.timeit(number=10):.3f}/10 seconds") 
+    ntimes = 3
+
+    t2 = t1.timeit(number=ntimes)
+
+    print(f"{t2/ntimes:.2f} seconds\n") 
                     

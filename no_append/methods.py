@@ -5,6 +5,8 @@ import math
 import numpy as np
 from time import time
 import copy
+from numba import njit
+
 
 NCPU = os.cpu_count()-1
 

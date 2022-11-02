@@ -1,5 +1,6 @@
 import methods as mno
 import numpy as np
+from numba import njit
 
 def Solve(pallets, items, cfg, k): # items include kept on board
 

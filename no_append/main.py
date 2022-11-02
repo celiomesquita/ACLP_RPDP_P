@@ -8,6 +8,7 @@ import optcgcons
 import shims
 import greedy
 import aco
+from numba import njit
 
 def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
     """
@@ -182,15 +183,15 @@ if __name__ == "__main__":
     # mno.DATA = "data100"
   
 
-    # method = "Greedy" # 23.708
+    method = "Greedy" # 23.708
     # method = "ACO"    # 26.182
-    method = "Shims"  # 26.177
+    # method = "Shims"  # 26.177
 
     scenario = 1
 
     if scenario == 1:
-        instances = [1,2,3,4,5,6,7]
-        # instances = [1]
+        # instances = [1,2,3,4,5,6,7]
+        instances = [1]
     if scenario == 2:
         instances = [1,2,3,4,5,6,7]
     if scenario == 3:
