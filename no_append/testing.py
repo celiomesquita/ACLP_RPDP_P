@@ -6,15 +6,20 @@ import shims
 import aco
 import aco_p
 import greedy
+import sys
 
-scenario = 1
+scenario  = int(sys.argv[1])
+method    =  f"{sys.argv[2]}"
+mno.NCPU  = int(sys.argv[3])
 
-mno.DATA = "data20"
-# mno.DATA = "data50"
+# scenario = 2
+
+# mno.DATA = "data20"
+mno.DATA = "data50"
 # mno.DATA = "data100"
 
 # method = "Shims"
-method = "Shims_p"
+# method = "Shims_p"
 # method = "ACO"
 # method = "ACO_p"
 # method = "Greedy"
@@ -35,8 +40,10 @@ pallets = mno.loadPallets(cfg)
 
 if method == "Shims_p":
 
-    if scenario == 1:
-        factor = [0.32, 0.42, 0.52, 0.62, 1.0, 1.0, 1.0]
+    factor = [0.32,0.42,0.52,0.62,1.,1.,1.]
+
+    if scenario > 1:
+        factor = [1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,0.9,0.9,0.7,0.7]
 
     torque = 0.
     for i, p in enumerate(pallets):
@@ -44,7 +51,7 @@ if method == "Shims_p":
         # print(f"{p.ID}\t{p.D}\t{p.V}\t{p.W}")
         torque += p.D * p.W 
 
-    print(f"\nTorque = {torque/cfg.maxTorque:.2f}\n")
+    # print(f"\nTorque = {torque/cfg.maxTorque:.2f}\n")
 
 """"""
 # pallets capacity

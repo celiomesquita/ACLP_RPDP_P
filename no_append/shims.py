@@ -53,7 +53,7 @@ class Shim(object):
 
 # solve a Subset Selection Problem for this pallet, by selecting
 # the best shim and including its edges in solution.
-def getBestShim(p, notInSol, sol, limit, numItems, maxTorque, k):
+def getBestShims(p, notInSol, sol, limit, numItems, maxTorque, k):
 
     # create the first shim
     sh = Shim(numItems)
@@ -138,12 +138,13 @@ def Compute(edges, pallets, items, limit, cfg, k) :
     for p in (pallets):
 
 		# get the best shim of edges             greedy limit
-        sedges = getBestShim(p, notInSol[p.ID], sol, limit, len(items), cfg.maxTorque, k)
+        BestShims = getBestShims(p, notInSol[p.ID], sol, limit, len(items), cfg.maxTorque, k)
 
         # move the best shim of edges to solution
-        for be in sedges:
-            sol.putInSol(be)
-            notInSol[p.ID].remove(be)
+        for e in BestShims:
+            sol.putInSol(e)
+            # notInSol[p.ID].remove(e)
+            notInSol[e.Pallet.ID].remove(e)
 
     counter = 0
     # local search: Maybe still exists any edge that fit in solution

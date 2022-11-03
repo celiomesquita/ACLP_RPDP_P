@@ -7,7 +7,7 @@ from time import time
 import copy
 from numba import njit
 
-NCPU = os.cpu_count()-1
+NCPU = os.cpu_count()
 
 SEC_BREAK = 3.0
 
@@ -21,7 +21,9 @@ class Node(object):
     def __init__(self, id, tau):
         self.ID      = id
         self.tau     = tau # node sum of torques
-        self.ICAO    = CITIES[id]
+        self.ICAO = CITIES[0]
+        if id < len(CITIES):
+            self.ICAO = CITIES[id]
 
 class Item(object):
     """
@@ -176,7 +178,7 @@ class Tour(object):
     def __init__(self, nodes, costs):
         self.nodes = nodes
         self.cost  = 0.0 # sum of legs costs plus CG deviation costs
-        self.legsCosts = [0]*len(nodes)
+        self.legsCosts = [0.]*len(nodes)
         self.score   = -1 # sum of nodes scores
         self.elapsed = -1 # seconds
         self.numOpts = 0 # sum of nodes eventual optima solutions
@@ -186,7 +188,7 @@ class Tour(object):
 
             if k > 0:
                 frm = self.nodes[k-1].ID
-                to  = node.ID                                
+                to  = node.ID
                 self.legsCosts[k] = costs[frm][to]
                 self.cost += self.legsCosts[k]
 
@@ -209,10 +211,9 @@ def permutations(n):
         f *= m
     return a
     
-#getTours(cfg.numNodes-1, costs, 0.05)
-def getTours(A, costs, threshold):
+def getTours(num, costs, threshold):
 
-    p = permutations(A)
+    p = permutations(num)
 
     # create the matrix of tours IDs
     toursInt = [[0 for _ in range(len(p[0])+2)] for _ in range(len(p))]
@@ -223,21 +224,22 @@ def getTours(A, costs, threshold):
 
     # calculates the tour costs and eliminate costly
     # (more expensive than the threshold) tours
-    tourCosts = np.full(len(p), 0.)
-    minCost = 9999999999999.
+    # tourCosts = np.full(len(p), 0.)
+    # minCost = 9999999999999.
 
-    for i, tour in enumerate(toursInt):
-        for j, node in enumerate(tour):
-            if j > 0:
-                prev = tour[j-1]
-                tourCosts[i] += costs[node][prev]
+    # for i, tour in enumerate(toursInt):
+    #     for j, node in enumerate(tour):
+    #         if j > 0:
+    #             prev = tour[j-1]
+    #             if prev < node and node < len(tour)-2:
+    #                 tourCosts[i] += costs[node][prev]
 
-        if tourCosts[i] < minCost:
-            minCost = tourCosts[i]
+    #     if tourCosts[i] < minCost:
+    #         minCost = tourCosts[i]
 
-    for i, cost in enumerate(tourCosts):
-        if cost > (1+threshold) * minCost and i < len(toursInt):
-            toursInt.pop(i)
+    # for i, cost in enumerate(tourCosts):
+    #     if cost > (1+threshold) * minCost and i < len(toursInt):
+    #         toursInt.pop(i)
 
     # generate tours from Node and Tour classes
     tours = [None for _ in range(len(toursInt))]
@@ -246,8 +248,12 @@ def getTours(A, costs, threshold):
     for i, tour in enumerate(toursInt):
         baseIx = len(tour)-1 # the last node is the base
         for j, node in enumerate(tour):
+            # print(node, end='')
+            print(f"{CITIES[node]} ", end='')
             if j < baseIx: # the last node before the return to the base
                 nodes[j] = Node(node, 0.)
+                
+        print()
 
         tours[i] = Tour(nodes, costs)
 
@@ -476,7 +482,7 @@ def writeResult(fname, value):
 def getTimeString(totTime, denom, inSecs=False):
 
     totTime = totTime / denom
-    totTimeS = f"{totTime:.0f}s"
+    totTimeS = f"{totTime:.0f}"
 
     if inSecs:
         return totTimeS
@@ -604,4 +610,26 @@ def writeTourSol(method, scenario, instance, pi, tour, cfg, pallets, cons, write
 
 if __name__ == "__main__":
 
-    print("----- Please execute module main_test -----")
+    scenario = 3
+
+    cfg = Config(scenario)
+
+    print(f"cfg.numNodes = {cfg.numNodes}")  
+
+    dists = loadDistances()
+
+    costs = [[0.0 for _ in dists] for _ in dists]
+
+    for i, cols in enumerate(dists):
+        for j, value in enumerate(cols):
+            costs[i][j] = cfg.kmCost*value
+
+    tours = getTours(cfg.numNodes-1, costs, 100.)
+
+    for tour in tours:
+        for node in tour.nodes:
+            print(f"{CITIES[node.ID]} ", end='')
+        print()
+
+
+    # print("----- Please execute module main_test -----")
