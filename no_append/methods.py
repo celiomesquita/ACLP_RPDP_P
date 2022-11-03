@@ -175,22 +175,13 @@ def loadDistances():
 
 # tour is pi in the mathematical formulation
 class Tour(object):
-    def __init__(self, nodes, costs):
+    def __init__(self, nodes, cost):
         self.nodes = nodes
-        self.cost  = 0.0 # sum of legs costs plus CG deviation costs
-        self.legsCosts = [0.]*len(nodes)
+        self.cost  = cost # sum of legs costs plus CG deviation costs
         self.score   = -1 # sum of nodes scores
         self.elapsed = -1 # seconds
         self.numOpts = 0 # sum of nodes eventual optima solutions
         self.bestSC  = 0 # best ratio score/cost of this tour
-
-        for k, node in enumerate(self.nodes):
-
-            if k > 0:
-                frm = self.nodes[k-1].ID
-                to  = node.ID
-                self.legsCosts[k] = costs[frm][to]
-                self.cost += self.legsCosts[k]
 
 def factorial(x):
     result = 1
@@ -215,49 +206,49 @@ def getTours(num, costs, threshold):
 
     p = permutations(num)
 
-    # create the matrix of tours IDs
     toursInt = [[0 for _ in range(len(p[0])+2)] for _ in range(len(p))]
 
     for i, row in enumerate(p):
         for j, col in enumerate(row):
             toursInt[i][j+1] = col+1
 
-    # calculates the tour costs and eliminate costly
-    # (more expensive than the threshold) tours
-    # tourCosts = np.full(len(p), 0.)
-    # minCost = 9999999999999.
-
-    # for i, tour in enumerate(toursInt):
-    #     for j, node in enumerate(tour):
-    #         if j > 0:
-    #             prev = tour[j-1]
-    #             if prev < node and node < len(tour)-2:
-    #                 tourCosts[i] += costs[node][prev]
-
-    #     if tourCosts[i] < minCost:
-    #         minCost = tourCosts[i]
-
-    # for i, cost in enumerate(tourCosts):
-    #     if cost > (1+threshold) * minCost and i < len(toursInt):
-    #         toursInt.pop(i)
-
-    # generate tours from Node and Tour classes
     tours = [None for _ in range(len(toursInt))]
-    nodes = [None for _ in range(len(toursInt[0])-1)] # except the return to the base
-
+    minCost = 9999999999999.
+    maxCost = 0.      
     for i, tour in enumerate(toursInt):
-        baseIx = len(tour)-1 # the last node is the base
-        for j, node in enumerate(tour):
-            # print(node, end='')
-            print(f"{CITIES[node]} ", end='')
-            if j < baseIx: # the last node before the return to the base
-                nodes[j] = Node(node, 0.)
-                
-        print()
+        nodes = []
+        cost = 0.
+      
+        for j, nid in enumerate(tour[:-1]):
+            n = Node(nid, 0.)
+            nodes.append( n )
 
-        tours[i] = Tour(nodes, costs)
+            if j>0:
+                frm = nodes[j-1].ID
+                to  = nodes[j].ID
+                cost += costs[frm][to]
 
-    return tours
+            if j == len(tour[:-1])-1: # the last node
+                frm = nodes[j].ID
+                to  = 0
+                cost += costs[frm][to]                
+
+        if cost < minCost:
+            minCost = cost
+
+        if cost > maxCost:
+            maxCost = cost
+
+        tours[i] = Tour(nodes, cost)
+
+    tours2 = []
+    for i, t in enumerate(tours):
+        if t.cost <= minCost + (maxCost - minCost) * threshold:
+            tours2.append(t)
+    tours    = None
+    toursInt = None
+
+    return tours2
 
 
 class Config(object):
@@ -624,9 +615,10 @@ if __name__ == "__main__":
         for j, value in enumerate(cols):
             costs[i][j] = cfg.kmCost*value
 
-    tours = getTours(cfg.numNodes-1, costs, 100.)
+    tours = getTours(cfg.numNodes-1, costs, 0.25)
 
     for tour in tours:
+        print(f"{tour.cost:.2f}\t", end='')
         for node in tour.nodes:
             print(f"{CITIES[node.ID]} ", end='')
         print()

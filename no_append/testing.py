@@ -65,7 +65,7 @@ for p in pallets:
 if cfg.weiCap > cfg.payload:
     cfg.weiCap = cfg.payload   
 
-tours = mno.getTours(cfg.numNodes, costs, 0.25)
+tours = mno.getTours(cfg.numNodes-1, costs, 0.25)
 
 pi = 0 # the first, not necessarily the best
 
