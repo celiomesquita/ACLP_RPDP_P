@@ -4,14 +4,10 @@ import os
 import math
 import numpy as np
 from time import time
-import copy
-from numba import njit
 
 NCPU = os.cpu_count()
 
 SEC_BREAK = 3.0
-
-RNG = np.random.default_rng()
 
 CITIES = ["GRU", "GIG", "SSA", "CNF", "CWB", "BSB", "REC"]
 
@@ -75,7 +71,6 @@ class Edge(object):
 
 def edgesCopy(edges):
     output = edges.copy()
-    # output = copy.deepcopy(edges)
     for i, e in enumerate(edges):
         output[i].ID        = e.ID
         output[i].Pallet    = e.Pallet 
@@ -94,6 +89,7 @@ class Solution(object):
         self.Limit = limit
 
         self.Edges = edgesCopy(edges)
+        # self.Edges = edges
 
         self.S = 0 # solution total score
         self.W = 0 # solution total weight
@@ -101,7 +97,7 @@ class Solution(object):
         self.Heuristic = 0 
 
         # set of number of times items were included in solution
-        self.Included = [ 0  for _ in np.arange(len(items)) ] 
+        self.Included = [ 0  for _ in items ] 
 
         # pallets initial torque: 140kg times pallet CG distance
         self.T = sum(140 * p.D for p in pallets)  # solution total torque
@@ -151,7 +147,7 @@ class Solution(object):
         if self.PAV[ce.Pallet.ID] + ce.Item.V > ce.Pallet.V * limit:
             return False #this item volume would exceed pallet volumetric limit. Equation 18
         
-        #if this inclusion increases torque and is turns it greater than the maximum
+        # if this inclusion increases torque and is turns it greater than the maximum
         newTorque = abs(self.T + ce.Torque)
         if newTorque > cfg.maxTorque:
             return False
@@ -165,7 +161,6 @@ def getSolMatrix(edges, numPallets, numItems):
         if e.InSol:
             X[e.Pallet.ID][e.Item.ID] = 1
     return X
-
 
 def loadDistances():
     fname =  f"./../params/distances.txt"      
@@ -183,6 +178,27 @@ class Tour(object):
         self.numOpts = 0 # sum of nodes eventual optima solutions
         self.bestSC  = 0 # best ratio score/cost of this tour
 
+class Config(object):
+
+    def __init__(self, scenario):
+        self.weiCap = 0
+        self.volCap = 0
+        self.maxD   = 0
+        self.numNodes = {0:3,  1:3,  2:3,    3:4,    4:5,    5:6,    6:7    }[scenario]
+        self.Sce      = {0:1,  1:1,  2:2,    3:3,    4:4,    5:5,    6:6    }[scenario]
+
+        self.size       = "smaller"
+        self.numPallets = 7
+        self.payload    = 26_000
+        self.maxTorque  = 26_000 * 0.556
+        self.kmCost     = 1.1
+        if scenario > 1:
+            self.size       = "larger"
+            self.numPallets = 18
+            self.payload    = 75_000
+            self.maxTorque  = 75_000 * 1.170
+            self.kmCost     = 4.9 
+
 def factorial(x):
     result = 1
     for i in range(x):
@@ -193,26 +209,28 @@ def permutations(n):
     fac = factorial(n)
     a = np.zeros((fac, n), np.uint32) # no jit
     f = 1
-    for m in range(2, n+1):
+    for m in np.arange(2, n+1):
         b = a[:f, n-m+1:]      # the block of permutations of range(m-1)
-        for i in range(1, m):
+        for i in np.arange(1, m):
             a[i*f:(i+1)*f, n-m] = i
             a[i*f:(i+1)*f, n-m+1:] = b + (b >= i)
         b += 1
         f *= m
     return a
-    
+
 def getTours(num, costs, threshold):
 
     p = permutations(num)
 
-    toursInt = [[0 for _ in range(len(p[0])+2)] for _ in range(len(p))]
+    #+2: the base before and after the permutation
+    toursInt = [[0 for _ in np.arange(len(p[0])+2)] for _ in np.arange(len(p))]
 
+    # define the core of the tours
     for i, row in enumerate(p):
         for j, col in enumerate(row):
             toursInt[i][j+1] = col+1
 
-    tours = [None for _ in range(len(toursInt))]
+    tours = [None for _ in np.arange(len(toursInt))]
     minCost = 9999999999999.
     maxCost = 0.      
     for i, tour in enumerate(toursInt):
@@ -249,32 +267,6 @@ def getTours(num, costs, threshold):
     toursInt = None
 
     return tours2
-
-
-class Config(object):
-    """
-    Problem configuration
-    """
-    def __init__(self, scenario):
-
-        self.weiCap = 0
-        self.volCap = 0
-        self.maxD   = 0
-
-        self.numNodes = {0:3,  1:3,  2:3,    3:4,    4:5,    5:6,    6:7    }[scenario]
-        self.Sce      = {0:1,  1:1,  2:2,    3:3,    4:4,    5:5,    6:6    }[scenario]
-
-        self.size       = "smaller"
-        self.numPallets = 7
-        self.payload    = 26_000
-        self.maxTorque  = 26_000 * 0.556
-        self.kmCost     = 1.1
-        if scenario > 1:
-            self.size       = "larger"
-            self.numPallets = 18
-            self.payload    = 75_000
-            self.maxTorque  = 75_000 * 1.170
-            self.kmCost     = 4.9           
 
 def mountEdges(pallets, items, cfg):
    

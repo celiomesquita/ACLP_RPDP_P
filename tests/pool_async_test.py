@@ -22,7 +22,7 @@ if __name__ == '__main__':
     t0 = time.time()
     aa = f1(1)
     bb = f1(2)
-    print(f"serial\t{time.time()-t0:.2f}")    
+    print(f"sequential\t{time.time()-t0:.2f}")    
 
     num_cores = multiprocessing.cpu_count()
 
@@ -33,7 +33,7 @@ if __name__ == '__main__':
     t0 = time.time()
     answer1 = result1.get(timeout=10)
     answer2 = result2.get(timeout=10)
-    print(f"pool\t{time.time()-t0:.2f}")
+    print(f"apply_async\t{time.time()-t0:.2f}")
 
 
     t0 = time.time()
