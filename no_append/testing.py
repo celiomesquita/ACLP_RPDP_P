@@ -8,18 +8,18 @@ import aco_p
 import greedy
 import sys
 
-scenario  = int(sys.argv[1])
-method    =  f"{sys.argv[2]}"
-mno.NCPU  = int(sys.argv[3])
+# scenario  = int(sys.argv[1])
+# method    =  f"{sys.argv[2]}"
+# mno.NCPU  = int(sys.argv[3])
 
-# scenario = 2
+scenario = 1
 
 # mno.DATA = "data20"
 mno.DATA = "data50"
 # mno.DATA = "data100"
 
 # method = "Shims"
-# method = "Shims_p"
+method = "Shims_p"
 # method = "ACO"
 # method = "ACO_p"
 # method = "Greedy"

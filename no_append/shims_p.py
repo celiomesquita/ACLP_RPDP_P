@@ -1,6 +1,8 @@
 import methods as mno
 import numpy as np
 from joblib import Parallel, delayed
+import multiprocessing as mp
+
 
 # A Shim is a thin and often tapered or wedged piece of material, used to fill small gaps or spaces between objects.
 # Set are typically used in order to support, adjust for better fit, or provide a level surface.
@@ -116,6 +118,8 @@ def getBestShims(p, notInSol, sol, limit, numItems, k):
         
     return []
 
+def comp_queue(         p, notInSol, sol, limit, n, k, q):
+    q.put( getBestShims(p, notInSol, sol, limit, n, k) )
 
 def Compute(edges, pallets, items, limit, cfg, k) :
 
@@ -126,13 +130,21 @@ def Compute(edges, pallets, items, limit, cfg, k) :
     #edges not in sol groupped by pallets
     notInSol = [ [] for _ in pallets ]
 
-    for p in (pallets):
+    for p in pallets:
         notInSol[p.ID] = [e for e in sol.Edges if e.Pallet.ID == p.ID and not e.InSol  ]
 
     # one best shim for each pallet
-    shimsSet = Parallel(n_jobs=mno.NCPU)(\
-        delayed(getBestShims)(p, notInSol[p.ID], sol, limit, n, k)  for p in pallets\
-        ) 
+    # shimsSet = Parallel(n_jobs=len(pallets))(\
+    #     delayed(getBestShims)(p, notInSol[p.ID], sol, limit, n, k)  for p in pallets\
+    #     ) 
+
+    procs = [None for _ in pallets]
+    out_queue = mp.Queue()
+    for i, p in enumerate(pallets):
+        procs[i] = mp.Process(target=comp_queue,args=(p, notInSol[p.ID], sol, limit, n, k, out_queue))
+    for p in procs:
+        p.start()
+    shimsSet = [out_queue.get() for _ in procs]
 
     for shims in shimsSet:
         for e in shims:
