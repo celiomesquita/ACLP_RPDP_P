@@ -2,15 +2,12 @@
 from os import path
 import os
 import math
-import itertools
 import numpy as np
 from time import time
 
-NCPU = os.cpu_count()-1
+NCPU = os.cpu_count()
 
-SEC_BREAK = 0.7
-
-RNG = np.random.default_rng()
+SEC_BREAK = 30.
 
 CITIES = ["GRU", "GIG", "SSA", "CNF", "CWB", "BSB", "REC"]
 
@@ -20,7 +17,9 @@ class Node(object):
     def __init__(self, id, tau):
         self.ID      = id
         self.tau     = tau # node sum of torques
-        self.ICAO    = CITIES[id]
+        self.ICAO = CITIES[0]
+        if id < len(CITIES):
+            self.ICAO = CITIES[id]
 
 class Item(object):
     """
@@ -44,15 +43,16 @@ class Pallet(object):
         self.D  = d  # centroid distance to CG
         self.V  = v  # volume limit
         self.W  = w  # weight limit
-        self.Dests = np.full(numNodes,-1)
+        self.Dests = np.full(numNodes, -1)
 
 # Edge connecting a pallet and an item
 class Edge(object):
     def __init__(self, id, pallet, item, cfg):
-        self.ID        = id
-        self.Pallet    = pallet
-        self.Item      = item
-        self.Torque    = float(item.W) * float(pallet.D)
+
+        self.ID      = id # index in the solution edges (it must be preserved in case of sorting)
+        self.Pallet  = pallet
+        self.Item    = item
+        self.Torque  = float(item.W) * float(pallet.D)
 
         # 1500 to make the heuristic average around 1.0
         # devided by volume, because it is the most constraintive attribute
@@ -63,13 +63,13 @@ class Edge(object):
 
         self.Pheromone = 0.5# for ACO
         self.Attract   = self.Heuristic# for ACO
-        self.Tested    = 0
+        self.InSol     = False
 
     # for ACO
     def updateAttract(self, Alpha, Beta):
         self.Attract = self.Pheromone**Alpha + self.Heuristic**Beta
 
-def edges_copy(edges):
+def edgesCopy(edges):
     output = edges.copy()
     for i, e in enumerate(edges):
         output[i].ID        = e.ID
@@ -78,17 +78,16 @@ def edges_copy(edges):
         output[i].Torque    = e.Torque 
         output[i].Heuristic = e.Heuristic 
         output[i].Pheromone = e.Pheromone 
-        output[i].Attract   = e.Attract 
+        output[i].Attract   = e.Attract
+        output[i].InSol     = False # reset solution
     return output
-
-
+  
 class Solution(object):
     def __init__(self, edges, pallets, items, limit, cfg, k):
 
-        self.Limit = limit
+        self.Limit = limit     
 
-        self.Edges  = [] # set of edges in solution
-        self.Nbhood = edges_copy(edges) # set of edges that did not enter the solution
+        self.Edges = edgesCopy(edges)
 
         self.S = 0 # solution total score
         self.W = 0 # solution total weight
@@ -96,7 +95,7 @@ class Solution(object):
         self.Heuristic = 0 
 
         # set of number of times items were included in solution
-        self.Included = [ 0  for _ in np.arange(len(items)) ] 
+        self.Included = [ 0  for _ in items ] 
 
         # pallets initial torque: 140kg times pallet CG distance
         self.T = sum(140 * p.D for p in pallets)  # solution total torque
@@ -104,43 +103,27 @@ class Solution(object):
         self.PAW = [ 0   for _ in pallets] # set of pallets accumulated weights
         self.PAV = [ 0.0 for _ in pallets] # set of pallets accumulated volumes
 
-        id = 0
-        for p in pallets:           
-            # insert consolidated in the solution
-            for it in items:
-                e = Edge(id, p, it, cfg)
-                id += 1
-                # if defined by OptCGCons MIP procedure for optimal consolidated positions
-                if it.P == p.ID: # if an item is in a pallet ...
-                    self.AppendEdge(e) # ... does not ask if consolidated inclusion is feasible
-
         # builds a greedy solution until the limited capacity is attained
         if limit > 0:
-            for ce in self.Nbhood: # candidate Pallet-Item edges from neighborhood
-                if self.isFeasible(ce, limit, cfg, k): # All constraints
-                    self.AppendEdge(ce)
-                    self.Nbhood.remove(ce)
+            for ce in self.Edges:
+                if not ce.InSol and self.isFeasible(ce, limit, cfg, k):
+                    self.putInSol(ce)
 
 
-    def AppendEdge(self, e):
-
+    def putInSol(self, e):
         if e.Item.ID > len(self.Included)-1:
             return
-
         if e.Pallet.ID > len(self.PAW)-1:
             return
-
         self.Included[e.Item.ID] += 1
         self.PAW[e.Pallet.ID] += e.Item.W
         self.PAV[e.Pallet.ID] += e.Item.V
-
         self.S += e.Item.S
         self.W += e.Item.W
         self.V += e.Item.V
         self.T += e.Torque
         self.Heuristic += e.Heuristic  
-
-        self.Edges.append(e)
+        self.Edges[e.ID].InSol = True
 
     # check constraints for greedy, Shims and metaheuristics
     def isFeasible(self, ce, limit, cfg, k):
@@ -163,40 +146,19 @@ class Solution(object):
             return False #this item volume would exceed pallet volumetric limit. Equation 18
         
         # if this inclusion increases torque and is turns it greater than the maximum
-        if  abs(self.T) < abs(self.T + ce.Torque) and abs(self.T + ce.Torque) > cfg.aircraft.maxTorque:
-            return False #this item/pallet torque would extend the CG shift beyond backward limit. Equation 15
-
+        newTorque = abs(self.T + ce.Torque)
+        if newTorque > cfg.maxTorque:
+            return False
+ 
         return True
 
-
-# ACO - Proportional Roulette Selection (biased if greediness > 0)
-def rouletteSelection(values, sumVal, greediness, sense):
-
-    n = len(values)
-    if n == 0:
-        return -1
-    if n == 1:
-        return 0
-
-    threshold = RNG.random()*(1.0-greediness) + greediness
-    threshold *= sumVal
-
-    maxVal = max(values)
-
-    pointer = 0.0
-    for j, v in enumerate(values):
-
-        if sense == -1: # preference for worst values
-            pointer += maxVal - v
-        else:
-            pointer += v
-
-        if pointer >= threshold: # when pointer reaches the threshold
-            return j # returns the chosen index
-
-    # just in case ....
-    return int(n * RNG.random())
-
+# mount the decision matrix for which items will be put in which pallets
+def getSolMatrix(edges, numPallets, numItems):
+    X = np.zeros((numPallets,numItems))
+    for e in edges:
+        if e.InSol:
+            X[e.Pallet.ID][e.Item.ID] = 1
+    return X
 
 def loadDistances():
     fname =  f"./params/distances.txt"      
@@ -206,108 +168,126 @@ def loadDistances():
 
 # tour is pi in the mathematical formulation
 class Tour(object):
-    def __init__(self, nodes, costs):
+    def __init__(self, nodes, cost):
         self.nodes = nodes
-        self.cost  = 0.0 # sum of legs costs plus CG deviation costs
-        self.legsCosts = [0]*len(nodes)
+        self.cost  = cost # sum of legs costs plus CG deviation costs
         self.score   = -1 # sum of nodes scores
         self.elapsed = -1 # seconds
         self.numOpts = 0 # sum of nodes eventual optima solutions
         self.bestSC  = 0 # best ratio score/cost of this tour
 
-        for k, node in enumerate(self.nodes):
-
-            if k > 0:
-                frm = self.nodes[k-1].ID
-                to  = node.ID                                
-                self.legsCosts[k] = costs[frm][to]
-                self.cost += self.legsCosts[k]
-
-def getTours(numNodes, costs):
-
-    last = numNodes - 1
-    ids = [i+1 for i in range(last)]
-    permuts = itertools.permutations(ids)
-
-    tours = []
-
-    for p in permuts:
-
-        tau = 0 
-        nodes = []
-        nodes.append( Node(0, tau) ) # the base
-        for i in p:
-            nodes.append( Node(i, tau) )
-        nodes.append( Node(0, tau) ) # the base
-
-        tours.append( Tour(nodes, costs) )
-
-    # tours.sort(key=lambda x: x.cost, reverse=False)
-
-    return tours
-
-class Aircraft(object):
-    def __init__(self, size, numPallets, payload, maxShift, kmCost):
-        self.size       = size
-        self.numPallets = numPallets
-        self.payload    = payload
-        self.maxTorque  = payload * maxShift
-        self.kmCost     = kmCost
-
-
 class Config(object):
-    """
-    Problem configuration
-    """
-    def __init__(self, scenario):
 
+    def __init__(self, scenario):
         self.weiCap = 0
         self.volCap = 0
         self.maxD   = 0
+        self.numNodes = {0:3,  1:3,  2:3,    3:4,    4:5,    5:6,    6:7    }[scenario]
+        self.Sce      = {0:1,  1:1,  2:2,    3:3,    4:4,    5:5,    6:6    }[scenario]
 
-        self.numNodes = {0:3,   1:3,   2:3,   3:4,   4:5,   5:6,   6:7}[scenario]
-        self.Sce      = {0:1,   1:1,   2:2,   3:3,   4:4,   5:5,   6:6}[scenario]
+        self.size       = "smaller"
+        self.numPallets = 7
+        self.payload    = 26_000
+        self.maxTorque  = 26_000 * 0.556
+        self.kmCost     = 1.1
+        if scenario > 1:
+            self.size       = "larger"
+            self.numPallets = 18
+            self.payload    = 75_000
+            self.maxTorque  = 75_000 * 1.170
+            self.kmCost     = 4.9 
 
-        self.aircraft = None
-        if scenario < 2:
-            self.aircraft = Aircraft("smaller", 7, 26_000, 0.556, 1.1)
-        else:
-            self.aircraft = Aircraft("larger", 18, 75_000, 1.170, 4.9)
+def factorial(x):
+    result = 1
+    for i in range(x):
+        result *= i+1
+    return result
 
-        # self.aircraft = {
-        #     0:Aircraft("smaller", 7, 26_000, 0.556, 1.1),
-        #     1:Aircraft("smaller", 7, 26_000, 0.556, 1.1),
-        #     2:Aircraft("larger", 18, 75_000, 1.170, 4.9),
-        #     3:Aircraft("larger", 18, 75_000, 1.170, 4.9),
-        #     4:Aircraft("larger", 18, 75_000, 1.170, 4.9),
-        #     5:Aircraft("larger", 18, 75_000, 1.170, 4.9),
-        #     6:Aircraft("larger", 18, 75_000, 1.170, 4.9) 
-        #     }[scenario]
+def permutations(n):
+    fac = factorial(n)
+    a = np.zeros((fac, n), np.uint32) # no jit
+    f = 1
+    for m in np.arange(2, n+1):
+        b = a[:f, n-m+1:]      # the block of permutations of range(m-1)
+        for i in np.arange(1, m):
+            a[i*f:(i+1)*f, n-m] = i
+            a[i*f:(i+1)*f, n-m+1:] = b + (b >= i)
+        b += 1
+        f *= m
+    return a
 
-def mountEdges(pallets, items, cfg, k):
+def getTours(num, costs, threshold):
 
-    # from operator import attrgetter
-    
+    p = permutations(num)
+
+    #+2: the base before and after the permutation
+    toursInt = [[0 for _ in np.arange(len(p[0])+2)] for _ in np.arange(len(p))]
+
+    # define the core of the tours
+    for i, row in enumerate(p):
+        for j, col in enumerate(row):
+            toursInt[i][j+1] = col+1
+
+    tours = [None for _ in np.arange(len(toursInt))]
+    minCost = 9999999999999.
+    maxCost = 0.      
+    for i, tour in enumerate(toursInt):
+        nodes = []
+        cost = 0.
+      
+        for j, nid in enumerate(tour[:-1]):
+            n = Node(nid, 0.)
+            nodes.append( n )
+
+            if j>0:
+                frm = nodes[j-1].ID
+                to  = nodes[j].ID
+                cost += costs[frm][to]
+
+            if j == len(tour[:-1])-1: # the last node
+                frm = nodes[j].ID
+                to  = 0
+                cost += costs[frm][to]                
+
+        if cost < minCost:
+            minCost = cost
+
+        if cost > maxCost:
+            maxCost = cost
+
+        tours[i] = Tour(nodes, cost)
+
+    tours2 = []
+    for i, t in enumerate(tours):
+        if t.cost <= minCost + (maxCost - minCost) * threshold:
+            tours2.append(t)
+    tours    = None
+    toursInt = None
+
+    return tours2
+
+def mountEdges(pallets, items, cfg):
+   
     # items include kept on board, are from this node (k), and destined to unattended nodes
     m = len(pallets)
     n = len(items)
 
-    # edges = np.full(shape=m*n, fill_value=None)
     edges = [None for _ in np.arange(m*n)]
 
-    id = 0
+    i = 0
     for p in pallets:           
         for it in items:
-            e = Edge(id, p, it, cfg)
-            edges[id] = e
-            id += 1
+            e = Edge(i, p, it, cfg)
+            edges[i] = e
+            i += 1
 
     # greater heuristic's attractivity are included first
     edges.sort(key=lambda x: x.Heuristic, reverse=True) # best result
 
-    # inds = np.array([e.Heuristic for e in edges])
-    # sort_inds = np.argsort(inds)
-    # edges = [edges[ind] for ind in sort_inds]
+    # as edges have its order changed the ID must in the original order
+    # to preserve reference
+    for i, e in enumerate(edges):
+        edges[i].ID = i
 
     return edges
     
@@ -315,7 +295,7 @@ def loadPallets(cfg):
     """
     Load pallets attributes based on aircraft size
     """
-    fname = f"./params/{cfg.aircraft.size}.txt"
+    fname = f"./params/{cfg.size}.txt"
       
     reader = open(fname,"r")
     lines = reader.readlines()    
@@ -394,9 +374,9 @@ def loadNodeCons(scenario, instance, pi, node, id):
     return cons
 
 # used in sequential mode
-def loadNodeItems(scenario, instance, node, unatended): # unatended,future nodes
+def loadNodeItems(scenario, instance, node, unatended): # unatended, future nodes
     """
-    Load this node items attributes
+    Load this node to unnatended items attributes
     """
     dirname = f"./{DATA}/scenario_{scenario}/instance_{instance}"
     fname = f"{dirname}/items.txt"
@@ -483,7 +463,7 @@ def writeResult(fname, value):
 def getTimeString(totTime, denom, inSecs=False):
 
     totTime = totTime / denom
-    totTimeS = f"{totTime:.2f}s"
+    totTimeS = f"{totTime:.0f}"
 
     if inSecs:
         return totTimeS
@@ -513,7 +493,7 @@ def writeTourSol(method, scenario, instance, pi, tour, cfg, pallets, cons, write
         cfg.volCap += p.V
         palletsWei += p.W
 
-    cfg.weiCap = float(min(cfg.aircraft.payload, palletsWei))
+    cfg.weiCap = float(min(cfg.payload, palletsWei))
 
     sTourAccum = 0
 
@@ -561,7 +541,7 @@ def writeTourSol(method, scenario, instance, pi, tour, cfg, pallets, cons, write
             if write:
                 sol += f"{wspace}{cons[i][k].W} & {vspace}{cons[i][k].V:.1f} \\\\ \n"
 
-        epsilom = tau/cfg.aircraft.maxTorque
+        epsilom = tau/cfg.maxTorque
 
         if write:
             sol += '\midrule \n'
@@ -611,4 +591,27 @@ def writeTourSol(method, scenario, instance, pi, tour, cfg, pallets, cons, write
 
 if __name__ == "__main__":
 
-    print("----- Please execute module main_test -----")
+    scenario = 3
+
+    cfg = Config(scenario)
+
+    print(f"cfg.numNodes = {cfg.numNodes}")  
+
+    dists = loadDistances()
+
+    costs = [[0.0 for _ in dists] for _ in dists]
+
+    for i, cols in enumerate(dists):
+        for j, value in enumerate(cols):
+            costs[i][j] = cfg.kmCost*value
+
+    tours = getTours(cfg.numNodes-1, costs, 0.25)
+
+    for tour in tours:
+        print(f"{tour.cost:.2f}\t", end='')
+        for node in tour.nodes:
+            print(f"{CITIES[node.ID]} ", end='')
+        print()
+
+
+    # print("----- Please execute module main_test -----")

@@ -3,13 +3,12 @@ from tabulate import tabulate
 import time
 import os
 # local packages
-import methods as mcuda
+import methods as mno
 import optcgcons
 import shims
-import shims_mp
-import aco
-import aco_mp
 import greedy
+import aco
+from numba import njit
 
 def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
     """
@@ -19,27 +18,25 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
     broke = 0
 
     # first line for result file
-    sol = f"Tour {pi}, with {cfg.numNodes} nodes and the {cfg.aircraft.size} aircraft\n"
+    sol = f"Tour {pi}, with {cfg.numNodes} nodes and the {cfg.size} aircraft\n"
 
     consJK = [
-                [ mcuda.Item(-1, -2, 0, 0, 0., -1, -1)
+                [ mno.Item(-1, -2, 0, 0, 0., -1, -1)
                   for _ in tour.nodes ]
-                for _ in pallets
+                for _ in pallets # a consolidated for each pallet
              ]          
 
     for k, node in enumerate(tour.nodes):  # solve each node sequentialy
 
         # L_k destination nodes set
-        unattended = []
-        for n in tour.nodes[k+1:]:
-            unattended.append(n.ID)
+        unattended = [n.ID for n in tour.nodes[k+1:]]
 
         # all nodes are attended, this node is the base, stops
         if len(unattended) == 0:
             break
 
         # load items parameters from this node and problem instance, that go to unnatended
-        items = mcuda.loadNodeItems(scenario, instance, node, unattended)
+        items = mno.loadNodeItems(scenario, instance, node, unattended)
 
         numItems = len(items)
         numKept = 0
@@ -50,48 +47,46 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
 
         # reset pallets destinations
         for i, _ in enumerate(pallets):
-            pallets[i].Dests = [-1]*cfg.numNodes
+            pallets[i].Dests = [-1 for _ in range(cfg.numNodes)]
 
         if k > 0: # not in the base
 
             # load consolidated generated in the previous node
             prevNode = tour.nodes[k-1]
-            cons = mcuda.loadNodeCons( scenario, instance, pi, prevNode, numItems ) # numItems = first cons ID
+            cons = mno.loadNodeCons( scenario, instance, pi, prevNode, numItems ) # numItems = first cons ID
 
-            print(f"\n-----Loaded from tour {pi} {mcuda.CITIES[prevNode.ID]} -----")
+            print(f"\n-----Loaded from tour {pi} {mno.CITIES[prevNode.ID]} -----")
             print("P\tW\tS\tV\tFROM\tTO")
             for c in cons:
                 print("%d\t%d\t%d\t%.1f\t%s\t%s" % (
-                        c.P, c.W, c.S, c.V, mcuda.CITIES[c.Frm], mcuda.CITIES[c.To]))
+                        c.P, c.W, c.S, c.V, mno.CITIES[c.Frm], mno.CITIES[c.To]))
 
             # consolidated contents not destined to this point are kept on board
-            kept = []
-            for c in cons:
-                if c.To in unattended:
-                    kept.append(c)
+            kept = [c for c in cons if c.To in unattended]
                     
             # optimize consolidated positions to minimize CG deviation
+            # it is not necessary with the MIP solver
             if len(kept) > 0 and method != "GRB":
                 print("\n----- optimize consolidated positions -----")
-                optcgcons.OptCGCons(kept, pallets, cfg.aircraft.maxTorque, "CBC", k)
+                optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, "GRB", k)
 
-            print(f"\n-----Consolidated contents from tour {pi}, {mcuda.CITIES[prevNode.ID]} kept on board -----")
+            print(f"\n-----Consolidated contents from tour {pi}, {mno.CITIES[prevNode.ID]} kept on board -----")
 
             print("P\tW\tS\tV\tFROM\tTO")
-            for c in kept:
+            for c in kept: # kept on board are also items to be transported
                 items.append(c)
                 numItems += 1
                 numKept  += 1
                 print("%d\t%d\t%d\t%.1f\t%s\t%s" % (
-                    c.P,c.W, c.S, c.V, mcuda.CITIES[c.Frm], mcuda.CITIES[c.To]))
+                    c.P,c.W, c.S, c.V, mno.CITIES[c.Frm], mno.CITIES[c.To]))
 
         # set pallets destinations with items and consolidated to be delivered
         print("\n----- setPalletsDestinations, Carlos' version -----")
-        mcuda.setPalletsDestinations(items, pallets, tour.nodes, k, unattended)                
+        mno.setPalletsDestinations(items, pallets, tour.nodes, k, unattended)                
 
         print("Dests: ",end="")
         for p in pallets:
-            print(f"{mcuda.CITIES[p.Dests[k]]} ", end='')
+            print(f"{mno.CITIES[p.Dests[k]]} ", end='')
         print()
 
         print(f"-> {numItems} items with {numKept} kept on board in {node.ICAO}")
@@ -100,22 +95,16 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
         startNodeTime = time.perf_counter()
 
         if method == "Shims":
-            E = shims.Solve(pallets, items, cfg, k)
-
-        if method == "Shims_mp":
-            E = shims_mp.Solve(pallets, items, cfg, k)            
-
-        if method == "Shims_jit":
-            E = shims_jit.Solve(pallets, items, cfg, k) 
-
-        if method == "ACO":
-            E = aco.Solve(pallets, items, startNodeTime, cfg, k)            
-        
-        if method == "ACO_mp":
-            E = aco_mp.Solve(pallets, items, startNodeTime, cfg, k) 
+            limit = 0.86
+            if scenario == 1:
+                limit = 1.0
+            E = shims.Solve(pallets, items, cfg, k, limit)
 
         if method == "Greedy":
             E = greedy.Solve(pallets, items, cfg, k)  
+
+        if method == "ACO":
+            E = aco.Solve( pallets, items, startNodeTime, cfg, k)      
 
         nodeElapsed = time.perf_counter() - startNodeTime
 
@@ -147,9 +136,9 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
             print(f"----- TOUR {pi} {node.ICAO} END -----\n")
 
             # write consolidated contents from this node in file
-            mcuda.writeNodeCons(scenario, instance, consNodeT, pi, node)
+            mno.writeNodeCons(scenario, instance, consNodeT, pi, node)
 
-    mcuda.writeTourSol(method, scenario, instance, pi, tour, cfg, pallets, consJK, False) # False -  does not generate latex table
+    mno.writeTourSol(method, scenario, instance, pi, tour, cfg, pallets, consJK, False) # False -  does not generate latex table
             
     return broke
 
@@ -157,7 +146,7 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
 
 def writeAvgResults(method, scenario, line):
 
-    dirname = f"./results/{mcuda.DATA}/{method}_{scenario}"
+    dirname = f"./results/{mno.DATA}/{method}_{scenario}"
     try:
         os.makedirs(dirname)
     except FileExistsError:
@@ -174,27 +163,31 @@ def writeAvgResults(method, scenario, line):
 
 if __name__ == "__main__":
 
-    import sys
+    # from numba import cuda
+    # print(cuda.gpus)    
 
-    scenario     = int(sys.argv[1])
-    method       =  f"{sys.argv[2]}"
-    mcuda.NCPU = int(sys.argv[3])
+    # import sys
+
+    # scenario  = int(sys.argv[1])
+    # method    =  f"{sys.argv[2]}"
+    # mno.NCPU = int(sys.argv[3])
 
     # clear cache
     # find . | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
 
-    mcuda.SEC_BREAK = 0.7
-    # mcuda.SEC_BREAK = 10
+    mno.SEC_BREAK = 0.7
+    # mno.SEC_BREAK = 10
 
-    mcuda.DATA = "data20"
-    # mcuda.DATA = "data50"
-    # mcuda.DATA = "data100"
+    # mno.DATA = "data20"
+    mno.DATA = "data50"
+    # mno.DATA = "data100"
+  
 
-    mcuda.DATA = "data20"
-    # mcuda.DATA = "data50"
-    # mcuda.DATA = "data100"    
+    method = "Greedy" # 23.708
+    # method = "ACO"    # 26.182
+    # method = "Shims"  # 26.177
 
-    # scenario = 1
+    scenario = 1
 
     if scenario == 1:
         # instances = [1,2,3,4,5,6,7]
@@ -210,20 +203,20 @@ if __name__ == "__main__":
     if scenario == 6:
         instances = [1,2,3]                                        
 
-    dists = mcuda.loadDistances()
+    dists = mno.loadDistances()
 
     costs = [[0.0 for _ in dists] for _ in dists]
 
-    cfg = mcuda.Config(scenario)
+    cfg = mno.Config(scenario)
     
     for i, cols in enumerate(dists):
         for j, value in enumerate(cols):
-            costs[i][j] = cfg.aircraft.kmCost*value
+            costs[i][j] = cfg.kmCost*value
 
     # for method in ["ACO","ACO_mp","Greedy","Shims","Shims_mp"]:
     # for method in ["Shims_mp"]:
 
-    pallets = mcuda.loadPallets(cfg)
+    pallets = mno.loadPallets(cfg)
 
     # pallets capacity
     cfg.weiCap = 0
@@ -233,10 +226,10 @@ if __name__ == "__main__":
         cfg.volCap += p.V
 
     # smaller aircrafts may have a payload lower than pallets capacity
-    if cfg.weiCap > cfg.aircraft.payload:
-        cfg.weiCap = cfg.aircraft.payload
+    if cfg.weiCap > cfg.payload:
+        cfg.weiCap = cfg.payload
 
-    tours = mcuda.getTours(cfg.numNodes, costs)
+    tours = mno.getTours(cfg.numNodes, costs, 0.25)
 
     broke = 0
     avgInstTime = 0.
@@ -272,15 +265,16 @@ if __name__ == "__main__":
 
     numInst = float(len(instances))
 
-    timeString = mcuda.getTimeString(avgInstTime, numInst)
+    timeString = mno.getTimeString(avgInstTime, numInst)
 
     avgInstSC /= numInst
 
-    latex = f"{avgInstSC:.3f}   &   {timeString}\n"
+    latex = f"{avgInstSC:.2f}   &   {timeString}\n"
 
     # instances average
     writeAvgResults(method, scenario, latex)
 
     print(f"{method}\t{scenario}\t{latex}")
+    
 
         

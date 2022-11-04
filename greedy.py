@@ -1,23 +1,19 @@
-import methods
+import methods as mno
 import numpy as np
+from numba import njit
 
 def Solve(pallets, items, cfg, k): # items include kept on board
 
     print("\nGreedy Heuristic for ACLP+RPDP")
 
-    edges = methods.mountEdges(pallets, items, cfg, k)
+    edges = mno.mountEdges(pallets, items, cfg)
 
     numItems   = len(items)
     numPallets = len(pallets)
 
-    sol = methods.Solution(edges, pallets, items, 1.0, cfg, k)
+    sol = mno.Solution(edges, pallets, items, 1.0, cfg, k)
 
-    # decision matrix for which items will be put in which pallets
-    X = np.zeros((numPallets,numItems))
-    for e in sol.Edges:
-        X[e.Pallet.ID][e.Item.ID] = 1
-
-    return X
+    return mno.getSolMatrix(sol.Edges, numPallets, numItems)
         
 if __name__ == "__main__":
 

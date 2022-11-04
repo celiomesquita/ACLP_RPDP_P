@@ -1,153 +1,122 @@
 
-from operator import countOf
-import methods
-from time import time
+import time
 import math
 import numpy as np
-import methods
+import methods as mno
 
 ALPHA = 1   # pheromone exponent (linearly affects attractivity)
 BETA  = 4   # heuristic exponent (exponentialy affects attractivity)
-NANTS = 4   # number of ants for team
+NANTS = 5   # number of ants for team
 
-# For ACO proportional selection
-RNG = np.random.default_rng()
-
-# Proportional Roulette Selection (biased if greediness > 0)
-def rouletteSelection(values, sumVal, greediness):
-
-    n = len(values)
-    if n == 0:
-        return -1
-    if n == 1:
-        return 0
-
-    threshold = RNG.random()*(1.0-greediness) + greediness
-    threshold *= sumVal
-
-    pointer = 0.0
-    for j, v in enumerate(values):
-        pointer += v
-        if pointer >= threshold: # when pointer reaches the threshold
-            return j # returns the chosen index
-
-    # just in case ....
-    return int(n * RNG.random())
+def rouletteSelection(values):
+    sumVal = sum([v for v in values])
+    probabilities = [v/sumVal for v    in           values ]
+    indexes       = [i        for i, _ in enumerate(values)]
+    return np.random.choice(indexes, p=probabilities)
 
 # getDeltaTau calculates the pheromone to be dropped by each on ants tracks
 def getDeltaTau(score, bestSoFar, numAnts):
-
-    if bestSoFar == 0:
-        return 0
-
-    if score > bestSoFar: # better the score more pheromone is deposited
-        score = bestSoFar
-
-    dt = score / bestSoFar
-
-    if numAnts < NANTS:
-        numAnts = NANTS
-
-    dt /= numAnts
-
-    return dt
+    DeltaTau = (score - bestSoFar)/bestSoFar # at this point DeltaTau may be positive ou negative learning
+    DeltaTau /= numAnts*numAnts
+    return DeltaTau
 
 # each Ant makes use of "updatePheroAttract" to update pheromones
 # and edge attractiveness according to the its solution value
-def updatePheroAttract(score, bestSoFar, edges, numAnts):
+def updatePheroAttract(score, bestSoFar, edges, numAnts, reset=False):
+
+    # if True resets pheromone and attractiveness levels to diversify the search
+    if reset:
+        for i, e in enumerate(edges):
+            edges[i].Pheromone = 0.5
+            edges[i].updateAttract(ALPHA, BETA)
+        return      
 
     # evaporate some pheromone from all edges
     for id, e in enumerate(edges):
-        # flatten pheromone curve
+            # flatten pheromone curve
         edges[id].Pheromone = math.sqrt(e.Pheromone) / 1.25 # RHO = 0.2
         edges[id].updateAttract(ALPHA, BETA)
 
     deltaTau = getDeltaTau(score, bestSoFar, numAnts)
 
     if deltaTau < 1:
-        # deposit some pheromone in the edges
+        # update pheromone level in all edges
         for id, e in enumerate(edges):
-            if e.Pheromone < 1.0:
-                edges[id].Pheromone += deltaTau
-                edges[id].updateAttract(ALPHA, BETA)
+            edges[id].Pheromone += deltaTau
+            if edges[id].Pheromone < 0.:
+                edges[id].Pheromone = 0.
+            edges[id].updateAttract(ALPHA, BETA)
 
 # pick and delete an edge from the neighborhood by a proportional roulette wheel
-def pickFromNbhood(nbhood, values, sumVal, greediness):
-    i = rouletteSelection(values, sumVal, greediness)
+def pickFromNbhood(nbhood, values):
+    i = rouletteSelection(values)
     e = nbhood[i]
     nbhood.pop(i)
     values.pop(i)
-    return e, sumVal - e.Attract
+    return e
 
-def Solve( pallets, items, startTime, cfg, k):  # items include kept on board
+def Solve( pallets, items, startTime, cfg, k, limit):  # items include kept on board
+
+    SEC_BREAK = NANTS
 
     print("\nAnt Colony Optimization for ACLP+RPDP")
 
-    edges = methods.mountEdges(pallets, items, cfg, k)
+    antsField = mno.mountEdges(pallets, items, cfg)
 
-    # initialize the best solution           1.0 totally greedy
-    Gbest = methods.Solution(edges, pallets, items, 1.0, cfg, k)
- 
-    stagnant = 0
+    # initialize the best solution so far           1.0 totally greedy
+    Gbest = mno.Solution(antsField, pallets, items, 1.00, cfg, k)
+
+    print(f"Initial score = {Gbest.S}")
+
+    numPallets = len(pallets)
+    numItems   = len(items)
     numAnts = 0
-    while stagnant < 1 and (time() - startTime) < methods.SEC_BREAK:
+    stagnant = 0
+    improvements = 0
 
-        Glocal = Gbest
-   
-        for _ in np.arange(NANTS): # sequential ants
+    while stagnant <= 5:# and (time.perf_counter() - startTime) < SEC_BREAK:
 
-            if (time() - startTime) > methods.SEC_BREAK:
-                break
-        
+        Glocal = mno.Solution(antsField, pallets, items, limit, cfg, k)
+
+        for _ in np.arange(NANTS):
+
+            # if (time.perf_counter() - startTime) > SEC_BREAK:
+            #     break
+
             numAnts += 1
+            
+            Gant = Glocal
 
-            # initilize a solution for each ant
-            Gant = methods.Solution(edges, pallets, items, 0.9, cfg, k)
+            Nbhood   = [ce for ce in Gant.Edges if not ce.InSol]
+            attracts = [ce.Attract for ce in Nbhood]
 
-            # neighborhood edges are a heritage from previous ants
-            nbhood = []
-            # prepare for the random proportional selection in pickFromNbhood method
-            attracts = []
-            attractSum = 0.0
-            for ce in Gant.Nbhood:
-                if ce.Item.P == -1: # items only
-                    attracts.append(ce.Attract)
-                    nbhood.append(ce)
-                    attractSum += ce.Attract
+            while Nbhood:
 
-            # builds or completes a solution by exploring the entire items neighborhood
-            while nbhood:
+                ce = pickFromNbhood(Nbhood, attracts)
 
-                if ((time() - startTime) > methods.SEC_BREAK):
-                    break                
+                if Gant.isFeasible(ce, 1.0, cfg, k):
+                    Gant.putInSol(ce)            
 
-                # pick a candidate edge from the neighborhood by a random proportional selection
-                # the last argument is the greediness
-                ce, attractSum = pickFromNbhood(nbhood, attracts, attractSum, 0.0)
-
-                if Gant.isFeasible(ce, 1.00, cfg, k):
-                    Gant.AppendEdge(ce)
-                    
             if Gant.S > Glocal.S:
                 Glocal = Gant
 
         if Glocal.S > Gbest.S:
             Gbest = Glocal
             stagnant = 0
-            updatePheroAttract(Gant.S, Gbest.S, nbhood, numAnts)
+            improvements += 1
         else:
             stagnant += 1
 
-    print(f"Number of ants used: {numAnts}")
-
-    # decision matrix for which items will be put in which pallet
-    X = [[0 for _ in np.arange(len(items))] for _ in np.arange(len(pallets))]
-    for e in Gbest.Edges:
-        X[e.Pallet.ID][e.Item.ID] = 1
-
-    return X
+        updatePheroAttract(Glocal.S, Gbest.S, antsField, NANTS)
 
 
+    print(f"Used {numAnts} ants | stagnated {stagnant-1} times | {improvements} improvements")
+
+    return mno.getSolMatrix(Gbest.Edges, numPallets, numItems)
+
+        
 if __name__ == "__main__":
 
-    print("----- Please execute the main py file -------------")
+    print("----- Please execute module main -----")
+
+

@@ -1,5 +1,8 @@
 import methods as mno
 import numpy as np
+from joblib import Parallel, delayed
+import multiprocessing as mp
+
 
 # A Shim is a thin and often tapered or wedged piece of material, used to fill small gaps or spaces between objects.
 # Set are typically used in order to support, adjust for better fit, or provide a level surface.
@@ -24,7 +27,7 @@ class Shim(object):
         self.Edges.append(e)
         self.Included[e.Item.ID] = 1        
 
-    def shimIsFeasible(self, ce, sol, maxTorque, k ):
+    def shimIsFeasible(self, ce, sol, k ):
 
         if ce.Item.ID > len(self.Included)-1:
             return False
@@ -42,18 +45,13 @@ class Shim(object):
         # Pallet Acumulated Volume
         if sol.PAV[ce.Pallet.ID] + self.V + ce.Item.V > ce.Pallet.V:
             return False #this item volume would exceed pallet volumetric limit. Equation 18
-        
-        newTorque = self.T + sol.T + ce.Torque
-        if abs(newTorque) > maxTorque:
-            return False
-        
+                
         return True
         
 
-
 # solve a Subset Selection Problem for this pallet, by selecting
 # the best shim and including its edges in solution.
-def getBestShims(p, notInSol, sol, limit, numItems, maxTorque, k):
+def getBestShims(p, notInSol, sol, limit, numItems, k):
 
     # create the first shim
     sh = Shim(numItems)
@@ -81,7 +79,7 @@ def getBestShims(p, notInSol, sol, limit, numItems, maxTorque, k):
     # First Fit Decrease - equivalente ao KP, mas mais rápido
     for i, oe in enumerate(outter):
         for sh in Set:
-            if sh.shimIsFeasible(oe, sol, maxTorque, k):
+            if sh.shimIsFeasible(oe, sol, k):
                 sh.AppendEdge(oe)
                 break
         else:
@@ -120,30 +118,38 @@ def getBestShims(p, notInSol, sol, limit, numItems, maxTorque, k):
         
     return []
 
+def comp_queue(         p, notInSol, sol, limit, n, k, q):
+    q.put( getBestShims(p, notInSol, sol, limit, n, k) )
 
 def Compute(edges, pallets, items, limit, cfg, k) :
+
+    n = len(items)
 
     sol = mno.Solution(edges, pallets, items, limit, cfg, k)
 
     #edges not in sol groupped by pallets
-    notInSol = [ [] for _ in range(len(pallets)) ]
+    notInSol = [ [] for _ in pallets ]
 
-    for p in (pallets):
+    for p in pallets:
         notInSol[p.ID] = [e for e in sol.Edges if e.Pallet.ID == p.ID and not e.InSol  ]
 
-	# pallets closer to the CG are completed first
-    pallets.sort(key=lambda x: abs(x.D), reverse=False)
+    # one best shim for each pallet
 
-	# get the best shim that fills the slack
-    for p in (pallets):
+    # shimsSet = Parallel(n_jobs=len(pallets))(\
+    #     delayed(getBestShims)(p, notInSol[p.ID], sol, limit, n, k)  for p in pallets\
+    #     ) 
 
-		# get the best shim of edges             greedy limit
-        BestShims = getBestShims(p, notInSol[p.ID], sol, limit, len(items), cfg.maxTorque, k)
+    procs = [None for _ in pallets]
+    out_queue = mp.Queue()
+    for i, p in enumerate(pallets):
+        procs[i] = mp.Process(target=comp_queue,args=(p, notInSol[p.ID], sol, limit, n, k, out_queue))
+    for p in procs:
+        p.start()
+    shimsSet = [out_queue.get() for _ in procs]
 
-        # move the best shim of edges to solution
-        for e in BestShims:
+    for shims in shimsSet:
+        for e in shims:
             sol.putInSol(e)
-            # notInSol[p.ID].remove(e)
             notInSol[e.Pallet.ID].remove(e)
 
     counter = 0
@@ -153,6 +159,7 @@ def Compute(edges, pallets, items, limit, cfg, k) :
             if sol.isFeasible(ce, 1.0, cfg, k):
                 sol.putInSol(ce)
                 counter += 1
+
     print(f"{counter} edges included by the local search\n")
 
     return sol
@@ -160,7 +167,7 @@ def Compute(edges, pallets, items, limit, cfg, k) :
 
 def Solve(pallets, items, cfg, k, limit): # items include kept on board
 
-    print(f"\nShims for ACLP+RPDP")
+    print(f"\nParallel Shims for ACLP+RPDP")
 
     numItems   = len(items)
     numPallets = len(pallets)
