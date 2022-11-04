@@ -1,4 +1,0 @@
-
-Score: 12105.0	Weight: 0.60	Volume: 0.78	Torque: 0.07
-Score: 12539.0	Weight: 0.61	Volume: 0.79	Torque: 0.11
-Score: 10272.0	Weight: 0.62	Volume: 0.81	Torque: 0.31

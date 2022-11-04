@@ -7,14 +7,15 @@ import aco
 import aco_p
 import greedy
 
-# mno.DATA = "data20"
-mno.DATA = "data50"
+mno.DATA = "data20"
+# mno.DATA = "data50"
 # mno.DATA = "data100"
 
 import sys
 scenario  = int(sys.argv[1])
 method    =  f"{sys.argv[2]}"
 # mno.NCPU  = int(sys.argv[3])
+limit  = float(sys.argv[3])
 
 # scenario = 1
 
@@ -24,7 +25,7 @@ method    =  f"{sys.argv[2]}"
 # method = "ACO_p"
 # method = "Greedy"
 
-limit = 0.95
+# limit = 0.95
 
 
 cfg = mno.Config(scenario)                                      

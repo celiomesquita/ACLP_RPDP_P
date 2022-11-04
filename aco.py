@@ -3,12 +3,22 @@ import time
 import math
 import numpy as np
 import methods as mno
+import random
 
 ALPHA = 1   # pheromone exponent (linearly affects attractivity)
-BETA  = 4   # heuristic exponent (exponentialy affects attractivity)
-NANTS = 5   # number of ants for team
+BETA  = 3   # heuristic exponent (exponentialy affects attractivity)
+NANTS = 4   # number of ants for team
 
-def rouletteSelection(values):
+def rouletteSelection(values): # at least 15 times faster than rouletteSelection2
+    max = sum(values)
+    pick = random.uniform(0, max)
+    current = 0
+    for key, value in enumerate(values):
+        current += value
+        if current > pick:
+            return key
+
+def rouletteSelection2(values):
     sumVal = sum([v for v in values])
     probabilities = [v/sumVal for v    in           values ]
     indexes       = [i        for i, _ in enumerate(values)]
@@ -26,26 +36,33 @@ def updatePheroAttract(score, bestSoFar, edges, numAnts, reset=False):
 
     # if True resets pheromone and attractiveness levels to diversify the search
     if reset:
-        for i, e in enumerate(edges):
+        for i, _ in enumerate(edges):
             edges[i].Pheromone = 0.5
             edges[i].updateAttract(ALPHA, BETA)
         return      
 
     # evaporate some pheromone from all edges
     for id, e in enumerate(edges):
-            # flatten pheromone curve
         edges[id].Pheromone = math.sqrt(e.Pheromone) / 1.25 # RHO = 0.2
         edges[id].updateAttract(ALPHA, BETA)
 
     deltaTau = getDeltaTau(score, bestSoFar, numAnts)
 
+    maxAttract = 0.
     if deltaTau < 1:
         # update pheromone level in all edges
-        for id, e in enumerate(edges):
+        for id, _ in enumerate(edges):
             edges[id].Pheromone += deltaTau
             if edges[id].Pheromone < 0.:
                 edges[id].Pheromone = 0.
             edges[id].updateAttract(ALPHA, BETA)
+
+            if edges[id].Attract > maxAttract:
+                maxAttract = edges[id].Attract
+
+        for id, _ in enumerate(edges):
+            edges[id].Attract /= maxAttract
+
 
 # pick and delete an edge from the neighborhood by a proportional roulette wheel
 def pickFromNbhood(nbhood, values):
@@ -66,7 +83,8 @@ def Solve( pallets, items, startTime, cfg, k, limit):  # items include kept on b
     # initialize the best solution so far           1.0 totally greedy
     Gbest = mno.Solution(antsField, pallets, items, 1.00, cfg, k)
 
-    print(f"Initial score = {Gbest.S}")
+    initialS = Gbest.S
+    print(f"Initial score = {initialS}")
 
     numPallets = len(pallets)
     numItems   = len(items)
@@ -74,14 +92,14 @@ def Solve( pallets, items, startTime, cfg, k, limit):  # items include kept on b
     stagnant = 0
     improvements = 0
 
-    while stagnant <= 5:# and (time.perf_counter() - startTime) < SEC_BREAK:
+    while stagnant <= 3 and (time.perf_counter() - startTime) < SEC_BREAK:
 
         Glocal = mno.Solution(antsField, pallets, items, limit, cfg, k)
 
         for _ in np.arange(NANTS):
 
-            # if (time.perf_counter() - startTime) > SEC_BREAK:
-            #     break
+            if (time.perf_counter() - startTime) > SEC_BREAK:
+                break
 
             numAnts += 1
             
@@ -110,13 +128,39 @@ def Solve( pallets, items, startTime, cfg, k, limit):  # items include kept on b
         updatePheroAttract(Glocal.S, Gbest.S, antsField, NANTS)
 
 
-    print(f"Used {numAnts} ants | stagnated {stagnant-1} times | {improvements} improvements")
+    print(f"Used {numAnts} ants | ratio {Glocal.S/initialS:.3f} | {improvements} improvements")
 
     return mno.getSolMatrix(Gbest.Edges, numPallets, numItems)
 
         
 if __name__ == "__main__":
 
-    print("----- Please execute module main -----")
+    values = [1,2,3,4,5,6,7,8,9]
+
+    sums = [0 for _ in values]
+
+    t0 = time.perf_counter()
+
+    for v in range(1000):
+        i = rouletteSelection2(values)
+        sums[i] += 1
+
+    print(sums)
+
+    t1 = time.perf_counter()
+
+    sums = [0 for _ in values]
+
+    for v in range(1000):
+        i = rouletteSelection(values)
+        sums[i] += 1
+
+    print(sums)
+
+    t2 = time.perf_counter()
+
+    print(f"{(t1-t0)/(t2-t1)}")
+
+    # print("----- Please execute module main -----")
 
 

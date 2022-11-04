@@ -28,10 +28,13 @@ def Solve( pallets, items, startTime, cfg, k, limit):  # items include kept on b
     # initialize the best solution so far           1.0 totally greedy
     Gbest = mno.Solution(antsField, pallets, items, 1.00, cfg, k)
 
+    initialS = Gbest.S
+
     numPallets = len(pallets)
     numItems   = len(items)
     numAnts = 0
     stagnant = 0
+    improvements = 0
    
     while stagnant < aco.NANTS and (time.perf_counter() - startTime) < mno.SEC_BREAK:    
 
@@ -51,16 +54,15 @@ def Solve( pallets, items, startTime, cfg, k, limit):  # items include kept on b
                 Glocal = Gant
 
         if Glocal.S > Gbest.S:
-            aco.updatePheroAttract(Glocal.S, Gbest.S, antsField, aco.NANTS)
             Gbest = Glocal
             stagnant = 0
+            improvements += 1
         else:
             stagnant += 1
 
-        if stagnant == 2: # reset pheromone level (True) to diversify the search
-            aco.updatePheroAttract(0, 0, antsField, 0, True)
+        aco.updatePheroAttract(Glocal.S, Gbest.S, antsField, aco.NANTS)
 
-    print(f"Number of ants used: {numAnts}")
+    print(f"Used {numAnts} ants | ratio {Glocal.S/initialS:.3f} | {improvements} improvements")
 
     return mno.getSolMatrix(Gbest.Edges, numPallets, numItems)
 

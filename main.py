@@ -5,10 +5,11 @@ import os
 # local packages
 import methods as mno
 import optcgcons
+import shims_p
 import shims
-import greedy
 import aco
-from numba import njit
+import aco_p
+import greedy
 
 def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
     """
@@ -94,17 +95,20 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
         E = []
         startNodeTime = time.perf_counter()
 
-        if method == "Shims":
-            limit = 0.86
-            if scenario == 1:
-                limit = 1.0
-            E = shims.Solve(pallets, items, cfg, k, limit)
-
         if method == "Greedy":
-            E = greedy.Solve(pallets, items, cfg, k)  
+            E = greedy.Solve(pallets, items, cfg, 0)
+
+        if method == "Shims_p":
+            E = shims_p.Solve(pallets, items, cfg, 0, 0.5)
+
+        if method == "Shims":
+            E = shims.Solve(pallets, items, cfg, 0, 0.5)
 
         if method == "ACO":
-            E = aco.Solve( pallets, items, startNodeTime, cfg, k)      
+            E =   aco.Solve( pallets, items, startNodeTime, cfg, k, 0.95)
+
+        if method == "ACO_p":
+            E = aco_p.Solve( pallets, items, startNodeTime, cfg, k, 0.95)
 
         nodeElapsed = time.perf_counter() - startNodeTime
 
@@ -135,7 +139,7 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
 
             print(f"----- TOUR {pi} {node.ICAO} END -----\n")
 
-            # write consolidated contents from this node in file
+            # write consolidated contents from this node in a file
             mno.writeNodeCons(scenario, instance, consNodeT, pi, node)
 
     mno.writeTourSol(method, scenario, instance, pi, tour, cfg, pallets, consJK, False) # False -  does not generate latex table
@@ -163,35 +167,32 @@ def writeAvgResults(method, scenario, line):
 
 if __name__ == "__main__":
 
-    # from numba import cuda
-    # print(cuda.gpus)    
+    import sys
 
-    # import sys
-
-    # scenario  = int(sys.argv[1])
-    # method    =  f"{sys.argv[2]}"
-    # mno.NCPU = int(sys.argv[3])
+    scenario  = int(sys.argv[1])
+    method    =  f"{sys.argv[2]}"
+    mno.NCPU  = int(sys.argv[3])
+    mno.DATA  =  f"{sys.argv[4]}"
 
     # clear cache
     # find . | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
 
-    mno.SEC_BREAK = 0.7
-    # mno.SEC_BREAK = 10
+    mno.SEC_BREAK = 1.5
 
     # mno.DATA = "data20"
-    mno.DATA = "data50"
+    # mno.DATA = "data50"
     # mno.DATA = "data100"
   
 
-    method = "Greedy" # 23.708
+    # method = "Greedy" # 23.708
     # method = "ACO"    # 26.182
     # method = "Shims"  # 26.177
 
-    scenario = 1
+    # scenario = 1
 
     if scenario == 1:
-        # instances = [1,2,3,4,5,6,7]
-        instances = [1]
+        instances = [1,2,3,4,5,6,7]
+        # instances = [1]
     if scenario == 2:
         instances = [1,2,3,4,5,6,7]
     if scenario == 3:
@@ -212,9 +213,6 @@ if __name__ == "__main__":
     for i, cols in enumerate(dists):
         for j, value in enumerate(cols):
             costs[i][j] = cfg.kmCost*value
-
-    # for method in ["ACO","ACO_mp","Greedy","Shims","Shims_mp"]:
-    # for method in ["Shims_mp"]:
 
     pallets = mno.loadPallets(cfg)
 
@@ -269,12 +267,10 @@ if __name__ == "__main__":
 
     avgInstSC /= numInst
 
-    latex = f"{avgInstSC:.2f}   &   {timeString}\n"
-
     # instances average
-    writeAvgResults(method, scenario, latex)
+    # writeAvgResults(method, scenario, f"{avgInstSC:.2f} {timeString}")
 
-    print(f"{method}\t{scenario}\t{latex}")
+    print(f"{method}\t{scenario}\t{avgInstSC:.2f}\t{timeString}")
     
 
         

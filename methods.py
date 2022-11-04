@@ -7,7 +7,7 @@ from time import time
 
 NCPU = os.cpu_count()
 
-SEC_BREAK = 30.
+SEC_BREAK = 3.
 
 CITIES = ["GRU", "GIG", "SSA", "CNF", "CWB", "BSB", "REC"]
 
@@ -367,7 +367,6 @@ def loadNodeCons(scenario, instance, pi, node, id):
             if w > 0: #           P = -2 consolidated
                 cons.append( Item(id, -2, w, s, v, frm, to) )
                 id += 1
-                
     finally:
         reader.close()
 
@@ -542,6 +541,7 @@ def writeTourSol(method, scenario, instance, pi, tour, cfg, pallets, cons, write
                 sol += f"{wspace}{cons[i][k].W} & {vspace}{cons[i][k].V:.1f} \\\\ \n"
 
         epsilom = tau/cfg.maxTorque
+        tour.cost *= ( 1.0 + abs(epsilom)/20.0 )
 
         if write:
             sol += '\midrule \n'
@@ -557,17 +557,13 @@ def writeTourSol(method, scenario, instance, pi, tour, cfg, pallets, cons, write
 
         sTourAccum += sNodeAccum
 
-        # Equation 3: 5% penalty at most, due to CG unbalance
-        tour.cost += abs(epsilom) * (tour.legsCosts[k+1] / 20)
-
     if write:
+
         sol += '\\bottomrule \n'
         sol += '\multicolumn{4}{l}{' + f"Tour {pi}\ \ \ \ \ S/C: {float(sTourAccum)/tour.cost:.3f}\ \ \ \ \ "
 
-
     tour.score = float(sTourAccum)
             
-
     if write:                 
         timeString = getTimeString(tour.elapsed, 1, inSecs=True) # 1 instance   
         sol += f"\ \ \ \ \ elapsed: {timeString}\ \ \ \ \ method:\ {method}" + '} \\\\ \n'
@@ -576,18 +572,19 @@ def writeTourSol(method, scenario, instance, pi, tour, cfg, pallets, cons, write
 
     print(sol)
 
-    dirname = f"./results/{DATA}/{method}_{scenario}"
-    try:
-        os.makedirs(dirname)
-    except FileExistsError:
-        pass    
+    if write:
+        dirname = f"./results/{DATA}/{method}_{scenario}"
+        try:
+            os.makedirs(dirname)
+        except FileExistsError:
+            pass    
 
-    fname = f"{dirname}/res_{method}_{scenario}_{instance}_{pi}.txt"
-    writer = open(fname, "w+") 
-    try:
-        writer.write(sol)
-    finally:
-        writer.close() 
+        fname = f"{dirname}/res_{method}_{scenario}_{instance}_{pi}.txt"
+        writer = open(fname, "w+") 
+        try:
+            writer.write(sol)
+        finally:
+            writer.close() 
 
 if __name__ == "__main__":
 
