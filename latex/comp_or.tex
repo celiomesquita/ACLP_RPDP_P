@@ -1,5 +1,6 @@
 % !TeX spellcheck = en_GB
 \documentclass[preprint,authoryear]{elsarticle}
+% sudo apt-get install -y texlive-publishers
 
 \usepackage[left]{lineno}
 \usepackage[utf8]{inputenc}
@@ -30,7 +31,7 @@
 
 \usepackage{pgfplots}
 \pgfplotsset{compat=newest}
-\usepackage{algorithm}
+\usepackage{algorithm} % sudo apt-get install -y texlive-science
 
 \usepackage[noend]{algpseudocode}
 
@@ -1267,30 +1268,30 @@ In the tests performed, we used a 64-bit, 16GB, 3.6GHz, eight-core processor wit
 
 \begin{table}[H]
 	\centering
-	\caption{Methods and scenarios with $volume =1.5$}  \label{tab:50}
+	\caption{Methods and scenarios with $volume =1.2$}  \label{tab:20}
 	\footnotesize
 	\begin{tabular}{c|c|cccccc|c}
 		\toprule
-		{$method$}                        & {\bf Results}    & {\bf 1}     &  {\bf 2}    & {\bf 3}      & {\bf 4}      & {\bf 5}      & {\bf 6}     & \specialcell{{\bf Normalized}\\{\bf Speed-up}} \\
+		{$method$}                        & {\bf Results}   & {\bf 1}     &  {\bf 2}    & {\bf 3}      & {\bf 4}      & {\bf 5}      & {\bf 6}     & \specialcell{{\bf Normalized}\\{\bf Speed-up}} \\
 		\toprule
 	
 		
-		\multirow{2}{*}{\textbf{ACO}}     & $f$             & 21.93       & {\bf 6.77}& 8.85      & 9.65       & 11.75      & 11.54      &  0.934 \\ %21.927   &   19.65s
-		                                  &{\bf runtime (s)}& 20          & 4        & 17       & 86        & 513       & 3,596     &  2.714 \\ 
+		\multirow{2}{*}{\textbf{ACO}}     & $f$             & 6.47        & 3.90        &       &        &       &       &   \\ 
+		                                  &{\bf runtime (s)}& <1          & 1           &       &        &       &       &   \\ 
 		\midrule[.1pt]	
 		
 		
-		\multirow{2}{*}{\textbf{Shims}}   & $f$             & 22.28       & {\bf 6.77} & 8.92     & 9.60       & 11.78      & 11.61      &  0.948       \\ 
-		                                  &{\bf runtime (s)}& <1         & 2         & 8       & 31        & 166       & 1,087     &  {\bf 8.856} \\ 
+		\multirow{2}{*}{\textbf{Shims}}   & $f$             &        &   &      &        &       &      &   \\ 
+		                                  &{\bf runtime (s)}&        &   &      &        &       &      &   \\ 
 
 		\midrule[.1pt]
 		
-		\multirow{2}{*}{\textbf{ACO-mp}}  & $f$             & 9.43       & {\bf 6.77}& 8.85      & 9.65       & 11.75      & 11.54      &  0.934 \\ 
-                                          &{\bf runtime (s)}& 3         & 4        & 17       & 86        & 513       & 3,596     &  2.714 \\ 
+		\multirow{2}{*}{\textbf{ACO-mp}}  & $f$             &        &         &       &        &       &      &   \\ 
+                                          &{\bf runtime (s)}&        &         &       &        &       &      &   \\ 
         \midrule[.1pt]	
 
-        \multirow{2}{*}{\textbf{Shims-mp}} & $f$             & 10.18       & {\bf 6.77} & 8.92     & 9.60       & 11.78      & 11.61      &  0.948       \\ 
-                                           &{\bf runtime (s)}& $< 1$         & 2         & 8       & 31        & 166       & 1,087     &  {\bf 8.856} \\ 
+        \multirow{2}{*}{\textbf{Shims-mp}} & $f$             &        &       &      &         &       &       &   \\ 
+                                           &{\bf runtime (s)}&        &       &      &         &       &       &   \\ 
 
         \bottomrule		
 	\end{tabular}

@@ -26,6 +26,8 @@ def rouletteSelection2(values):
 
 # getDeltaTau calculates the pheromone to be dropped by each on ants tracks
 def getDeltaTau(score, bestSoFar, numAnts):
+    if bestSoFar == 0:
+        bestSoFar = 1000
     DeltaTau = (score - bestSoFar)/bestSoFar # at this point DeltaTau may be positive ou negative learning
     DeltaTau /= numAnts*numAnts
     return DeltaTau
@@ -127,6 +129,9 @@ def Solve( pallets, items, startTime, cfg, k, limit):  # items include kept on b
 
         updatePheroAttract(Glocal.S, Gbest.S, antsField, NANTS)
 
+
+    if initialS == 0:
+        initialS = 1000
 
     print(f"Used {numAnts} ants | ratio {Glocal.S/initialS:.3f} | {improvements} improvements")
 

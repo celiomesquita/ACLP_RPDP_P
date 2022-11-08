@@ -5,8 +5,6 @@ import math
 import numpy as np
 from time import time
 
-NCPU = os.cpu_count()
-
 SEC_BREAK = 3.
 
 CITIES = ["GRU", "GIG", "SSA", "CNF", "CWB", "BSB", "REC"]

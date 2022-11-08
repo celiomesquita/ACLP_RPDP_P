@@ -106,11 +106,15 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
         if method == "Greedy":
             E = greedy.Solve(pallets, items, cfg, k)
 
+        lim = 0.99 # for Shims only
+        if scenario > 1:
+            lim = 0.85
+
         if method == "Shims_p":
-            E = shims_p.Solve(pallets, items, cfg, k, 0.5)
+            E = shims_p.Solve(pallets, items, cfg, k, lim)
 
         if method == "Shims":
-            E = shims.Solve(pallets, items, cfg, k, 0.5)
+            E = shims.Solve(pallets, items, cfg, k, lim)
 
         if method == "ACO":
             E =   aco.Solve( pallets, items, startNodeTime, cfg, k, 0.95)
@@ -127,6 +131,8 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
 
             consNodeT = [None for _ in pallets]
 
+            itemsCount = [0 for _ in np.arange(numItems)]
+
             pallets.sort(key=lambda x: x.ID)  
 
             for j, p in enumerate(pallets):
@@ -135,9 +141,12 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
                 consJK[j][k].Frm = node.ID
                 consJK[j][k].To  = p.Dests[k]
 
+
                 for i in np.arange(numItems):
 
                     if E[j][i] == 1:
+
+                        itemsCount[i] += 1
 
                         consJK[j][k].W += items[i].W
                         consJK[j][k].V += items[i].V
@@ -145,12 +154,21 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
 
                 consNodeT[j] = consJK[j][k]
 
-            print(f"----- TOUR {pi} {node.ICAO} END -----\n")
+            state = "Feasible"
+            for n in itemsCount:
+                if n > 1:
+                    state = "Unfeasible"
+                    break
+
+            print(f"----- TOUR {pi} {node.ICAO} END ----- {state}\n")
 
             # write consolidated contents from this node in file
             methods.writeNodeCons(scenario, instance, consNodeT, pi, node)
 
-    methods.writeTourSol(method, scenario, instance, pi, tour, cfg, pallets, consJK, False) # False -  does not generate latex table
+
+           
+
+    methods.writeTourSol(method, scenario, instance, pi, tour, cfg, pallets, consJK, False) # False -  does not generate latex solution table
             
     return broke
 
@@ -179,8 +197,8 @@ if __name__ == "__main__":
     scenario     =   int(sys.argv[1])
     method       =    f"{sys.argv[2]}"
     methods.NCPU =   int(sys.argv[3])
-    limit        = float(sys.argv[4])
-    methods.DATA =    f"{sys.argv[5]}"
+    # limit        = float(sys.argv[4])
+    methods.DATA =    f"{sys.argv[4]}"
 
     # clear cache
     # find . | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
@@ -243,7 +261,7 @@ if __name__ == "__main__":
     # worstDuration = 0
     for instance in instances:
 
-        print(f"-> method: {method} scenario: {scenario} instance: {instance}")
+        # print(f"-> method: {method} scenario: {scenario} instance: {instance} | Tours {len(tours)}")
 
         bestSC = 0. # maximum score/cost relation
 
@@ -274,9 +292,9 @@ if __name__ == "__main__":
 
     avgInstSC /= numInst
 
-    latex = f"{avgInstSC:.3f}   &   {timeString}\n"
+    latex = f"{avgInstSC:.2f}   &   {timeString}\n"
 
     # instances average
     writeAvgResults(method, scenario, latex)
 
-    print(f"{method}\t{scenario}\t{avgInstSC:.2f}\t{timeString}")
+    print(f"{method}\t{scenario}\t{avgInstSC:.2f}\t{timeString}\t{len(tours)} tours")

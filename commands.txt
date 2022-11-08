@@ -1,0 +1,27 @@
+python -m main 1 Shims 1  data20
+python -m main 2 Shims 1  data20
+python -m main 3 Shims 1  data20
+python -m main 4 Shims 1  data20
+python -m main 5 Shims 1  data20
+python -m main 6 Shims 1  data20
+
+python -m main 1 Shims_p  7  data20
+python -m main 2 Shims_p 18  data20
+python -m main 3 Shims_p 18  data20
+python -m main 4 Shims_p 18  data20
+python -m main 5 Shims_p 18  data20
+python -m main 6 Shims_p 18  data20
+
+python -m main 1 ACO 1  data20
+python -m main 2 ACO 1  data20
+python -m main 3 ACO 1  data20
+python -m main 4 ACO 1  data20
+python -m main 5 ACO 1  data20
+python -m main 6 ACO 1  data20
+
+python -m main 1 ACO_p 16  data20
+python -m main 2 ACO_p 16  data20
+python -m main 3 ACO_p 16  data20
+python -m main 4 ACO_p 16  data20
+python -m main 5 ACO_p 16  data20
+python -m main 6 ACO_p 16  data20

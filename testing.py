@@ -102,13 +102,13 @@ E = []
 startNodeTime = time.perf_counter()
 
 if method == "Greedy":
-    E = greedy.Solve(pallets, items, cfg, 0)
+    E = greedy.Solve(pallets, items, cfg, k)
 
 if method == "Shims_p":
-    E = shims_p.Solve(pallets, items, cfg, 0, limit)
+    E = shims_p.Solve(pallets, items, cfg, k, limit)
 
 if method == "Shims":
-    E = shims.Solve(pallets, items, cfg, 0, limit)
+    E = shims.Solve(pallets, items, cfg, k, limit)
 
 if method == "ACO":
     E =   aco.Solve( pallets, items, startNodeTime, cfg, k, limit)
@@ -165,11 +165,14 @@ if len(E) > 0:
 
     epsilom = tau/cfg.maxTorque
 
+    # greedyScore = 50842.0 # data50
+
     sol += f"Score: {sNodeAccum}\t"
     sol += f"Weight: {wNodeAccum/cfg.weiCap:.2f}\t"
     sol += f"Volume: {vNodeAccum/cfg.volCap:.2f}\t"
     sol += f"Torque: {epsilom:.2f}\n"
     sol += f"Elapsed: {elapsed:.2f}\n"
+    # sol += f"Ratio: {sNodeAccum/greedyScore:.3f}\n"
 
     state = "Feasible"
     for n in itemsCount:
