@@ -7,15 +7,16 @@ import aco
 import aco_p
 import greedy
 
-mno.DATA = "data20"
+# mno.DATA = "data20"
 # mno.DATA = "data50"
 # mno.DATA = "data100"
 
 import sys
-scenario  = int(sys.argv[1])
-method    =  f"{sys.argv[2]}"
-# mno.NCPU  = int(sys.argv[3])
-limit  = float(sys.argv[3])
+scenario  =   int(sys.argv[1])
+method    =    f"{sys.argv[2]}"
+mno.NCPU  =   int(sys.argv[3])
+limit     = float(sys.argv[4])
+mno.DATA  =    f"{sys.argv[5]}"
 
 # scenario = 1
 
@@ -45,15 +46,14 @@ if method == "Shims_p":
 
     factor = [0.32,0.42,0.52,0.62,1.,1.,1.]
 
-    if scenario > 1:
+    if scenario > 1: # larger aircraft
         factor = [1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,0.9,0.9,0.7,0.7]
 
-    torque = 0.
+    # torque = 0.
     for i, p in enumerate(pallets):
         pallets[i].W *= factor[i]
         # print(f"{p.ID}\t{p.D}\t{p.V}\t{p.W}")
-        torque += p.D * p.W 
-
+        # torque += p.D * p.W 
     # print(f"\nTorque = {torque/cfg.maxTorque:.2f}\n")
 
 """"""
@@ -137,9 +137,13 @@ if len(E) > 0:
         consJK[j][k].Frm = node.ID
         consJK[j][k].To  = p.Dests[k]
 
+        itemsCount = [0 for _ in np.arange(numItems)]
+
         for i in np.arange(numItems):
 
             if E[j][i] == 1:
+
+                itemsCount[i] += 1
 
                 consJK[j][k].W += items[i].W
                 consJK[j][k].V += items[i].V
@@ -166,6 +170,22 @@ if len(E) > 0:
     sol += f"Volume: {vNodeAccum/cfg.volCap:.2f}\t"
     sol += f"Torque: {epsilom:.2f}\n"
     sol += f"Elapsed: {elapsed:.2f}\n"
+
+    state = "Feasible"
+    for n in itemsCount:
+        if n > 1:
+            state = "Unfeasible"
+
+    if wNodeAccum/cfg.weiCap > 1.0:
+        state = "Unfeasible"
+
+    if vNodeAccum/cfg.volCap > 1.0:
+        state = "Unfeasible"
+
+    if abs(epsilom) > 1.0:
+        state = "Unfeasible"
+
+    sol += f"State: {state}\n"
 
     print(sol)
 """"""

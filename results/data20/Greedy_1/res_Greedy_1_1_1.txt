@@ -1,0 +1,44 @@
+\begin{tabular}{c c c c} 
+\toprule 
+\rowcolor{Gray}\multicolumn{4}{l}{Node 0: GRU solution} \\ 
+$Pallet$ & $From:To$ & $Kg$ & $m^3$ \\ 
+\midrule 
+1 & GRU:GIG &  749 &  3.9 \\ 
+2 & GRU:GIG & 1505 &  6.1 \\ 
+3 & GRU:GIG & 3183 & 13.5 \\ 
+4 & GRU:SSA & 3308 & 13.6 \\ 
+5 & GRU:SSA & 3499 & 13.7 \\ 
+6 & GRU:SSA & 3297 & 13.6 \\ 
+7 & GRU:SSA & 2846 & 13.4 \\ 
+\midrule 
+Score: 11090.0 & Weight: 0.71 & Volume: 0.92 & Torque: 0.86 \\ 
+\toprule 
+\rowcolor{Gray}\multicolumn{4}{l}{Node 1: GIG solution} \\ 
+$Pallet$ & $From:To$ & $Kg$ & $m^3$ \\ 
+\midrule 
+1 & GIG:SSA &    0 &  0.0 \\ 
+2 & GIG:SSA &    0 &  0.0 \\ 
+3 & GIG:SSA &    0 &  0.0 \\ 
+4 & GIG:SSA &    0 &  0.0 \\ 
+5 & GIG:SSA &    0 &  0.0 \\ 
+6 & GIG:SSA &    0 &  0.0 \\ 
+7 & GIG:SSA &    0 &  0.0 \\ 
+\midrule 
+Score: 0.0 & Weight: 0.00 & Volume: 0.00 & Torque: 0.00 \\ 
+\toprule 
+\rowcolor{Gray}\multicolumn{4}{l}{Node 3: CNF solution} \\ 
+$Pallet$ & $From:To$ & $Kg$ & $m^3$ \\ 
+\midrule 
+1 & CNF:GRU &    0 &  0.0 \\ 
+2 & CNF:GRU &    0 &  0.0 \\ 
+3 & CNF:GRU &    0 &  0.0 \\ 
+4 & CNF:GRU &    0 &  0.0 \\ 
+5 & CNF:GRU &    0 &  0.0 \\ 
+6 & CNF:GRU &    0 &  0.0 \\ 
+7 & CNF:GRU &    0 &  0.0 \\ 
+\midrule 
+Score: 0.0 & Weight: 0.00 & Volume: 0.00 & Torque: 0.00 \\ 
+\bottomrule 
+\multicolumn{4}{l}{Tour 1\ \ \ \ \ S/C: 3.127\ \ \ \ \ \ \ \ \ \ elapsed: 0\ \ \ \ \ method:\ Greedy} \\ 
+\bottomrule 
+\end{tabular} 

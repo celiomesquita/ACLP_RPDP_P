@@ -1,15 +1,18 @@
 import numpy as np
 from tabulate import tabulate
-import time
+from time import time
+import math
+from os import path
 import os
 # local packages
-import methods as mno
+import methods
 import optcgcons
-import shims_p
 import shims
+import shims_p
 import aco
 import aco_p
 import greedy
+
 
 def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
     """
@@ -22,22 +25,24 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
     sol = f"Tour {pi}, with {cfg.numNodes} nodes and the {cfg.size} aircraft\n"
 
     consJK = [
-                [ mno.Item(-1, -2, 0, 0, 0., -1, -1)
+                [ methods.Item(-1, -2, 0, 0, 0., -1, -1)
                   for _ in tour.nodes ]
-                for _ in pallets # a consolidated for each pallet
+                for _ in pallets
              ]          
 
     for k, node in enumerate(tour.nodes):  # solve each node sequentialy
 
         # L_k destination nodes set
-        unattended = [n.ID for n in tour.nodes[k+1:]]
+        unattended = []
+        for n in tour.nodes[k+1:]:
+            unattended.append(n.ID)
 
         # all nodes are attended, this node is the base, stops
         if len(unattended) == 0:
             break
 
         # load items parameters from this node and problem instance, that go to unnatended
-        items = mno.loadNodeItems(scenario, instance, node, unattended)
+        items = methods.loadNodeItems(scenario, instance, node, unattended)
 
         numItems = len(items)
         numKept = 0
@@ -48,69 +53,72 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
 
         # reset pallets destinations
         for i, _ in enumerate(pallets):
-            pallets[i].Dests = [-1 for _ in range(cfg.numNodes)]
+            pallets[i].Dests = [-1]*cfg.numNodes
 
         if k > 0: # not in the base
 
             # load consolidated generated in the previous node
             prevNode = tour.nodes[k-1]
-            cons = mno.loadNodeCons( scenario, instance, pi, prevNode, numItems ) # numItems = first cons ID
+            cons = methods.loadNodeCons( scenario, instance, pi, prevNode, numItems ) # numItems = first cons ID
 
-            print(f"\n-----Loaded from tour {pi} {mno.CITIES[prevNode.ID]} -----")
+            print(f"\n-----Loaded from tour {pi} {methods.CITIES[prevNode.ID]} -----")
             print("P\tW\tS\tV\tFROM\tTO")
             for c in cons:
                 print("%d\t%d\t%d\t%.1f\t%s\t%s" % (
-                        c.P, c.W, c.S, c.V, mno.CITIES[c.Frm], mno.CITIES[c.To]))
+                        c.P, c.W, c.S, c.V, methods.CITIES[c.Frm], methods.CITIES[c.To]))
 
             # consolidated contents not destined to this point are kept on board
-            kept = [c for c in cons if c.To in unattended]
+            kept = []
+            for c in cons:
+                if c.To in unattended:
+                    kept.append(c)
                     
             # optimize consolidated positions to minimize CG deviation
-            # it is not necessary with the MIP solver
             if len(kept) > 0 and method != "GRB":
                 print("\n----- optimize consolidated positions -----")
-                optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, "GRB", k)
+                optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, "CBC", k)
 
-            print(f"\n-----Consolidated contents from tour {pi}, {mno.CITIES[prevNode.ID]} kept on board -----")
+            print(f"\n-----Consolidated contents from tour {pi}, {methods.CITIES[prevNode.ID]} kept on board -----")
 
             print("P\tW\tS\tV\tFROM\tTO")
-            for c in kept: # kept on board are also items to be transported
+            for c in kept:
                 items.append(c)
                 numItems += 1
                 numKept  += 1
                 print("%d\t%d\t%d\t%.1f\t%s\t%s" % (
-                    c.P,c.W, c.S, c.V, mno.CITIES[c.Frm], mno.CITIES[c.To]))
+                    c.P,c.W, c.S, c.V, methods.CITIES[c.Frm], methods.CITIES[c.To]))
 
         # set pallets destinations with items and consolidated to be delivered
         print("\n----- setPalletsDestinations, Carlos' version -----")
-        mno.setPalletsDestinations(items, pallets, tour.nodes, k, unattended)                
+        methods.setPalletsDestinations(items, pallets, tour.nodes, k, unattended)                
 
         print("Dests: ",end="")
         for p in pallets:
-            print(f"{mno.CITIES[p.Dests[k]]} ", end='')
+            print(f"{methods.CITIES[p.Dests[k]]} ", end='')
         print()
 
         print(f"-> {numItems} items with {numKept} kept on board in {node.ICAO}")
 
         E = []
-        startNodeTime = time.perf_counter()
+        opt = 0
+        startNodeTime = time()
 
         if method == "Greedy":
-            E = greedy.Solve(pallets, items, cfg, 0)
+            E = greedy.Solve(pallets, items, cfg, k)
 
         if method == "Shims_p":
-            E = shims_p.Solve(pallets, items, cfg, 0, 0.5)
+            E = shims_p.Solve(pallets, items, cfg, k, 0.5)
 
         if method == "Shims":
-            E = shims.Solve(pallets, items, cfg, 0, 0.5)
+            E = shims.Solve(pallets, items, cfg, k, 0.5)
 
         if method == "ACO":
             E =   aco.Solve( pallets, items, startNodeTime, cfg, k, 0.95)
 
         if method == "ACO_p":
-            E = aco_p.Solve( pallets, items, startNodeTime, cfg, k, 0.95)
+            E = aco_p.Solve( pallets, items, startNodeTime, cfg, k, 0.95) 
 
-        nodeElapsed = time.perf_counter() - startNodeTime
+        nodeElapsed = time() - startNodeTime
 
         tour.elapsed += nodeElapsed
 
@@ -139,10 +147,10 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
 
             print(f"----- TOUR {pi} {node.ICAO} END -----\n")
 
-            # write consolidated contents from this node in a file
-            mno.writeNodeCons(scenario, instance, consNodeT, pi, node)
+            # write consolidated contents from this node in file
+            methods.writeNodeCons(scenario, instance, consNodeT, pi, node)
 
-    mno.writeTourSol(method, scenario, instance, pi, tour, cfg, pallets, consJK, False) # False -  does not generate latex table
+    methods.writeTourSol(method, scenario, instance, pi, tour, cfg, pallets, consJK, False) # False -  does not generate latex table
             
     return broke
 
@@ -150,7 +158,7 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
 
 def writeAvgResults(method, scenario, line):
 
-    dirname = f"./results/{mno.DATA}/{method}_{scenario}"
+    dirname = f"./results/{methods.DATA}/{method}_{scenario}"
     try:
         os.makedirs(dirname)
     except FileExistsError:
@@ -168,25 +176,22 @@ def writeAvgResults(method, scenario, line):
 if __name__ == "__main__":
 
     import sys
-
-    scenario  = int(sys.argv[1])
-    method    =  f"{sys.argv[2]}"
-    mno.NCPU  = int(sys.argv[3])
-    mno.DATA  =  f"{sys.argv[4]}"
+    scenario     =   int(sys.argv[1])
+    method       =    f"{sys.argv[2]}"
+    methods.NCPU =   int(sys.argv[3])
+    limit        = float(sys.argv[4])
+    methods.DATA =    f"{sys.argv[5]}"
 
     # clear cache
     # find . | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
 
-    mno.SEC_BREAK = 1.5
+    methods.SEC_BREAK = 1.5
 
-    # mno.DATA = "data20"
-    # mno.DATA = "data50"
-    # mno.DATA = "data100"
-  
+    # methods.DATA = "data20"
+    # methods.DATA = "data50"
+    # methods.DATA = "data100"
 
-    # method = "Greedy" # 23.708
-    # method = "ACO"    # 26.182
-    # method = "Shims"  # 26.177
+    # method = "Greedy"
 
     # scenario = 1
 
@@ -195,6 +200,7 @@ if __name__ == "__main__":
         # instances = [1]
     if scenario == 2:
         instances = [1,2,3,4,5,6,7]
+        # instances = [1]
     if scenario == 3:
         instances = [1,2,3,4,5,6,7]
     if scenario == 4:
@@ -204,17 +210,18 @@ if __name__ == "__main__":
     if scenario == 6:
         instances = [1,2,3]                                        
 
-    dists = mno.loadDistances()
+    dists = methods.loadDistances()
 
     costs = [[0.0 for _ in dists] for _ in dists]
 
-    cfg = mno.Config(scenario)
+    cfg = methods.Config(scenario)
     
     for i, cols in enumerate(dists):
         for j, value in enumerate(cols):
             costs[i][j] = cfg.kmCost*value
 
-    pallets = mno.loadPallets(cfg)
+
+    pallets = methods.loadPallets(cfg)
 
     # pallets capacity
     cfg.weiCap = 0
@@ -227,7 +234,7 @@ if __name__ == "__main__":
     if cfg.weiCap > cfg.payload:
         cfg.weiCap = cfg.payload
 
-    tours = mno.getTours(cfg.numNodes, costs, 0.25)
+    tours = methods.getTours(cfg.numNodes, costs, 0.25)
 
     broke = 0
     avgInstTime = 0.
@@ -263,14 +270,13 @@ if __name__ == "__main__":
 
     numInst = float(len(instances))
 
-    timeString = mno.getTimeString(avgInstTime, numInst)
+    timeString = methods.getTimeString(avgInstTime, numInst)
 
     avgInstSC /= numInst
 
+    latex = f"{avgInstSC:.3f}   &   {timeString}\n"
+
     # instances average
-    # writeAvgResults(method, scenario, f"{avgInstSC:.2f} {timeString}")
+    writeAvgResults(method, scenario, latex)
 
     print(f"{method}\t{scenario}\t{avgInstSC:.2f}\t{timeString}")
-    
-
-        

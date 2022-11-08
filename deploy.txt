@@ -29,6 +29,9 @@ sudo openvpn --config vpnita-linux.ovpn
 --- Send files to the server ---
 rsync -avze "ssh -p 2222"  --exclude "*.txt" --exclude "*.pyc" /home/celio/Projects/ACLP_RPDP_P/  celio@161.24.2.247:/home/celio/Projects/ACLP_RPDP_P/
 
+--- Get result files from the server ---
+rsync -avze "ssh -p 2222" celio@161.24.2.247:/home/celio/Projects/ACLP_RPDP_P/results  /home/celio/Projects/ACLP_RPDP_P/results
+
 --- Go to the server ---
 ssh -p2222 celio@161.24.2.247
 S&l10w&$k
