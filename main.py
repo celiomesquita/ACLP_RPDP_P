@@ -61,11 +61,12 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
             prevNode = tour.nodes[k-1]
             cons = methods.loadNodeCons( scenario, instance, pi, prevNode, numItems ) # numItems = first cons ID
 
-            print(f"\n-----Loaded from tour {pi} {methods.CITIES[prevNode.ID]} -----")
-            print("P\tW\tS\tV\tFROM\tTO")
-            for c in cons:
-                print("%d\t%d\t%d\t%.1f\t%s\t%s" % (
-                        c.P, c.W, c.S, c.V, methods.CITIES[c.Frm], methods.CITIES[c.To]))
+            if prevNode.ID < len(methods.CITIES):
+                print(f"\n-----Loaded from tour {pi} {methods.CITIES[prevNode.ID]} -----")
+                print("P\tW\tS\tV\tFROM\tTO")
+                for c in cons:
+                    print("%d\t%d\t%d\t%.1f\t%s\t%s" % (
+                            c.P, c.W, c.S, c.V, methods.CITIES[c.Frm], methods.CITIES[c.To]))
 
             # consolidated contents not destined to this point are kept on board
             kept = []
@@ -78,15 +79,17 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
                 print("\n----- optimize consolidated positions -----")
                 optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, "CBC", k)
 
-            print(f"\n-----Consolidated contents from tour {pi}, {methods.CITIES[prevNode.ID]} kept on board -----")
+            if prevNode.ID < len(methods.CITIES):
+                print(f"\n-----Consolidated contents from tour {pi}, {methods.CITIES[prevNode.ID]} kept on board -----")
 
             print("P\tW\tS\tV\tFROM\tTO")
             for c in kept:
                 items.append(c)
                 numItems += 1
                 numKept  += 1
-                print("%d\t%d\t%d\t%.1f\t%s\t%s" % (
-                    c.P,c.W, c.S, c.V, methods.CITIES[c.Frm], methods.CITIES[c.To]))
+                if prevNode.ID < len(methods.CITIES):
+                    print("%d\t%d\t%d\t%.1f\t%s\t%s" % (
+                        c.P,c.W, c.S, c.V, methods.CITIES[c.Frm], methods.CITIES[c.To]))
 
         # set pallets destinations with items and consolidated to be delivered
         print("\n----- setPalletsDestinations, Carlos' version -----")
@@ -288,7 +291,7 @@ if __name__ == "__main__":
 
     numInst = float(len(instances))
 
-    timeString = methods.getTimeString(avgInstTime, numInst)
+    timeString = methods.getTimeString(avgInstTime, numInst, True)
 
     avgInstSC /= numInst
 

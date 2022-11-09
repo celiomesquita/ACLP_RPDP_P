@@ -32,6 +32,9 @@ def getDeltaTau(score, bestSoFar, numAnts):
     DeltaTau /= numAnts*numAnts
     return DeltaTau
 
+
+# Ant System (AS), the classic method that uses a random proportional state transition rule, while the pheromone is deposited
+# by all ants proportionally to their solution quality and is evaporated in all the components.
 # each Ant makes use of "updatePheroAttract" to update pheromones
 # and edge attractiveness according to the its solution value
 def updatePheroAttract(score, bestSoFar, edges, numAnts, reset=False):
@@ -112,10 +115,17 @@ def Solve( pallets, items, startTime, cfg, k, limit):  # items include kept on b
 
             while Nbhood:
 
+                # denom = float(len(Nbhood))
+
                 ce = pickFromNbhood(Nbhood, attracts)
 
                 if Gant.isFeasible(ce, 1.0, cfg, k):
-                    Gant.putInSol(ce)            
+                    # ce.Pheromone += ce.Pheromone/denom
+                    Gant.putInSol(ce)
+                # else:
+                    # ce.Pheromone -= ce.Pheromone/denom
+
+                # ce.updateAttract(ALPHA, BETA)          
 
             if Gant.S > Glocal.S:
                 Glocal = Gant

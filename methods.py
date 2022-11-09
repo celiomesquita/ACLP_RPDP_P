@@ -240,12 +240,14 @@ def getTours(num, costs, threshold):
             if j>0:
                 frm = nodes[j-1].ID
                 to  = nodes[j].ID
-                cost += costs[frm][to]
+                if frm < len(costs) and to < len(costs[frm]):
+                    cost += costs[frm][to]
 
             if j == len(tour[:-1])-1: # the last node
                 frm = nodes[j].ID
                 to  = 0
-                cost += costs[frm][to]                
+                if frm < len(costs) and to < len(costs[frm]):
+                    cost += costs[frm][to]                
 
         if cost < minCost:
             minCost = cost

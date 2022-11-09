@@ -7,22 +7,22 @@ import aco
 import aco_p
 import greedy
 
-# mno.DATA = "data20"
+mno.DATA = "data20"
 # mno.DATA = "data50"
 # mno.DATA = "data100"
 
-import sys
-scenario  =   int(sys.argv[1])
-method    =    f"{sys.argv[2]}"
-mno.NCPU  =   int(sys.argv[3])
-limit     = float(sys.argv[4])
-mno.DATA  =    f"{sys.argv[5]}"
+# import sys
+# scenario  =   int(sys.argv[1])
+# method    =    f"{sys.argv[2]}"
+# mno.NCPU  =   int(sys.argv[3])
+# limit     = float(sys.argv[4])
+# mno.DATA  =    f"{sys.argv[5]}"
 
-# scenario = 1
+scenario = 1
 
 # method = "Shims"
 # method = "Shims_p"
-# method = "ACO"
+method = "ACO"
 # method = "ACO_p"
 # method = "Greedy"
 
@@ -104,17 +104,21 @@ startNodeTime = time.perf_counter()
 if method == "Greedy":
     E = greedy.Solve(pallets, items, cfg, k)
 
+lim = 0.99 # for Shims only
+if scenario > 1:
+    lim = 0.85    
+
 if method == "Shims_p":
-    E = shims_p.Solve(pallets, items, cfg, k, limit)
+    E = shims_p.Solve(pallets, items, cfg, k, lim)
 
 if method == "Shims":
-    E = shims.Solve(pallets, items, cfg, k, limit)
+    E = shims.Solve(pallets, items, cfg, k, lim)
 
 if method == "ACO":
-    E =   aco.Solve( pallets, items, startNodeTime, cfg, k, limit)
+    E =   aco.Solve( pallets, items, startNodeTime, cfg, k, 0.95)
 
 if method == "ACO_p":
-    E = aco_p.Solve( pallets, items, startNodeTime, cfg, k, limit)
+    E = aco_p.Solve( pallets, items, startNodeTime, cfg, k, 0.95)
 
 elapsed = time.perf_counter() - startNodeTime
 

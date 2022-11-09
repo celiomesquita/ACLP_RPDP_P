@@ -62,7 +62,8 @@ def Solve( pallets, items, startTime, cfg, k, limit):  # items include kept on b
 
         aco.updatePheroAttract(Glocal.S, Gbest.S, antsField, aco.NANTS)
 
-    print(f"Used {numAnts} ants | ratio {Glocal.S/initialS:.3f} | {improvements} improvements")
+    if initialS > 0:
+        print(f"Used {numAnts} ants | ratio {Glocal.S/initialS:.3f} | {improvements} improvements")
 
     return mno.getSolMatrix(Gbest.Edges, numPallets, numItems)
 
