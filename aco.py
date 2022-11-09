@@ -103,8 +103,8 @@ def Solve( pallets, items, startTime, cfg, k, limit):  # items include kept on b
 
         for _ in np.arange(NANTS):
 
-            if (time.perf_counter() - startTime) > SEC_BREAK:
-                break
+            # if (time.perf_counter() - startTime) > SEC_BREAK:
+            #     break
 
             numAnts += 1
             
@@ -115,17 +115,17 @@ def Solve( pallets, items, startTime, cfg, k, limit):  # items include kept on b
 
             while Nbhood:
 
-                # denom = float(len(Nbhood))
+                denom = float(len(Nbhood))
 
                 ce = pickFromNbhood(Nbhood, attracts)
 
                 if Gant.isFeasible(ce, 1.0, cfg, k):
-                    # ce.Pheromone += ce.Pheromone/denom
+                    ce.Pheromone += ce.Pheromone/denom
                     Gant.putInSol(ce)
-                # else:
-                    # ce.Pheromone -= ce.Pheromone/denom
+                else:
+                    ce.Pheromone -= ce.Pheromone/denom
 
-                # ce.updateAttract(ALPHA, BETA)          
+                ce.updateAttract(ALPHA, BETA)          
 
             if Gant.S > Glocal.S:
                 Glocal = Gant
@@ -137,7 +137,7 @@ def Solve( pallets, items, startTime, cfg, k, limit):  # items include kept on b
         else:
             stagnant += 1
 
-        updatePheroAttract(Glocal.S, Gbest.S, antsField, NANTS)
+        # updatePheroAttract(Glocal.S, Gbest.S, antsField, NANTS)
 
 
     if initialS == 0:
