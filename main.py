@@ -106,24 +106,23 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
         opt = 0
         startNodeTime = time()
 
+        minLim = 0.75 # Shims_p
+        limit  = 0.95 # Shims and ACO
+
         if method == "Greedy":
             E = greedy.Solve(pallets, items, cfg, k)
 
-        lim = 0.99 # for Shims only
-        if scenario > 1:
-            lim = 0.85
-
         if method == "Shims_p":
-            E = shims_p.Solve(pallets, items, cfg, k, lim)
+            E = shims_p.Solve(pallets, items, cfg, k, minLim)
 
         if method == "Shims":
-            E = shims.Solve(pallets, items, cfg, k, lim)
+            E = shims.Solve(pallets, items, cfg, k, limit)
 
         if method == "ACO":
-            E =   aco.Solve( pallets, items, startNodeTime, cfg, k, 0.95)
+            E =   aco.Solve( pallets, items, startNodeTime, cfg, k, limit)
 
         if method == "ACO_p":
-            E = aco_p.Solve( pallets, items, startNodeTime, cfg, k, 0.95) 
+            E = aco_p.Solve( pallets, items, startNodeTime, cfg, k, limit) 
 
         nodeElapsed = time() - startNodeTime
 

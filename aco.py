@@ -6,10 +6,10 @@ import methods as mno
 import random
 
 ALPHA = 1   # pheromone exponent (linearly affects attractivity)
-BETA  = 3   # heuristic exponent (exponentialy affects attractivity)
-NANTS = 6   # number of ants for team
+BETA  = 4   # heuristic exponent (exponentialy affects attractivity)
+NANTS = mno.NCPU
 
-def rouletteSelection(values): # at least 15 times faster than rouletteSelection2
+def rouletteSelection(values): # at least 15 times faster than randomChoice
     max = sum(values)
     pick = random.uniform(0, max)
     current = 0
@@ -18,7 +18,7 @@ def rouletteSelection(values): # at least 15 times faster than rouletteSelection
         if current > pick:
             return key
 
-def rouletteSelection2(values):
+def randomChoice(values):
     sumVal = sum([v for v in values])
     probabilities = [v/sumVal for v    in           values ]
     indexes       = [i        for i, _ in enumerate(values)]
@@ -37,14 +37,7 @@ def getDeltaTau(score, bestSoFar, numAnts):
 # by all ants proportionally to their solution quality and is evaporated in all the components.
 # each Ant makes use of "updatePheroAttract" to update pheromones
 # and edge attractiveness according to the its solution value
-def updatePheroAttract(score, bestSoFar, edges, numAnts, reset=False):
-
-    # if True resets pheromone and attractiveness levels to diversify the search
-    if reset:
-        for i, _ in enumerate(edges):
-            edges[i].Pheromone = 0.5
-            edges[i].updateAttract(ALPHA, BETA)
-        return      
+def updatePheroAttract(score, bestSoFar, edges, numAnts):
 
     # evaporate some pheromone from all edges
     for id, e in enumerate(edges):
@@ -96,11 +89,12 @@ def Solve( pallets, items, startTime, cfg, k, limit):  # items include kept on b
     numAnts = 0
     stagnant = 0
     improvements = 0
-    denom = float(NANTS*NANTS)
 
     while stagnant <= 3:# and (time.perf_counter() - startTime) < SEC_BREAK:
 
         Glocal = mno.Solution(antsField, pallets, items, limit, cfg, k)
+
+        deltaTau = getDeltaTau(Glocal.S, initialS, NANTS)
 
         for _ in np.arange(NANTS):
 
@@ -119,10 +113,10 @@ def Solve( pallets, items, startTime, cfg, k, limit):  # items include kept on b
                 ce = pickFromNbhood(Nbhood, attracts)
 
                 if Gant.isFeasible(ce, 1.0, cfg, k):
-                    antsField[ce.ID].Pheromone += ce.Pheromone/denom
+                    antsField[ce.ID].Pheromone += deltaTau
                     Gant.putInSol(ce)
                 else:
-                    antsField[ce.ID].Pheromone -= ce.Pheromone/denom
+                    antsField[ce.ID].Pheromone -= deltaTau
 
                 antsField[ce.ID].updateAttract(ALPHA, BETA)          
 
@@ -156,7 +150,7 @@ if __name__ == "__main__":
     t0 = time.perf_counter()
 
     for v in range(1000):
-        i = rouletteSelection2(values)
+        i = randomChoice(values)
         sums[i] += 1
 
     print(sums)

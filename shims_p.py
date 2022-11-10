@@ -41,7 +41,7 @@ def Compute(edges, pallets, items, limit, cfg, k) :
 
 
 
-def Solve(pallets, items, cfg, k, minLim, NPROCS): # items include kept on board
+def Solve(pallets, items, cfg, k, minLim): # items include kept on board
 
     print(f"\nParallel Shims for ACLP+RPDP")
 
@@ -50,12 +50,12 @@ def Solve(pallets, items, cfg, k, minLim, NPROCS): # items include kept on board
 
     edges = mno.mountEdges(pallets, items, cfg)
 
-    procs = [None for _ in range(NPROCS)]
+    procs = [None for _ in range(mno.NCPU)]
     outQueue = mp.Queue()
 
     for i, p in enumerate(procs):
 
-        limit = minLim + (1.0 - minLim)*(i+1)/NPROCS
+        limit = minLim + (1.0 - minLim)*(i+1)/mno.NCPU
 
         procs[i] = mp.Process( target=shimsQueue,args=( edges, pallets, items, limit, cfg, k, outQueue  ) )
     for p in procs:

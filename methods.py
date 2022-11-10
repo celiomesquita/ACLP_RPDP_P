@@ -7,6 +7,8 @@ from time import time
 
 SEC_BREAK = 3.
 
+NCPU = 8
+
 CITIES = ["GRU", "GIG", "SSA", "CNF", "CWB", "BSB", "REC"]
 
 DATA = "data20"

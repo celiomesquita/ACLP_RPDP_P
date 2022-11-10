@@ -7,6 +7,8 @@ import aco
 import aco_p
 import greedy
 
+mno.NCPU = 8
+
 mno.DATA = "data20"
 # mno.DATA = "data50"
 # mno.DATA = "data100"
@@ -20,11 +22,11 @@ mno.DATA = "data20"
 
 scenario = 1
 
-# method = "Shims"   # score 19488
-method = "Shims_p" # score 19520
-# method = "ACO"     # sum of scores 195098.0
-# method = "ACO_p"   # sum of scores 196257.0
-# method = "Greedy"  # sum of scores 195200.0
+# method = "Greedy"
+# method = "Shims"
+# method = "Shims_p"
+# method = "ACO"
+method = "ACO_p"
 
 # data20 Shims best limit = 0.10 | 0.02s-0.04s
 # data20 ACO   best limit = 0.50
@@ -33,8 +35,8 @@ method = "Shims_p" # score 19520
 # data50 ACO   best limit = 0.90 | 1.82s
 # data50 ACO-p best limit = 0.90 | 0.77s
 
-NPROCS = 5 # Shims_p number of processes
-minLim = 0.05
+minLim = 0.75 # Shims_p
+limit  = 0.95 # Shims and ACO
 
 cfg = mno.Config(scenario)                                      
 
@@ -109,18 +111,15 @@ while tries:
         E = greedy.Solve(pallets, items, cfg, k)
 
     if method == "Shims_p":
-        E = shims_p.Solve(pallets, items, cfg, k, minLim, NPROCS)
+        E = shims_p.Solve(pallets, items, cfg, k, minLim)
 
     if method == "Shims":
-        limit = 0.99
         E = shims.Solve(pallets, items, cfg, k, limit)
 
     if method == "ACO":
-        limit = 0.90
         E =   aco.Solve( pallets, items, startNodeTime, cfg, k, limit)
 
     if method == "ACO_p":
-        limit = 0.90
         E = aco_p.Solve( pallets, items, startNodeTime, cfg, k, limit)
 
     elapsed = time.perf_counter() - startNodeTime
@@ -203,4 +202,4 @@ while tries:
         sumScores += sNodeAccum
 
 
-print(f"average elapsed = {totElapsed/(numTries):.2f} | sum of scores = {sumScores/numTries:.0f}")
+print(f"average elapsed = {totElapsed/(numTries):.2f} | average score = {sumScores/numTries:.0f}")
