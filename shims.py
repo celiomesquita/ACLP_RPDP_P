@@ -86,6 +86,8 @@ def getBestShims(p, notInSol, sol, limit, numItems, maxTorque, k):
                 break
         else:
             sh = Shim(numItems) # create a new Shim
+            if sh.shimIsFeasible(oe, sol, maxTorque, k): # try to insert the edge "oe" in the new Shim
+                sh.AppendEdge(oe)
             Set.append(sh)
 
     # all Set of edges are feasible, but one has a better score
@@ -128,14 +130,10 @@ def Compute(edges, pallets, items, limit, cfg, k) :
     #edges not in sol groupped by pallets
     notInSol = [ [] for _ in range(len(pallets)) ]
 
-    for p in (pallets):
-        notInSol[p.ID] = [e for e in sol.Edges if e.Pallet.ID == p.ID and not e.InSol  ]
-
-	# pallets closer to the CG are completed first
-    pallets.sort(key=lambda x: abs(x.D), reverse=False)
-
 	# get the best shim that fills the slack
     for p in (pallets):
+
+        notInSol[p.ID] = [e for e in sol.Edges if e.Pallet.ID == p.ID and not e.InSol  ]
 
 		# get the best shim of edges             greedy limit
         BestShims = getBestShims(p, notInSol[p.ID], sol, limit, len(items), cfg.maxTorque, k)
@@ -152,6 +150,7 @@ def Compute(edges, pallets, items, limit, cfg, k) :
             if sol.isFeasible(ce, 1.0, cfg, k):
                 sol.putInSol(ce)
                 counter += 1
+
     print(f"{counter} edges included by the local search\n")
 
     return sol
@@ -165,6 +164,9 @@ def Solve(pallets, items, cfg, k, limit): # items include kept on board
     numPallets = len(pallets)
 
     edges = mno.mountEdges(pallets, items, cfg)
+
+	# pallets closer to the CG are completed first
+    pallets.sort(key=lambda x: abs(x.D), reverse=False)      
 
     sol = Compute(edges, pallets, items, limit, cfg, k)
 

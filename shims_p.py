@@ -13,14 +13,10 @@ def Compute(edges, pallets, items, limit, cfg, k) :
     #edges not in sol groupped by pallets
     notInSol = [ [] for _ in range(len(pallets)) ]
 
-    for p in (pallets):
-        notInSol[p.ID] = [e for e in sol.Edges if e.Pallet.ID == p.ID and not e.InSol  ]
-
-	# pallets closer to the CG are completed first
-    pallets.sort(key=lambda x: abs(x.D), reverse=False)
-
 	# get the best shim that fills the slack
     for p in (pallets):
+
+        notInSol[p.ID] = [e for e in sol.Edges if e.Pallet.ID == p.ID and not e.InSol  ]
 
 		# get the best shim of edges             greedy limit
         BestShims = shims.getBestShims(p, notInSol[p.ID], sol, limit, len(items), cfg.maxTorque, k)
@@ -28,7 +24,6 @@ def Compute(edges, pallets, items, limit, cfg, k) :
         # move the best shim of edges to solution
         for e in BestShims:
             sol.putInSol(e)
-            # notInSol[p.ID].remove(e)
             notInSol[e.Pallet.ID].remove(e)
 
     # local search: Maybe still exists any edge that fit in solution
@@ -40,7 +35,6 @@ def Compute(edges, pallets, items, limit, cfg, k) :
     return sol
 
 
-
 def Solve(pallets, items, cfg, k, minLim): # items include kept on board
 
     print(f"\nParallel Shims for ACLP+RPDP")
@@ -50,6 +44,9 @@ def Solve(pallets, items, cfg, k, minLim): # items include kept on board
 
     edges = mno.mountEdges(pallets, items, cfg)
 
+	# pallets closer to the CG are completed first
+    pallets.sort(key=lambda x: abs(x.D), reverse=False)      
+
     procs = [None for _ in range(mno.NCPU)]
     outQueue = mp.Queue()
 
@@ -57,6 +54,7 @@ def Solve(pallets, items, cfg, k, minLim): # items include kept on board
 
         limit = minLim + (1.0 - minLim)*(i+1)/mno.NCPU
 
+        # create a child process for each limit
         procs[i] = mp.Process( target=shimsQueue,args=( edges, pallets, items, limit, cfg, k, outQueue  ) )
     for p in procs:
         p.start()

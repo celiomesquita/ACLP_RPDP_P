@@ -63,11 +63,13 @@ def Solve( pallets, items, startTime, cfg, k, limit):  # items include kept on b
         outQueue = mp.Queue()
         outLock  = mp.Lock()
         for i, p in enumerate(procs):
+
+            # create a child process for each ant
             procs[i] = mp.Process( target=antQueue,args=( Glocal, cfg, k, antsField, outQueue, outLock, bestScore  ) )
         for p in procs:
             numAnts+=1
             p.start()
-        sols = [outQueue.get() for _ in procs]
+        sols = [outQueue.get() for _ in procs if (time.perf_counter() - startTime) < mno.SEC_BREAK]
 
         for Gant in sols:
             if Gant.S > Glocal.S:
