@@ -47,7 +47,7 @@ class Pallet(object):
 
 # Edge connecting a pallet and an item
 class Edge(object):
-    def __init__(self, id, pallet, item, cfg):
+    def __init__(self, id, pallet, item, cfg, Alpha, Beta):
 
         self.ID      = id # index in the solution edges (it must be preserved in case of sorting)
         self.Pallet  = pallet
@@ -58,11 +58,11 @@ class Edge(object):
         # devided by volume, because it is the most constraintive attribute
         # 5100 = 15m x 340kg, maximum torque possible
         factor = abs(self.Torque) / (cfg.maxD*340) # less than 1
-        penalty = self.Item.S * factor
-        self.Heuristic = float(item.S - penalty)**2 / (1500.0*float(item.V))
+
+        self.Heuristic = ( float(item.S) / ( 3000 * float(item.V) ) ) * (1.02 - factor)
 
         self.Pheromone = 0.5# for ACO
-        self.Attract   = self.Heuristic# for ACO
+        self.Attract   = self.Pheromone**Alpha + self.Heuristic**Beta # for ACO
         self.InSol     = False
 
     # for ACO
@@ -267,7 +267,7 @@ def getTours(num, costs, threshold):
 
     return tours2
 
-def mountEdges(pallets, items, cfg):
+def mountEdges(pallets, items, cfg, Alpha=1, Beta=4):
    
     # items include kept on board, are from this node (k), and destined to unattended nodes
     m = len(pallets)
@@ -278,7 +278,7 @@ def mountEdges(pallets, items, cfg):
     i = 0
     for p in pallets:           
         for it in items:
-            e = Edge(i, p, it, cfg)
+            e = Edge(i, p, it, cfg, Alpha, Beta)
             edges[i] = e
             i += 1
 
@@ -593,7 +593,7 @@ if __name__ == "__main__":
 
     cfg = Config(scenario)
 
-    print(f"cfg.numNodes = {cfg.numNodes}")  
+    pallets = loadPallets(cfg)
 
     dists = loadDistances()
 
@@ -605,11 +605,45 @@ if __name__ == "__main__":
 
     tours = getTours(cfg.numNodes-1, costs, 0.25)
 
-    for tour in tours:
-        print(f"{tour.cost:.2f}\t", end='')
-        for node in tour.nodes:
-            print(f"{CITIES[node.ID]} ", end='')
-        print()
+
+    pi = 0 # the first, not necessarily the best
+
+    tour = tours[pi]
+
+    k = 0 # the base
+
+    # L_k destination nodes set
+    unattended = [n.ID for n in tour.nodes[k+1:]]
+
+    node = tour.nodes[k]
+
+    scenario = 1
+
+    instance = 1
+
+    items = loadNodeItems(scenario, instance, node, unattended)
+
+    edges = mountEdges(pallets, items, cfg, 1, 3)
+
+    maxHeu = max(e.Heuristic for e in edges)
+
+    minHeu = min(e.Heuristic for e in edges)
+
+    sumHeu = sum(e.Heuristic for e in edges)
+
+    avgHeu = sumHeu/len(edges)
+
+    print(minHeu, avgHeu, maxHeu)
 
 
-    # print("----- Please execute module main_test -----")
+    maxAttract = max(e.Attract for e in edges)
+
+    minAttract = min(e.Attract for e in edges)
+
+    sumAttract = sum(e.Attract for e in edges)
+
+    avgAttract = sumAttract/len(edges)
+
+    print(minAttract, avgAttract, maxAttract)
+
+

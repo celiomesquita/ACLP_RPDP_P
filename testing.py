@@ -9,8 +9,8 @@ import greedy
 
 mno.NCPU = 8
 
-# mno.DATA = "data20"
-mno.DATA = "data50"
+mno.DATA = "data20"
+# mno.DATA = "data50"
 # mno.DATA = "data100"
 
 # import sys
@@ -26,7 +26,7 @@ scenario = 1
 # method = "Shims"
 # method = "Shims_p"
 # method = "ACO"
-method = "ACO_p"
+# method = "ACO_p"
 
 # data20 Shims best limit = 0.10 | 0.02s-0.04s
 # data20 ACO   best limit = 0.50

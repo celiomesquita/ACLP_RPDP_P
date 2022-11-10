@@ -39,25 +39,26 @@ def getDeltaTau(score, bestSoFar, numAnts):
 # and edge attractiveness according to the its solution value
 def updatePheroAttract(score, bestSoFar, edges, numAnts):
 
-    # evaporate some pheromone from all edges
-    for id, e in enumerate(edges):
-        edges[id].Pheromone = math.sqrt(e.Pheromone) / 1.25 # RHO = 0.2
-        edges[id].updateAttract(ALPHA, BETA)
-
     deltaTau = getDeltaTau(score, bestSoFar, numAnts)
 
     maxAttract = 0.
     if deltaTau < 1:
         # update pheromone level in all edges
-        for id, _ in enumerate(edges):
+        for id, e in enumerate(edges):
+
+            #evaporate some pheromone 
+            edges[id].Pheromone = math.sqrt(e.Pheromone) / 1.25 # RHO = 0.2
+
             edges[id].Pheromone += deltaTau
             if edges[id].Pheromone < 0.:
                 edges[id].Pheromone = 0.
+
             edges[id].updateAttract(ALPHA, BETA)
 
             if edges[id].Attract > maxAttract:
                 maxAttract = edges[id].Attract
 
+        # normalize attractivity
         for id, _ in enumerate(edges):
             edges[id].Attract /= maxAttract
 
