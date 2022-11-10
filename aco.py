@@ -7,7 +7,7 @@ import random
 
 ALPHA = 1   # pheromone exponent (linearly affects attractivity)
 BETA  = 3   # heuristic exponent (exponentialy affects attractivity)
-NANTS = 4   # number of ants for team
+NANTS = 6   # number of ants for team
 
 def rouletteSelection(values): # at least 15 times faster than rouletteSelection2
     max = sum(values)
@@ -96,8 +96,9 @@ def Solve( pallets, items, startTime, cfg, k, limit):  # items include kept on b
     numAnts = 0
     stagnant = 0
     improvements = 0
+    denom = float(NANTS*NANTS)
 
-    while stagnant <= 3 and (time.perf_counter() - startTime) < SEC_BREAK:
+    while stagnant <= 3:# and (time.perf_counter() - startTime) < SEC_BREAK:
 
         Glocal = mno.Solution(antsField, pallets, items, limit, cfg, k)
 
@@ -114,9 +115,7 @@ def Solve( pallets, items, startTime, cfg, k, limit):  # items include kept on b
             attracts = [ce.Attract for ce in Nbhood]
 
             while Nbhood:
-
-                denom = float(len(Nbhood))
-
+                
                 ce = pickFromNbhood(Nbhood, attracts)
 
                 if Gant.isFeasible(ce, 1.0, cfg, k):

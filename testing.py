@@ -22,8 +22,8 @@ scenario = 1
 
 # method = "Shims"
 # method = "Shims_p"
-method = "ACO"
-# method = "ACO_p"
+# method = "ACO"
+method = "ACO_p"
 # method = "Greedy"
 
 # limit = 0.95
