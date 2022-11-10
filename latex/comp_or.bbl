@@ -1,4 +1,4 @@
-\begin{thebibliography}{30}
+\begin{thebibliography}{32}
 \expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
 \providecommand{\url}[1]{\texttt{#1}}
 \providecommand{\href}[2]{#2}
@@ -27,6 +27,12 @@
   problem definition and literature review on related problems}.
 \newblock \bibinfo{journal}{{European Journal of Operational Research}}
   \bibinfo{volume}{275}, \bibinfo{pages}{399--410}.
+%Type = Book
+\bibitem[{Breshears(2009)}]{Breshears2009}
+\bibinfo{author}{Breshears, C.}, \bibinfo{year}{2009}.
+\newblock \bibinfo{title}{A Thread Monkey's Guide to Writing Parallel
+  Applications}. volume \bibinfo{volume}{Chapter 8}.
+\newblock \bibinfo{publisher}{Kindle 1st Edition}.
 %Type = Article
 \bibitem[{Brosh(1981)}]{Brosh1981}
 \bibinfo{author}{Brosh, I.}, \bibinfo{year}{1981}.
@@ -178,6 +184,12 @@
   application}.
 \newblock \bibinfo{journal}{International Transactions in Operational Research}
   \bibinfo{volume}{23}, \bibinfo{pages}{187--213}.
+%Type = Misc
+\bibitem[{{Python}(2022)}]{multiprocessing}
+\bibinfo{author}{{Python}}, \bibinfo{year}{2022}.
+\newblock \bibinfo{title}{{Process-based parallelism}}.
+\newblock \URLprefix
+  \url{https://docs.python.org/3/library/multiprocessing.html}.
 %Type = Article
 \bibitem[{Roesener and Barnes(2016)}]{RoesenerBarnes2016}
 \bibinfo{author}{Roesener, A.}, \bibinfo{author}{Barnes, J.},
