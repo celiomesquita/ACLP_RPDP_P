@@ -143,7 +143,6 @@ def Compute(edges, pallets, items, limit, cfg, k) :
         # move the best shim of edges to solution
         for e in BestShims:
             sol.putInSol(e)
-            # notInSol[p.ID].remove(e)
             notInSol[e.Pallet.ID].remove(e)
 
     counter = 0
