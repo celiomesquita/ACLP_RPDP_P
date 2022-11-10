@@ -107,7 +107,6 @@ class Solution(object):
                 if not ce.InSol and self.isFeasible(ce, limit, cfg, k):
                     self.putInSol(ce)
 
-
     def putInSol(self, e):
         if e.Item.ID > len(self.Included)-1:
             return
