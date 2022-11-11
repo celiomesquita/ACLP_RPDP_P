@@ -2,7 +2,7 @@
 
 # --------Go installation--------------------------------------------------- 
 
---- in the server ---
+    --- in the server ---
 sudo apt-get update
 sudo apt-get -y upgrade
 wget https://dl.google.com/go/go1.19.2.linux-amd64.tar.gz
@@ -12,7 +12,7 @@ sudo mv go /usr/local
 export PATH=$PATH:/usr/local/go/bin
 go version
 
--- in the developing machine ---
+    --- in the developing machine ---
 cd /home/celio/Downloads
 tar -xvf go1.19.2.linux-amd64.tar.gz
 sudo rm -rvf /usr/local/go/
@@ -20,42 +20,55 @@ sudo mv go /usr/local
 go version
 
 
-
---- if not in ITA ---
+--- VPN connection ---
 sudo openvpn --config vpnita-linux.ovpn
 - sudo pwd
 - ITA e-mail username and pwd
 
-
---- Send files to the server WITH PASSWORD ---
+----- WITH PASSWORD -----
+    -- Send files to the server WITH PASSWORD ---
 rsync -avze "ssh -p 2222"  --exclude "*.txt" --exclude "*.pyc" /home/celio/Projects/ACLP_RPDP_P/  celio@161.24.2.247:/home/celio/Projects/ACLP_RPDP_P/
 
---- Get result files from the server  WITH PASSWORD --->
+    -- Get result files from the server  WITH PASSWORD --->
 rsync -avze "ssh -p 2222" celio@161.24.2.247:/home/celio/Projects/ACLP_RPDP_P/results  /home/celio/Projects/ACLP_RPDP_P/
+
+
+----- NO PASSWORD -----
+
+--- WORK ---
+    --send algorithms ---
+rsync -auvz -e "ssh -p2222 -i /home/celio/celio-rsync-key" --exclude "*.txt" --exclude "*.pyc" /home/celio/Projects/ACLP_RPDP_P/  celio@161.24.2.247:/home/celio/Projects/ACLP_RPDP_P/
+
+    --receive results ---
+rsync -avz -e "ssh -p2222 -i /home/celio/celio-rsync-key" celio@161.24.2.247:/home/celio/Projects/ACLP_RPDP_P/results  /home/celio/Projects/ACLP_RPDP_P/
+
+--- HOME ---
+    --send algorithms ---
+rsync -auvz -e "ssh -p2222 -i /home/celio/home-rsync-key" --exclude "*.txt" --exclude "*.pyc" /home/celio/Projects/ACLP_RPDP_P/  celio@161.24.2.247:/home/celio/Projects/ACLP_RPDP_P/
+
+    --receive results ---
+rsync -avz -e "ssh -p2222 -i /home/celio/home-rsync-key" celio@161.24.2.247:/home/celio/Projects/ACLP_RPDP_P/results  /home/celio/Projects/ACLP_RPDP_P/
+
 
 --- Go to the server ---
 ssh -p2222 celio@161.24.2.247
 S&l10w&$k
 cd Projects/ACLP_RPDP_P
+screen
 
+--- resume the screen session
+screen -r
 
 
 ------ secure keys creation -------
-ssh-keygen -t rsa -b 2048 -f /home/celio/celio-rsync-key
 
-rsync -avze "ssh -p 2222" /home/celio/celio-rsync-key.pub celio@161.24.2.247:/home/celio/
+--Local machine--
+    ssh-keygen -t rsa -b 2048 -f /home/celio/home-rsync-key
+    rsync -avze "ssh -p 2222" /home/celio/home-rsync-key.pub celio@161.24.2.247:/home/celio/
 
-if [ ! -f authorized_keys ]; then touch authorized_keys; chmod 600 authorized_keys; fi
-cat celio-rsync-key.pub >> .ssh/authorized_keys
-rm celio-rsync-key.pub
+--Remote machine--
+    if [ ! -f authorized_keys ]; then touch authorized_keys; chmod 600 authorized_keys; fi
+    cat home-rsync-key.pub >> .ssh/authorized_keys
 
-
---- send algorithms NO PASSWORD ---
-rsync -auvz -e "ssh -p2222 -i /home/celio/celio-rsync-key" --exclude "*.txt" --exclude "*.pyc" /home/celio/Projects/ACLP_RPDP_P/  celio@161.24.2.247:/home/celio/Projects/ACLP_RPDP_P/
-
----receive results NO PASSWORD ---
-rsync -avz -e "ssh -p2222 -i /home/celio/celio-rsync-key" celio@161.24.2.247:/home/celio/Projects/ACLP_RPDP_P/results  /home/celio/Projects/ACLP_RPDP_P/
-
---- Server ---
-64 bits, 128GiB, Intel(R) Xeon(R) CPU E5-2670 v3 @ 2.30GHz, 48 CPU, 2 threads per core, Operating System: CentOS Linux 8
-
+--- install screen for persistent process on ssh disconection
+sudo yum install screen

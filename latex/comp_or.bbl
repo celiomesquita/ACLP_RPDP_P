@@ -1,4 +1,4 @@
-\begin{thebibliography}{32}
+\begin{thebibliography}{28}
 \expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
 \providecommand{\url}[1]{\texttt{#1}}
 \providecommand{\href}[2]{#2}
@@ -12,14 +12,6 @@
 \providecommand{\bibinfo}[2]{#2}
 \ifx\xfnm\relax \def\xfnm[#1]{\unskip,\space#1}\fi
 %Type = Article
-\bibitem[{Alonso et~al.(2019)Alonso, Alvarez-Valdes and Parreno}]{Alonso2019}
-\bibinfo{author}{Alonso, M.T.}, \bibinfo{author}{Alvarez-Valdes, R.},
-  \bibinfo{author}{Parreno, F.}, \bibinfo{year}{2019}.
-\newblock \bibinfo{title}{A grasp algorithm for multi-container loading
-  problems with practical constraints}.
-\newblock \bibinfo{journal}{A Quarterly Journal of Operations Research}
-  \bibinfo{volume}{18}, \bibinfo{pages}{49--72}.
-%Type = Article
 \bibitem[{Brandt and Nickel(2019)}]{BrandtStefan2019}
 \bibinfo{author}{Brandt, F.}, \bibinfo{author}{Nickel, S.},
   \bibinfo{year}{2019}.
@@ -30,8 +22,8 @@
 %Type = Book
 \bibitem[{Breshears(2009)}]{Breshears2009}
 \bibinfo{author}{Breshears, C.}, \bibinfo{year}{2009}.
-\newblock \bibinfo{title}{A Thread Monkey's Guide to Writing Parallel
-  Applications}. volume \bibinfo{volume}{Chapter 8}.
+\newblock \bibinfo{title}{THE ART OF CONCURRENCY. Chapter 8: A Thread Monkey's
+  Guide to Writing Parallel Applications}.
 \newblock \bibinfo{publisher}{Kindle 1st Edition}.
 %Type = Article
 \bibitem[{Brosh(1981)}]{Brosh1981}
@@ -104,15 +96,6 @@
 \newblock \bibinfo{journal}{International Transactions in Operational Research}
   \bibinfo{volume}{16}, \bibinfo{pages}{767--787}.
 %Type = Article
-\bibitem[{Laabadi et~al.(2018)Laabadi, Naimi, Amri and Achchab}]{Laabadi2018}
-\bibinfo{author}{Laabadi, S.}, \bibinfo{author}{Naimi, M.},
-  \bibinfo{author}{Amri, H.E.}, \bibinfo{author}{Achchab, B.},
-  \bibinfo{year}{2018}.
-\newblock \bibinfo{title}{The 0/1 multidimensional knapsack problem and its
-  variants: A survey of practical models and heuristic approaches.}
-\newblock \bibinfo{journal}{American Journal of Operations Research}
-  \bibinfo{volume}{8}, \bibinfo{pages}{395--439}.
-%Type = Article
 \bibitem[{Larsen and Mikkelsen(1980)}]{LarsenMikkelsen1979}
 \bibinfo{author}{Larsen, O.}, \bibinfo{author}{Mikkelsen, G.},
   \bibinfo{year}{1980}.
@@ -157,13 +140,6 @@
   loading}.
 \newblock \bibinfo{journal}{Operations Research} \bibinfo{volume}{40},
   \bibinfo{pages}{1200--1205}.
-%Type = Inproceedings
-\bibitem[{Niar and Freville(1997)}]{NiarFreville1997}
-\bibinfo{author}{Niar, S.}, \bibinfo{author}{Freville, A.},
-  \bibinfo{year}{1997}.
-\newblock \bibinfo{title}{A parallel tabu search algorithm for the 0-1
-  multidimensional knapsack problem}, in: \bibinfo{booktitle}{Proceedings 11th
-  International Parallel Processing Symposium}, pp. \bibinfo{pages}{512--516}.
 %Type = Article
 \bibitem[{Paquay et~al.(2018)Paquay, Limbourg, Schyns and
   Oliveira}]{PaquayLimbourgSchynsOliveira2018}
@@ -244,14 +220,6 @@
 \newblock \bibinfo{journal}{International Journal of Computer Integrated
   Manufacturing} \bibinfo{volume}{34}, \bibinfo{pages}{801--813}.
 \newblock \DOIprefix\doi{10.1080/0951192X.2020.1775299}.
-%Type = Article
-\bibitem[{Zhan et~al.(2020)Zhan, Wang, Zhang and Zhong}]{Zhan2020}
-\bibinfo{author}{Zhan, S.}, \bibinfo{author}{Wang, L.}, \bibinfo{author}{Zhang,
-  Z.}, \bibinfo{author}{Zhong, Y.}, \bibinfo{year}{2020}.
-\newblock \bibinfo{title}{Noising methods with hybrid greedy repair operator
-  for 0-1 knapsack problem}.
-\newblock \bibinfo{journal}{Memetic Computing} \bibinfo{volume}{12},
-  \bibinfo{pages}{37--50}.
 %Type = Article
 \bibitem[{Zhao et~al.(2021)Zhao, Yuan, Dong and Zhao}]{zhao2021}
 \bibinfo{author}{Zhao, X.}, \bibinfo{author}{Yuan, Y.}, \bibinfo{author}{Dong,

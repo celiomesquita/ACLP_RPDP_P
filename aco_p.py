@@ -36,7 +36,7 @@ def antSolve(Gant, cfg, k, antsField, outLock, bestScore):
 def antQueue( Gant, cfg, k, antsField, outQueue, outLock, bestScore ):
     outQueue.put( antSolve(Gant, cfg, k, antsField, outLock, bestScore) )
 
-def Solve( pallets, items, startTime, cfg, k, limit):  # items include kept on board
+def Solve( pallets, items, startTime, cfg, k, limit, numCPU, secBreak):  # items include kept on board
 
     print("\nMultiprocess Ant Colony Optimization for ACLP+RPDP")
 
@@ -55,11 +55,11 @@ def Solve( pallets, items, startTime, cfg, k, limit):  # items include kept on b
     stagnant = 0
     improvements = 0
    
-    while stagnant < aco.NANTS and (time.perf_counter() - startTime) < mno.SEC_BREAK:    
+    while stagnant <= 3 and (time.perf_counter() - startTime) < secBreak:    
 
         Glocal = mno.Solution(antsField, pallets, items, limit, cfg, k)
 
-        procs = [None for _ in range(aco.NANTS)]
+        procs = [None for _ in range(numCPU)]
         outQueue = mp.Queue()
         outLock  = mp.Lock()
         for i, p in enumerate(procs):
@@ -69,10 +69,12 @@ def Solve( pallets, items, startTime, cfg, k, limit):  # items include kept on b
         for p in procs:
             numAnts+=1
             p.start()
-        sols = [outQueue.get() for _ in procs if (time.perf_counter() - startTime) < mno.SEC_BREAK]
+        sols = [outQueue.get() for _ in procs if (time.perf_counter() - startTime) < secBreak]
+
+        outQueue = None
 
         for Gant in sols:
-            if Gant.S > Glocal.S:
+            if Gant != None and Gant.S > Glocal.S:
                 Glocal = Gant
 
         if Glocal.S > Gbest.S:

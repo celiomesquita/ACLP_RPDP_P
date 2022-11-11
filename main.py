@@ -14,7 +14,7 @@ import aco_p
 import greedy
 
 
-def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
+def solveTour(scenario, instance, pi, tour, method, pallets, cfg, numCPU, secBreak):
     """
     Solves one tour
     """
@@ -113,16 +113,16 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg):
             E = greedy.Solve(pallets, items, cfg, k)
 
         if method == "Shims_p":
-            E = shims_p.Solve(pallets, items, cfg, k, minLim)
+            E = shims_p.Solve(pallets, items, cfg, k, minLim, numCPU)
 
         if method == "Shims":
             E = shims.Solve(pallets, items, cfg, k, limit)
 
         if method == "ACO":
-            E =   aco.Solve( pallets, items, startNodeTime, cfg, k, limit)
+            E =   aco.Solve( pallets, items, startNodeTime, cfg, k, limit, secBreak)
 
         if method == "ACO_p":
-            E = aco_p.Solve( pallets, items, startNodeTime, cfg, k, limit) 
+            E = aco_p.Solve( pallets, items, startNodeTime, cfg, k, limit, numCPU, secBreak) 
 
         nodeElapsed = time() - startNodeTime
 
@@ -198,14 +198,13 @@ if __name__ == "__main__":
     import sys
     scenario     =   int(sys.argv[1])
     method       =    f"{sys.argv[2]}"
-    methods.NCPU =   int(sys.argv[3])
-    # limit        = float(sys.argv[4])
+    numCPU       =   int(sys.argv[3])
     methods.DATA =    f"{sys.argv[4]}"
 
     # clear cache
     # find . | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
 
-    methods.SEC_BREAK = 1.5
+    secBreak = 0.7
 
     # methods.DATA = "data20"
     # methods.DATA = "data50"
@@ -271,7 +270,7 @@ if __name__ == "__main__":
         searchTime = 0
         for pi, tour in enumerate(tours):
 
-            broke = solveTour(scenario, instance, pi, tour, method, pallets, cfg) # writeTourSol is True or False
+            broke = solveTour(scenario, instance, pi, tour, method, pallets, cfg, numCPU, secBreak) # writeTourSol is True or False
 
             searchTime += tour.elapsed
 

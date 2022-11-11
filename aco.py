@@ -7,7 +7,7 @@ import random
 
 ALPHA = 1   # pheromone exponent (linearly affects attractivity)
 BETA  = 4   # heuristic exponent (exponentialy affects attractivity)
-NANTS = mno.NCPU
+NANTS = 6
 
 def rouletteSelection(values): # at least 15 times faster than randomChoice
     max = sum(values)
@@ -42,7 +42,7 @@ def updatePheroAttract(score, bestSoFar, edges, numAnts):
     deltaTau = getDeltaTau(score, bestSoFar, numAnts)
 
     maxAttract = 0.
-    if deltaTau < 1:
+    if abs(deltaTau) < 1:
         # update pheromone level in all edges
         for id, e in enumerate(edges):
 
@@ -71,9 +71,7 @@ def pickFromNbhood(nbhood, values):
     values.pop(i)
     return e
 
-def Solve( pallets, items, startTime, cfg, k, limit):  # items include kept on board
-
-    SEC_BREAK = NANTS
+def Solve( pallets, items, startTime, cfg, k, limit, secBreak):  # items include kept on board
 
     print("\nAnt Colony Optimization for ACLP+RPDP")
 
@@ -91,7 +89,7 @@ def Solve( pallets, items, startTime, cfg, k, limit):  # items include kept on b
     stagnant = 0
     improvements = 0
 
-    while stagnant <= 3:# and (time.perf_counter() - startTime) < SEC_BREAK:
+    while stagnant <= 3 and (time.perf_counter() - startTime) < secBreak:
 
         Glocal = mno.Solution(antsField, pallets, items, limit, cfg, k)
 
@@ -99,7 +97,7 @@ def Solve( pallets, items, startTime, cfg, k, limit):  # items include kept on b
 
         for _ in np.arange(NANTS):
 
-            if (time.perf_counter() - startTime) > SEC_BREAK:
+            if (time.perf_counter() - startTime) > secBreak:
                 break
 
             numAnts += 1

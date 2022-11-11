@@ -866,7 +866,7 @@ $ScoreAndDeviation$\/ is described in Algorithm \ref{alg:eval}, which evaluates 
 
 In this subsection we present implementations of $SolveNode(method,k, G)$, where $method$\/ corresponds to a heuristic, $k$\/ is the index of the current node and $G$\/ is the allocation graph of the consolidated items that remain on board at node $l_k$.
 
-An important issue on meta-heuristics is that they are known for the hard work in tuning parameters. For this, when we use the word {\it empirically}\/ throughout the text, we want to say that we accomplished many tests with the hardest instances to fit these values. This does not guarantee best results for all instances, but, on average, overall results are acceptable. Another important observation is that our heuristics were designed based on traditional ideas from the literature \cite{NiarFreville1997,Fidanova2006,Laabadi2018,Alonso2019,Zhan2020} and on the experiences learned during tests.
+An important issue on meta-heuristics is that they are known for the hard work in tuning parameters. For this, when we use the word {\it empirically}\/ throughout the text, we want to say that we accomplished many tests with the hardest instances to fit these values. This does not guarantee best results for all instances, but, on average, overall results are acceptable. Another important observation is that our heuristics were designed based on traditional ideas from the literature \cite{Fidanova2006} and on the experiences learned during tests.
 
 To guarantee that performance comparisons are made correctly, our implementations use the same elements described below.
 
@@ -1228,16 +1228,16 @@ According to \cite[p.271]{Breshears2009}, a Process is the operating system’s 
 		                                  &{\bf run-time (s)}& <1          & 1           &             &            &            &          &   \\ %206s
 		\midrule[.1pt]	
 		
-		\multirow{2}{*}{\textbf{Shims-p}} & $f$              & 5.72        & 3.17        &          &          &          &         &   \\ 
-		                                  &{\bf run-time (s)}& 2           & 12          &             &            &            &          &   \\ %299s
+		\multirow{2}{*}{\textbf{Shims-p}} & $f$              & 5.88        & 3.16        &          &          &          &         &   \\ 
+		                                  &{\bf run-time (s)}& 1           & 10          &             &            &            &          &   \\ %299s
 		\midrule[.1pt]
 		
-		\multirow{2}{*}{\textbf{ACO}}     & $f$              & 5.64        &         &          &        &       &      &   \\ 
-                                          &{\bf run-time (s)}& 23          &          &           &        &       &      &   \\ 
+		\multirow{2}{*}{\textbf{ACO}}     & $f$              & 5.77        &         &          &        &       &      &   \\ 
+                                          &{\bf run-time (s)}& 14          &          &           &        &       &      &   \\ 
         \midrule[.1pt]	
 
-        \multirow{2}{*}{\textbf{ACO-p}}   & $f$              & {\bf 5.81}        &         &          &         &       &       &   \\ 
-                                          &{\bf run-time (s)}& 16          &           &           &         &       &       &   \\ 
+        \multirow{2}{*}{\textbf{ACO-p}}   & $f$              & 5.82        &         &          &         &       &       &   \\ 
+                                          &{\bf run-time (s)}& 22          &           &           &         &       &       &   \\ 
 
         \bottomrule		
 	\end{tabular}

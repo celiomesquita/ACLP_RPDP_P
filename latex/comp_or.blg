@@ -1,51 +1,51 @@
-This is BibTeX, Version 0.99d (TeX Live 2019/Debian)
+This is BibTeX, Version 0.99d (TeX Live 2022/dev/Debian)
 Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: comp_or.aux
 The style file: elsarticle-harv.bst
 Database file #1: references.bib
 Warning--entry type for "Dorigo1992" isn't style-file defined
---line 288 of file references.bib
+--line 287 of file references.bib
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Warning--empty pages in fok2004optimizing
-You've used 32 entries,
+You've used 28 entries,
             2990 wiz_defined-function locations,
-            872 strings with 11380 characters,
-and the built_in function-call counts, 20541 in all, are:
-= -- 1565
-> -- 704
-< -- 22
-+ -- 304
-- -- 240
-* -- 2175
-:= -- 2958
-add.period$ -- 94
-call.type$ -- 32
-change.case$ -- 238
-chr.to.int$ -- 32
-cite$ -- 33
-duplicate$ -- 1582
-empty$ -- 1579
-format.name$ -- 348
-if$ -- 3879
+            844 strings with 10608 characters,
+and the built_in function-call counts, 17640 in all, are:
+= -- 1345
+> -- 592
+< -- 19
++ -- 253
+- -- 201
+* -- 1857
+:= -- 2551
+add.period$ -- 83
+call.type$ -- 28
+change.case$ -- 205
+chr.to.int$ -- 28
+cite$ -- 29
+duplicate$ -- 1362
+empty$ -- 1369
+format.name$ -- 295
+if$ -- 3327
 int.to.chr$ -- 1
 int.to.str$ -- 1
-missing$ -- 299
-newline$ -- 173
-num.names$ -- 128
-pop$ -- 574
+missing$ -- 256
+newline$ -- 154
+num.names$ -- 112
+pop$ -- 495
 preamble$ -- 1
-purify$ -- 208
+purify$ -- 179
 quote$ -- 0
-skip$ -- 462
+skip$ -- 395
 stack$ -- 0
-substring$ -- 939
-swap$ -- 1099
-text.length$ -- 4
+substring$ -- 808
+swap$ -- 934
+text.length$ -- 2
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 282
+type$ -- 246
 warning$ -- 1
-while$ -- 126
+while$ -- 109
 width$ -- 0
-write$ -- 458
+write$ -- 402
 (There were 2 warnings)

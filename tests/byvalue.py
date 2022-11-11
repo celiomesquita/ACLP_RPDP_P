@@ -1,3 +1,4 @@
+
 def set_list(list):
 	list = ["A", "B", "C"]
 	return list
