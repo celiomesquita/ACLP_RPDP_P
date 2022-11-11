@@ -42,9 +42,9 @@
 
 
 \newcommand{\Comentar}[1]{\State {\cmmt{#1}}}
-\newcommand{\Break}{\State \textbf{break}}
-\renewcommand{\Return}{\State \textbf{return}~}
-\renewcommand{\algorithmicensure}{\textbf{Parameters:}}
+\newcommand{\Break}{\State \bf {break}}
+\renewcommand{\Return}{\State \bf {return}~}
+\renewcommand{\algorithmicensure}{\bf {Parameters:}}
 
 \renewcommand\algorithmicthen{}
 \renewcommand\algorithmicdo{}
@@ -392,9 +392,9 @@ Tables \ref{tab:smaller} and \ref{tab:larger} show the parameters in both cases.
 	\footnotesize
 	\begin{tabular}{c | c c c c c c c}
 		\toprule
-		\textbf{Limits}  & \multicolumn{3}{c}{$Payload$: $26,000kg$} & \multicolumn{4}{c}{$limit^{CG}_{long}$: $0.556m$} \\
+		\bf {Limits}  & \multicolumn{3}{c}{$Payload$: $26,000kg$} & \multicolumn{4}{c}{$limit^{CG}_{long}$: $0.556m$} \\
 		\midrule
-		\bf{Pallets} & $p_7$ & $p_6$ & $p_5$ & $p_4$ & $p_3$ & $p_2$ & $p_1$ \\
+		\bf {Pallets} & $p_7$ & $p_6$ & $p_5$ & $p_4$ & $p_3$ & $p_2$ & $p_1$ \\
 		\midrule
 		{\bf CGx ($m$)}     & -5.10 & -2.70 & -0.30   & 2.10 & 4.50 & 6.25 & 8.39  \\
 		\midrule
@@ -402,7 +402,7 @@ Tables \ref{tab:smaller} and \ref{tab:larger} show the parameters in both cases.
 		{\bf Volume limits ($m^3$)} & 13.7  &  13.7 &  13.7   & 13.7 & 13.7 & 8.9 & 6.9 \\ 
 		\midrule
 
-		\textbf{Costs}  & \multicolumn{4}{c}{$c_d$: US\$ $1.100/km$ } &	\multicolumn{3}{c}{$c_g = 0.05$} \\
+		\bf {Costs}  & \multicolumn{4}{c}{$c_d$: US\$ $1.100/km$ } &	\multicolumn{3}{c}{$c_g = 0.05$} \\
 
 		\bottomrule
 	\end{tabular}
@@ -416,23 +416,23 @@ Tables \ref{tab:smaller} and \ref{tab:larger} show the parameters in both cases.
 	\footnotesize
 	\begin{tabular}{c | c c c c c c c c c}
 		\toprule
-		\textbf{Limits}& \multicolumn{3}{c}{$Payload$: $75,000kg$} & \multicolumn{3}{c}{$limit^{CG}_{long}$: $1.170m$} &
+		\bf {Limits}& \multicolumn{3}{c}{$Payload$: $75,000kg$} & \multicolumn{3}{c}{$limit^{CG}_{long}$: $1.170m$} &
 		\multicolumn{3}{c}{$limit^{CG}_{lat}$: $0.19m$} \\
 		\midrule
-		\multirow{2}{*}{\textbf{Pallets}}  & $p_{17}$ & $p_{15}$ & $p_{13}$ & $p_{11}$ & $p_{9}$ & $p_{7}$ & $p_{5}$ & $p_{3}$ & $p_{1}$ \\
+		\multirow{2}{*}{\bf {Pallets}}  & $p_{17}$ & $p_{15}$ & $p_{13}$ & $p_{11}$ & $p_{9}$ & $p_{7}$ & $p_{5}$ & $p_{3}$ & $p_{1}$ \\
 		& $p_{18}$ & $p_{16}$ & $p_{14}$ & $p_{12}$ & $p_{10}$ & $p_{8}$ & $p_{6}$ & $p_{4}$ & $p_{2}$ \\
 		\midrule 
-		\multirow{2}{*}{\textbf{CGx ($m$)}} & -17.57 & -13.17 & -8.77 & -4.40 & 0 & 4.40 & 8.77 & 11.47 & 14.89 \\
+		\multirow{2}{*}{\bf {CGx ($m$)}} & -17.57 & -13.17 & -8.77 & -4.40 & 0 & 4.40 & 8.77 & 11.47 & 14.89 \\
 		& -17.57 & -13.17 & -8.77 & -4.40 & 0 & 4.40 & 8.77 & 11.47 & 14.89 \\			
 		\midrule 
-		\multirow{2}{*}{\textbf{CGy ($m$)}}  & 1.32 & 1.32 & 1.32 & 1.32 & 1.32 & 1.32 & 1.32 & 1.32 & 1.32 \\
+		\multirow{2}{*}{\bf {CGy ($m$)}}  & 1.32 & 1.32 & 1.32 & 1.32 & 1.32 & 1.32 & 1.32 & 1.32 & 1.32 \\
 		& -1.32 & -1.32 & -1.32 & -1.32 & -1.32 & -1.32 & -1.32 & -1.32 & -1.32 \\	
 		\midrule
 		{\bf Weight limits ($kg$)}      &   4,500   &    4,500  &   4,500   &  4,500    & 4,500     & 4,500     & 4,500     & 4,000    & 3,000   \\
 		{\bf Volume limits ($m^3$)}   &   14.8   &   14.8   &  14.8    &  14.8    & 14.8     & 14.8     & 14.8     & 10.0    & 7.0 \\	
 		\midrule	
 
-		\textbf{Costs}  & \multicolumn{5}{c}{ $c_d$: US\$ $4.900/km$ } &	\multicolumn{4}{c}{$c_g = 0.05$} \\
+		\bf {Costs}  & \multicolumn{5}{c}{ $c_d$: US\$ $4.900/km$ } &	\multicolumn{4}{c}{$c_g = 0.05$} \\
 
 		\bottomrule
 	\end{tabular}
@@ -1205,39 +1205,69 @@ For each generated $t^k_j$\/ item, its destination is uniformly random selected 
 
 All the experiments are performed on a 64-bit, 128GiB, 3.6GHz, 48-core processor, 2 threads per core, Intel Xeon, with {\it Linux CentOS 8} as the operational system and {\it Python 3.10.4}\/ as the programming language.
 
-For parallelization, we used the {\it Python multiprocessing} package, which implements {\it process-based parallelism or parallel shared memory algorithm}. According to \cite{multiprocessing}, Multiprocessing is a package that supports spawning processes using an API similar to the threading module.
+For parallelization, we used the {\it Python multiprocessing} package, which implements {\it process-based parallelism} or {\it parallel shared memory algorithm}. According to \cite{multiprocessing}, {\it Multiprocessing} is a package that supports spawning processes using an API similar to the {\it Python Threading} package.
 
-The multiprocessing package offers both local and remote concurrency, effectively side-stepping the global interpreter lock by using sub-processes instead of threads. Because of this, the multiprocessing module lets the programmer take full advantage of the fact that a machine has more than one processor. This decision for multiprocessing relies on the need to exchange information among processes, which would be harder to handle with thread-based parallelism.
+The {\it Multiprocessing} package (mp) offers both local and remote concurrency, effectively side-stepping the global interpreter lock by using sub-processes instead of threads. Because of this, the {\it Multiprocessing} module lets the programmer take full advantage of the fact that a machine has more than one processor, 48 in our computer. This decision for {\it Multiprocessing} relies on the need to exchange information among processes (the pheromone trails or some information regarding load balancing, in our case), which would be harder to handle with thread-based parallelism.
 
 According to \cite[p.271]{Breshears2009}, a Process is the operating system’s spawned and controlled entity that encapsulates an executing application. A process has two main functions: The first is to act as the resource holder for the application, and the second is to execute the instructions of the application.
+
+\vspace{2.0mm}
+
+\begin{table}[H]
+	\centering
+	\caption{Performance for different number of concurrent processes with $1.2 \times volume$}  \label{tab:procs}
+%	\footnotesize
+	\scriptsize
+	\begin{tabular}{c| c | c | c c c c c c }
+	\toprule
+	\textbf{Scenario} & $method$ &{\bf Results}     & \textbf{1} & \textbf{4} & \textbf{8} & \textbf{16} & \textbf{24} & \textbf{32}  \\
+	\toprule
+	\multirow{4}{*}{\bf {1}}  &\multirow{2}{*}{\it {mpShims}}  &$f$               & 1 & 4 & 8 & 16 & 24 & 32 \\
+	                          &                                &{\bf run-time (s)}& 1 & 4 & 8 & 16 & 24 & 32 \\
+                              \cmidrule{2-9}
+	                          &\multirow{2}{*}{\it {mpACO}}    &$f$               & 1 & 4 & 8 & 16 & 24 & 32 \\
+	                          &                                &{\bf run-time (s)}& 1 & 4 & 8 & 16 & 24 & 32 \\
+	\cmidrule{1-9}
+	\multirow{4}{*}{\bf {2}}  &\multirow{2}{*}{\it {mpShims}} &$f$               & 1 & 4 & 8 & 16 & 24 & 32 \\
+	                          &   &{\bf run-time (s)}& 1 & 4 & 8 & 16 & 24 & 32 \\
+                              \cmidrule{2-9}
+	                          &\multirow{2}{*}{\it {mpACO}}   &$f$               & 1 & 4 & 8 & 16 & 24 & 32 \\
+	                          &   &{\bf run-time (s)}& 1 & 4 & 8 & 16 & 24 & 32 \\				
+	\bottomrule		
+\end{tabular}
+
+\normalsize
+
+\end{table}
 
 
 \vspace{2.0mm}
 
 \begin{table}[H]
 	\centering
-	\caption{Methods and scenarios with $volume=1.2$}  \label{tab:20}
-	\footnotesize
-	\begin{tabular}{l|c|cccccc|c}
+	\caption{Methods and scenarios with $1.2 \times volume$}  \label{tab:20}
+%	\footnotesize
+\scriptsize
+	\begin{tabular}{r|c|c|cccccc|c}
 		\toprule
-		{$method$}                        &{\bf Results}    &{\bf 1}     &{\bf 2}    &{\bf 3}      &{\bf 4}      &{\bf 5}      &{\bf 6}     &\specialcell{{\bf Normalized}\\{\bf Speed-up}} \\
+		{$method$}                     &{\bf Procs}              &{\bf Results}     &{\bf 1}     &{\bf 2}    &{\bf 3}      &{\bf 4}      &{\bf 5}      &{\bf 6}     &\specialcell{{\bf Normalized}\\{\bf Speed-up}} \\
 		\toprule
 	
 		
-		\multirow{2}{*}{\textbf{Shims}}   & $f$              & 5.40        & 2.94        &          &          &          &         &   \\ 
-		                                  &{\bf run-time (s)}& <1          & 1           &             &            &            &          &   \\ %206s
+		\multirow{2}{*}{\it {Shims}}   &\multirow{2}{*}{\bf {1}} & $f$              & 5.40        & 2.94    & 2.93         &          &          &         &   \\ 
+		                               &                         &{\bf run-time (s)}& <1          & 1       & 4            &            &            &          &   \\ %206s
 		\midrule[.1pt]	
 		
-		\multirow{2}{*}{\textbf{Shims-p}} & $f$              & 5.88        & 3.16        &          &          &          &         &   \\ 
-		                                  &{\bf run-time (s)}& 1           & 10          &             &            &            &          &   \\ %299s
+		\multirow{2}{*}{\it {mpShims}} &\multirow{2}{*}{\bf {24}}& $f$              & 5.88        & 3.16    & 3.16         &          &          &         &   \\ 
+		                               &                         &{\bf run-time (s)}& 1           & 10      & 41           &            &            &          &   \\ %299s
 		\midrule[.1pt]
 		
-		\multirow{2}{*}{\textbf{ACO}}     & $f$              & 5.77        &         &          &        &       &      &   \\ 
-                                          &{\bf run-time (s)}& 14          &          &           &        &       &      &   \\ 
+		\multirow{2}{*}{\it {ACO}}     &\multirow{2}{*}{\bf {1}} & $f$              & 5.77        & 3.49    &          &        &       &      &   \\ 
+                                       &                         &{\bf run-time (s)}& 14          & 808     &           &        &       &      &   \\ 
         \midrule[.1pt]	
 
-        \multirow{2}{*}{\textbf{ACO-p}}   & $f$              & 5.82        &         &          &         &       &       &   \\ 
-                                          &{\bf run-time (s)}& 22          &           &           &         &       &       &   \\ 
+        \multirow{2}{*}{\it {mpACO}}   &\multirow{2}{*}{\bf {32}}& $f$              & 5.82        & 3.12    &          &         &       &       &   \\ 
+                                       &                         &{\bf run-time (s)}& 22          & 473     &           &         &       &       &   \\ 
 
         \bottomrule		
 	\end{tabular}
