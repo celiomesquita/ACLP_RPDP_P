@@ -7,24 +7,22 @@ import aco
 import aco_p
 import greedy
 
-mno.DATA = "data20"
+# mno.DATA = "data20"
 # mno.DATA = "data50"
 # mno.DATA = "data100"
 
-# import sys
-# scenario  =   int(sys.argv[1])
-# method    =    f"{sys.argv[2]}"
-# mno.NCPU  =   int(sys.argv[3])
-# limit     = float(sys.argv[4])
-# mno.DATA  =    f"{sys.argv[5]}"
+import sys
+scenario  =   int(sys.argv[1])
+method    =    f"{sys.argv[2]}"
+mno.DATA  =    f"{sys.argv[3]}"
 
-scenario = 1
+# scenario = 1
 
 # method = "Greedy"
 # method = "Shims"
 # method = "Shims_p"
 # method = "ACO"
-method = "ACO_p"
+# method = "ACO_p"
 
 # data20 Shims best limit = 0.10 | 0.02s-0.04s
 # data20 ACO   best limit = 0.50
@@ -70,7 +68,9 @@ tries = numTries
 totElapsed = 0
 sumScores = 0
 
-numCpus = [4,8,12,16,20,24,28,32,36,40,44,48]
+# numCpus = [4,8,12,16,20,24,28,32,36,40,44,48]
+numCpus = [1,4,8,16,24,32,40,48]
+# numCpus = [8]
 
 if method == "Shims" or method == "ACO" or method == "Greedy":
     numCpus = [1]
@@ -103,7 +103,7 @@ while tries:
 
         numItems = len(items)
 
-        print(f"{numItems} items")
+        print(f"{numItems} items and {numCPU} CPU")
 
         mno.setPalletsDestinations(items, pallets, tour.nodes, k, unattended)
 
@@ -218,5 +218,12 @@ while tries:
 print(f"average elapsed = {totElapsed/(numTries):.2f} | average score = {sumScores/numTries:.0f}")
 
 if method == "Shims_p" or method == "ACO_p":
-    print(f"{times}")
-    print(f"{scores}")
+    timesLatex = ""
+    for t in times:
+        timesLatex += f"& {t:.2f} " 
+    print(timesLatex)
+
+    scoresLatex = ""
+    for s in scores:
+        scoresLatex += f"& {s:.0f} " 
+    print(scoresLatex)

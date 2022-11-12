@@ -34,8 +34,22 @@ def Compute(edges, pallets, items, limit, cfg, k) :
 
     return sol
 
+def getLimits(minLim, numProcs): # pid: 0 - numProcs-1
 
-def Solve(pallets, items, cfg, k, minLim, numCPU): # items include kept on board
+    limitSet = set()
+
+    maxLim = 0.98
+
+    delta = (maxLim - minLim)/(numProcs+1)
+
+    # set of unique limit values
+    for i in range(numProcs):
+        limitSet.add(minLim + (i+1)*delta)
+
+    # return list(limitSet)
+    return [*limitSet, ] # a bit faster
+
+def Solve(pallets, items, cfg, k, minLim, numProcs): # items include kept on board
 
     print(f"\nParallel Shims for ACLP+RPDP")
 
@@ -45,17 +59,21 @@ def Solve(pallets, items, cfg, k, minLim, numCPU): # items include kept on board
     edges = mno.mountEdges(pallets, items, cfg)
 
 	# pallets closer to the CG are completed first
-    pallets.sort(key=lambda x: abs(x.D), reverse=False)      
+    pallets.sort(key=lambda x: abs(x.D), reverse=False)
 
-    procs = [None for _ in range(numCPU)]
+    # set of unique limit values
+    limits = getLimits(minLim, numProcs)    
+
+    procs = [None for _ in limits]
     outQueue = mp.Queue()
 
     for i, p in enumerate(procs):
 
-        limit = minLim + (1.0 - minLim)*(i+1)/numCPU
+        limit = limits[i]
 
         # create a child process for each limit
         procs[i] = mp.Process( target=shimsQueue,args=( edges, pallets, items, limit, cfg, k, outQueue  ) )
+        
     for p in procs:
         p.start()
         
