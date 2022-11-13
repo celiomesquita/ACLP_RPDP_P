@@ -1224,43 +1224,14 @@ The {\it Multiprocessing} package (mp) offers both local and remote concurrency
 
 According to \cite[p.271]{Breshears2009}, a Process is the operating system’s spawned and controlled entity that encapsulates an executing application. A process has two main functions: The first is to act as the resource holder for the application, and the second is to execute the instructions of the application.
 
-\vspace{2.0mm}
 
-\begin{table}[H]
-	\centering
-	\caption{Performance for different number of concurrent processes with $1.2 \times volume$}  \label{tab:procs}
-%	\footnotesize
-	\scriptsize
-	\begin{tabular}{c| c | c | c c c c c c c c }
-	\toprule
-	{\it Scenario} & $method$ &{\bf numProcs}    & \textbf{1} & \textbf{4} & \textbf{8} & \textbf{16} & \textbf{24} & \textbf{32} & \textbf{40} & \textbf{48}  \\
-	\toprule
-	\multirow{4}{*}{\it {1}}  &\multirow{2}{*}{\it {mpShims}}  &{\bf scores}      & 10909 & 10936 & 11022 & 11003 & 11033 & 11021 & 11013 & 11033 \\
-	                          &                                &{\bf run-time (s)}& 0.12 & 0.23 & 0.44 & 0.65 & 1.13 & 1.74 & 2.32 & 3.68  \\
-                              \cmidrule{2-11}
-	                          &\multirow{2}{*}{\it {mpACO}}    &{\bf scores}               & 4 & 4 & 8 & 16 & 24 & 32&& \\
-	                          &                                &{\bf run-time (s)}& 4 & 4 & 8 & 16 & 24 & 32&& \\
-	\cmidrule{1-11}
-	\multirow{4}{*}{\it {2}}  &\multirow{2}{*}{\it {mpShims}} &{\bf scores}       & 40016 & 40071 & 40071 & 40078 & 40078 & 40073 & 40083 & 40083 \\
-	                          &                               &{\bf run-time (s)} & 2.72 & 2.85 & 2.15 & 1.95 & 3.10 & 20.32 & 13.95 & 17.24  \\
-                              \cmidrule{2-11}
-	                          &\multirow{2}{*}{\it {mpACO}}   &{\bf scores}       & 4 & 4 & 8 & 16 & 24 & 32&& \\
-	                          &   &{\bf run-time (s)}         & 4 & 4 & 8 & 16 & 24 & 32&& \\				
-	\bottomrule		
-\end{tabular}
-
-\normalsize
-
-\end{table}
-
-
-\begin{figure}[h!]
+\begin{figure}[H]
 	\begin{center}
 		\begin{tikzpicture}[scale=0.8, samples=100]
 			\begin{axis}[
 				myplotstyle,
 				xlabel={\bf Scenario 1 computation times (s)},
-				ylabel={\bf Scores},
+				ylabel={\bf Score},
 				]
 				\addplot+[
 				only marks,	
@@ -1278,7 +1249,6 @@ According to \cite[p.271]{Breshears2009}, a Process is the operating system’s 
 			\begin{axis}[
 				myplotstyle,
 				xlabel={\bf Scenario 2 computation times (s)},
-				ylabel={\bf Scores},
 				]
 				\addplot+[
 				only marks,	
@@ -1291,22 +1261,22 @@ According to \cite[p.271]{Breshears2009}, a Process is the operating system’s 
 			\end{axis}
 		\end{tikzpicture}	
 		
-		\caption{ {\it mpShims} performance with $1.2 \times volume$. }
 	\end{center}
-	\label{fig:mpShimsData20}
+	\caption{ {\it mpShims} performance with $1.2 \times volume$. }
+	\label{fig:mpShims2data20}
 \end{figure}
 
-Observing Figure \ref{fig:mpShimsData20}, it may be noticed that the best number of processes for {\it Scenario 1} (closest to the upper left corner) is 8. For {\it Scenario 2}, the best number is 16.
+Observing Figure \ref{fig:mpShims2data20}, it may be noticed that the best number of processes for {\it Scenario 1} (closest to the upper left corner) is \textbf{1}. For {\it Scenario 2}, the best number is \textbf{4}.
 
 
 
-\begin{figure}[h!]
+\begin{figure}[H]
 	\begin{center}
 		\begin{tikzpicture}[scale=0.8, samples=100]
 			\begin{axis}[
 				myplotstyle,
 				xlabel={\bf Scenario 1 computation times (s)},
-				ylabel={\bf Scores},
+				ylabel={\bf Score},
 				]
 				\addplot+[
 				only marks,	
@@ -1324,7 +1294,6 @@ Observing Figure \ref{fig:mpShimsData20}, it may be noticed that the best number
 			\begin{axis}[
 				myplotstyle,
 				xlabel={\bf Scenario 2 computation times (s)},
-				ylabel={\bf Scores},
 				]
 				\addplot+[
 				only marks,	
@@ -1337,31 +1306,32 @@ Observing Figure \ref{fig:mpShimsData20}, it may be noticed that the best number
 			\end{axis}
 		\end{tikzpicture}
 		
-		\caption{{\it mpShims} performance with $1.5 \times volume$.}
+		
 	\end{center}
-	\label{fig:mpShimsData50}
+	\caption{{\it mpShims} performance with $1.5 \times volume$.}
+	\label{fig:mpShims2data50}
 \end{figure}
 
-Observing Figure \ref{fig:mpShimsData50}, it may be noticed that the best number of processes for {\it Scenario 1} (closest to the upper left corner) is 8. For {\it Scenario 2}, the best number is 16.
+Observing Figure \ref{fig:mpShims2data50}, it may be noticed that the best number of processes for {\it Scenario 1} is \textbf{1}. For {\it Scenario 2}, the best number is \textbf{8}.
 
 
 
 
-\begin{figure}[h!]
+\begin{figure}[H]
 	
 	\begin{center}
 		\begin{tikzpicture}[scale=0.8, samples=100]
 			\begin{axis}[
 				myplotstyle,
 				xlabel={\bf Scenario 1 computation times (s)},
-				ylabel={\bf Scores},
+				ylabel={\bf Score},
 				]
 				\addplot+[
 				only marks,	
 				nodes near coords = {\numProcs{}},
 				visualization depends on = {value \thisrow{np} \as \numProcs},						
 				]
-				table[x=time, y=score, col sep=comma] {Shims_p1data100.csv};
+				table[x=time, y=score, col sep=comma] {mpACO1data20.csv};
 				
 				\legend{\it parallel processes}
 			\end{axis}
@@ -1372,26 +1342,71 @@ Observing Figure \ref{fig:mpShimsData50}, it may be noticed that the best number
 			\begin{axis}[
 				myplotstyle,
 				xlabel={\bf Scenario 2 computation times (s)},
-				ylabel={\bf Scores},
 				]
 				\addplot+[
 				only marks,	
 				nodes near coords = {\numProcs{}},
 				visualization depends on = {value \thisrow{np} \as \numProcs},						
 				]
-				table[x=time, y=score, col sep=comma] {Shims_p2data100.csv};
+				table[x=time, y=score, col sep=comma] {mpACO2data20.csv};
 				
 				\legend{\it parallel processes}
 			\end{axis}
 		\end{tikzpicture}
 		
-		\caption{{\it mpShims} performance with $2.0 \times volume$.}
+		
 	\end{center}
-	\label{fig:mpShimsData100}
+	\caption{{\it mpACO} performance with $1.2 \times volume$.}
+	\label{fig:mpACO2data20}
 \end{figure}
 
-Observing Figure \ref{fig:mpShimsData100}, it may be noticed that the best number of processes for {\it Scenario 1} (closest to the upper left corner) is 8. For {\it Scenario 2}, the best number is 16.
+Observing Figure \ref{fig:mpACO2data20}, it may be noticed that the best number of processes for {\it Scenario 1} is \textbf{40}. For {\it Scenario 2}, the best number is \textbf{1}.
 
+
+\begin{figure}[H]
+	
+	\begin{center}
+		\begin{tikzpicture}[scale=0.8, samples=100]
+			\begin{axis}[
+				myplotstyle,
+				xlabel={\bf Scenario 1 computation times (s)},
+				ylabel={\bf Score},
+				]
+				\addplot+[
+				only marks,	
+				nodes near coords = {\numProcs{}},
+				visualization depends on = {value \thisrow{np} \as \numProcs},						
+				]
+				table[x=time, y=score, col sep=comma] {mpACO1data50.csv};
+				
+				\legend{\it parallel processes}
+			\end{axis}
+		\end{tikzpicture}%
+		~%
+		%
+		\begin{tikzpicture}[scale=0.8, samples=100]
+			\begin{axis}[
+				myplotstyle,
+				xlabel={\bf Scenario 2 computation times (s)},
+				]
+				\addplot+[
+				only marks,	
+				nodes near coords = {\numProcs{}},
+				visualization depends on = {value \thisrow{np} \as \numProcs},						
+				]
+				table[x=time, y=score, col sep=comma] {mpACO2data50.csv};
+				
+				\legend{\it parallel processes}
+			\end{axis}
+		\end{tikzpicture}
+		
+		
+	\end{center}
+	\caption{{\it mpACO} performance with $1.5 \times volume$.}
+	\label{fig:mpACO2data50}
+\end{figure}
+
+Observing Figure \ref{fig:mpACO2data50}, it may be noticed that the best number of processes for {\it Scenario 1} is \textbf{1}. For {\it Scenario 2}, the best number is \textbf{16}.
 
 
 

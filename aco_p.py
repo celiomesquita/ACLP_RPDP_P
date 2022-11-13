@@ -69,9 +69,10 @@ def Solve( pallets, items, startTime, cfg, k, limit, numCPU, secBreak):  # items
         for p in procs:
             numAnts+=1
             p.start()
-        sols = [outQueue.get() for _ in procs if (time.perf_counter() - startTime) < secBreak]
+        sols = [outQueue.get() for _ in procs]
 
         outQueue = None
+        outLock  = None
 
         for Gant in sols:
             if Gant != None and Gant.S > Glocal.S:
@@ -86,8 +87,8 @@ def Solve( pallets, items, startTime, cfg, k, limit, numCPU, secBreak):  # items
 
         aco.updatePheroAttract(Glocal.S, Gbest.S, antsField, aco.NANTS)
 
-    if initialS > 0:
-        print(f"Used {numAnts} ants | ratio {Glocal.S/initialS:.3f} | {improvements} improvements")
+    # if initialS > 0:
+        # print(f"Used {numAnts} ants | ratio {Glocal.S/initialS:.3f} | {improvements} improvements")
 
     return mno.getSolMatrix(Gbest.Edges, numPallets, numItems)
 

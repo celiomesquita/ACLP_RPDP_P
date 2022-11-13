@@ -59,7 +59,7 @@ for p in pallets:
 if cfg.weiCap > cfg.payload:
     cfg.weiCap = cfg.payload   
 
-numTries = 10
+numTries = 3
 if method == "Shims" or method == "Shims_p" or method=="Greedy": # the solution is always the same
     numTries = 1
 
@@ -103,7 +103,7 @@ while tries:
 
         numItems = len(items)
 
-        print(f"{numItems} items and {numCPU} CPU")
+        print(f"{numItems} items and {numCPU} processes")
 
         mno.setPalletsDestinations(items, pallets, tour.nodes, k, unattended)
 
@@ -212,7 +212,7 @@ while tries:
 
             if method == "Shims_p" or method == "ACO_p":
                 times[ix]  += elapsed
-                scores[ix] += sNodeAccum
+                scores[ix] += sNodeAccum # * (2-abs(epsilom))
 
 
 print(f"average elapsed = {totElapsed/(numTries):.2f} | average score = {sumScores/numTries:.0f}")
