@@ -1238,7 +1238,7 @@ According to \cite[p.271]{Breshears2009}, a Process is the operating system’s 
 				nodes near coords = {\numProcs{}},
 				visualization depends on = {value \thisrow{np} \as \numProcs},						
 				]
-				table[x=time, y=score, col sep=comma] {mpShims1data20.csv};
+				table[x=time, y=score, col sep=comma] {./csv/Shims_p1data20.csv};
 				
 				\legend{\it parallel processes}
 			\end{axis}
@@ -1255,7 +1255,7 @@ According to \cite[p.271]{Breshears2009}, a Process is the operating system’s 
 				nodes near coords = {\numProcs{}},
 				visualization depends on = {value \thisrow{np} \as \numProcs},						
 				]
-				table[x=time, y=score, col sep=comma] {mpShims2data20.csv};
+				table[x=time, y=score, col sep=comma] {./csv/Shims_p2data20.csv};
 				
 				\legend{\it parallel processes}
 			\end{axis}
@@ -1263,10 +1263,10 @@ According to \cite[p.271]{Breshears2009}, a Process is the operating system’s 
 		
 	\end{center}
 	\caption{ {\it mpShims} performance with $1.2 \times volume$. }
-	\label{fig:mpShims2data20}
+	\label{fig:mpShimsdata20}
 \end{figure}
 
-Observing Figure \ref{fig:mpShims2data20}, it may be noticed that the best number of processes for {\it Scenario 1} (closest to the upper left corner) is \textbf{1}. For {\it Scenario 2}, the best number is \textbf{4}.
+Observing Figure \ref{fig:mpShimsdata20}, it may be noticed that the best number of processes for {\it Scenario 1} (closest to the upper left corner) is \textbf{1}. For {\it Scenario 2}, the best number is \textbf{4}.
 
 
 
@@ -1283,7 +1283,7 @@ Observing Figure \ref{fig:mpShims2data20}, it may be noticed that the best numbe
 				nodes near coords = {\numProcs{}},
 				visualization depends on = {value \thisrow{np} \as \numProcs},						
 				]
-				table[x=time, y=score, col sep=comma] {mpShims1data50.csv};
+				table[x=time, y=score, col sep=comma] {./csv/Shims_p1data50.csv};
 				
 				\legend{\it parallel processes}
 			\end{axis}
@@ -1300,7 +1300,7 @@ Observing Figure \ref{fig:mpShims2data20}, it may be noticed that the best numbe
 				nodes near coords = {\numProcs{}},
 				visualization depends on = {value \thisrow{np} \as \numProcs},						
 				]
-				table[x=time, y=score, col sep=comma] {mpShims2data50.csv};
+				table[x=time, y=score, col sep=comma] {./csv/Shims_p2data50.csv};
 				
 				\legend{\it parallel processes}
 			\end{axis}
@@ -1309,10 +1309,10 @@ Observing Figure \ref{fig:mpShims2data20}, it may be noticed that the best numbe
 		
 	\end{center}
 	\caption{{\it mpShims} performance with $1.5 \times volume$.}
-	\label{fig:mpShims2data50}
+	\label{fig:mpShimsdata50}
 \end{figure}
 
-Observing Figure \ref{fig:mpShims2data50}, it may be noticed that the best number of processes for {\it Scenario 1} is \textbf{1}. For {\it Scenario 2}, the best number is \textbf{8}.
+Observing Figure \ref{fig:mpShimsdata50}, it may be noticed that the best number of processes for {\it Scenario 1} is \textbf{1}. For {\it Scenario 2}, the best number is \textbf{8}.
 
 
 
@@ -1331,7 +1331,7 @@ Observing Figure \ref{fig:mpShims2data50}, it may be noticed that the best numbe
 				nodes near coords = {\numProcs{}},
 				visualization depends on = {value \thisrow{np} \as \numProcs},						
 				]
-				table[x=time, y=score, col sep=comma] {mpACO1data20.csv};
+				table[x=time, y=score, col sep=comma] {./csv/ACO_p1data20.csv};
 				
 				\legend{\it parallel processes}
 			\end{axis}
@@ -1348,7 +1348,7 @@ Observing Figure \ref{fig:mpShims2data50}, it may be noticed that the best numbe
 				nodes near coords = {\numProcs{}},
 				visualization depends on = {value \thisrow{np} \as \numProcs},						
 				]
-				table[x=time, y=score, col sep=comma] {mpACO2data20.csv};
+				table[x=time, y=score, col sep=comma] {./csv/ACO_p2data20.csv};
 				
 				\legend{\it parallel processes}
 			\end{axis}
@@ -1357,10 +1357,10 @@ Observing Figure \ref{fig:mpShims2data50}, it may be noticed that the best numbe
 		
 	\end{center}
 	\caption{{\it mpACO} performance with $1.2 \times volume$.}
-	\label{fig:mpACO2data20}
+	\label{fig:mpACOdata20}
 \end{figure}
 
-Observing Figure \ref{fig:mpACO2data20}, it may be noticed that the best number of processes for {\it Scenario 1} is \textbf{40}. For {\it Scenario 2}, the best number is \textbf{1}.
+Observing Figure \ref{fig:mpACOdata20}, it may be noticed that the best number of processes for {\it Scenario 1} is \textbf{40}. For {\it Scenario 2}, the best number is \textbf{1}.
 
 
 \begin{figure}[H]
@@ -1377,7 +1377,7 @@ Observing Figure \ref{fig:mpACO2data20}, it may be noticed that the best number 
 				nodes near coords = {\numProcs{}},
 				visualization depends on = {value \thisrow{np} \as \numProcs},						
 				]
-				table[x=time, y=score, col sep=comma] {mpACO1data50.csv};
+				table[x=time, y=score, col sep=comma] {./csv/ACO_p1data50.csv};
 				
 				\legend{\it parallel processes}
 			\end{axis}
@@ -1394,7 +1394,7 @@ Observing Figure \ref{fig:mpACO2data20}, it may be noticed that the best number 
 				nodes near coords = {\numProcs{}},
 				visualization depends on = {value \thisrow{np} \as \numProcs},						
 				]
-				table[x=time, y=score, col sep=comma] {mpACO2data50.csv};
+				table[x=time, y=score, col sep=comma] {./csv/ACO_p2data50.csv};
 				
 				\legend{\it parallel processes}
 			\end{axis}
@@ -1403,10 +1403,10 @@ Observing Figure \ref{fig:mpACO2data20}, it may be noticed that the best number 
 		
 	\end{center}
 	\caption{{\it mpACO} performance with $1.5 \times volume$.}
-	\label{fig:mpACO2data50}
+	\label{fig:mpACOdata50}
 \end{figure}
 
-Observing Figure \ref{fig:mpACO2data50}, it may be noticed that the best number of processes for {\it Scenario 1} is \textbf{1}. For {\it Scenario 2}, the best number is \textbf{16}.
+Observing Figure \ref{fig:mpACOdata50}, it may be noticed that the best number of processes for {\it Scenario 1} is \textbf{1}. For {\it Scenario 2}, the best number is \textbf{16}.
 
 
 

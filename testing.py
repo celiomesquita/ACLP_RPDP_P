@@ -69,7 +69,7 @@ totElapsed = 0
 sumScores = 0
 
 # numCpus = [4,8,12,16,20,24,28,32,36,40,44,48]
-numCpus = [1,4,8,16,24,32,40,48]
+numCpus = [1,2,4,6,8,10]
 # numCpus = [8]
 
 if method == "Shims" or method == "ACO" or method == "Greedy":
@@ -218,21 +218,12 @@ while tries:
 print(f"average elapsed = {totElapsed/(numTries):.2f} | average score = {sumScores/numTries:.0f}")
 
 if method == "Shims_p" or method == "ACO_p":
-    # timesLatex = ""
-    # for t in times:
-    #     timesLatex += f"& {t:.2f} " 
-    # print(timesLatex)
-
-    # scoresLatex = ""
-    # for s in scores:
-    #     scoresLatex += f"& {s:.0f} " 
-    # print(scoresLatex)
 
     text = "np,time,score\n"
     for i, _ in enumerate(numCpus):
         text += f"{numCpus[i]},{times[i]:.2f},{scores[i]:.0f}\n"
 
-    fname = f"./latex/{method}{scenario}{mno.DATA}.csv"
+    fname = f"./latex/csv/{method}{scenario}{mno.DATA}.csv"
 
     writer = open(fname,'w+') # + creates the file, if not exists
 
@@ -242,13 +233,3 @@ if method == "Shims_p" or method == "ACO_p":
         writer.close() 
 
     print(text)
-
-# np,  time,    score
-# 1,	0.41,	50914
-# 4,	0.77,	50937
-# 8,	1.21,	50916
-# 16,	2.16,	50929
-# 24,	3.05,	50951
-# 32,	4.41,	50941
-# 40,	4.52,	50944
-# 48,	6.15,	50934

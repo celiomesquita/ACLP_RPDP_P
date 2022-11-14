@@ -1,6 +1,4 @@
 import time
-import math
-import numpy as np
 import methods as mno
 import multiprocessing as mp
 import aco
@@ -47,7 +45,7 @@ def Solve( pallets, items, startTime, cfg, k, limit, numCPU, secBreak):  # items
 
     bestScore = Gbest.S
 
-    initialS = Gbest.S
+    # initialS = Gbest.S
 
     numPallets = len(pallets)
     numItems   = len(items)
@@ -60,22 +58,28 @@ def Solve( pallets, items, startTime, cfg, k, limit, numCPU, secBreak):  # items
         Glocal = mno.Solution(antsField, pallets, items, limit, cfg, k)
 
         procs = [None for _ in range(numCPU)]
+
+
         outQueue = mp.Queue()
+
         outLock  = mp.Lock()
         for i, p in enumerate(procs):
-
             # create a child process for each ant
             procs[i] = mp.Process( target=antQueue,args=( Glocal, cfg, k, antsField, outQueue, outLock, bestScore  ) )
+        
         for p in procs:
             numAnts+=1
             p.start()
-        sols = [outQueue.get() for _ in procs]
 
-        outQueue = None
-        outLock  = None
+        sols = [outQueue.get() for _ in procs if time.perf_counter() - startTime < secBreak ]
+       
+        for p in procs:
+            p.terminate()
+               
+        outQueue.close()
 
         for Gant in sols:
-            if Gant != None and Gant.S > Glocal.S:
+            if Gant.S > Glocal.S:
                 Glocal = Gant
 
         if Glocal.S > Gbest.S:
