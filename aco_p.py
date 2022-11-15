@@ -5,20 +5,7 @@ import aco
 
 # Process-based parallelism
 
-def getLimits(minLim, numProcs): # pid: 0 - numProcs-1
 
-    limitSet = set()
-
-    maxLim = 0.98
-
-    delta = (maxLim - minLim)/(numProcs+1)
-
-    # set of unique limit values
-    for i in range(numProcs):
-        limitSet.add(minLim + (i+1)*delta)
-
-    # return list(limitSet)
-    return [*limitSet, ] # a bit faster
 
 def antSolve(Gant, cfg, k, antsField, bestScore):
     
@@ -41,7 +28,7 @@ def enqueue( antsQueue,     Gant, cfg, k, antsField, bestScore ):
 
 def publish(antsQueue, procs, limits, antsField, pallets, items, cfg, k, bestScore ):
 
-    for i, p in enumerate(procs):
+    for i, _ in enumerate(procs):
 
         limit = limits[i] # greedy limit
 
@@ -50,33 +37,25 @@ def publish(antsQueue, procs, limits, antsField, pallets, items, cfg, k, bestSco
         # create a child process for each ant
         procs[i] = mp.Process( target=enqueue, args=( antsQueue, Glocal, cfg, k, antsField, bestScore ) )
     
-    numAnts = 0    
-    for p in procs:
-        numAnts+=1
-        p.start()
-
-    return numAnts
-
+        procs[i].start()
+         
 
 def subscribe(antsQueue, procs, startTime, secBreak):
 
     sols = [antsQueue.get() for _ in procs if time.perf_counter() - startTime < secBreak ]
-    
     for p in procs:
         p.terminate()  
-
     antsQueue.close()
-
     return sols  
 
 def Solve( pallets, items, startTime, cfg, k, minLim, numProcs, secBreak):  # items include kept on board
 
-    print("\nMultiprocess Ant Colony Optimization for ACLP+RPDP")
+    print("\nParallel Ant Colony Optimization for ACLP+RPDP")
 
     antsField = mno.mountEdges(pallets, items, cfg)
 
     # set of unique greedy limit values
-    limits = getLimits(minLim, numProcs) 
+    limits = mno.getLimits(minLim, numProcs) 
 
     # initialize the best solution so far           1.0 totally greedy
     Gbest = mno.Solution(antsField, pallets, items, 0.95, cfg, k)
@@ -93,9 +72,11 @@ def Solve( pallets, items, startTime, cfg, k, minLim, numProcs, secBreak):  # it
 
         procs = [None for _ in range(numProcs)]
 
+        numAnts += numProcs
+
         antsQueue = mp.Queue()
 
-        numAnts += publish(antsQueue, procs, limits, antsField, pallets, items, cfg, k, Gbest.S)
+        publish(antsQueue, procs, limits, antsField, pallets, items, cfg, k, Gbest.S)
 
         sols = subscribe(antsQueue, procs, startTime, secBreak)
 

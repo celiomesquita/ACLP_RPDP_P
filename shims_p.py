@@ -34,20 +34,6 @@ def Compute(edges, pallets, items, limit, cfg, k) :
 
     return sol
 
-def getLimits(minLim, numProcs): # pid: 0 - numProcs-1
-
-    limitSet = set()
-
-    maxLim = 0.98
-
-    delta = (maxLim - minLim)/(numProcs+1)
-
-    # set of unique limit values
-    for i in range(numProcs):
-        limitSet.add(minLim + (i+1)*delta)
-
-    # return list(limitSet)
-    return [*limitSet, ] # a bit faster
 
 def Solve(pallets, items, cfg, k, minLim, numProcs): # items include kept on board
 
@@ -62,7 +48,7 @@ def Solve(pallets, items, cfg, k, minLim, numProcs): # items include kept on boa
     pallets.sort(key=lambda x: abs(x.D), reverse=False)
 
     # set of unique limit values
-    limits = getLimits(minLim, numProcs)    
+    limits = mno.getLimits(minLim, numProcs)    
 
     procs = [None for _ in limits]
     outQueue = mp.Queue()

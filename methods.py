@@ -147,6 +147,21 @@ class Solution(object):
  
         return True
 
+def getLimits(minLim, numProcs): # pid: 0 - numProcs-1
+
+    limitSet = set()
+
+    maxLim = 0.98
+
+    delta = (maxLim - minLim)/(numProcs+1)
+
+    # set of unique limit values
+    for i in range(numProcs):
+        limitSet.add(minLim + (i+1)*delta)
+
+    # return list(limitSet)
+    return [*limitSet, ] # a bit faster
+    
 # mount the decision matrix for which items will be put in which pallets
 def getSolMatrix(edges, numPallets, numItems):
     X = np.zeros((numPallets,numItems))
