@@ -5,47 +5,83 @@ import aco
 
 # Process-based parallelism
 
-def antSolve(Gant, cfg, k, antsField, outLock, bestScore):
+def getLimits(minLim, numProcs): # pid: 0 - numProcs-1
 
+    limitSet = set()
+
+    maxLim = 0.98
+
+    delta = (maxLim - minLim)/(numProcs+1)
+
+    # set of unique limit values
+    for i in range(numProcs):
+        limitSet.add(minLim + (i+1)*delta)
+
+    # return list(limitSet)
+    return [*limitSet, ] # a bit faster
+
+def antSolve(Gant, cfg, k, antsField, bestScore):
+    
     Nbhood   = [ce for ce in Gant.Edges if not ce.InSol]
     attracts = [ce.Attract for ce in Nbhood]
-
-    deltaTau = aco.getDeltaTau(Gant.S, bestScore, aco.NANTS)
 
     while Nbhood:
 
         ce = aco.pickFromNbhood(Nbhood, attracts)
 
         if Gant.isFeasible(ce, 1.0, cfg, k):
-
             Gant.putInSol(ce)
-
-            with outLock:
-                antsField[ce.ID].Pheromone += deltaTau            
-        else:
-            with outLock:
-                antsField[ce.ID].Pheromone -= deltaTau
-
-        with outLock:
-            antsField[ce.ID].updateAttract(aco.ALPHA, aco.BETA)
+    
+    aco.updatePheroAttract(Gant.S, bestScore, antsField)
 
     return Gant
 
-def antQueue( Gant, cfg, k, antsField, outQueue, outLock, bestScore ):
-    outQueue.put( antSolve(Gant, cfg, k, antsField, outLock, bestScore) )
+def enqueue( antsQueue,     Gant, cfg, k, antsField, bestScore ):
+    antsQueue.put( antSolve(Gant, cfg, k, antsField, bestScore) )
 
-def Solve( pallets, items, startTime, cfg, k, limit, numCPU, secBreak):  # items include kept on board
+def publish(antsQueue, procs, limits, antsField, pallets, items, cfg, k, bestScore ):
+
+    for i, p in enumerate(procs):
+
+        limit = limits[i] # greedy limit
+
+        Glocal = mno.Solution(antsField, pallets, items, limit, cfg, k)
+
+        # create a child process for each ant
+        procs[i] = mp.Process( target=enqueue, args=( antsQueue, Glocal, cfg, k, antsField, bestScore ) )
+    
+    numAnts = 0    
+    for p in procs:
+        numAnts+=1
+        p.start()
+
+    return numAnts
+
+
+def subscribe(antsQueue, procs, startTime, secBreak):
+
+    sols = [antsQueue.get() for _ in procs if time.perf_counter() - startTime < secBreak ]
+    
+    for p in procs:
+        p.terminate()  
+
+    antsQueue.close()
+
+    return sols  
+
+def Solve( pallets, items, startTime, cfg, k, minLim, numProcs, secBreak):  # items include kept on board
 
     print("\nMultiprocess Ant Colony Optimization for ACLP+RPDP")
 
     antsField = mno.mountEdges(pallets, items, cfg)
 
+    # set of unique greedy limit values
+    limits = getLimits(minLim, numProcs) 
+
     # initialize the best solution so far           1.0 totally greedy
-    Gbest = mno.Solution(antsField, pallets, items, 1.00, cfg, k)
+    Gbest = mno.Solution(antsField, pallets, items, 0.95, cfg, k)
 
-    bestScore = Gbest.S
-
-    # initialS = Gbest.S
+    initialS  = Gbest.S
 
     numPallets = len(pallets)
     numItems   = len(items)
@@ -55,44 +91,27 @@ def Solve( pallets, items, startTime, cfg, k, limit, numCPU, secBreak):  # items
    
     while stagnant <= 3 and (time.perf_counter() - startTime) < secBreak:    
 
-        Glocal = mno.Solution(antsField, pallets, items, limit, cfg, k)
+        procs = [None for _ in range(numProcs)]
 
-        procs = [None for _ in range(numCPU)]
+        antsQueue = mp.Queue()
 
+        numAnts += publish(antsQueue, procs, limits, antsField, pallets, items, cfg, k, Gbest.S)
 
-        outQueue = mp.Queue()
-
-        outLock  = mp.Lock()
-        for i, p in enumerate(procs):
-            # create a child process for each ant
-            procs[i] = mp.Process( target=antQueue,args=( Glocal, cfg, k, antsField, outQueue, outLock, bestScore  ) )
-        
-        for p in procs:
-            numAnts+=1
-            p.start()
-
-        sols = [outQueue.get() for _ in procs if time.perf_counter() - startTime < secBreak ]
-       
-        for p in procs:
-            p.terminate()
-               
-        outQueue.close()
+        sols = subscribe(antsQueue, procs, startTime, secBreak)
 
         for Gant in sols:
-            if Gant.S > Glocal.S:
-                Glocal = Gant
 
-        if Glocal.S > Gbest.S:
-            Gbest = Glocal
-            stagnant = 0
-            improvements += 1
-        else:
-            stagnant += 1
+            if Gant.S > Gbest.S:
+                Gbest = Gant
+                stagnant = 0
+                improvements += 1
+            else:
+                stagnant += 1
 
-        aco.updatePheroAttract(Glocal.S, Gbest.S, antsField, aco.NANTS)
+            aco.updatePheroAttract(Gant.S, Gbest.S, antsField)
 
-    # if initialS > 0:
-        # print(f"Used {numAnts} ants | ratio {Glocal.S/initialS:.3f} | {improvements} improvements")
+    if initialS > 0:
+        print(f"\nUsed {numAnts} ants | ratio {Gbest.S/initialS:.3f} | {improvements} improvements\n")
 
     return mno.getSolMatrix(Gbest.Edges, numPallets, numItems)
 

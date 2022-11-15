@@ -3,49 +3,47 @@ Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: comp_or.aux
 The style file: elsarticle-harv.bst
 Database file #1: references.bib
-Warning--entry type for "Dorigo1992" isn't style-file defined
---line 287 of file references.bib
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Warning--empty pages in fok2004optimizing
-You've used 28 entries,
+You've used 29 entries,
             2990 wiz_defined-function locations,
-            844 strings with 10608 characters,
-and the built_in function-call counts, 17640 in all, are:
-= -- 1345
-> -- 592
+            852 strings with 10892 characters,
+and the built_in function-call counts, 18410 in all, are:
+= -- 1408
+> -- 618
 < -- 19
-+ -- 253
-- -- 201
-* -- 1857
-:= -- 2551
-add.period$ -- 83
-call.type$ -- 28
-change.case$ -- 205
-chr.to.int$ -- 28
-cite$ -- 29
-duplicate$ -- 1362
-empty$ -- 1369
-format.name$ -- 295
-if$ -- 3327
++ -- 263
+- -- 210
+* -- 1950
+:= -- 2660
+add.period$ -- 88
+call.type$ -- 29
+change.case$ -- 213
+chr.to.int$ -- 29
+cite$ -- 30
+duplicate$ -- 1420
+empty$ -- 1425
+format.name$ -- 307
+if$ -- 3473
 int.to.chr$ -- 1
 int.to.str$ -- 1
-missing$ -- 256
-newline$ -- 154
-num.names$ -- 112
-pop$ -- 495
+missing$ -- 268
+newline$ -- 161
+num.names$ -- 116
+pop$ -- 508
 preamble$ -- 1
-purify$ -- 179
+purify$ -- 186
 quote$ -- 0
-skip$ -- 395
+skip$ -- 409
 stack$ -- 0
-substring$ -- 808
-swap$ -- 934
+substring$ -- 840
+swap$ -- 983
 text.length$ -- 2
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 246
+type$ -- 255
 warning$ -- 1
-while$ -- 109
+while$ -- 113
 width$ -- 0
-write$ -- 402
-(There were 2 warnings)
+write$ -- 423
+(There was 1 warning)

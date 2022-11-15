@@ -1,27 +1,22 @@
 
-def set_list(list):
+def set_list(list): # by value
 	list = ["A", "B", "C"]
 	return list
 
-def add(list):
+my_list = ["X","Y"]
+
+new_list = set_list(my_list)
+
+print(new_list)
+
+
+def add(list): # by reference
 	list.append("D")
 	return list
 
 my_list = ["E"]
-add(my_list)
-set_list(my_list)
-print(my_list)
 
+new_list = add(my_list)
 
-def set_list(list):
-	list = 5
-	return list
+print(new_list)
 
-def add(list):
-	list += 1
-	return list
-
-my_list = 2
-add(my_list)
-set_list(my_list)
-print(my_list)

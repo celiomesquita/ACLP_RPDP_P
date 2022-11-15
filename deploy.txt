@@ -72,3 +72,8 @@ screen -r
 
 --- install screen for persistent process on ssh disconection
 sudo yum install screen
+
+
+cpupower frequency-set -g ondemand -d 1.8GHz -u 3.2GHz
+
+cpupower frequency-info

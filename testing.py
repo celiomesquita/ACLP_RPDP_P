@@ -12,28 +12,34 @@ import greedy
 # mno.DATA = "data100"
 
 import sys
-scenario  =   int(sys.argv[1])
-method    =    f"{sys.argv[2]}"
+method    =    f"{sys.argv[1]}"
+scenario  =   int(sys.argv[2])
 mno.DATA  =    f"{sys.argv[3]}"
+
 
 # scenario = 1
 
-# method = "Greedy"
-# method = "Shims"
-# method = "Shims_p"
-# method = "ACO"
-# method = "ACO_p"
-
-# data20 Shims best limit = 0.10 | 0.02s-0.04s
-# data20 ACO   best limit = 0.50
-# data20 ACO-p best limit = 0.40
-# data50 Shims best limit = 0.10
-# data50 ACO   best limit = 0.90 | 1.82s
-# data50 ACO-p best limit = 0.90 | 0.77s
+if scenario == 1:
+    instances = [1,2,3,4,5,6,7]
+    # instances = [1]
+if scenario == 2:
+    instances = [1,2,3,4,5,6,7]
+    # instances = [1]
+if scenario == 3:
+    instances = [1,2,3,4,5,6,7]
+if scenario == 4:
+    instances = [1,2,3,4,5,6,7]
+if scenario == 5:
+    instances = [1,2,3,4,5]
+if scenario == 6:
+    instances = [1,2,3] 
 
 minLim = 0.75 # Shims_p
 limit  = 0.95 # Shims and ACO
-secBreak = 0.7
+secBreak = 3.0 # seconds
+
+if method == "ACO_p":
+    minLim = 0.9
 
 cfg = mno.Config(scenario)                                      
 
@@ -59,29 +65,25 @@ for p in pallets:
 if cfg.weiCap > cfg.payload:
     cfg.weiCap = cfg.payload   
 
-numTries = 3
-if method == "Shims" or method == "Shims_p" or method=="Greedy": # the solution is always the same
-    numTries = 1
-
-tries = numTries
-
 totElapsed = 0
 sumScores = 0
 
-# numCpus = [4,8,12,16,20,24,28,32,36,40,44,48]
-numCpus = [1,2,4,6,8,10]
-# numCpus = [8]
+# numProcs = [1,4,8,12,16,20,24,28,32,36,40,44,48]
+numProcs = [1,2,4,6,8]
+# numProcs = [1,2]
 
 if method == "Shims" or method == "ACO" or method == "Greedy":
-    numCpus = [1]
+    numProcs = [1]
 
-times = [0 for _ in numCpus]
-scores = [0 for _ in numCpus]
+times = [0 for _ in numProcs]
+scores = [0 for _ in numProcs]
 
-while tries:
-    tries -= 1
+# while tries:
+#     tries -= 1
 
-    for ix, numCPU in enumerate(numCpus):
+for inst in instances:    
+
+    for ix, procs in enumerate(numProcs):
 
         tours = mno.getTours(cfg.numNodes-1, costs, 0.25)
 
@@ -103,7 +105,7 @@ while tries:
 
         numItems = len(items)
 
-        print(f"{numItems} items and {numCPU} processes")
+        print(f"{numItems} items and {procs} processes")
 
         mno.setPalletsDestinations(items, pallets, tour.nodes, k, unattended)
 
@@ -120,7 +122,7 @@ while tries:
             E = greedy.Solve(pallets, items, cfg, k)
 
         if method == "Shims_p": # 6 CPU
-            E = shims_p.Solve(pallets, items, cfg, k, minLim, numCPU)
+            E = shims_p.Solve(pallets, items, cfg, k, minLim, procs)
 
         if method == "Shims":
             E = shims.Solve(pallets, items, cfg, k, limit)
@@ -129,7 +131,7 @@ while tries:
             E =   aco.Solve( pallets, items, startNodeTime, cfg, k, limit, secBreak)
 
         if method == "ACO_p":
-            E = aco_p.Solve( pallets, items, startNodeTime, cfg, k, limit, numCPU, secBreak)
+            E = aco_p.Solve( pallets, items, startNodeTime, cfg, k, minLim, procs, secBreak)
 
         elapsed = time.perf_counter() - startNodeTime
 
@@ -214,14 +216,11 @@ while tries:
                 times[ix]  += elapsed
                 scores[ix] += sNodeAccum # * (2-abs(epsilom))
 
-
-print(f"average elapsed = {totElapsed/(numTries):.2f} | average score = {sumScores/numTries:.0f}")
-
 if method == "Shims_p" or method == "ACO_p":
 
     text = "np,time,score\n"
-    for i, _ in enumerate(numCpus):
-        text += f"{numCpus[i]},{times[i]:.2f},{scores[i]:.0f}\n"
+    for i, _ in enumerate(numProcs):
+        text += f"{numProcs[i]},{times[i]/len(instances):.2f},{scores[i]/len(instances):.0f}\n"
 
     fname = f"./latex/csv/{method}{scenario}{mno.DATA}.csv"
 

@@ -4,6 +4,7 @@ import math
 import numpy as np
 import methods as mno
 import random
+from scipy import stats
 
 ALPHA = 1   # pheromone exponent (linearly affects attractivity)
 BETA  = 4   # heuristic exponent (exponentialy affects attractivity)
@@ -25,43 +26,40 @@ def randomChoice(values):
     return np.random.choice(indexes, p=probabilities)
 
 # getDeltaTau calculates the pheromone to be dropped by each on ants tracks
-def getDeltaTau(score, bestSoFar, numAnts):
-    if bestSoFar == 0:
-        bestSoFar = 1000
+def getDeltaTau(score, bestSoFar):
+
     DeltaTau = (score - bestSoFar)/bestSoFar # at this point DeltaTau may be positive ou negative learning
-    DeltaTau /= numAnts*numAnts
-    return DeltaTau
+    return DeltaTau*30.
 
 
 # Ant System (AS), the classic method that uses a random proportional state transition rule, while the pheromone is deposited
 # by all ants proportionally to their solution quality and is evaporated in all the components.
 # each Ant makes use of "updatePheroAttract" to update pheromones
 # and edge attractiveness according to the its solution value
-def updatePheroAttract(score, bestSoFar, edges, numAnts):
+def updatePheroAttract(score, bestSoFar, edges):
 
-    deltaTau = getDeltaTau(score, bestSoFar, numAnts)
+    deltaTau = getDeltaTau(score, bestSoFar)
 
-    maxAttract = 0.
-    if abs(deltaTau) < 1:
-        # update pheromone level in all edges
-        for id, e in enumerate(edges):
+    Pheromone = [] 
 
-            #evaporate some pheromone 
-            edges[id].Pheromone = math.sqrt(e.Pheromone) / 1.25 # RHO = 0.2
+    # update pheromone level in all edges
+    for id, e in enumerate(edges):
 
+        #evaporate some pheromone 
+        edges[id].Pheromone = math.sqrt(e.Pheromone) / 1.4 # RHO = 0.2
+
+        # update pheromone level
+        if e.Pheromone + deltaTau > 0 and e.Pheromone + deltaTau <= 1:
             edges[id].Pheromone += deltaTau
-            if edges[id].Pheromone < 0.:
-                edges[id].Pheromone = 0.
+        
+        Pheromone.append(e.Pheromone)
+        
+        # update the general attractiveness
+        edges[id].updateAttract(ALPHA, BETA)
 
-            edges[id].updateAttract(ALPHA, BETA)
-
-            if edges[id].Attract > maxAttract:
-                maxAttract = edges[id].Attract
-
-        # normalize attractivity
-        for id, _ in enumerate(edges):
-            edges[id].Attract /= maxAttract
-
+    # mean = stats.tmean(Pheromone)
+    # sdev = stats.tstd(Pheromone)
+    # print(f"Mean: {mean:.2f} | StdDev: {sdev:.2f}")
 
 # pick and delete an edge from the neighborhood by a proportional roulette wheel
 def pickFromNbhood(nbhood, values):
@@ -93,8 +91,6 @@ def Solve( pallets, items, startTime, cfg, k, limit, secBreak):  # items include
 
         Glocal = mno.Solution(antsField, pallets, items, limit, cfg, k)
 
-        deltaTau = getDeltaTau(Glocal.S, initialS, NANTS)
-
         for _ in np.arange(NANTS):
 
             if (time.perf_counter() - startTime) > secBreak:
@@ -112,15 +108,12 @@ def Solve( pallets, items, startTime, cfg, k, limit, secBreak):  # items include
                 ce = pickFromNbhood(Nbhood, attracts)
 
                 if Gant.isFeasible(ce, 1.0, cfg, k):
-                    antsField[ce.ID].Pheromone += deltaTau
                     Gant.putInSol(ce)
-                else:
-                    antsField[ce.ID].Pheromone -= deltaTau
-
-                antsField[ce.ID].updateAttract(ALPHA, BETA)          
-
+       
             if Gant.S > Glocal.S:
                 Glocal = Gant
+
+            updatePheroAttract(Glocal.S, Gbest.S, antsField)
 
         if Glocal.S > Gbest.S:
             Gbest = Glocal
@@ -128,9 +121,6 @@ def Solve( pallets, items, startTime, cfg, k, limit, secBreak):  # items include
             improvements += 1
         else:
             stagnant += 1
-
-        updatePheroAttract(Glocal.S, Gbest.S, antsField, NANTS)
-
 
     if initialS == 0:
         initialS = 1000
