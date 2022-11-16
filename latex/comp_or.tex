@@ -78,6 +78,7 @@
 		enlargelimits=0.2,
 		legend pos=south east,
 		y tick label style={ /pgf/number format/.cd, fixed, fixed zerofill, precision=3, /tikz/.cd, },
+		x tick label style={ /pgf/number format/.cd, fixed, fixed zerofill, precision=1, /tikz/.cd, },
 		grid=major,		
 	},
 }
@@ -1226,24 +1227,21 @@ For each generated $t^k_j$\/ item, its destination is uniformly random selected 
 \subsection{Results obtained}
 
 
-%All the experiments are performed on a 64-bit, 128GiB, 3.6GHz, 48-core processor, 2 threads per core, Intel Xeon, with {\it Linux CentOS 8} as the operational system and {\it Python 3.10.4}\/ as the programming language.
+The testing experiments are performed on a 64-bit, 16GiB, 3.2GHz, 8-core processor, 2 threads per core, AMD FX-8320E, with {\it Linux Ubuntu 22.04} as the operational system and {\it Python 3.10.4}\/ as the programming language.
 
-All the experiments are performed on a 64-bit, 16GiB, 3.2GHz, 8-core processor, 2 threads per core, AMD FX-8320E, with {\it Linux Ubuntu 22.04} as the operational system and {\it Python 3.10.4}\/ as the programming language.
-
+The final experiments are performed on a 64-bit, 128GiB, 3.6GHz, 48-core processor, 2 threads per core, Intel Xeon, with {\it Linux CentOS 8} as the operational system and {\it Python 3.8.2}\/ as the programming language.
 
 For parallelization, we used the {\it Python multiprocessing} package, which implements {\it process-based parallelism} or {\it parallel shared memory algorithm}. According to \cite{multiprocessing}, {\it Multiprocessing} is a package that supports spawning processes using an API similar to the {\it Python Threading} package.
 
-There is an optimal number of threads for each problem in each environment. This is the reason for the experiments ahead.
+According to \cite[p.271]{Breshears2009}, a {\it Process} is the operating system’s spawned and controlled entity that encapsulates an executing application. A process has two main jobs: the first is to hold the application's resources, and the second is to carry out the application's instructions. 
 
 It is known that working concurrently opens up synchronization issues. But the {\it Multiprocessing} package (mp) offers both local and remote concurrency, effectively side-stepping the global interpreter lock by using sub-processes instead of threads. Because of this, the {\it Multiprocessing} module lets the programmer take full advantage of the fact that a machine has more than one processor, normally capable of 2 threads each.
 
-The decision for {\it Multiprocessing} relies on the need to exchange information among processes (the pheromone trails or some information regarding load balancing, in our case), which would be harder to handle with thread-based parallelism. For this, we used the multiprocessing queue feature, that is thread safe.
+The decision for {\it Multiprocessing} relies on the need to exchange information among processes (the pheromone trails or some information regarding load balancing, in our case), which would be harder to handle with thread-based parallelism. For this, we used the multiprocessing queue feature that, according to \cite{multiprocessing}, is thread safe.
 
-Communication between processes can be achieved via {\it multiprocessing.Queue} and {\it multiprocessing.Pipe} which permits regular inter-process communication -IPC. (\cite{multiprocessing}).
+By Amdahl's law, there is an optimal number of parallel executions for each problem in each environment. While working at IBM in 1967, Gene Amdahl developed the foundation for what became known as Amdahl's Law or Amdahl's Argument. Essentially, the law states that while a process can be decomposed into steps that may then be run in parallel, the time taken for the whole process will be significantly limited by the steps that remain serialized. So, we decided to run some tests to find the best number of parallel processes for each of this work's operational scenarios.
 
-According to \cite[p.271]{Breshears2009}, a Process is the operating system’s spawned and controlled entity that encapsulates an executing application. A process has two main functions: The first is to act as the resource holder for the application, and the second is to execute the instructions of the application.
-
-For each red dot closest to the upper left corner, we call it {\it Utopia}, an impossible result with zero time duration and the best possible score.
+For each red bullet closest to the upper left corner, we call it {\it Utopia}, an impossible result with zero time duration and a possible best score. The blue bullets are experiments performed with the number of parallel processes indicated. The shortest distance from {\it Utopia} may reveal the most efficient parallel processes for the scenario (see Table \ref{tab:scenarios}). 
 
 
 \begin{figure}[H]
