@@ -1249,7 +1249,7 @@ For each red bullet closest to the upper left corner, we call it {\it Utopia}, a
 		\begin{tikzpicture}[scale=0.8, samples=100]
 			\begin{axis}[
 				myplotstyle,
-				xlabel={\bf Scenario 1 computation times (s)},
+				xlabel={\bf mpShims computation times (s)},
 				ylabel={\bf Score},
 				]
 				\addplot+[
@@ -1264,26 +1264,27 @@ For each red bullet closest to the upper left corner, we call it {\it Utopia}, a
 		~%
 		%
 		\begin{tikzpicture}[scale=0.8, samples=100]
-			\begin{axis}[
-				myplotstyle,
-				xlabel={\bf Scenario 2 computation times (s)},
-				]		
-				\addplot+[
-				only marks,	
-				nodes near coords = {\numProcs{}},
-				visualization depends on = {value \thisrow{np} \as \numProcs},						
-				]
-				table[x=time, y=score, col sep=comma] {./csv/Shims_p2data20.csv};
-			\end{axis}
-			\fill [red] (canvas cs:x=0.1cm,y=5.6cm) circle (2pt);		
-		\end{tikzpicture}	
+		\begin{axis}[
+			myplotstyle,
+			xlabel={\bf mpACO computation times (s)},
+			ylabel={\bf Score},
+			]
+			\addplot+[
+			only marks,	
+			nodes near coords = {\numProcs{}},
+			visualization depends on = {value \thisrow{np} \as \numProcs},						
+			]
+			table[x=time, y=score, col sep=comma] {./csv/ACO_p1data20.csv};
+		\end{axis}
+		\fill [red] (canvas cs:x=0.1cm,y=5.6cm) circle (2pt);
+	\end{tikzpicture}
 		
 	\end{center}
-	\caption{ {\it mpShims} performance with $1.2 \times volume$. }
-	\label{fig:mpShimsdata20}
+	\caption{ Scenario 1 performances with $1.2 \times volume$. }
+	\label{fig:scenario1data20}
 \end{figure}
 
-Observing Figure \ref{fig:mpShimsdata20}, it may be noticed that the best number of processes for {\it Scenario 1} (the closest to the {\it Utopia}) is \textbf{6}. For {\it Scenario 2}, the best number is \textbf{4}.
+Observing Figure \ref{fig:scenario1data20}, it may be noticed that the best number of processes for {\it Scenario 1} (the closest to the {\it Utopia}) is \textbf{6}. For {\it Scenario 2}, the best number is \textbf{4}.
 
 
 
@@ -1292,7 +1293,7 @@ Observing Figure \ref{fig:mpShimsdata20}, it may be noticed that the best number
 		\begin{tikzpicture}[scale=0.8, samples=100]
 			\begin{axis}[
 				myplotstyle,
-				xlabel={\bf Scenario 1 computation times (s)},
+				xlabel={\bf mpShims computation times (s)},
 				ylabel={\bf Score},
 				]
 				\addplot+[
@@ -1309,68 +1310,7 @@ Observing Figure \ref{fig:mpShimsdata20}, it may be noticed that the best number
 		\begin{tikzpicture}[scale=0.8, samples=100]
 			\begin{axis}[
 				myplotstyle,
-				xlabel={\bf Scenario 2 computation times (s)},
-				]
-				\addplot+[
-				only marks,	
-				nodes near coords = {\numProcs{}},
-				visualization depends on = {value \thisrow{np} \as \numProcs},						
-				]
-				table[x=time, y=score, col sep=comma] {./csv/Shims_p2data50.csv};
-			\end{axis}
-			\fill [red] (canvas cs:x=0.1cm,y=5.6cm) circle (2pt);
-		\end{tikzpicture}
-	\end{center}
-	\caption{{\it mpShims} performance with $1.5 \times volume$.}
-	\label{fig:mpShimsdata50}
-\end{figure}
-
-
-\begin{figure}[H]
-	\begin{center}
-		\begin{tikzpicture}[scale=0.8, samples=100]
-			\begin{axis}[
-				myplotstyle,
-				xlabel={\bf Scenario 1 computation times (s)},
-				ylabel={\bf Score},
-				]
-				\addplot+[
-				only marks,	
-				nodes near coords = {\numProcs{}},
-				visualization depends on = {value \thisrow{np} \as \numProcs},						
-				]
-				table[x=time, y=score, col sep=comma] {./csv/ACO_p1data20.csv};
-			\end{axis}
-			\fill [red] (canvas cs:x=0.1cm,y=5.6cm) circle (2pt);
-		\end{tikzpicture}%
-		~%
-		%
-		\begin{tikzpicture}[scale=0.8, samples=100]
-			\begin{axis}[
-				myplotstyle,
-				xlabel={\bf Scenario 2 computation times (s)},
-				]
-				\addplot+[
-				only marks,	
-				nodes near coords = {\numProcs{}},
-				visualization depends on = {value \thisrow{np} \as \numProcs},						
-				]
-				table[x=time, y=score, col sep=comma] {./csv/ACO_p2data20.csv};
-			\end{axis}
-			\fill [red] (canvas cs:x=0.1cm,y=5.6cm) circle (2pt);
-		\end{tikzpicture}
-	\end{center}
-	\caption{{\it mpACO} performance with $1.2 \times volume$.}
-	\label{fig:mpACOdata20}
-\end{figure}
-
-\begin{figure}[H]
-	
-	\begin{center}
-		\begin{tikzpicture}[scale=0.8, samples=100]
-			\begin{axis}[
-				myplotstyle,
-				xlabel={\bf Scenario 1 computation times (s)},
+				xlabel={\bf mpACO computation times (s)},
 				ylabel={\bf Score},
 				]
 				\addplot+[
@@ -1381,13 +1321,78 @@ Observing Figure \ref{fig:mpShimsdata20}, it may be noticed that the best number
 				table[x=time, y=score, col sep=comma] {./csv/ACO_p1data50.csv};
 			\end{axis}
 			\fill [red] (canvas cs:x=0.1cm,y=5.6cm) circle (2pt);
+		\end{tikzpicture}
+		
+	\end{center}
+	\caption{ Scenario 1 performances with $1.5 \times volume$. }
+	\label{fig:scenario1data50}
+\end{figure}
+
+
+\begin{figure}[H]
+	\begin{center}
+		\begin{tikzpicture}[scale=0.8, samples=100]
+			\begin{axis}[
+				myplotstyle,
+				xlabel={\bf mpShims computation times (s)},
+				ylabel={\bf Score},
+				]
+				\addplot+[
+				only marks,	
+				nodes near coords = {\numProcs{}},
+				visualization depends on = {value \thisrow{np} \as \numProcs},						
+				]
+				table[x=time, y=score, col sep=comma] {./csv/Shims_p2data20.csv};
+			\end{axis}
+			\fill [red] (canvas cs:x=0.1cm,y=5.6cm) circle (2pt);
 		\end{tikzpicture}%
 		~%
 		%
 		\begin{tikzpicture}[scale=0.8, samples=100]
 			\begin{axis}[
 				myplotstyle,
-				xlabel={\bf Scenario 2 computation times (s)},
+				xlabel={\bf mpACO computation times (s)},
+				ylabel={\bf Score},
+				]
+				\addplot+[
+				only marks,	
+				nodes near coords = {\numProcs{}},
+				visualization depends on = {value \thisrow{np} \as \numProcs},						
+				]
+				table[x=time, y=score, col sep=comma] {./csv/ACO_p2data20.csv};
+			\end{axis}
+			\fill [red] (canvas cs:x=0.1cm,y=5.6cm) circle (2pt);
+		\end{tikzpicture}
+		
+	\end{center}
+	\caption{ Scenario 2 performances with $1.2 \times volume$. }
+	\label{fig:scenario2data20}
+\end{figure}
+
+\begin{figure}[H]
+	\begin{center}
+		\begin{tikzpicture}[scale=0.8, samples=100]
+			\begin{axis}[
+				myplotstyle,
+				xlabel={\bf mpShims computation times (s)},
+				ylabel={\bf Score},
+				]
+				\addplot+[
+				only marks,	
+				nodes near coords = {\numProcs{}},
+				visualization depends on = {value \thisrow{np} \as \numProcs},						
+				]
+				table[x=time, y=score, col sep=comma] {./csv/Shims_p2data50.csv};
+			\end{axis}
+			\fill [red] (canvas cs:x=0.1cm,y=5.6cm) circle (2pt);
+		\end{tikzpicture}%
+		~%
+		%
+		\begin{tikzpicture}[scale=0.8, samples=100]
+			\begin{axis}[
+				myplotstyle,
+				xlabel={\bf mpACO computation times (s)},
+				ylabel={\bf Score},
 				]
 				\addplot+[
 				only marks,	
@@ -1398,12 +1403,13 @@ Observing Figure \ref{fig:mpShimsdata20}, it may be noticed that the best number
 			\end{axis}
 			\fill [red] (canvas cs:x=0.1cm,y=5.6cm) circle (2pt);
 		\end{tikzpicture}
+		
 	\end{center}
-	\caption{{\it mpACO} performance with $1.5 \times volume$.}
-	\label{fig:mpACOdata50}
+	\caption{ Scenario 2 performances with $1.5 \times volume$. }
+	\label{fig:scenario2data50}
 \end{figure}
 
-Observing figures \ref{fig:mpShimsdata20}, \ref{fig:mpShimsdata50}, \ref{fig:mpACOdata20}, \ref{fig:mpACOdata50}, it may be noticed that the best overall number of processes for all scenarios is \textbf{?}, because in average it is the number that most of the times is closer to the {\it Utopia} red bullet.
+%Observing figures \ref{fig:mpShimsdata20}, \ref{fig:mpShimsdata50}, \ref{fig:mpACOdata20}, \ref{fig:mpACOdata50}, it may be noticed that the best overall number of processes for all scenarios is \textbf{?}, because in average it is the number that most of the times is closer to the {\it Utopia} red bullet.
 
 
 
