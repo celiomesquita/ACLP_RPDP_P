@@ -960,6 +960,8 @@ In the pseudo-codes presented below, given an allocation graph $G$\/ for the nod
 
 Below, we present 2 implementations for $SolveNode$: {\it Multiprocess Ant Colony Optimization}\/ ({\it mpACO})  and a new parallel heuristic that we propose called {\it Multiprocess Shims (mpShims)}.
 
+According to \cite[p.226]{manfrin2006}, there are five topologies for multi-process interchange of information: {\it fully-connected}, where the master process broadcasts to all remaining child processes; {\it replace-worst}, where the best-so-far solution process broadcasts only to the current worst solution process; {\it hypercube}, where processes are connected as a hypercube, and a vertex process broadcasts only to the connected vertices; {\it ring}, in which one process only sends a message to the next process connected to it; and {\it parallel independent runs (PIR)}, in which there are no communication costs and the best solution is chosen among all processes. They concluded that the PIR topology presented, in average, the smallest distance from the optimal solutions.
+
 It is important to say that the parallel ACO ({\it pACO}) is a different implementation where employs threads instead of processes to solve each ant solution in parallel (for a detailed information on parallel ACO see \cite{Pedemonte2011}). We chose {\it mpACO} for our approach because of the need to share the pheromone array between ants/processes and the facility to handle the possibility of race condition.
 
 
@@ -1033,7 +1035,9 @@ The best solution of each generation is stored in $G^+$\/ (lines \ref{aco:gen1}-
 	\Delta\tau^k_{ij} = \frac{ ga^k_{ij}\times t^k_j.s }{ A \times t^k_j.v}
 \end{equation}
 
-Pheromone $\tau^k_{ij}$\/ evaporates (lines \ref{aco:rho1} and \ref{aco:rho2}), where $\rho$\/ is a evaporation rate, which can be seen as a mechanism that delays premature convergence towards a sub-optimal solution. $\rho$\/ was empirically set to $0.2$\/ (line \ref{aco:rho}). 
+Pheromone $\tau^k_{ij}$\/ evaporates (lines \ref{aco:rho1} and \ref{aco:rho2}), where $\rho$\/ is a evaporation rate, which can be seen as a mechanism that delays premature convergence towards a sub-optimal solution. $\rho$\/ was empirically set to $0.2$\/ (line \ref{aco:rho}).
+
+
 
 
 
@@ -1237,8 +1241,6 @@ According to \cite[p.271]{Breshears2009}, a {\it Process} is the operating syste
 
 It is known that working concurrently opens up synchronization issues. But the {\it Multiprocessing} package (mp) offers both local and remote concurrency, effectively side-stepping the global interpreter lock by using sub-processes instead of threads. Because of this, the {\it Multiprocessing} module lets the programmer take full advantage of the fact that a machine has more than one processor, normally capable of 2 threads each.
 
-The decision for {\it Multiprocessing} relies on the need to exchange information among processes (the pheromone trails or some information regarding load balancing, in our case), which would be harder to handle with thread-based parallelism. For this, we used the multiprocessing queue feature that, according to \cite{multiprocessing}, is thread safe.
-
 By Amdahl's law, there is an optimal number of parallel executions for each problem in each environment. While working at IBM in 1967, Gene Amdahl developed the foundation for what became known as Amdahl's Law or Amdahl's Argument. Essentially, the law states that while a process can be decomposed into steps that may then be run in parallel, the time taken for the whole process will be significantly limited by the steps that remain serialized. So, we decided to run some tests to find the best number of parallel processes for each of this work's operational scenarios.
 
 For each red bullet closest to the upper left corner, we call it {\it Utopia}, an impossible result with zero time duration and a possible best score. The blue bullets are experiments performed with the number of parallel processes indicated. The shortest distance from {\it Utopia} may reveal the most efficient parallel processes for the scenario (see Table \ref{tab:scenarios}). 
@@ -1284,173 +1286,96 @@ For each red bullet closest to the upper left corner, we call it {\it Utopia}, a
 	\label{fig:scenario1data20}
 \end{figure}
 
-Observing Figure \ref{fig:scenario1data20}, it may be noticed that the best number of processes for {\it Scenario 1} (the closest to the {\it Utopia}) is \textbf{6}. For {\it Scenario 2}, the best number is \textbf{4}.
+Observing Figure \ref{fig:scenario1data20}, it may be noticed that the best number of processes for {\it Scenario 1} (the closest to the {\it Utopia}) is \textbf{6}. For {\it Scenario 2}, the best number is \textbf{4}. Table \ref{tab:numProcs} presents all methods, volumes percentages and scenarios numbers of best parallel processes to be run to solve all tours.
 
+To build Table \ref{tab:numProcs}, it was necessary to determine the number of parallel processes that best solve each node. For this we created a procedure as in Algorithm \ref{alg:bestnum}.
 
-
-\begin{figure}[H]
-	\begin{center}
-		\begin{tikzpicture}[scale=0.8, samples=100]
-			\begin{axis}[
-				myplotstyle,
-				xlabel={\bf mpShims computation times (s)},
-				ylabel={\bf Score},
-				]
-				\addplot+[
-				only marks,	
-				nodes near coords = {\numProcs{}},
-				visualization depends on = {value \thisrow{np} \as \numProcs},						
-				]
-				table[x=time, y=score, col sep=comma] {./csv/Shims_p1data50.csv};
-			\end{axis}
-			\fill [red] (canvas cs:x=0.1cm,y=5.6cm) circle (2pt);
-		\end{tikzpicture}%
-		~%
-		%
-		\begin{tikzpicture}[scale=0.8, samples=100]
-			\begin{axis}[
-				myplotstyle,
-				xlabel={\bf mpACO computation times (s)},
-				ylabel={\bf Score},
-				]
-				\addplot+[
-				only marks,	
-				nodes near coords = {\numProcs{}},
-				visualization depends on = {value \thisrow{np} \as \numProcs},						
-				]
-				table[x=time, y=score, col sep=comma] {./csv/ACO_p1data50.csv};
-			\end{axis}
-			\fill [red] (canvas cs:x=0.1cm,y=5.6cm) circle (2pt);
-		\end{tikzpicture}
+\begin{algorithm}[H]
+	\caption{$getBestNPP(procs, scores, runtimes)$}  \label{alg:bestnum}
+	\begin{algorithmic}[1]
+		\State $maxS   \gets max(scores)$
+		\State $minS   \gets min(scores)$
+		\State $maxR \gets max(runtimes)$
+		\State $minR \gets min(runtimes)$
 		
-	\end{center}
-	\caption{ Scenario 1 performances with $1.5 \times volume$. }
-	\label{fig:scenario1data50}
-\end{figure}
-
-
-\begin{figure}[H]
-	\begin{center}
-		\begin{tikzpicture}[scale=0.8, samples=100]
-			\begin{axis}[
-				myplotstyle,
-				xlabel={\bf mpShims computation times (s)},
-				ylabel={\bf Score},
-				]
-				\addplot+[
-				only marks,	
-				nodes near coords = {\numProcs{}},
-				visualization depends on = {value \thisrow{np} \as \numProcs},						
-				]
-				table[x=time, y=score, col sep=comma] {./csv/Shims_p2data20.csv};
-			\end{axis}
-			\fill [red] (canvas cs:x=0.1cm,y=5.6cm) circle (2pt);
-		\end{tikzpicture}%
-		~%
-		%
-		\begin{tikzpicture}[scale=0.8, samples=100]
-			\begin{axis}[
-				myplotstyle,
-				xlabel={\bf mpACO computation times (s)},
-				ylabel={\bf Score},
-				]
-				\addplot+[
-				only marks,	
-				nodes near coords = {\numProcs{}},
-				visualization depends on = {value \thisrow{np} \as \numProcs},						
-				]
-				table[x=time, y=score, col sep=comma] {./csv/ACO_p2data20.csv};
-			\end{axis}
-			\fill [red] (canvas cs:x=0.1cm,y=5.6cm) circle (2pt);
-		\end{tikzpicture}
+		\State $bestNPP \gets 0$, best number of parallel processes
+		\State $minD \gets 999999999.9$		
 		
-	\end{center}
-	\caption{ Scenario 2 performances with $1.2 \times volume$. }
-	\label{fig:scenario2data20}
-\end{figure}
-
-\begin{figure}[H]
-	\begin{center}
-		\begin{tikzpicture}[scale=0.8, samples=100]
-			\begin{axis}[
-				myplotstyle,
-				xlabel={\bf mpShims computation times (s)},
-				ylabel={\bf Score},
-				]
-				\addplot+[
-				only marks,	
-				nodes near coords = {\numProcs{}},
-				visualization depends on = {value \thisrow{np} \as \numProcs},						
-				]
-				table[x=time, y=score, col sep=comma] {./csv/Shims_p2data50.csv};
-			\end{axis}
-			\fill [red] (canvas cs:x=0.1cm,y=5.6cm) circle (2pt);
-		\end{tikzpicture}%
-		~%
-		%
-		\begin{tikzpicture}[scale=0.8, samples=100]
-			\begin{axis}[
-				myplotstyle,
-				xlabel={\bf mpACO computation times (s)},
-				ylabel={\bf Score},
-				]
-				\addplot+[
-				only marks,	
-				nodes near coords = {\numProcs{}},
-				visualization depends on = {value \thisrow{np} \as \numProcs},						
-				]
-				table[x=time, y=score, col sep=comma] {./csv/ACO_p2data50.csv};
-			\end{axis}
-			\fill [red] (canvas cs:x=0.1cm,y=5.6cm) circle (2pt);
-		\end{tikzpicture}
+		\For{$i$ in $procs$}
+			\State $y = ( maxS - scores[i] )\ /\ (maxS   - minS  )$
+			\State $x = ( runtimes[i] - minR )\ /\ (maxR - minR)$
+			\State $h = \sqrt{x^2 + y^2}$, distance from {\it Utopia}
+			\If{$minD$ > $h$}
+				\State $minD \gets h$
+				\State $bestNPP \gets procs[i]$
+			\EndIf
 		
-	\end{center}
-	\caption{ Scenario 2 performances with $1.5 \times volume$. }
-	\label{fig:scenario2data50}
-\end{figure}
-
-%Observing figures \ref{fig:mpShimsdata20}, \ref{fig:mpShimsdata50}, \ref{fig:mpACOdata20}, \ref{fig:mpACOdata50}, it may be noticed that the best overall number of processes for all scenarios is \textbf{?}, because in average it is the number that most of the times is closer to the {\it Utopia} red bullet.
-
+		\EndFor
+		
+		\State ${\bf return}$ $bestNPP$
+	\end{algorithmic}
+\end{algorithm}
 
 
 \vspace{2.0mm}
 
 \begin{table}[H]
-	\centering
-	\caption{Methods and scenarios with $1.2 \times volume$}  \label{tab:20}
-%	\footnotesize
-\scriptsize
-	\begin{tabular}{r|c|c|cccccc|c}
-		\toprule
-		{$method$}                     &{\bf Procs}              &{\bf Results}     &{\bf 1}     &{\bf 2}    &{\bf 3}      &{\bf 4}      &{\bf 5}      &{\bf 6}     &\specialcell{{\bf Normalized}\\{\bf Speed-up}} \\
-		\toprule
-	
-		
-		\multirow{2}{*}{\it {Shims}}   &\multirow{2}{*}{\bf {1}} & $f$              & 5.40        & 2.94    & 2.93         &          &          &         &   \\ 
-		                               &                         &{\bf run-time (s)}& <1          & 1       & 4            &            &            &          &   \\ %206s
-		\midrule[.1pt]	
-		
-		\multirow{2}{*}{\it {mpShims}} &\multirow{2}{*}{\bf {?}}& $f$              & 5.88        & 3.16    & 3.16         &          &          &         &   \\ 
-		                               &                         &{\bf run-time (s)}& 1           & 10      & 41           &            &            &          &   \\ %299s
-		\midrule[.1pt]
-		
-		\multirow{2}{*}{\it {ACO}}     &\multirow{2}{*}{\bf {1}} & $f$              & 5.77        & 3.49    & 3.02         &        &       &      &   \\ 
-                                       &                         &{\bf run-time (s)}& 14          & 808     & 2398          &        &       &      &   \\ 
-        \midrule[.1pt]	
+\centering
+\caption{$bestNPP$ found for each scenario}  \label{tab:numProcs}
+	\footnotesize
+%\scriptsize
+\begin{tabular}{rccccccc}
+\toprule
+                               &               &\multicolumn{6}{c}{\bf Scenarios} \\
+                               \cmidrule{3-8}
+{$method$}                     &{\it volume}&{\bf 1}&{\bf 2}&{\bf 3}&{\bf 4}&{\bf 5}&{\bf 6} \\
+\toprule
 
-        \multirow{2}{*}{\it {mpACO}}   &\multirow{2}{*}{\bf {?}}& $f$              & 5.82        & 3.12    &          &         &       &       &   \\ 
-                                       &                         &{\bf run-time (s)}& 22          & 473     &           &         &       &       &   \\ 
+\multirow{3}{*}{\it {mpShims}} &$1.2$& 6       & 2     & 0     & 0     & 0     & 0    \\ 
+                               &$1.5$& 4       & 4     & 0     & 0     & 0     & 0    \\
+                               &$2.0$& 0       & 0     & 0     & 0     & 0     & 0    \\
+\midrule[.1pt]
 
-        \bottomrule		
-	\end{tabular}
-	
-	\normalsize
-	
+\multirow{3}{*}{\it {mpACO}}   &$1.2$& 4       & 2     & 0     & 0     & 0     & 0    \\ 
+                               &$1.5$& 6       & 1     & 0     & 0     & 0     & 0    \\ 
+                               &$2.0$& 0       & 0     & 0     & 0     & 0     & 0    \\                               
+\bottomrule		
+\end{tabular}
+
+\normalsize
+
 \end{table}
 
+Table \ref{tab:numProcs} presents the best numbers of parallel processes for each method, scenario, and volume surplus.
+
+
+\vspace{2.0mm}
+
+\begin{table}[H]
+\centering
+\caption{Methods and scenarios with $1.2 \times volume$}  \label{tab:20}
+\footnotesize
+%\scriptsize
+\begin{tabular}{rccccccc|c}
+\toprule
+                                &                &\multicolumn{6}{c}{\bf Scenarios} &\\
+\cmidrule{3-8}		
+{$method$}                      &{\bf Results}   &{\bf 1}&{\bf 2}&{\bf 3}&{\bf 4}&{\bf 5}&{\bf 6}&\specialcell{{\bf Normalized}\\{\bf Speed-up}} \\
+\toprule
+\multirow{2}{*}{\it {mpShims}} & $f$              & 5.88 & 3.16    & 3.16 &      &      &      &   \\ 
+                               &{\bf run-time (s)}& 1    & 10      & 41   &      &      &      &   \\
+\midrule
+
+\multirow{2}{*}{\it {mpACO}}   & $f$              & 5.82 & 3.12    &      &      &      &      &   \\ 
+                               &{\bf run-time (s)}& 22   & 473     &      &      &      &      &   \\ 
+\bottomrule		
+\end{tabular}
+
+\normalsize
+
+\end{table}
 
 \section{Conclusions}
-\label{sec7}
 
 xxxxx
 

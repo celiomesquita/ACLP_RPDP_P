@@ -34,7 +34,6 @@ def Compute(edges, pallets, items, limit, cfg, k) :
 
     return sol
 
-
 def Solve(pallets, items, cfg, k, minLim, numProcs): # items include kept on board
 
     print(f"\nParallel Shims for ACLP+RPDP")

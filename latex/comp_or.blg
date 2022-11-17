@@ -5,45 +5,45 @@ The style file: elsarticle-harv.bst
 Database file #1: references.bib
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Warning--empty pages in fok2004optimizing
-You've used 30 entries,
+You've used 31 entries,
             2990 wiz_defined-function locations,
-            861 strings with 11079 characters,
-and the built_in function-call counts, 19120 in all, are:
-= -- 1464
-> -- 644
+            867 strings with 11253 characters,
+and the built_in function-call counts, 19754 in all, are:
+= -- 1504
+> -- 678
 < -- 19
-+ -- 275
-- -- 219
-* -- 2029
-:= -- 2761
-add.period$ -- 91
-call.type$ -- 30
-change.case$ -- 221
-chr.to.int$ -- 30
-cite$ -- 31
-duplicate$ -- 1471
-empty$ -- 1478
-format.name$ -- 319
-if$ -- 3604
++ -- 288
+- -- 231
+* -- 2098
+:= -- 2856
+add.period$ -- 94
+call.type$ -- 31
+change.case$ -- 229
+chr.to.int$ -- 31
+cite$ -- 32
+duplicate$ -- 1518
+empty$ -- 1526
+format.name$ -- 334
+if$ -- 3721
 int.to.chr$ -- 1
 int.to.str$ -- 1
-missing$ -- 278
-newline$ -- 166
-num.names$ -- 120
-pop$ -- 526
+missing$ -- 288
+newline$ -- 171
+num.names$ -- 124
+pop$ -- 550
 preamble$ -- 1
-purify$ -- 193
+purify$ -- 201
 quote$ -- 0
-skip$ -- 422
+skip$ -- 437
 stack$ -- 0
-substring$ -- 884
-swap$ -- 1020
+substring$ -- 895
+swap$ -- 1051
 text.length$ -- 2
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 264
+type$ -- 270
 warning$ -- 1
-while$ -- 118
+while$ -- 121
 width$ -- 0
-write$ -- 437
+write$ -- 450
 (There was 1 warning)

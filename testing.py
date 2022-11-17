@@ -1,6 +1,8 @@
 import methods as mno
 import numpy as np
 import time
+import math
+
 import shims_p
 import shims
 import aco
@@ -23,8 +25,8 @@ if scenario == 1:
     instances = [1,2,3,4,5,6,7]
     # instances = [1]
 if scenario == 2:
-    instances = [1,2,3,4,5,6,7]
-    # instances = [1]
+    # instances = [1,2,3,4,5,6,7]
+    instances = [1]
 if scenario == 3:
     instances = [1,2,3,4,5,6,7]
 if scenario == 4:
@@ -75,7 +77,7 @@ numProcs = [1,2,4,6,8]
 if method == "Shims" or method == "ACO" or method == "Greedy":
     numProcs = [1]
 
-times = [0 for _ in numProcs]
+runtimes = [0 for _ in numProcs]
 scores = [0 for _ in numProcs]
 
 # while tries:
@@ -213,14 +215,18 @@ for inst in instances:
             sumScores  += sNodeAccum
 
             if method == "Shims_p" or method == "ACO_p":
-                times[ix]  += elapsed
+                runtimes[ix]  += elapsed
                 scores[ix] += sNodeAccum # * (2-abs(epsilom))
 
 if method == "Shims_p" or method == "ACO_p":
 
     text = "np,time,score\n"
     for i, _ in enumerate(numProcs):
-        text += f"{numProcs[i]},{times[i]/len(instances):.2f},{scores[i]/len(instances):.0f}\n"
+
+        scores[i] /= len(instances)
+        runtimes[i] /= len(instances)
+
+        text += f"{numProcs[i]},{runtimes[i]:.2f},{scores[i]:.0f}\n"          
 
     fname = f"./latex/csv/{method}{scenario}{mno.DATA}.csv"
 
@@ -232,3 +238,28 @@ if method == "Shims_p" or method == "ACO_p":
         writer.close() 
 
     print(text)
+
+    bestNumProcs = -1
+    minDist = 999999.9
+    maxScore = max(scores)
+    minScore = min(scores)      
+    maxTime = max(runtimes)
+    minTime = min(runtimes)  
+
+    for i, _ in enumerate(numProcs):
+
+
+
+        yLeg = (maxScore - scores[i])/(maxScore - minScore)
+        xLeg = (runtimes[i] - minTime)  /(maxTime  - minTime)
+
+        distance = math.sqrt(xLeg**2 + yLeg**2)
+
+        if minDist > distance:
+            minDist = distance
+            bestNumProcs = numProcs[i]
+        
+        print(f"{numProcs[i]}\t{distance:.2f}\t{xLeg:.2f}\t{yLeg:.2f}")
+
+    print(f"The best number of processes is: {bestNumProcs}")
+
