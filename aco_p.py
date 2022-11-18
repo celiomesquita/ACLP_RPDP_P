@@ -1,16 +1,19 @@
 import time
 import methods as mno
 import multiprocessing as mp
+# import threading as thrd
+
 import aco
 
 # Process-based parallelism
 
-
-
-def antSolve(Gant, cfg, k, antsField, bestScore):
+def antSolve(Gant, cfg, k, antsField, bestScore, mpAttract):
     
     Nbhood   = [ce for ce in Gant.Edges if not ce.InSol]
     attracts = [ce.Attract for ce in Nbhood]
+
+    # for i, e in enumerate(Nbhood): # https://superfastpython.com/multiprocessing-shared-ctypes-in-python/
+    #     attracts[i] = mpAttract[e.ID]
 
     while Nbhood:
 
@@ -19,14 +22,14 @@ def antSolve(Gant, cfg, k, antsField, bestScore):
         if Gant.isFeasible(ce, 1.0, cfg, k):
             Gant.putInSol(ce)
     
-    aco.updatePheroAttract(Gant.S, bestScore, antsField)
+    aco.updatePheroAttract(Gant.S, bestScore, antsField, mpAttract)
 
     return Gant
 
-def enqueue( antsQueue,     Gant, cfg, k, antsField, bestScore ):
-    antsQueue.put( antSolve(Gant, cfg, k, antsField, bestScore) )
+def enqueue( antsQueue,     Gant, cfg, k, antsField, bestScore, mpAttract ):
+    antsQueue.put( antSolve(Gant, cfg, k, antsField, bestScore, mpAttract) )
 
-def publish(antsQueue, procs, limits, antsField, pallets, items, cfg, k, bestScore ):
+def publish(antsQueue, procs, limits, antsField, pallets, items, cfg, k, bestScore, mpAttract ):
 
     for i, _ in enumerate(procs):
 
@@ -35,7 +38,8 @@ def publish(antsQueue, procs, limits, antsField, pallets, items, cfg, k, bestSco
         Glocal = mno.Solution(antsField, pallets, items, limit, cfg, k)
 
         # create a child process for each ant
-        procs[i] = mp.Process( target=enqueue, args=( antsQueue, Glocal, cfg, k, antsField, bestScore ) )
+        procs[i] = mp.Process( target=enqueue, args=( antsQueue, Glocal, cfg, k, antsField, bestScore, mpAttract ) ) # faster than thread
+        # procs[i] = thrd.Thread( target=enqueue, args=( antsQueue, Glocal, cfg, k, antsField, bestScore ) )
     
         procs[i].start()
          
@@ -52,7 +56,7 @@ def Solve( pallets, items, startTime, cfg, k, minLim, numProcs, secBreak):  # it
 
     print("\nParallel Ant Colony Optimization for ACLP+RPDP")
 
-    antsField = mno.mountEdges(pallets, items, cfg)
+    antsField, mpAttract = mno.mountEdges(pallets, items, cfg)
 
     # set of unique greedy limit values
     limits = mno.getLimits(minLim, numProcs) 
@@ -76,7 +80,7 @@ def Solve( pallets, items, startTime, cfg, k, minLim, numProcs, secBreak):  # it
 
         antsQueue = mp.Queue()
 
-        publish(antsQueue, procs, limits, antsField, pallets, items, cfg, k, Gbest.S)
+        publish(antsQueue, procs, limits, antsField, pallets, items, cfg, k, Gbest.S, mpAttract)
 
         sols = subscribe(antsQueue, procs, startTime, secBreak)
 
@@ -89,7 +93,7 @@ def Solve( pallets, items, startTime, cfg, k, minLim, numProcs, secBreak):  # it
             else:
                 stagnant += 1
 
-            aco.updatePheroAttract(Gant.S, Gbest.S, antsField)
+            aco.updatePheroAttract(Gant.S, Gbest.S, antsField, mpAttract)
 
     if initialS > 0:
         print(f"\nUsed {numAnts} ants | ratio {Gbest.S/initialS:.3f} | {improvements} improvements\n")

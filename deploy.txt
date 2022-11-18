@@ -35,7 +35,7 @@ rsync -avze "ssh -p 2222" celio@161.24.2.247:/home/celio/Projects/ACLP_RPDP_P/re
 
 ----- NO PASSWORD -----
 
---- WORK ---
+--- WORK PLACE ---
     --send algorithms ---
 rsync -auvz -e "ssh -p2222 -i /home/celio/celio-rsync-key" --exclude "*.txt" --exclude "*.pyc" /home/celio/Projects/ACLP_RPDP_P/  celio@161.24.2.247:/home/celio/Projects/ACLP_RPDP_P/
 

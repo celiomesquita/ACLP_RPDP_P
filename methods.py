@@ -4,6 +4,7 @@ import os
 import math
 import numpy as np
 from time import time
+import multiprocessing as mp
 
 CITIES = ["GRU", "GIG", "SSA", "CNF", "CWB", "BSB", "REC"]
 
@@ -286,6 +287,8 @@ def mountEdges(pallets, items, cfg, Alpha=1, Beta=4):
 
     edges = [None for _ in np.arange(m*n)]
 
+    mpAttract = mp.Array('d', [0.5 for _ in np.arange(m*n)])
+
     i = 0
     for p in pallets:           
         for it in items:
@@ -301,7 +304,7 @@ def mountEdges(pallets, items, cfg, Alpha=1, Beta=4):
     for i, e in enumerate(edges):
         edges[i].ID = i
 
-    return edges
+    return edges, mpAttract
     
 def loadPallets(cfg):
     """

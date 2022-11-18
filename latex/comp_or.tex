@@ -1168,7 +1168,7 @@ In the third phase (lines \ref{shims:phase3a}-\ref{shims:phase3b}), the best shi
 This section is composed of two parts: the generation of test instances and the results obtained in our implementations.
 
 
-\subsection{Instances generation}
+\subsection{Items generation}
 \label{items}
 
 
@@ -1226,14 +1226,16 @@ $ItemsGeneration$, which generates $N$, is described in Algorithm \ref{alg:items
 
 For each generated $t^k_j$\/ item, its destination is uniformly random selected (line \ref{ig:dest}), its weight has a distribution according to Table \ref{tab:weights} (lines \ref{ig:weight1}-\ref{ig:weight2}), its score varies $100$\/ (highest) and $5$\/ (lowest) according to a logarithmic scale (line \ref{ig:score}, and its volume is randomly defined from the density, where we allow a variation of 40\% more or less than the average density of $246 kg/m^3$\/ (line \ref{ig:volume}).
 
+We test our methods with 126 different instances because we have six operational scenarios with seven randomly generated item sets for three volume surpluses (1.2, 1.5, and 2.0 times aircraft volume capacities).
+
 
 
 \subsection{Results obtained}
 
 
-The testing experiments are performed on a 64-bit, 16GiB, 3.2GHz, 8-core processor, 2 threads per core, AMD FX-8320E, with {\it Linux Ubuntu 22.04} as the operational system and {\it Python 3.10.4}\/ as the programming language.
+%The testing experiments are performed on a 64-bit, 16GiB, 3.2GHz, 8-core processor, 2 threads per core, AMD FX-8320E, with {\it Linux Ubuntu 22.04} as the operational system and {\it Python 3.10.4}\/ as the programming language.
 
-The final experiments are performed on a 64-bit, 128GiB, 3.6GHz, 48-core processor, 2 threads per core, Intel Xeon, with {\it Linux CentOS 8} as the operational system and {\it Python 3.8.2}\/ as the programming language.
+The final experiments are performed on a 64-bit, 128GiB, 3.6GHz, 48-core processor, 2 threads per core, Intel Xeon, with {\it Linux CentOS 8} as the operational system and {\it Python 3.8.2} as the programming language.
 
 For parallelization, we used the {\it Python multiprocessing} package, which implements {\it process-based parallelism} or {\it parallel shared memory algorithm}. According to \cite{multiprocessing}, {\it Multiprocessing} is a package that supports spawning processes using an API similar to the {\it Python Threading} package.
 
@@ -1291,7 +1293,7 @@ Observing Figure \ref{fig:scenario1data20}, it may be noticed that the best numb
 To build Table \ref{tab:numProcs}, it was necessary to determine the number of parallel processes that best solve each node. For this we created a procedure as in Algorithm \ref{alg:bestnum}.
 
 \begin{algorithm}[H]
-	\caption{$getBestNPP(procs, scores, runtimes)$}  \label{alg:bestnum}
+	\caption{$getBestNPP(scores, runtimes, procs)$}  \label{alg:bestnum}
 	\begin{algorithmic}[1]
 		\State $maxS   \gets max(scores)$
 		\State $minS   \gets min(scores)$
@@ -1301,10 +1303,10 @@ To build Table \ref{tab:numProcs}, it was necessary to determine the number of p
 		\State $bestNPP \gets 0$, best number of parallel processes
 		\State $minD \gets 999999999.9$		
 		
-		\For{$i$ in $procs$}
-			\State $y = ( maxS - scores[i] )\ /\ (maxS   - minS  )$
-			\State $x = ( runtimes[i] - minR )\ /\ (maxR - minR)$
-			\State $h = \sqrt{x^2 + y^2}$, distance from {\it Utopia}
+		\For{$i \in |scores|$}
+			\State $y = ( maxS - scores[i] )\ /\ (maxS   - minS  )$, the Y axis leg of Figure \ref{fig:scenario1data20}
+			\State $x = ( runtimes[i] - minR )\ /\ (maxR - minR)$. the X axis leg
+			\State $h = \sqrt{x^2 + y^2}$, the hypotenuse, distance from {\it Utopia}
 			\If{$minD$ > $h$}
 				\State $minD \gets h$
 				\State $bestNPP \gets procs[i]$
@@ -1331,12 +1333,12 @@ To build Table \ref{tab:numProcs}, it was necessary to determine the number of p
 {$method$}                     &{\it volume}&{\bf 1}&{\bf 2}&{\bf 3}&{\bf 4}&{\bf 5}&{\bf 6} \\
 \toprule
 
-\multirow{3}{*}{\it {mpShims}} &$1.2$& 6       & 2     & 0     & 0     & 0     & 0    \\ 
-                               &$1.5$& 4       & 4     & 0     & 0     & 0     & 0    \\
-                               &$2.0$& 0       & 0     & 0     & 0     & 0     & 0    \\
+\multirow{3}{*}{\it {mpShims}} &$1.2$& 6       & 4     & 4     & 4     & 2     & 2    \\ 
+                               &$1.5$& 4       & 4     & 4     & 4     & 4     & 4    \\
+                               &$2.0$& 4       & 4     & 4     & 2     & 2     & 4    \\
 \midrule[.1pt]
 
-\multirow{3}{*}{\it {mpACO}}   &$1.2$& 4       & 2     & 0     & 0     & 0     & 0    \\ 
+\multirow{3}{*}{\it {mpACO}}   &$1.2$& 10      & 8     & 10    & 6     & 10     & 10    \\ 
                                &$1.5$& 6       & 1     & 0     & 0     & 0     & 0    \\ 
                                &$2.0$& 0       & 0     & 0     & 0     & 0     & 0    \\                               
 \bottomrule		
@@ -1346,7 +1348,7 @@ To build Table \ref{tab:numProcs}, it was necessary to determine the number of p
 
 \end{table}
 
-Table \ref{tab:numProcs} presents the best numbers of parallel processes for each method, scenario, and volume surplus.
+Table \ref{tab:numProcs} presents the best numbers of parallel processes for each method, scenario, and volume surplus. As all numbers are less than or equal to 8, any hand-held computer with 8 cores can yield efficient solutions.
 
 
 \vspace{2.0mm}
