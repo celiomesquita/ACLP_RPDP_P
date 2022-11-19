@@ -36,17 +36,17 @@ rsync -avze "ssh -p 2222" celio@161.24.2.247:/home/celio/Projects/ACLP_RPDP_P/re
 ----- NO PASSWORD -----
 
 --- WORK PLACE ---
-    --send algorithms ---
+    --work send algorithms ---
 rsync -auvz -e "ssh -p2222 -i /home/celio/celio-rsync-key" --exclude "*.txt" --exclude "*.pyc" /home/celio/Projects/ACLP_RPDP_P/  celio@161.24.2.247:/home/celio/Projects/ACLP_RPDP_P/
 
-    --receive results ---
+    --work get results ---
 rsync -avz -e "ssh -p2222 -i /home/celio/celio-rsync-key" celio@161.24.2.247:/home/celio/Projects/ACLP_RPDP_P/results  /home/celio/Projects/ACLP_RPDP_P/
 
 --- HOME ---
-    --send algorithms ---
+    --home send algorithms ---
 rsync -auvz -e "ssh -p2222 -i /home/celio/home-rsync-key" --exclude "*.txt" --exclude "*.pyc" /home/celio/Projects/ACLP_RPDP_P/  celio@161.24.2.247:/home/celio/Projects/ACLP_RPDP_P/
 
-    --receive results ---
+    --home get results ---
 rsync -avz -e "ssh -p2222 -i /home/celio/home-rsync-key" celio@161.24.2.247:/home/celio/Projects/ACLP_RPDP_P/results  /home/celio/Projects/ACLP_RPDP_P/
 
 
@@ -77,3 +77,5 @@ sudo yum install screen
 cpupower frequency-set -g ondemand -d 1.8GHz -u 3.2GHz
 
 cpupower frequency-info
+
+top -p `pgrep -d "," python3+`

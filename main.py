@@ -14,7 +14,7 @@ import aco_p
 import greedy
 
 
-def solveTour(scenario, instance, pi, tour, method, pallets, cfg, numCPU, secBreak):
+def solveTour(scenario, instance, pi, tour, method, pallets, cfg, numProcs, secBreak):
     """
     Solves one tour
     """
@@ -113,7 +113,7 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg, numCPU, secBre
             E = greedy.Solve(pallets, items, cfg, k)
 
         if method == "Shims_p":
-            E = shims_p.Solve(pallets, items, cfg, k, minLim, numCPU)
+            E = shims_p.Solve(pallets, items, cfg, k, minLim, numProcs)
 
         if method == "Shims":
             E = shims.Solve(pallets, items, cfg, k, limit)
@@ -122,7 +122,7 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg, numCPU, secBre
             E =   aco.Solve( pallets, items, startNodeTime, cfg, k, limit, secBreak)
 
         if method == "ACO_p":
-            E = aco_p.Solve( pallets, items, startNodeTime, cfg, k, limit, numCPU, secBreak) 
+            E = aco_p.Solve( pallets, items, startNodeTime, cfg, k, limit, numProcs, secBreak) 
 
         nodeElapsed = time() - startNodeTime
 
@@ -195,107 +195,120 @@ def writeAvgResults(method, scenario, line):
 
 if __name__ == "__main__":
 
-    import sys
-    scenario     =   int(sys.argv[1])
-    method       =    f"{sys.argv[2]}"
-    numCPU       =   int(sys.argv[3])
-    methods.DATA =    f"{sys.argv[4]}"
 
-    # clear cache
-    # find . | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
+    bestNPP = [
+        [0,  6, 4,  4,  4,  2,  2], # Shims_p 1.2
+        [0,  4, 4,  4,  4,  4,  4], # Shims_p 1.5
+        [0,  4, 4,  4,  2,  2,  4], # Shims_p 2.0
+        [0, 10, 8, 10,  6, 10, 10], # ACO_p   1.2
+        [0, 10, 6, 12,  8, 10,  8], # ACO_p   1.5
+        [0, 10, 8,  2, 10,  6,  6]  # ACO_p   2.0
+    ]
 
-    secBreak = 0.7
-
-    # methods.DATA = "data20"
-    # methods.DATA = "data50"
-    # methods.DATA = "data100"
-
-    # method = "Greedy"
-
-    # scenario = 1
-
-    if scenario == 1:
-        instances = [1,2,3,4,5,6,7]
-        # instances = [1]
-    if scenario == 2:
-        instances = [1,2,3,4,5,6,7]
-        # instances = [1]
-    if scenario == 3:
-        instances = [1,2,3,4,5,6,7]
-    if scenario == 4:
-        instances = [1,2,3,4,5,6,7]
-    if scenario == 5:
-        instances = [1,2,3,4,5]
-    if scenario == 6:
-        instances = [1,2,3]                                        
+    scenarios = [1,2,3,4,5,6]
+    secBreak  = 60
 
     dists = methods.loadDistances()
 
     costs = [[0.0 for _ in dists] for _ in dists]
 
-    cfg = methods.Config(scenario)
-    
-    for i, cols in enumerate(dists):
-        for j, value in enumerate(cols):
-            costs[i][j] = cfg.kmCost*value
+    import sys
+    method       =  f"{sys.argv[1]}"
+    methods.DATA =  f"{sys.argv[2]}"
 
+    for scenario in scenarios:
 
-    pallets = methods.loadPallets(cfg)
+        numProcs = 1
+        if method == "Shims_p":
+            if methods.DATA == "data20":
+                numProcs =  bestNPP[0][scenario]
+            if methods.DATA == "data50":
+                numProcs =  bestNPP[1][scenario]
+            if methods.DATA == "data100":
+                numProcs =  bestNPP[2][scenario]
+        if method == "ACO_p":
+            if methods.DATA == "data20":
+                numProcs =  bestNPP[3][scenario]
+            if methods.DATA == "data50":
+                numProcs =  bestNPP[4][scenario]
+            if methods.DATA == "data100":
+                numProcs =  bestNPP[5][scenario]
 
-    # pallets capacity
-    cfg.weiCap = 0
-    cfg.volCap = 0
-    for p in pallets:
-        cfg.weiCap += p.W
-        cfg.volCap += p.V
+        if scenario == 1:
+            instances = [1,2,3,4,5,6,7]
+            # instances = [1]
+        if scenario == 2:
+            instances = [1,2,3,4,5,6,7]
+            # instances = [1]
+        if scenario == 3:
+            instances = [1,2,3,4,5,6,7]
+        if scenario == 4:
+            instances = [1,2,3,4,5,6,7]
+        if scenario == 5:
+            instances = [1,2,3,4,5]
+        if scenario == 6:
+            instances = [1,2,3]                                        
 
-    # smaller aircrafts may have a payload lower than pallets capacity
-    if cfg.weiCap > cfg.payload:
-        cfg.weiCap = cfg.payload
-
-    tours = methods.getTours(cfg.numNodes, costs, 0.25)
-
-    broke = 0
-    avgInstTime = 0.
-    avgInstNumOpt = 0.
-    avgInstSC = 0.
-    # worstDuration = 0
-    for instance in instances:
-
-        # print(f"-> method: {method} scenario: {scenario} instance: {instance} | Tours {len(tours)}")
-
-        bestSC = 0. # maximum score/cost relation
-
-        # selects the best tour
-        searchTime = 0
-        for pi, tour in enumerate(tours):
-
-            broke = solveTour(scenario, instance, pi, tour, method, pallets, cfg, numCPU, secBreak) # writeTourSol is True or False
-
-            searchTime += tour.elapsed
-
-            # if tour.elapsed > worstDuration :
-                # worstDuration = tour.elapsed
-                            
-            curSC = tour.score / tour.cost
-
-
-            # best tour parameters
-            if curSC > bestSC:
-                bestSC = curSC
+        cfg = methods.Config(scenario)
         
-        avgInstTime   += searchTime
-        avgInstSC     += bestSC
+        for i, cols in enumerate(dists):
+            for j, value in enumerate(cols):
+                costs[i][j] = cfg.kmCost*value
 
-    numInst = float(len(instances))
+        pallets = methods.loadPallets(cfg)
 
-    timeString = methods.getTimeString(avgInstTime, numInst, True)
+        # pallets capacity
+        cfg.weiCap = 0
+        cfg.volCap = 0
+        for p in pallets:
+            cfg.weiCap += p.W
+            cfg.volCap += p.V
 
-    avgInstSC /= numInst
+        # smaller aircrafts may have a payload lower than pallets capacity
+        if cfg.weiCap > cfg.payload:
+            cfg.weiCap = cfg.payload
 
-    latex = f"{avgInstSC:.2f}   &   {timeString}\n"
+        tours = methods.getTours(cfg.numNodes, costs, 0.25)
 
-    # instances average
-    writeAvgResults(method, scenario, latex)
+        broke         = 0
+        avgInstTime   = 0.
+        avgInstNumOpt = 0.
+        avgInstSC     = 0.
+        # worstDuration = 0
+        for instance in instances:
 
-    print(f"{method}\t{scenario}\t{avgInstSC:.2f}\t{timeString}\t{len(tours)} tours")
+            # print(f"-> method: {method} scenario: {scenario} instance: {instance} | Tours {len(tours)}")
+
+            bestSC = 0. # maximum score/cost relation
+
+            # selects the best tour
+            searchTime = 0
+            for pi, tour in enumerate(tours):
+
+                broke = solveTour(scenario, instance, pi, tour, method, pallets, cfg, numProcs, secBreak) # writeTourSol is True or False
+
+                searchTime += tour.elapsed
+
+                # if tour.elapsed > worstDuration :
+                    # worstDuration = tour.elapsed
+                                
+                curSC = tour.score / tour.cost
+
+
+                # best tour parameters
+                if curSC > bestSC:
+                    bestSC = curSC
+            
+            avgInstTime   += searchTime
+            avgInstSC     += bestSC
+
+        numInst = float(len(instances))
+
+        timeString = methods.getTimeString(avgInstTime, numInst, True)
+
+        avgInstSC /= numInst
+
+        # instances average
+        writeAvgResults(method, scenario, f"{avgInstSC:.2f}\t{timeString}\n")
+
+        # print(f"{method}\t{scenario}\t{avgInstSC:.2f}\t{timeString}\t{len(tours)} tours")

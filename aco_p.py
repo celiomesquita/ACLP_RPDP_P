@@ -7,7 +7,7 @@ import aco
 
 # Process-based parallelism
 
-def antSolve(Gant, cfg, k, antsField, bestScore, mpAttract):
+def antSolve(Gant, cfg, k, antsField, bestScore):
     
     Nbhood   = [ce for ce in Gant.Edges if not ce.InSol]
     attracts = [ce.Attract for ce in Nbhood]
@@ -22,14 +22,14 @@ def antSolve(Gant, cfg, k, antsField, bestScore, mpAttract):
         if Gant.isFeasible(ce, 1.0, cfg, k):
             Gant.putInSol(ce)
     
-    aco.updatePheroAttract(Gant.S, bestScore, antsField, mpAttract)
+    aco.updatePheroAttract(Gant.S, bestScore, antsField)
 
     return Gant
 
-def enqueue( antsQueue,     Gant, cfg, k, antsField, bestScore, mpAttract ):
-    antsQueue.put( antSolve(Gant, cfg, k, antsField, bestScore, mpAttract) )
+def enqueue( antsQueue,     Gant, cfg, k, antsField, bestScore ):
+    antsQueue.put( antSolve(Gant, cfg, k, antsField, bestScore) )
 
-def publish(antsQueue, procs, limits, antsField, pallets, items, cfg, k, bestScore, mpAttract ):
+def publish(antsQueue, procs, limits, antsField, pallets, items, cfg, k, bestScore ):
 
     for i, _ in enumerate(procs):
 
@@ -38,7 +38,7 @@ def publish(antsQueue, procs, limits, antsField, pallets, items, cfg, k, bestSco
         Glocal = mno.Solution(antsField, pallets, items, limit, cfg, k)
 
         # create a child process for each ant
-        procs[i] = mp.Process( target=enqueue, args=( antsQueue, Glocal, cfg, k, antsField, bestScore, mpAttract ) ) # faster than thread
+        procs[i] = mp.Process( target=enqueue, args=( antsQueue, Glocal, cfg, k, antsField, bestScore ) ) # faster than thread
         # procs[i] = thrd.Thread( target=enqueue, args=( antsQueue, Glocal, cfg, k, antsField, bestScore ) )
     
         procs[i].start()
@@ -56,7 +56,7 @@ def Solve( pallets, items, startTime, cfg, k, minLim, numProcs, secBreak):  # it
 
     print("\nParallel Ant Colony Optimization for ACLP+RPDP")
 
-    antsField, mpAttract = mno.mountEdges(pallets, items, cfg)
+    antsField = mno.mountEdges(pallets, items, cfg)
 
     # set of unique greedy limit values
     limits = mno.getLimits(minLim, numProcs) 
@@ -80,7 +80,7 @@ def Solve( pallets, items, startTime, cfg, k, minLim, numProcs, secBreak):  # it
 
         antsQueue = mp.Queue()
 
-        publish(antsQueue, procs, limits, antsField, pallets, items, cfg, k, Gbest.S, mpAttract)
+        publish(antsQueue, procs, limits, antsField, pallets, items, cfg, k, Gbest.S)
 
         sols = subscribe(antsQueue, procs, startTime, secBreak)
 
@@ -93,7 +93,7 @@ def Solve( pallets, items, startTime, cfg, k, minLim, numProcs, secBreak):  # it
             else:
                 stagnant += 1
 
-            aco.updatePheroAttract(Gant.S, Gbest.S, antsField, mpAttract)
+            aco.updatePheroAttract(Gant.S, Gbest.S, antsField)
 
     if initialS > 0:
         print(f"\nUsed {numAnts} ants | ratio {Gbest.S/initialS:.3f} | {improvements} improvements\n")

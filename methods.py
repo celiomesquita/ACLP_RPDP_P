@@ -279,6 +279,15 @@ def getTours(num, costs, threshold):
 
     return tours2
 
+bestNPP = [
+[6, 4, 4, 4, 2, 2,],
+[4, 4, 4, 4, 4, 4],
+[4, 4, 4, 2, 2, 4],
+[10, 8, 10, 6, 10, 10],
+[10, 6, 12, 8, 10, 8],
+[10, 8, 2, 10, 6, 6]
+]
+
 def mountEdges(pallets, items, cfg, Alpha=1, Beta=4):
    
     # items include kept on board, are from this node (k), and destined to unattended nodes
@@ -287,7 +296,7 @@ def mountEdges(pallets, items, cfg, Alpha=1, Beta=4):
 
     edges = [None for _ in np.arange(m*n)]
 
-    mpAttract = mp.Array('d', [0.5 for _ in np.arange(m*n)])
+    # mpAttract = mp.Array('d', [0.5 for _ in np.arange(m*n)])
 
     i = 0
     for p in pallets:           
@@ -304,7 +313,7 @@ def mountEdges(pallets, items, cfg, Alpha=1, Beta=4):
     for i, e in enumerate(edges):
         edges[i].ID = i
 
-    return edges, mpAttract
+    return edges
     
 def loadPallets(cfg):
     """

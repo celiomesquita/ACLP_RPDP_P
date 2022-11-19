@@ -36,7 +36,7 @@ def getDeltaTau(score, bestSoFar):
 # by all ants proportionally to their solution quality and is evaporated in all the components.
 # each Ant makes use of "updatePheroAttract" to update pheromones
 # and edge attractiveness according to the its solution value
-def updatePheroAttract(score, bestSoFar, edges, mpAttract):
+def updatePheroAttract(score, bestSoFar, edges):
 
     deltaTau = getDeltaTau(score, bestSoFar)
 
@@ -57,7 +57,7 @@ def updatePheroAttract(score, bestSoFar, edges, mpAttract):
         # update the general attractiveness
         edges[id].updateAttract(ALPHA, BETA)
 
-        mpAttract[id] = edges[id].Attract
+        # mpAttract[id] = edges[id].Attract
 
     # mean = stats.tmean(Pheromone)
     # sdev = stats.tstd(Pheromone)

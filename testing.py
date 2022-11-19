@@ -14,6 +14,7 @@ method   = f"{sys.argv[1]}"
 mno.DATA = f"{sys.argv[2]}"
 
 scenarios = [1,2,3,4,5,6]
+# scenarios = [1]
 bests = []
 
 for scenario in scenarios:
@@ -67,7 +68,7 @@ for scenario in scenarios:
     totElapsed = 0
     sumScores = 0
 
-    numProcs = [1,2,4,6,8,10]
+    numProcs = [1,2,4,6,8,10,12,14,16]
 
     if method == "Shims" or method == "ACO" or method == "Greedy":
         numProcs = [1]
