@@ -28,7 +28,9 @@ def randomChoice(values):
 # getDeltaTau calculates the pheromone to be dropped by each on ants tracks
 def getDeltaTau(score, bestSoFar):
 
-    DeltaTau = (score - bestSoFar)/bestSoFar # at this point DeltaTau may be positive ou negative learning
+    DeltaTau = 0.0001
+    if bestSoFar > 0:
+        DeltaTau = (score - bestSoFar)/bestSoFar # at this point DeltaTau may be positive ou negative learning
     return DeltaTau*30.
 
 

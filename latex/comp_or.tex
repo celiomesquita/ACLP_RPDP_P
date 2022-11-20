@@ -663,8 +663,11 @@ On the other hand, our tactic will be, at each shipping node, to predefine the d
 		\State Let $L, M, C$ be according to $scenario$ \label{main:LMC}
 		\State $N \gets ItemsGeneration(scenario,volume)$ \label{main:items}
 		\For {each $method$}
+		
+			\State $numProcs \gets $, the number of parallel processes to be used
+		
 			\For {each $\pi \in S_K$} \label{main:loop1}
-				\State $f_{\pi} \gets SolveTour(\pi, L, M, C, N, method )$ \label{main:method}
+				\State $f_{\pi} \gets SolveTour(\pi, L, M, C, N, method, numProcs )$ \label{main:method}
 			\EndFor \label{main:loop2}
 			\State $answer[scenario,volume,method] \gets \max f$ \label{main:f}
 		\EndFor
@@ -714,7 +717,7 @@ In the context of this work, we know that $m>K$, once the aircraft has $7$\/ or 
 Finally, $SolveNode$\/ includes the edges corresponding to the items shipped at the current node, returning the graph $G_2$\/ (line \ref{tour:node}). The score and the CG deviation of this graph are calculated (line \ref{tour:analyse}) and accumulated (lines \ref{tour:score2}-\ref{tour:cost2}), allowing the final result of this tour (line \ref{tour:f}).
 
 \begin{algorithm}[H]
-	\caption{$SolveTour(\pi, L, M, C, N, method)$}  \label{alg:tour}
+	\caption{$SolveTour(\pi, L, M, C, N, method, numProcs)$}  \label{alg:tour}
 	
 	\begin{algorithmic}[1]
 		
@@ -735,7 +738,7 @@ Finally, $SolveNode$\/ includes the edges corresponding to the items shipped at 
 				\State Let $G_1(M \cup N_{\pi(k)} \cup Q_{\pi(k)}, E^Q_{\pi(k)})$ \label{tour:g12}
 			\EndIf  \label{tour:lk2}	
 			\State $M \gets SetPalletsDestination( \pi(k) )$ \label{tour:dest2}		
-			\State $G_2 \gets SolveNode(method, \pi(k), G_1)$ \label{tour:node}
+			\State $G_2 \gets SolveNode(method, \pi(k), G_1, numProcs)$ \label{tour:node}
 			\State $s, \epsilon \gets ScoreAndDeviation(\pi(k), G_2)$ \label{tour:analyse}
 			\State $score \gets score + s$ \label{tour:score2}
 			\State $cost \gets cost + c_{\pi(k),\pi(k+1)} * (1 + c_g * |\epsilon|)$ \label{tour:cost2} 
@@ -976,7 +979,7 @@ In ACO \cite{Dorigo1992}, a population of $A$\/ ants performs independent search
 
 \begin{algorithm}[H] 
 	
-	\caption{ $SolveNode(mpACO, k, G)$ } \label{alg:aco}
+	\caption{ $SolveNode(mpACO, k, G, numProcs)$ } \label{alg:aco}
 	\begin{algorithmic}[1]
 		\State Let $G(V_k, E^Q_k)$
 		\State $G^*(V_k, E^{N*}_k \cup E^Q_k) \gets Greedy(k, G, 1)$  \label{aco:greedy}
@@ -1092,23 +1095,20 @@ Finally, we present a new heuristic designed specifically for ACLP+RPDP, which w
 
 In this heuristic, described in Algorithm \ref{alg:shims}, pallets $p_i$\/ are considered in non-descending order of $|p_i.d|$ (line \ref{shims:pallets}). For each $p_i$, the $n_k$\/ possible edges $e_{ ij}^k$\/ are considered in non-increasing order of $\theta_{ij}^k$\/ (line \ref{shims:edges}) in three phases: the greedy phase (lines \ref{shims:phase1a}-\ref{shims:phase1b}), the composition phase of the shims (lines \ref{shims:phase2a}-\ref{shims:phase2b}) and the selection phase of the best shim (lines \ref{shims:phase3a}-\ref{shims:phase3b}).
 
-Figure \ref{fig:whip} represents the $n_k$\/ possible edges $e_{ij}^k$\/ of $p_i$\/ sorted by $\theta_{ij}^k$. \emph{Shims}\/ starts with a greedy solution, stopping at the edge with index $\eta_1[i]$ close to the local optimum (first phase). Then, considering even the edge with the index $\eta_2[i]$, it elaborates different possible complements for this pallet (second phase) and selects the best of these complements (third phase).
-
-%Examples:
-%$\to$ for a small problem if limit is 0.85 for the first phase of the solution process, remains 0.15 for second and third phases.
-%$\to$ for a big problem if it is 0.98 for the first phase, it is 0.02 for the remaining phases.
-
-
+Figure \ref{fig:whip} represents the $n_k$\/ possible edges $e_{ij}^k$\/ of $p_i$\/ sorted by $\theta_{ij}^k$. \emph{mpShims}\/ starts with a greedy solution, stopping at the edge with index $\eta_1[i]$ close to the local optimum (first phase). Then, considering even the edge with the index $\eta_2[i]$, it elaborates different possible complements for this pallet (second phase) and selects the best of these complements (third phase).
 
 
 \begin{algorithm}[H]
-	\caption{ $SolveNode(Shims, k, G)$}  \label{alg:shims}
+	\caption{ $SolveNode(mpShims, k, G, numProcs)$}  \label{alg:shims}
 	\begin{algorithmic}[1]
 		\State Let $G(V_k, E^Q_k)$
 		\State Sort $M$ by $|p_i.d|$ in non-descending order \label{shims:pallets}
 		\State $E^N_k \gets \varnothing$ 
 		\State Let $E[1..m][1..n_k]$, where $E[i]$ is an array with $n_k$ edges $(p_i,t^k_j)$ sorted by $\theta_{ij}^k$ in non-ascending order, $1 \leq i \leq m$ \label{shims:edges}
-		\State $gap \gets 2000/n_k*m$ \label{shims:gap} 
+		
+		\State $limits \gets getLimits(0.75,\ 0.98,\ numProcs)$, a list of unique limits, 1 for each process, between 0.75 and 0.98
+	
+		
 		\For{$i \gets 1$ to $m$} 
 			\State $pv[i] \gets 0$		\label{shims:phase1a}
 			\State $\eta_1[i] \gets 0$
@@ -1377,8 +1377,8 @@ To find these values we submitted to test 1, 2, 4, 6, 8, 10, 12, 14, 16 parallel
                                &\multirow{2}{*}{$1.5$}& $f$              & 8.15  & 4.22  & 4.40  & 4.01  & 3.51  & 7.08  &\\
                                &                      &{\bf run-time (s)}& 1     & 5     & 12    & 45    & 244   & 737   &\\
 \cmidrule{2-10}                                 
-                               &\multirow{2}{*}{$2.0$}& $f$              &&&&&&&\\
-                               &                      &{\bf run-time (s)}&&&&&&&\\
+                               &\multirow{2}{*}{$2.0$}& $f$              & 11.31 & 6.29  & 5.54  & 5.83  & 5.05  & 10.63 &\\
+                               &                      &{\bf run-time (s)}& 2     & 14    & 34    & 106   & 477   & 2417  &\\
 \midrule
 
 \multirow{6}{*}{\it {mpACO}}   &\multirow{2}{*}{$1.2$}& $f$              &  &     &      &      &      &      &   \\

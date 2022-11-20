@@ -148,6 +148,7 @@ class Solution(object):
  
         return True
 
+# gets a list of unique limits, 1 for each process, greater than the minimum defined limit
 def getLimits(minLim, numProcs): # pid: 0 - numProcs-1
 
     limitSet = set()
@@ -278,15 +279,6 @@ def getTours(num, costs, threshold):
     toursInt = None
 
     return tours2
-
-bestNPP = [
-[6, 4, 4, 4, 2, 2,],
-[4, 4, 4, 4, 4, 4],
-[4, 4, 4, 2, 2, 4],
-[10, 8, 10, 6, 10, 10],
-[10, 6, 12, 8, 10, 8],
-[10, 8, 2, 10, 6, 6]
-]
 
 def mountEdges(pallets, items, cfg, Alpha=1, Beta=4):
    
