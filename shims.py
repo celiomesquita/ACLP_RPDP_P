@@ -65,7 +65,9 @@ def getBestShims(p, notInSol, sol, limit, numItems, maxTorque, k):
     # Only a small portion of the notInSol vector is assessed to find the a local best Shim.
 
     vol = sol.PAV[p.ID] # current pallet ocupation
+    # slack = 1.0 - limit
     maxVol = vol * (2. - limit)
+    # maxVol = (1+3*slack)*vol
    
     k2 = 0
     for e in notInSol:
