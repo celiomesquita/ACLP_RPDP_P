@@ -1,4 +1,4 @@
-\begin{thebibliography}{32}
+\begin{thebibliography}{33}
 \expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
 \providecommand{\url}[1]{\texttt{#1}}
 \providecommand{\href}[2]{#2}
@@ -169,6 +169,15 @@
   loading}.
 \newblock \bibinfo{journal}{Operations Research} \bibinfo{volume}{40},
   \bibinfo{pages}{1200--1205}.
+%Type = Article
+\bibitem[{Nurcahyadi and Blum(2021)}]{math9040361}
+\bibinfo{author}{Nurcahyadi, T.}, \bibinfo{author}{Blum, C.},
+  \bibinfo{year}{2021}.
+\newblock \bibinfo{title}{Adding negative learning to ant colony optimization:
+  A comprehensive study}.
+\newblock \bibinfo{journal}{Mathematics} \bibinfo{volume}{9}.
+\newblock \URLprefix \url{https://www.mdpi.com/2227-7390/9/4/361},
+  \DOIprefix\doi{10.3390/math9040361}.
 %Type = Article
 \bibitem[{Paquay et~al.(2018)Paquay, Limbourg, Schyns and
   Oliveira}]{PaquayLimbourgSchynsOliveira2018}

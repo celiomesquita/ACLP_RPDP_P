@@ -979,73 +979,96 @@ In ACO \cite{Dorigo1992}, a population of $A$\/ ants performs independent search
 
 \begin{algorithm}[H] 
 	
+	
+	
 	\caption{ $SolveNode(mpACO, k, G, numProcs)$ } \label{alg:aco}
 	\begin{algorithmic}[1]
 		\State Let $G(V_k, E^Q_k)$
 		\State $G^*(V_k, E^{N*}_k \cup E^Q_k) \gets Greedy(k, G, 1)$  \label{aco:greedy}
 		\State $G^+(V_k, E^{N+}_k \cup E^Q_k) \gets G^*(V_k,E^{N*}_k \cup E^Q_k)$
-		\State $A \gets$ a number of ants or parallel processes to be determined for each iteration \label{aco:ants}
+		\State $A \gets numProcs$ \label{aco:numProcs}
 		\State $ga^k_{ij}   \gets 0$, $1 \leq i \leq m$, $1 \leq j \leq n_k$  \label{aco:init1}
 		\State $\tau^k_{ij} \gets 1$, $1 \leq i \leq m$, $1 \leq j \leq n_k$   \label{aco:init2}
 		\State $\alpha    \gets 1.0$ \label{aco:alpha}
 		\State $\beta     \gets 4.0$ \label{aco:beta}
 		\State $\rho      \gets 0.2$ \label{aco:rho}
 		\State $stagnant \gets 0$
-		\While{($stagnant < 3$) {\bf and} ($runtime < 0.7s$)} \label{aco:while}
-		
-		\State $publish$
-		\State $solutions \gets subscribe()$		
-		
-			\For{$a \gets 1$ to $A$} \label{aco:g1}
-				\State $G^a(V_k, E^{Na}_k \cup E^Q_k) \gets G^+(V_k, E^{N+}_k \cup E^Q_k)$
-				\State $E \gets \{ (p_i,t^k_j) \mid (p_i,t^k_j) \not\in E^{Na}_k \}$
-				\While{$|E| > 0$}
-					\State $e \gets Roulette(E)$ biased through $ga^k_{ij}$  \label{aco:roulette}
-					\State $E \gets E - \{e\}$		
-					\If{$E^{Na}_k \cup \{e\}$ is feasible}
-						\State $ E^{Na}_k \gets E^{Na}_k \cup \{e\} $ \label{aco:ant2}
-					\EndIf	
-				\EndWhile	
-				\If{$f_s(G^{a}) > f_s(G^{+})$} \label{aco:gen1}
-					\State $G^+(V_k, E^{N+}_k \cup E^Q_k) \gets G^a(V_k, E^{Na}_k \cup E^Q_k)$  \label{aco:gen2}
-						\For{each $(p_i,t^k_j) \in E^{N+}_k$}
-							\State $\tau^k_{ij} \gets \tau^k_{ij} - \Delta\tau^k_{ij}$ \label{aco:phero1}
-							\State $ga^k_{ij} \gets (\tau^k_{ij})^\alpha + (\theta^k_{ij})^\beta$ \label{aco:ga1}
-						\EndFor
-				\EndIf 
-			\EndFor \label{aco:g2}
+		\While{ $stagnant < 3$ } \label{aco:while}
+					
+			\State $AntsQueue \gets \{\ \}$ \label{aco:AntsQueue}
+
+			\For{$1$ {\bf to} $A$} \label{aco:AntsSolve}	
+				\State $AntSolve(G^+,\ AntsQueue,\ ga^k_{ij})$
+			\EndFor
+			
+			\State $counter \gets A$
+						
+			\While{$runtime < 0.7s$ {\bf and} $counter > 0$} \label{aco:while2}
+			
+				\State $G^{a} \gets AntsQueue.Pop()$	
+				\If{$f_s(G^{a}) > f_s(G^{+})$}
+					\State $G^+(V_k, E^{N+}_k \cup E^Q_k) \gets G^a(V_k, E^{Na}_k \cup E^Q_k)$ 
+				\EndIf
+				
+				\State $counter \gets counter - 1$
+												
+			\EndWhile			
+									
 			\If{$f_s(G^+) > f_s(G^*)$} \label{aco:best1}
 				\State $stagnant \gets 0$
-				\State $G^*(V_k, E^{N*}_k \cup E^Q_k) \gets G^+(V_k, E^{N+}_k \cup E^Q_k)$
-				\For{each $(p_i,t^k_j) \in E^{N*}_k$}
-					\State $\tau^k_{ij} \gets (1-\rho)\tau^k_{ij}$ \label{aco:rho1}
-					\State $\tau^k_{ij} \gets \tau^k_{ij} + \Delta\tau^k_{ij}$ \label{aco:phero2}
-					\State $ga^k_{ij} \gets (\tau^k_{ij})^\alpha + (\theta^k_{ij})^\beta$ \label{aco:ga2}
-				\EndFor			
+				\State $G^*(V_k, E^{N*}_k \cup E^Q_k) \gets G^+(V_k, E^{N+}_k \cup E^Q_k)$		
 			\Else
-				\State $stagnant \gets stagnant + 1$ \label{aco:best2}
+				\State $stagnant \gets stagnant + 1$ 
 			\EndIf
 			\For{all $\tau^k_{ij}$} 
 				\State $\tau^k_{ij} \gets (1-\rho)\tau^k_{ij}$ \label{aco:rho2}
+				\State $\tau^k_{ij} \gets \tau^k_{ij} + \Delta\tau$ \label{aco:phero2}
+				\State $ga^k_{ij} \gets (\tau^k_{ij})^\alpha + (\theta^k_{ij})^\beta$ \label{aco:ga2}				
 			\EndFor	
 		\EndWhile	
 		\State ${\bf return}$ $G^*(V_k, E^{N*}_k \cup E^Q_k)$		
 	\end{algorithmic}
 \end{algorithm}
 	
-A greedy solution is obtained in line \ref{aco:greedy}, being initially stored in $G^*$\/ and $G^+$. The number $A$\/ of ants was empirically set to 4 (line \ref{aco:ants}), yielding solutions with a good relation quality/time. The $m \times n_k$\/ matrices $\tau^k_{ij}$ and $ga^k_{ij}$\/ (lines \ref{aco:init1}-\ref{aco:init2}) are used and updated by all ants.
+A greedy solution is obtained in line \ref{aco:greedy}, being initially stored in $G^*$\/ and $G^+$.
+The number $A$\/ of ants was set to the number of parallel processes (line \ref{aco:numProcs}).
 
-In each generation, $A$\/ ants are created (lines \ref{aco:g1}-\ref{aco:g2}). The number of generations depends on the time limit or stagnation in improving results (line \ref{aco:while}). Each ant $a$\/ elaborates its allocation graph $G^a$, considering the current values of $ga^k_{ij}$. To enforce solution diversification, if $(p_i,t^k_j)$ is included in $G^a$\/ then pheromone $\tau^k_{ij}$\/ is decreased (line \ref{aco:phero1}). Similarly, the values of $ga^k_{ij}$\/ are also updated (line \ref{aco:ga1}), where the exponents $\alpha$\/ and $\beta$\/ were chosen empirically: $\alpha$ was set to 1.0 and $\beta$\/ to $4.0$\/ (lines \ref{aco:alpha}-\ref{aco:beta}). For further explanation, see \cite{DorigoManiezzoColorni1996}. 
+The $m \times n_k$\/ matrices $\tau^k_{ij}$ and $ga^k_{ij}$\/ (lines \ref{aco:init1}-\ref{aco:init2}) are used and updated by all ants. For further explanation, see \cite{DorigoManiezzoColorni1996}. 
 
-The best solution of each generation is stored in $G^+$\/ (lines \ref{aco:gen1}-\ref{aco:gen2}), and the update of $G^*$\/ and the stopping criterion are performed on lines \ref{aco:best1}-\ref{aco:best2}. Each edge $(p_i,t^k_j)$\/ in some solution has its corresponding pheromone updated in a cumulative way (line \ref{aco:phero2}), that is, more pheromone will be given to the most relevant edges, where the increment is defined in \ref{eq:delta_tau}. The same with $ga^k_{ij}$\/ (line \ref{aco:ga2}).
+The number of iterations depends on the time limit or stagnation in improving results (line \ref{aco:while}).
+At the beginning os each iteration (\ref{aco:AntsQueue}) a queue of ants ($AntsQueue$) is created to hold ants parallel solutions generated in the child processes.
+
+The local solution $G^+$ is sent to A child processes (\ref{aco:AntsSolve}) almost simultaneously.
+While there are any ant working on an solution or the run-time is still less then maximum (\ref{aco:while2}), it hangs in the $AntsQueue$ until there is a solution available.
+
+If there is a global improvement (\ref{aco:best1}) the best so far solution ($G^*(V_k, E^{N*}_k \cup E^Q_k)$) is updated.
+At the end of each iteration pheromone levels (\ref{aco:rho2}) are evaporated, than updated with the new calculated $\Delta\tau$ (line \ref{aco:phero2}), and according to Equation \ref{eq:delta_tau}, and the general attractiveness ( \ref{aco:ga2}) is also updated.
 
 \begin{equation} \label{eq:delta_tau}
-	\Delta\tau^k_{ij} = \frac{ ga^k_{ij}\times t^k_j.s }{ A \times t^k_j.v}
+	\Delta\tau = \frac{f_s(G^{+}) - f_s(G^{*})}{A \times f_s(G^{*})}
 \end{equation}
 
-Pheromone $\tau^k_{ij}$\/ evaporates (lines \ref{aco:rho1} and \ref{aco:rho2}), where $\rho$\/ is a evaporation rate, which can be seen as a mechanism that delays premature convergence towards a sub-optimal solution. $\rho$\/ was empirically set to $0.2$\/ (line \ref{aco:rho}).
+Many ACO applications update pheromone levels and the general attractiveness only when there is a solution improvement. Differently, this work updates in both cases, exploring also the negative learning approach proposed by \cite{math9040361}.
 
 
+
+
+
+\begin{algorithm}[H] 
+	\caption{ $AntSolve(G^+,\ AntsQueue,\ ga^k_{ij})$ } \label{alg:AntSolve}
+	\begin{algorithmic}[1]
+		\State $G^a(V_k, E^{Na}_k \cup E^Q_k) \gets G^+(V_k, E^{N+}_k \cup E^Q_k)$
+		\State $E \gets \{ (p_i,t^k_j) \mid (p_i,t^k_j) \not\in E^{Na}_k \}$
+		\While{$|E| > 0$}
+			\State $e \gets Roulette(E)$ biased through $ga^k_{ij}$  \label{AntSolve:roulette}
+			\State $E \gets E - \{e\}$		
+			\If{$E^{Na}_k \cup \{e\}$ is feasible}
+				\State $ E^{Na}_k \gets E^{Na}_k \cup \{e\} $ \label{AntSolve:ant}
+			\EndIf	
+		\EndWhile
+		\State $AntsQueue \gets AntsQueue \cup G^a(V_k, E^{Na}_k \cup E^Q_k)$
+	\end{algorithmic}
+\end{algorithm}
 
 
 
