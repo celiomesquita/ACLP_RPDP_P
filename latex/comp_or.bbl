@@ -90,6 +90,7 @@
 \newblock \bibinfo{title}{A 7160 theorem for bin packing}.
 \newblock \bibinfo{journal}{Journal of Complexity} \bibinfo{volume}{1},
   \bibinfo{pages}{65--106}.
+\newblock \DOIprefix\doi{10.1016/0885-064X(85)90022-6}.
 %Type = Article
 \bibitem[{Kaluzny and Shaw(2009)}]{KaluznyBohdanL2009Oalb}
 \bibinfo{author}{Kaluzny, B.L.}, \bibinfo{author}{Shaw, R.H.A.D.},

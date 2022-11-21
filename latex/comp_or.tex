@@ -1122,36 +1122,34 @@ Finally, we present a new heuristic designed specifically for ACLP+RPDP, which w
 \end{table}
 
 
-In this heuristic, described in Algorithm \ref{alg:shims}, pallets $p_i$\/ are considered in non-descending order of $|p_i.d|$ (line \ref{shims:pallets}).
-
-Figure \ref{fig:whip} represents the $n_k$\/ possible edges $e_{ij}^k$\/ of $p_i$\/ sorted by $\theta_{ij}^k$. \emph{mpShims}\/ starts with a greedy solution, stopping at the edge with index $\eta_1$ close to the local optimum (first phase). Then, considering even the edge with the index $\eta_2[i]$, it elaborates different possible complements for this pallet (second phase) and selects the best of these complements (third phase).
+Figure \ref{fig:whip} represents the $n_k$\/ possible edges $e_{ij}^k$\/ of $p_i$\/ sorted by $\theta_{ij}^k$. \emph{mpShims}\/ starts with a greedy solution, stopping at the edge with index in $\eta_1[i]$ close to the local optimum (first phase). Then, considering even the edge with the index $\eta_2[i]$, it elaborates different possible complements for this pallet (second phase) and selects the best of these complements (third phase).
 
 
 \begin{algorithm}[H]
-	\caption{ $SolveNode(mpShims, k, G, numProcs)$}  \label{alg:shims}
+	\caption{ $SolveNode(mpShims, k, G, numProcs)$}  \label{alg:mpshims}
 	\begin{algorithmic}[1]
 		
-		\State $G^* \gets G(V_k, E^Q_k)$
+		\State $G^* \gets G(V_k, E^Q_k)$ \label{best_so_far}
 		
-		\State Sort $M$ by $|p_i.d|$ in non-descending order \label{shims:pallets}
+		\State Sort $M$ by $|p_i.d|$ in non-descending order \label{mpshims:pallets}
 		
-		\State $E^N_k \gets \{\}$ 
+		\State $E^N_k \gets \{\}$ \label{mpshims:items}
 		
-		\State Let $E[1..m][1..n_k]$, where $E[i]$ is an array with $n_k$ edges $(p_i,t^k_j)$ sorted by $\theta_{ij}^k$ in non-ascending order, $1 \leq i \leq m$ \label{shims:edges}
+		\State Let $E[1..m][1..n_k]$, where $E[i]$ is an array with $n_k$ edges $(p_i,t^k_j)$ sorted by $\theta_{ij}^k$ in non-ascending order, $1 \leq i \leq m$ \label{mpshims:edges}
 		
-		\State $limits \gets getLimits(0.75,\ 0.98,\ numProcs)$, a list of unique limits, 1 for each process, between 0.75 and 0.98
+		\State $limits \gets getLimits(0.75,\ 0.98,\ numProcs)$ \label{mpshims:limits}
 		
-		\State $shimsQueue \gets \{\}$, a queue of shims solutions to be used by the child processes
+		\State $shimsQueue \gets \{\}$ \label{mpshims:queue}
 	
 		\For{$lim \in limits$}
-			\State $shimsSolve(G(V_k, E^Q_k),\ M,\ shimsQueue,\ lim,\ E)$
+			\State $shimsSolve(G(V_k, E^Q_k),\ M,\ shimsQueue,\ lim,\ E)$ \label{mpshims:send}
 		\EndFor
 		
 		\State $counter \gets |limits|$
 		
 		\While{$runtime < 0.7s$ {\bf and} $counter > 0$}
 
-			\State $G \gets shimsQueue.Pop()$	
+			\State $G \gets shimsQueue.Pop()$	\label{mpshims:wait}
 			\If{$f_s(G) > f_s(G^*)$}
 				\State $G^* \gets G$ 
 			\EndIf
@@ -1160,13 +1158,29 @@ Figure \ref{fig:whip} represents the $n_k$\/ possible edges $e_{ij}^k$\/ of $p_i
 		
 		\EndWhile		
 		
-		\State ${\bf return}$ $G^*(V_k, E^N_k \cup E^Q_k)$
+		\State ${\bf return}$ $G^*(V_k, E^N_k \cup E^Q_k)$ \label{mpshims:return}
 	\end{algorithmic}
 \end{algorithm}
 
+Algorithm \ref{alg:mpshims} describes the {\it SolveNode} method when it receives {\it mpShims} as argument.
 
-In this phase, the heuristic that provided the best results, both in terms of time and quality, is based on {\it Next-Fit}, which is an approximation algorithm for the {\it Bin Packing Problem}\/ \cite{JohnsonGarey1985}. Basically, shims are created by accumulating the following edges, taking $slack[i]$\/ as a limit.
+Line \ref{best_so_far} defines the best solution so far which is formed by a semi-loaded aircraft where pallets have been unloaded and some remain on board ($E^Q_k$) with consolidated items.
 
+The Shims solution starts with the set of pallets closer to the center of gravity (\ref{mpshims:pallets}).
+
+A new empty set of edges is created in line \ref{mpshims:items}.
+
+Edges with items in node "k" to be loaded into not full pallets are defined in line \ref{mpshims:edges}.
+
+Line \ref{mpshims:limits} creates a list of unique limits with values between 0.75 and 0.98, that will be sent to different parallel processes to generate diverse solutions.
+
+A queue of shims solutions to be used by the child processes to send solution to the main process is defined in line \ref{mpshims:queue}.
+
+The iteration in \ref{mpshims:send} publishes or triggers parallel processes to solve $G(V_k, E^Q_k)$.
+
+In line \ref{mpshims:wait} the program hangs until each child process put a solution into the queue. Each solution is collected by the main process and compared with the best so far.
+
+Finally, in line \ref{mpshims:return}, the best solution found is returned.
 
 
 \begin{algorithm}[H]
@@ -1199,7 +1213,7 @@ In this phase, the heuristic that provided the best results, both in terms of ti
 \end{algorithm}
 
 Algorithm \ref{alg:shimsSolve}, line \ref{first_phase} corresponds to Shims' first phase. Lines  \ref{second_phase_begin}-\ref{second_phase_end} correspond to the Shims' second phase.
-Line \ref{third_phase} corresponds to Shims' third phase. In the last line, \ref{enqueue}, {\it mpShims} puts the solution in the queue to be retrieved by the main process.
+Line \ref{third_phase} corresponds to Shims' third phase. In the last line, \ref{enqueue}, {\it mpShims} puts the solution into the queue to be retrieved by the main process.
 
 
 \begin{algorithm}[H]
@@ -1209,23 +1223,23 @@ Line \ref{third_phase} corresponds to Shims' third phase. In the last line, \ref
 		\State $volume \gets 0$	
 		
 		\State $b \gets 1$
-		\State $shims[b] \gets \{\}$
-		\State $Set \gets Set \cup \{shims[b]\}$
+		\State $shims[b] \gets \{\}$  \label{empty_shims}
+		\State $Set \gets Set \cup \{shims[b]\}$ \label{empty_set}
 		
-		\For{$x \gets \eta_1[i]$ to $\eta_2[i]$}
+		\For{$x \gets \eta_1[i]$ to $\eta_2[i]$} \label{edges_indexes}
 				
 
-			\State $NewShims \gets$ {\bf True}
+			\State $NewShims \gets$ {\bf True} \label{new_shims}
 			\State $e_{ij}^k \gets E[i][x]$
 			
-			\For{$shims \in Set$}
+			\For{$shims \in Set$} \label{shims_set}
 							
 				\If { $e_{ij}^k \not\in (E^N_k \cup shims)$ {\bf and} $e_{ij}^k$ is feasible  {\bf and}  $(t_j^k.v + volume) \leq slack[i]$}
 				
 					
 					\State $shims \gets shims \cup \{e_{ij}^k\}$
 					\State $volume \gets volume + t_j^k.v$
-					\State $NewShims \gets$ {\bf False}
+					\State $NewShims \gets$ {\bf False} \label{new_shims_false}
 		
 					\State {\bf break}
 		
@@ -1233,7 +1247,7 @@ Line \ref{third_phase} corresponds to Shims' third phase. In the last line, \ref
 			
 			\EndFor 
 		
-			\If{$NewShims$} \label{ffd:new1}
+			\If{$NewShims$} \label{new_shims2}
 				\State $volume \gets 0$
 				\State $b \gets b + 1$
 				\State $shims[b] \gets \{\}$
@@ -1243,82 +1257,36 @@ Line \ref{third_phase} corresponds to Shims' third phase. In the last line, \ref
 
 		\EndFor 
 		
-		\State $sh_w \gets shims$, where $shims \in Set$ and $\sum_{e_{ab}^k \in shims} t_b^k.w$ is maximum 		
-		\State $sh_v \gets shims$, where $shims \in Set$ and $\sum_{e_{ab}^k \in shims} t_b^k.v$ is maximum
-		\State $sh_{best} \gets shims$, where $shims \in \{sh_w, sh_v\}$ and $\sum_{e_{ab}^k \in x} t_b^k.s$ is maximum
+		\State $sh_w \gets shims$, where $shims \in Set$ and $\sum_{e_{ab}^k \in shims} t_b^k.w$ is maximum  \label{best_weight}		
+		\State $sh_v \gets shims$, where $shims \in Set$ and $\sum_{e_{ab}^k \in shims} t_b^k.v$ is maximum \label{best_volume}
+		\State $sh_{best} \gets shims$, where $shims \in \{sh_w, sh_v\}$ and $\sum_{e_{ab}^k \in x} t_b^k.s$ is maximum \label{best_score}
 		
 		\State ${\bf return}$ $sh_{best}$
 		
 	\end{algorithmic}
 \end{algorithm}
 
+Algorithm \ref{alg:getBestShims} describes the procedure do get the best Shims, the best subset of edges to fill each pallet gap. This algorithm follows the logic of the {\it First-Fit Decreasing} algorithm as described by \cite{JohnsonGarey1985}.
+
+Line \ref{empty_shims} creates the first empty shims.
+Line \ref{empty_set} creates the first set of shims from where the best shims will be chosen.
+
+Line \ref{edges_indexes} iterate in the edges indexes range to find subsets of shims that fit into each pallet gap.
+
+Initially, new shims creation is permitted (\ref{new_shims}), but it will only be created if the last edge could not be included in any shims from the set (\ref{new_shims2}). 
+
+For each edge, iterate in all sets in a try to include it in any of the previous shims (\ref{shims_set}).
+As the last edge was included, forbid a new shims creation (\ref{new_shims_false}).
+
+Finally, select the best weight shims (\ref{best_weight}), the best volume shims (\ref{best_volume}), and the best score shims (\ref{best_score}) between these 2. The best score shims edges will be returned.
 
 \section{Implementation and results}
 \label{sec6}
 
-This section is composed of two parts: the generation of test instances and the results obtained in our implementations.
 
-
-\subsection{Items generation}
-\label{items}
-
-
-As we are dealing with a new problem, which until now had not been modelled in the literature, we have to create our own benchmarks. For this, we based on the characteristics of real airlifts carried out by the {\em Brazilian Air Force}, as described below.
-
-In the military airlift carried out in Brazil from 2008 to 2010, 23\% of the items weighed between $10kg$ and $20kg$, 22\% from $21kg$ to $40kg$, 24\% from $41kg$ to $80kg$, 23\% from $81kg$ to $200kg$, and 8\% between $201kg$ and $340kg$. These five groups of items are described in Table \ref{tab:weights}. On the other hand, the average density of these items is approximately $246 kg/m^3$.
-
+As we are dealing with a new problem, which has been modeled by \cite{MesquitaSanches2023}, we use the same benchmarks of their work, which are based on the characteristics of real airlifts carried out by the {\em Brazilian Air Force}.
  
-\begin{table}[H]
-		\centering
-		\caption{Items weight distribution ($kg$) in Brazil}  \label{tab:weights}
-		\begin{tabular}{c c c c }
-			\toprule
-			$item$ & $P$ & $low$ & $high$  \\		
-			\midrule
-			1              & 0.23           & 10  & 20\\
-			2              & 0.22           & 21  & 40\\
-			3              & 0.24           & 41  & 80 \\		
-			4              & 0.23           & 81  & 200\\
-			5              & 0.08           & 201 & 340 \\
-			\bottomrule
-		\end{tabular}
-\end{table}
-
-
-$ItemsGeneration$, which generates $N$, is described in Algorithm \ref{alg:itemsgen}. The parameter $scenario$\/ defines $L$\/ and $M$\/ (line \ref{ig:LM}), and the parameter $volume$\/ sets a limit on the total volume of items at each node (line \ref{ig:extended}). To avoid simply loading all items, we use $volume > 1$.
-
-\begin{algorithm}[H]
-	\caption{$ItemsGeneration(scenario,volume)$}  \label{alg:itemsgen}
-	\begin{algorithmic}[1]
-		\State Let $L$ and $M$ be according to $scenario$ \label{ig:LM}
-		\State $limit \gets volume \times \sum_{i=1}^{m} p_i.v$ \label{ig:extended}
-		\For{$k \gets 0$ to $K$}
-			\State $N_k \gets \varnothing$
-			\State $j \gets 0$
-			\State $vol \gets 0$	\label{ig:totals}	
-			\While{$vol < limit$}
-				\State $j \gets j+1$
-				\Repeat
-					\State $t_j^k.to \gets RandomInt(0, K)$ \label{ig:dest}
-				\Until{$t_j^k.to \neq k$}
-				\State $x = Roulette(item)$ biased through $P$ \label{ig:weight1}	
-				\State $t_j^k.w \gets RandomReal(low(x), high(x))$        \label{ig:weight2}		
-				\State $t_j^k.s \gets \round{100 \times (1 - \log_{10}(RandomInt(1, 9)))} $ \label{ig:score}
-				\State $t_j^k.v \gets t_j^k.w / RandomReal(148, 344)$ \label{ig:volume}
-				\State $vol \gets vol + t_j^k.v$ 
-				\State $N_k \gets N_k \cup \{t_j^k\}$ 
-			\EndWhile
-			\State $n_k \gets j$
-		\EndFor
-		\State $N \gets \bigcup_{0 \leq k \leq K} N_k$ 
-		\State ${\bf return}$ $N$
-	\end{algorithmic}
-\end{algorithm}
-
-For each generated $t^k_j$\/ item, its destination is uniformly random selected (line \ref{ig:dest}), its weight has a distribution according to Table \ref{tab:weights} (lines \ref{ig:weight1}-\ref{ig:weight2}), its score varies $100$\/ (highest) and $5$\/ (lowest) according to a logarithmic scale (line \ref{ig:score}, and its volume is randomly defined from the density, where we allow a variation of 40\% more or less than the average density of $246 kg/m^3$\/ (line \ref{ig:volume}).
-
-We test our methods with 126 different instances because we have six operational scenarios with seven randomly generated item sets for three volume surpluses (1.2, 1.5, and 2.0 times aircraft volume capacities).
-
+We test our methods with 126 different instances: six operational scenarios with 2 aircraft sizes and 3 to 7 nodes; and seven randomly generated item sets for three volume surpluses (1.2, 1.5, and 2.0 times aircraft volume capacities).
 
 
 \subsection{Results obtained}

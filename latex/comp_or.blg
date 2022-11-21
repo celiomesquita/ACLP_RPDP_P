@@ -7,16 +7,16 @@ Reallocated singl_function (elt_size=4) to 100 items from 50.
 Warning--empty pages in fok2004optimizing
 You've used 33 entries,
             2990 wiz_defined-function locations,
-            879 strings with 11681 characters,
-and the built_in function-call counts, 20841 in all, are:
-= -- 1593
+            880 strings with 11709 characters,
+and the built_in function-call counts, 20856 in all, are:
+= -- 1596
 > -- 714
 < -- 21
 + -- 302
 - -- 243
-* -- 2209
-:= -- 3020
-add.period$ -- 101
+* -- 2212
+:= -- 3022
+add.period$ -- 102
 call.type$ -- 33
 change.case$ -- 243
 chr.to.int$ -- 33
@@ -24,20 +24,20 @@ cite$ -- 34
 duplicate$ -- 1608
 empty$ -- 1605
 format.name$ -- 356
-if$ -- 3924
+if$ -- 3927
 int.to.chr$ -- 1
 int.to.str$ -- 1
 missing$ -- 303
-newline$ -- 182
+newline$ -- 183
 num.names$ -- 132
-pop$ -- 584
+pop$ -- 582
 preamble$ -- 1
 purify$ -- 213
 quote$ -- 0
-skip$ -- 465
+skip$ -- 466
 stack$ -- 0
 substring$ -- 917
-swap$ -- 1105
+swap$ -- 1106
 text.length$ -- 2
 text.prefix$ -- 0
 top$ -- 0
@@ -45,5 +45,5 @@ type$ -- 288
 warning$ -- 1
 while$ -- 127
 width$ -- 0
-write$ -- 480
+write$ -- 482
 (There was 1 warning)
