@@ -1,0 +1,425 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{fullpage}
+
+\parskip 1ex
+\parindent 0pt
+
+% an environment for problems that numbers them
+\newcounter{exnum}[section]
+\newenvironment{problem}{{\vskip 0.1in
+   \noindent \bf Problem\addtocounter{exnum}{1}~\arabic{exnum}.~}}{\vskip 0.1in}
+
+% a blunt instrument for making subproblems be (a), (b), ...
+\renewcommand{\labelenumi}{(\alph{enumi})}
+
+\begin{document}
+
+\ 
+\vfil
+\begin{center}
+{\Large Some Homework Problems For the Material in ``A Sophomoric
+  Introduction to Shared-Memory Parallelism and Concurrency''}
+\vfil
+\ 
+\vfil
+For more information, see
+http://www.cs.washington.edu/homes/djg/teachingMaterials.
+\end{center}
+\vfil
+
+\newpage
+
+\begin{problem}{\bf Fork-Join Parallelism: Longest Series}
+
+Consider the problem of finding the longest sequence of some number in
+an array of numbers:\\ {\tt longest\_sequence(i,arr)} returns the
+longest number of consecutive {\tt i} in {\tt arr}.  For example, if\\
+{\tt arr} is {\tt \{2,17,17,8,17,17,17,0,17,1\}} then
+{\tt longest\_sequence(17,arr)} is {\tt 3} and 
+{\tt longest\_sequence(9,arr)} is {\tt 0}.
+
+\begin{enumerate}
+\item In pseudocode, give a parallel fork-join algorithm for
+  implementing {\tt longest\_sequence}.  Your algorithm should have
+  work $O(n)$ and span $O(\log n)$ where $n$ is the length of the
+  array.  Do \emph{not} employ a sequential cut-off: your base case
+  should process an array range containing one element.  Hint: Use
+  this definition:
+\begin{verbatim}
+  class Result {
+    int numLeftEdge;
+    int numRightEdge;
+    int numLongest;
+    boolean entireRange;
+    Result(int l, int r, int m, boolean a) {
+      numLeftEdge=l; numRightEdge=r; numLongest=m; entireRange=a;
+    }
+  }
+\end{verbatim}
+For example, {\tt numLeftEdge} should represent the length of the
+sequence at the \emph{beginning} of the range processed by a
+subproblem.  Think carefully about how to combine results.
+\item In English, describe how you would make your answer to part (a)
+  more efficient by using a sequential cut-off.  In pseudocode, show
+  the code you would use below this cut-off.
+\end{enumerate}
+  
+\end{problem}
+
+\newpage
+
+\begin{problem}{\bf Fork-Join Parallelism: Leftmost Occurrence of Substring}
+
+Consider the problem of finding the leftmost occurrence of the sequence
+of characters {\tt cseRox} in an array of characters, returning the index
+of the leftmost occurrence or {\tt -1} if there is none.  For example,
+the answer for the sequence {\tt cseRhellocseRoxmomcseRox} is {\tt 9}.
+
+\begin{enumerate}
+\item In English (though some high-level pseudocode will probably help),
+  describe a fork-join algorithm similar in design to your solution in problem
+  1.  Use a sequential cut-off of at least 6 (the
+  length of {\tt cseRox}) and explain why this
+  significantly simplifies your solution.  Notice you still must deal
+  with the leftmost occurrence being ``split'' across two recursive
+  subproblems.
+\item Give a much simpler fork-join solution to the problem that avoids the
+  possibility of a ``split'' by using slightly overlapping
+  subproblems.  Assume a larger sequential cut-off, for example 100.
+  Give your solution precisely in pseudocode. Avoid off-by-one errors.
+\end{enumerate}
+
+\end{problem}
+
+\newpage
+
+\begin{problem}{\bf Amdahl's Law: Graphing the Pain}
+  
+  Use a graphing program such as a spreadsheet to plot the following
+  implications of Amdahl's Law.  Turn in the graphs and tables with
+  the data.
+
+\begin{enumerate}
+\item Consider the speed-up ($T_1/T_P$) where $P=256$ of a program
+  with sequential portion $S$ where the portion $1-S$ enjoys perfect
+  linear speed-up.  Plot the speed-up as $S$ ranges from .01 (1\%
+  sequential) to .25 (25\% sequential).
+\item Consider again the speed-up of a program with sequential portion $S$
+  where the portion $1-S$ enjoys perfect linear speed-up.  This time,
+  hold $S$ constant and vary the number of processors $P$ from 2 to
+  32.  On the same graph, show three curves, one each for $S=.01$,
+  $S=.1$, and $S=.25$.
+\end{enumerate}
+
+\end{problem}
+
+\newpage
+
+\begin{problem}{\bf Parallel Prefix and Pack}
+
+  In this problem, the input is an array of strings and the output is
+  an array of integers.  The output has the length of each string in
+  the input, but empty strings are filtered out.  For example:
+\begin{verbatim}
+   [ "", "", "cse", "rox", "", "homework", "", "7", "" ]
+\end{verbatim}
+produces output:
+\begin{verbatim}
+   [ 3, 3, 8, 1]
+\end{verbatim}
+  A parallel algorithm can solve this problem in $O(\log n)$ span and
+  $O(n)$ work by doing a parallel map to produce a bit vector, followed
+  by a parallel prefix over the bit vector, followed by a parallel map
+  to produce the output.
+  
+  Show the intermediate steps for the algorithm described above on the
+  example above.  For each step, show the tree of recursive task
+  objects that would be created (where a node's child is for two
+  problems of half the size) and the fields each node needs.  Do not
+  use a sequential cut-off.  Show three separate trees (for the three
+  steps).  Explain briefly what each field represents.
+  
+  Note that because the input length is not a power of two, the tree
+  will not have all its leaves at exactly the same height.
+\end{problem}
+
+\newpage
+
+\begin{problem}{\bf Parallel Quicksort}
+  
+  Lecture presented a parallel version of quicksort with
+  \emph{best-case} $O(\log^2 n)$ span and $O(n\log n)$ work.  This
+  algorithm used parallelism for the two recursive sorting calls and
+  the partition.
+
+  \begin{enumerate}
+  \item For the algorithm from lecture, what is the asymptotic \emph{worst-case}
+  span and work.  Justify your answer.
+
+  \item Suppose we use the parallel partition part of the algorithm,
+  but perform the two recursive calls in sequence rather than in
+  parallel.
+  \begin{enumerate}
+  \item[i.] What is the asymptotic best-case span and work?  Justify your answer.
+  \item[ii.] What is the asymptotic worst-case span and work? Justify your answer.
+  \end{enumerate}
+  \end{enumerate}
+
+\end{problem}
+
+\newpage
+
+\begin{problem}{\bf Another Wrong Bank Account}
+
+Note: The purpose of this problem is to show you something you should
+not do because it does not work.
+
+Consider this pseudocode for a bank account supporting concurrent
+access:
+\begin{verbatim}
+class BankAccount {
+  private int balance = 0;
+  private Lock lk = new Lock();
+  int getBalance() {
+    lk.acquire();
+    int ans = balance;
+    lk.release();
+    return ans;
+  }
+  void setBalance(int x) {
+    lk.acquire();
+    balance = x;
+    lk.release(); 
+  }
+  void withdraw(int amount) {
+    lk.acquire(); 
+    int b = getBalance();
+    if(amount > b) {
+      lk.release();
+      throw new WithdrawTooLargeException();
+    }
+    setBalance(b - amount);
+    lk.release(); 
+  }
+}
+\end{verbatim}
+The code above is wrong if locks are \emph{not} re-entrant.
+Consider the \emph{absolutely horrible idea} of ``fixing'' this
+problem by rewriting the {\tt withdraw} method to be:
+\begin{verbatim}
+  void withdraw(int amount) {
+    lk.acquire(); 
+    lk.release();
+    int b = getBalance();
+    lk.acquire();
+    if(amount > b) {
+      lk.release();
+      throw new WithdrawTooLargeException();
+    }
+    lk.release();
+    setBalance(b - amount);
+    lk.acquire();
+    lk.release(); 
+  }
+\end{verbatim}
+
+\begin{enumerate}
+\item Explain how this approach prevents blocking forever unlike the
+  original code.
+\item Show this approach is incorrect by giving an interleaving of two
+  threads in which a withdrawal is forgotten.
+\end{enumerate}
+
+\end{problem}
+
+\newpage
+
+\begin{problem}{\bf Concurrent Queue with Two Stacks}
+
+Consider this Java implementation of a queue with two stacks.  We do
+not show the entire stack implementation, but assume it is correct.
+Notice the stack has synchronized methods but the queue does not.
+The queue is incorrect in a concurrent setting.
+\begin{verbatim}
+class Stack<E> {                              class Queue<E> {
+  ...                                           Stack<E> in  = new Stack<E>();
+  synchronized boolean isEmpty() { ... }        Stack<E> out = new Stack<E>();
+  synchronized E pop() { ... }                  void enqueue(E x){ in.push(x); }
+  synchronized void push(E x) { ... }           E dequeue() {
+}                                                 if(out.isEmpty()) {
+                                                    while(!in.isEmpty()) {
+                                                      out.push(in.pop());
+                                                    }
+                                                  }
+                                                  return out.pop();
+                                                }
+                                              }
+\end{verbatim}
+\begin{enumerate}
+\item Show the queue is incorrect by showing an interleaving that
+  meets the following criteria:
+  \begin{enumerate}
+  \item[i.] Only one thread ever performs {\tt enqueue} operations and
+  that thread enqueues numbers in increasing order (1, 2, 3, ...).
+  \item[ii.] There is a thread that performs two {\tt dequeue} operations
+  such that its first {\tt dequeue} returns a number larger than its
+  second {\tt dequeue}, which should never happen.
+  \item[iii.] Every {\tt dequeue} succeeds (the queue is never empty).
+  \end{enumerate}
+  Your solution can use 1 or more additional threads that perform {\tt
+    dequeue} operations.
+\item A simple fix would make {\tt enqueue} and {\tt dequeue}
+  synchronized methods.  Explain why this would never allow an {\tt
+  enqueue} and {\tt dequeue} to happen at the same time.
+\item To allow an {\tt enqueue} and a {\tt dequeue} to
+  operate on a queue at the same time (at least when {\tt out} is not empty),
+  we could try either of the approaches below for {\tt
+    dequeue}.  For each, show an interleaving that demonstrates the
+  approach is broken.  Your interleaving should satisfy the three
+  properties listed in part (a).
+\begin{verbatim}
+  E dequeue() {                                E dequeue() {
+    synchronized(out) {                          synchronized(in) {
+      if(out.isEmpty()) {                          if(out.isEmpty()) {
+        while(!in.isEmpty()) {                       while(!in.isEmpty()) {
+          out.push(in.pop());                          out.push(in.pop());
+        }                                            }
+      }                                            }
+      return out.pop();                           }
+    }                                             return out.pop();
+  }                                            } 
+\end{verbatim}
+\item Provide a solution, based on two stacks as above, that correctly allows
+an {\tt enqueue} and a {\tt dequeue} to happen at the same time, at
+least when {\tt out} is not empty.  Your solution should define {\tt dequeue} and
+involve multiple locks.
+\end{enumerate}
+
+\end{problem}
+
+\newpage
+
+\begin{problem}{\bf Simple Concurrency with B-Trees}
+  
+  Note: Real databases and file systems use very fancy fine-grained
+  synchronization for B-Trees such as ``hand-over-hand locking''
+  (which we did not discuss), but this problem considers some
+  relatively simpler approaches.
+
+  Suppose we have a B Tree supporting operations {\tt insert} and {\tt
+    lookup}.  A simple way to synchronize threads accessing the tree
+  would be to have one lock for the entire tree that both operations
+  acquire/release.
+\begin{enumerate}
+\item Suppose instead we have one lock per node in the tree. Each
+  operation acquires the locks along the path to the leaf it needs
+  and then at the end releases all these locks.  Explain why this
+  allegedly more fine-grained approach provides absolutely no benefit.
+\item Now suppose we have one readers/writer lock per node and {\tt
+    lookup} acquires a read lock for each node it encounters whereas
+  {\tt insert} acquires a write lock for each node it encounters.  How
+  does this provide more concurrent access than the approach in part
+  (a)?  Is it any better than having one readers/writer lock for the
+  whole tree (explain)?
+\item Now suppose we modify the approach in part (b) so that {\tt
+    insert} acquires a write lock \emph{only for the leaf node} (and
+    read locks for other nodes it encounters).  How would
+  this approach increase concurrent access?  When would this be
+  \emph{incorrect}?  Explain how to fix this approach without changing the
+  asymptotic complexity of {\tt insert} by detecting when it is
+  incorrect and in (only) those cases, starting the {\tt insert} over
+  using the approach in part (b) for that {\tt insert}.  Why would
+  reverting to the approach in part (b) be fairly rare?
+\end{enumerate}
+
+\end{problem}
+
+\newpage
+
+\begin{problem}{\bf Concurrent/Parallel Graph Traversal}
+
+\begin{enumerate}
+\item In Java or pseudocode, define an \emph{unbounded stack} with
+  operations {\tt push} and {\tt pop} that can be used by threads
+  concurrently.  Make the element type generic and use a linked list
+  for the underlying implementation.  A {\tt pop} should not raise an
+  error.  Instead it should wait until the stack is not empty.  
+  Use a condition variable.  (Java detail: The {\tt wait}
+  method throws an exception that Java requires you catch, but it
+  doesn't matter if you include this detail in your solution.)
+\item The method {\tt traverseFrom} in the code below uses your answer
+  to part (a) to apply the {\tt doIt} method to every node reachable
+  from some node in a graph.  The order {\tt doIt} is applied to nodes
+  does not matter.  The code uses 4 threads to try to improve
+  performance.  All you need to do is write the {\tt run} method
+  (probably around 10 lines) for {\tt GraphWalker} using the other
+  code.  Requirements:
+  \begin{itemize}
+  \item No node should have {\tt doIt} applied to it more than once.
+  You can assume the {\tt visited} field of each node is initially
+  {\tt false} for this purpose.
+  \item Use the stack to hold nodes that still need to be processed.
+  That way threads not busy completing a {\tt doIt} call can find
+  useful work.
+  \item Avoid all synchronization errors.  (Hint: Your code does not
+  need any \emph{explicit} synchronization since it can call other
+  code that already performs synchronization.)  
+  \item Because {\tt doIt} may be expensive, do not hold any locks while
+  calling it.
+  \end{itemize}
+  Note that after all reachable nodes have been processed, all threads
+  will be blocked forever waiting for the stack to become non-empty.
+  That is fine for a homework problem.  Also note that you
+  may or may not find {\tt isVisited} helpful.
+\end{enumerate}
+
+\begin{tabular}{ll}
+\begin{minipage}[t]{.48\linewidth}
+\begin{verbatim}
+class GraphNode {
+  boolean visited = false;
+  GraphNode[] neighbors; 
+  // ... other fields, constructor, 
+  // etc. omitted ...
+  synchronized boolean isVisited() { 
+    return visited; 
+  }
+  synchronized boolean wasAndSetVisited(){ 
+    boolean ans = visited;
+    visited = true;
+    return ans;
+  }
+}
+\end{verbatim}
+\end{minipage}
+&
+\begin{minipage}[t]{.48\linewidth}
+\begin{verbatim}
+class GraphWalker extends java.lang.Thread {
+  Stack<GraphNode> stk;
+  GraphWalker(Stack<GraphNode> s) {
+    stk = s;
+  }
+  void doIt(GraphNode n) {/*...*/}
+
+  // ... FOR YOU ...
+
+}
+class Main {
+  public static final int NUM_THREADS = 4;
+  void traverseFrom(GraphNode root) {
+    Stack<GraphNode> stk = 
+       new Stack<GraphNode>();
+    stk.push(root);
+    for(int i = 0; i < NUM_THREADS; i++)
+      new GraphWalker(stk).start();
+  }
+}
+\end{verbatim}
+\end{minipage}
+\end{tabular}
+
+\end{problem}
+
+\end{document}
