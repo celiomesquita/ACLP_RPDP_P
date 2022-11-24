@@ -658,20 +658,24 @@ The tactic will be, at each shipping node, to predefine the destinations of the 
 
 
 \begin{algorithm}[H]
-	\caption{$ACLP+RPDP (scenario,volume)$}  \label{alg:main}
+	\caption{Solves ACLP+RPDP for a scenario with certain volume surplus (1.2, 1.5, or 2.0)}  \label{alg:main}
 	\begin{algorithmic}[1]
+		
+		\Procedure{$ACLP+RPDP$}{$scenario,\ surplus,\ numProcs$}
+		
 		\State Let $L, M, C$ be according to $scenario$ \label{main:LMC}
-		\State $N \gets ItemsGeneration(scenario,volume)$ \label{main:items}
+		\State $N \gets ItemsGeneration(scenario,\ surplus)$ \label{main:items}
 		\For {each $method$}
-		
-			\State $numProcs \gets $, the number of parallel processes to be used
-		
+				
 			\For {each $\pi \in S_K$} \label{main:loop1}
 				\State $f_{\pi} \gets SolveTour(\pi, L, M, C, N, method, numProcs )$ \label{main:method}
 			\EndFor \label{main:loop2}
-			\State $answer[scenario,volume,method] \gets \max f$ \label{main:f}
+			\State $answer[scenario,surplus,method] \gets \max f$ \label{main:f}
 		\EndFor
-		\State $ {\bf return}\ answer$
+		
+		\Return $answer$
+		
+		\EndProcedure
 	\end{algorithmic}
 \end{algorithm}
 
@@ -717,9 +721,11 @@ In the context of this work, we know that $m>K$, once the aircraft has $7$\/ or 
 Finally, $SolveNode$\/ includes the edges corresponding to the items shipped at the current node, returning the graph $G_2$\/ (line \ref{tour:node}). The score and the CG deviation of this graph are calculated (line \ref{tour:analyse}) and accumulated (lines \ref{tour:score2}-\ref{tour:cost2}), allowing the final result of this tour (line \ref{tour:f}).
 
 \begin{algorithm}[H]
-	\caption{$SolveTour(\pi, L, M, C, N, method, numProcs)$}  \label{alg:tour}
+	\caption{ Solves the sequence of nodes in the tour indexed by $\pi$ }  \label{alg:tour}
 	
 	\begin{algorithmic}[1]
+		
+		\Procedure{$SolveTour$}{$\pi, L, M, C, N, method, numProcs$}
 		
 		\State $\pi(0) \gets 0$ \label{tour:pi1}
 		\State $\pi(K+1) \gets 0$ \label{tour:pi2}
@@ -743,7 +749,9 @@ Finally, $SolveNode$\/ includes the edges corresponding to the items shipped at 
 			\State $score \gets score + s$ \label{tour:score2}
 			\State $cost \gets cost + c_{\pi(k),\pi(k+1)} * (1 + c_g * |\epsilon|)$ \label{tour:cost2} 
 		\EndFor  \label{tour:loop2}
-		\State $ {\bf return}\ score / cost$ \label{tour:f}
+		\Return $score / cost$ \label{tour:f}
+		
+		\EndProcedure
 		
 	\end{algorithmic}
 \end{algorithm}
@@ -827,8 +835,11 @@ $SolveNode(mpACO, k, G, numProcs)$ is the main process, while $AntSolve(G^+,\ An
 \begin{algorithm}[H] 
 	
 	
-	\caption{ $SolveNode(mpACO, k, G, numProcs)$ } \label{alg:aco}
+	\caption{ Solves a node with the {\it mpACO} method } \label{alg:aco}
 	\begin{algorithmic}[1]
+		
+		\Procedure{$SolveNode$}{$mpACO, k, G, numProcs$}
+		
 		\State Let $G(V_k, E^Q_k)$ \Comment{This is a partial solution with only consolidated on board}
 		\State $G^*(V_k, E^{N*}_k \cup E^Q_k), \_ \gets Greedy(k, G, 0.9)$  \label{aco:greedy} \Comment{This partial solution is completed by a greedy algorithm}
 		\State $G^+(V_k, E^{N+}_k \cup E^Q_k) \gets G^*(V_k,E^{N*}_k \cup E^Q_k)$
@@ -849,9 +860,20 @@ $SolveNode(mpACO, k, G, numProcs)$ is the main process, while $AntSolve(G^+,\ An
 			
 			\State $counter \gets A$
 						
-			\While{$runtime < 0.7s$ {\bf and} $counter > 0$} \label{aco:while2}
+			\While{$counter > 0$} \label{aco:while2}
 			
-				\State $G^{a} \gets AntsQueue.Pop()$	
+				\State $G^{a} \gets \varnothing$
+			
+				\While{$runtime < 0.7s$} \Comment{Wait until there is a solution in the queue}
+			
+					\State $G^{a} \gets AntsQueue.Pop()$
+					
+					\If{$G^{a} \ne \varnothing$}				
+						\Break
+					\EndIf
+				
+				\EndWhile
+					
 				\If{$f_s(G^{a}) > f_s(G^{+})$}
 					\State $G^+(V_k, E^{N+}_k \cup E^Q_k) \gets G^a(V_k, E^{Na}_k \cup E^Q_k)$ 
 				\EndIf
@@ -872,7 +894,9 @@ $SolveNode(mpACO, k, G, numProcs)$ is the main process, while $AntSolve(G^+,\ An
 				\State $ga^k_{ij} \gets (\tau^k_{ij})^\alpha + (\theta^k_{ij})^\beta$ \label{aco:ga2}				
 			\EndFor	
 		\EndWhile	
-		\State ${\bf return}$ $G^*(V_k, E^{N*}_k \cup E^Q_k)$		
+		\Return $G^*(V_k,\ E^{N*}_k \cup E^Q_k)$
+		
+		\EndProcedure		
 	\end{algorithmic}
 \end{algorithm}
 	
@@ -901,9 +925,12 @@ Many ACO applications update pheromone levels and the general attractiveness onl
 We also developed Algorithm \ref{alg:greedy}, which generates a greedy allocation of the items available in node $l_k$, according to the non-ascending order of $\theta^k_{ij}$, and considering the consolidated items already shipped ($E^Q_k$). Edges are included in this allocation as long as they respect feasibility constraints. Furthermore, the volume of each pallet $p_i$\/ cannot exceed $p_i.v \times limit$, where $ 0 < limit \leq 1$\/ is a given parameter.
 
 \begin{algorithm}[H]
-	\caption{ $Greedy(k, G, limit)$}  \label{alg:greedy}
+	\caption{Mount a greedy solution until the volume limit for each pallet}  \label{alg:greedy}
 	
 	\begin{algorithmic}[1]
+		
+		\Procedure{$Greedy$}{$k, G, limit$}
+		
 		\State Let $G(V_k, E^Q_k)$
 		
 		\State $\eta_1 \gets \{0\} \times m$ \label{greedy:eta}
@@ -913,7 +940,7 @@ We also developed Algorithm \ref{alg:greedy}, which generates a greedy allocatio
 		
 		\For{$q \gets 1$ to $m$}
 			\If{$(p_i, a_q^k) \in E^Q_k$} 
-				\State $volume[i] \gets volume[i] + a_q^k.v$ 
+				\State $volume[q] \gets volume[q] + a_q^k.v$ 
 			\EndIf		
 		\EndFor
 			
@@ -924,7 +951,10 @@ We also developed Algorithm \ref{alg:greedy}, which generates a greedy allocatio
 				\State $\eta_1[i] \gets \eta_1[i] + 1$ 	
 			\EndIf
 		\EndFor
-		\State ${\bf return}\ G(V_k, E^N_k \cup E^Q_k),\ \eta_1$
+		
+		\Return $G(V_k, E^N_k \cup E^Q_k),\ \eta_1$ \Comment{return the solution and the last item indexes array }
+		
+		\EndProcedure
 		
 	\end{algorithmic}
 \end{algorithm}
@@ -933,33 +963,44 @@ In Algorithm \ref{alg:greedy}, line \ref{greedy:eta} defines an array with the s
 
 
 \begin{algorithm}[H] 
-	\caption{ $AntSolve(G^+,\ AntsQueue,\ ga^k_{ij})$ } \label{alg:AntSolve}
+	\caption{Each ant solves a node in parallel} \label{alg:AntSolve}
 	\begin{algorithmic}[1]
+		
+		\Procedure{$AntSolve$}{$G^+,\ AntsQueue,\ ga^k_{ij})$}
+		
 		\State $G^a(V_k, E^{Na}_k \cup E^Q_k) \gets G^+(V_k, E^{N+}_k \cup E^Q_k)$
 		\State $E \gets \{ (p_i,t^k_j) \mid (p_i,t^k_j) \not\in E^{Na}_k \}$ \label{AntSolve:neighborhood}
 		\While{$|E| > 0$} \label{AntSolve:not_empty}
+		
 			\State $e \gets Roulette(E)$ biased through $ga^k_{ij}$  \label{AntSolve:roulette}
 			\State $E \gets E - \{e\}$		
 			\If{$E^{Na}_k \cup \{e\}$ is feasible}
 				\State $ E^{Na}_k \gets E^{Na}_k \cup \{e\} $ \label{AntSolve:ant}
-			\EndIf	
+			\EndIf
+			
 		\EndWhile
 		
-\State $\tau^k_{ij} \gets (1-\rho)\tau^k_{ij}$ \label{AntSolve:rho}
-\State $\tau^k_{ij} \gets \tau^k_{ij} + \Delta\tau$ \label{AntSolve:phero}
-\State $ga^k_{ij} \gets (\tau^k_{ij})^\alpha + (\theta^k_{ij})^\beta$ \label{AntSolve:ga}		
+%\For{$\tau^k_{ij}, \theta^k_{ij} \in E^{Na}_k$}
+%\State $\tau^k_{ij} \gets (1-\rho)\tau^k_{ij}$ \label{AntSolve:rho}
+%\State $\tau^k_{ij} \gets \tau^k_{ij} + \Delta\tau$ \label{AntSolve:phero}  \Comment{$\Delta\tau \gets$ Equation \ref{eq:delta_tau}}
+%\State $ga^k_{ij} \gets (\tau^k_{ij})^\alpha + (\theta^k_{ij})^\beta$ \label{AntSolve:ga}		
+%\EndFor
 		
-		\State $AntsQueue \gets AntsQueue \cup G^a(V_k, E^{Na}_k \cup E^Q_k)$ \label{AntSolve:put_in_queue}
+		\State $AntsQueue \gets AntsQueue \cup G^a(V_k,\ E^{Na}_k \cup E^Q_k)$ \label{AntSolve:put_in_queue}
+		
+		\EndProcedure
 	\end{algorithmic}
 \end{algorithm}
 
-Algorithm \ref{alg:AntSolve}, which will be executed by a child parallel process, receives an initial and poor solution ($G^+(V_k, E^{N+}_k \cup E^Q_k)$) generated greedily to be completed and improved by {\it mpACO}.
+Algorithm \ref{alg:AntSolve}, which will be executed by a child parallel process, receives an initial and poor solution $G^+(V_k, E^{N+}_k \cup E^Q_k)$ generated greedily to be completed and improved by {\it mpACO}.
 
 Line \ref{AntSolve:neighborhood} expresses the creation of the neighborhood, the set of candidate edges.
 
-While the neighborhood is not empty (\ref{AntSolve:not_empty}), choose an edge (\ref{AntSolve:roulette}), delete it from the neighborhood and include it in the solution, if feasible (\ref{AntSolve:ant}).
+While the neighborhood is not empty (line \ref{AntSolve:not_empty}), choose an edge (line \ref{AntSolve:roulette}), delete it from the neighborhood and include it in the solution, if feasible (line \ref{AntSolve:ant}).
 
-Finally, put the solution in the queue (\ref{AntSolve:put_in_queue}) to be retrieved by the main process.
+Finally, put the solution in the queue (line \ref{AntSolve:put_in_queue}) to be retrieved by the main process.
+
+%Note that $ga^k_{ij}$ is updated by each parallel ant, which may influence the solution of the others during run-time. This fully connected topology may increase run-time due to the overhead in communications handled by {\it Python API Multiprocessing} but it is expected that this will yield better solutions.
 
 
 \subsubsection{Multi-process Shims - mpShims}
@@ -1009,8 +1050,10 @@ Figure \ref{fig:whip} represents the $n_k$\/ possible edges $e_{ij}^k$\/ of $p_i
 
 
 \begin{algorithm}[H]
-	\caption{ $SolveNode(mpShims, k, G, numProcs)$}  \label{alg:mpshims}
+	\caption{Solve a node with {\it mpShims}}  \label{alg:mpshims}
 	\begin{algorithmic}[1]
+		
+		\Procedure{$SolveNode$}{$mpShims, k, G, numProcs$}
 		
 		\State $G^* \gets G(V_k, E^Q_k)$ \label{best_so_far}
 		
@@ -1030,18 +1073,28 @@ Figure \ref{fig:whip} represents the $n_k$\/ possible edges $e_{ij}^k$\/ of $p_i
 		
 		\State $counter \gets |limits|$
 		
-		\While{$runtime < 0.7s$ {\bf and} $counter > 0$}
+		\While{$counter > 0$}
+			
+			\State $G \gets \varnothing$
 
-			\State $G \gets shimsQueue.Pop()$	\label{mpshims:wait}
+			\While{$runtime < 0.7s$} \Comment{Wait until there is a solution in the queue}
+			
+			\State $G \gets shimsQueue.Pop()$
+				\If{$G \ne \varnothing$}
+					\Break
+				\EndIf
+			\EndWhile
+			
 			\If{$f_s(G) > f_s(G^*)$}
 				\State $G^* \gets G$ 
 			\EndIf
-			
-			\State $counter \gets counter - 1$
+			\State $counter \gets counter - 1$			
 		
 		\EndWhile		
 		
-		\State ${\bf return}$ $G^*(V_k, E^N_k \cup E^Q_k)$ \label{mpshims:return}
+		\Return $G^*(V_k, E^N_k \cup E^Q_k)$ \label{mpshims:return}
+		
+		\EndProcedure
 	\end{algorithmic}
 \end{algorithm}
 
@@ -1067,8 +1120,10 @@ Finally, in line \ref{mpshims:return}, the best solution found is returned.
 
 
 \begin{algorithm}[H]
-	\caption{ $shimsSolve(G,\ M,\ shimsQueue,\ limit,\ E)$}  \label{alg:shimsSolve}
+	\caption{Shims solving method to be run in parallel}  \label{alg:shimsSolve}
 	\begin{algorithmic}[1]
+		
+		\Procedure{$shimsSolve$}{$G,\ M,\ shimsQueue,\ limit,\ E$}
 		
 		\State $G(V_k,\ E^Q_k \cup E^N_k),\ \eta_1 \gets Greedy(k,\ G(V_k,\ E^Q_k),\ limit)$ \label{first_phase}
 				
@@ -1092,6 +1147,8 @@ Finally, in line \ref{mpshims:return}, the best solution found is returned.
 		
 		\State $shimsQueue \gets shimsQueue \cup \{G(V_k, E^N_k \cup E^Q_k)\}$ \label{enqueue}
 		
+		\EndProcedure
+		
 	\end{algorithmic}
 \end{algorithm}
 
@@ -1100,8 +1157,10 @@ Line \ref{third_phase} corresponds to Shims' third phase. In the last line, \ref
 
 
 \begin{algorithm}[H]
-	\caption{ $getBestShims(i,\ \eta_1,\ \eta_2,\ E,\ k,\ slack)$ }  \label{alg:getBestShims}
+	\caption{Get the best shims of edges that fills each pallet gap}  \label{alg:getBestShims}
 	\begin{algorithmic}[1]
+		
+		\Procedure{$getBestShims$}{$i,\ \eta_1,\ \eta_2,\ E,\ k,\ slack$}
 		
 		\State $volume \gets 0$	
 		
@@ -1144,7 +1203,9 @@ Line \ref{third_phase} corresponds to Shims' third phase. In the last line, \ref
 		\State $sh_v \gets shims$, where $shims \in Set$ and $\sum_{e_{ab}^k \in shims} t_b^k.v$ is maximum \label{best_volume}
 		\State $sh_{best} \gets shims$, where $shims \in \{sh_w, sh_v\}$ and $\sum_{e_{ab}^k \in x} t_b^k.s$ is maximum \label{best_score}
 		
-		\State ${\bf return}$ $sh_{best}$
+		\Return $sh_{best}$
+		
+		\EndProcedure
 		
 	\end{algorithmic}
 \end{algorithm}
@@ -1230,13 +1291,16 @@ For each red bullet closest to the upper left corner, we call it {\it Utopia}, a
 	\label{fig:scenario1data20}
 \end{figure}
 
-Observing Figure \ref{fig:scenario1data20}, it may be noticed that the best number of processes for {\it Scenario 1} (the closest to the {\it Utopia}) is \textbf{6}. For {\it Scenario 2}, the best number is \textbf{4}. Table \ref{tab:numProcs} presents all methods, volumes percentages and scenarios numbers of best parallel processes to be run to solve all tours.
+Observing Figure \ref{fig:scenario1data20}, it may be noticed that the best number of processes for {\it Scenario 1} solved with {\it mpShims} (the closest to the {\it Utopia}) is \textbf{6}. Solved with {\it mpACO}, the best number is \textbf{8}. Table \ref{tab:numProcs} presents all methods, volumes percentages and scenarios numbers of best parallel processes to be run to solve all tours.
 
 To build Table \ref{tab:numProcs}, it was necessary to determine the number of parallel processes that best solve each node. For this we created a procedure as in Algorithm \ref{alg:bestnum}.
 
 \begin{algorithm}[H]
-	\caption{$getBestNPP(scores, runtimes, procs)$}  \label{alg:bestnum}
+	\caption{Get the best number of parallel processes}  \label{alg:bestnum}
 	\begin{algorithmic}[1]
+		
+		\Procedure{$getBestNPP$}{$scores,\ runtimes,\ procs$}
+				
 		\State $maxS   \gets max(scores)$
 		\State $minS   \gets min(scores)$
 		\State $maxR \gets max(runtimes)$
@@ -1246,9 +1310,9 @@ To build Table \ref{tab:numProcs}, it was necessary to determine the number of p
 		\State $minD \gets 999999999.9$		
 		
 		\For{$i \in |scores|$}
-			\State $y = ( maxS - scores[i] )\ /\ (maxS   - minS  )$, the Y axis leg of Figure \ref{fig:scenario1data20}
-			\State $x = ( runtimes[i] - minR )\ /\ (maxR - minR)$. the X axis leg
-			\State $h = \sqrt{x^2 + y^2}$, the hypotenuse, distance from {\it Utopia}
+			\State $y = ( maxS - scores[i] )\ /\ (maxS   - minS  )$ \Comment{the Y axis leg}
+			\State $x = ( runtimes[i] - minR )\ /\ (maxR - minR)$ \Comment{the X axis leg}
+			\State $h = \sqrt{x^2 + y^2}$  \Comment{distance from {\it Utopia}}
 			\If{$minD$ > $h$}
 				\State $minD \gets h$
 				\State $bestNPP \gets procs[i]$
@@ -1256,7 +1320,9 @@ To build Table \ref{tab:numProcs}, it was necessary to determine the number of p
 		
 		\EndFor
 		
-		\State ${\bf return}$ $bestNPP$
+		\Return $bestNPP$
+		
+		\EndProcedure
 	\end{algorithmic}
 \end{algorithm}
 
@@ -1311,27 +1377,38 @@ To find these values we submitted to test 1, 2, 4, 6, 8, 10, 12, 14, 16 parallel
 
 
 		
-		\multirow{4}{*}{$1.2$} &\multirow{2}{*}{\it {mpShims}} & $f$                & 5.70  & 3.09  & 2.94  & 2.90  & 2.79  & 5.70  & 0.91  \\%2312
-		                       &                               & {\bf run-time (s)} & 1     & 3     & 7     & 26    & 97    & 267   & 70  \\%390
+		\multirow{6}{*}{$1.2$} &\multirow{2}{*}{ $mpShims^{0.7s}$}& $f$                & 5.70  & 3.09  & 2.94  & 2.90  & 2.79  & 5.70  & 0.91  \\%2312
+		                       &                                 & {\bf run-time (s)} & 1     & 3     & 7     & 26    & 97    & 267   & 70  \\%390
 		                       \cmidrule{2-10}
-		                       &\multirow{2}{*}{\it {mpACO}}   & $f$                & 6.42  & 3.78  &  3.19 & 3.17  & 2.97  & 5.87  & 1.00  \\ %2540
-                               &                               & {\bf run-time (s)} & 16    & 282   &  314  & 1334  & 6945  & 18883 & 1  \\ %27162
+		                       &\multirow{2}{*}{ $mpACO^{60s}$}   & $f$                & 6.42  & 3.78  &  3.19 & 3.17  & 2.97  & 5.87  & 1.00  \\ %2540
+                               &                                 & {\bf run-time (s)} & 16    & 282   &  314  & 1334  & 6945  & 18883 & 1  \\ %27162
+		\cmidrule{2-10}		                       
+							   &\multirow{2}{*}{ $mpACO^{0.7s}$}  & $f$                &&&&&&&\\
+							   &                                 & {\bf run-time (s)} &&&&&&&\\                               
 		\midrule
-		\multirow{4}{*}{$1.5$} &\multirow{2}{*}{\it {mpShims}} & $f$                & 8.15  & 4.22  & 4.40  & 4.01  & 3.51  & 7.08  &   \\
-		                       &                               & {\bf run-time (s)} & 1     & 5     & 12    & 45    & 244   & 737   &   \\
+		\multirow{6}{*}{$1.5$} &\multirow{2}{*}{ $mpShims^{0.7s}$}& $f$                & 8.15  & 4.22  & 4.40  & 4.01  & 3.51  & 7.08  &   \\
+		                       &                                 & {\bf run-time (s)} & 1     & 5     & 12    & 45    & 244   & 737   &   \\
 		\cmidrule{2-10}
-		                       &\multirow{2}{*}{\it {mpACO}}   & $f$                &&&&&&&\\
-		                       &                               & {\bf run-time (s)} &&&&&&&\\
+		                       &\multirow{2}{*}{ $mpACO^{60s}$}   & $f$                & 9.50  & 5.01  & 4.60  & 4.28  &&&\\
+		                       &                                 & {\bf run-time (s)} & 9     & 344   & 787   & 1525  &&&\\
+		\cmidrule{2-10}		                       
+							   &\multirow{2}{*}{ $mpACO^{0.7s}$}  & $f$                &&&&&&&\\
+							   &                                 & {\bf run-time (s)} &&&&&&&\\		                       
 		\midrule
-		\multirow{4}{*}{$2.0$} &\multirow{2}{*}{\it {mpShims}} & $f$                & 11.31 & 6.29  & 5.54  & 5.83  & 5.05  & 10.63 &   \\
-		                       &                               & {\bf run-time (s)} & 2     & 14    & 34    & 106   & 477   & 2417  &   \\
+		\multirow{6}{*}{$2.0$} &\multirow{2}{*}{ $mpShims^{0.7s}$}& $f$                & 11.31 & 6.29  & 5.54  & 5.83  & 5.05  & 10.63 &   \\
+		                       &                                 & {\bf run-time (s)} & 2     & 14    & 34    & 106   & 477   & 2417  &   \\
 		\cmidrule{2-10}
-		                       &\multirow{2}{*}{\it {mpACO}}   & $f$                &&&&&&&\\
-		                       &                               & {\bf run-time (s)} &&&&&&&\\
+		                       &\multirow{2}{*}{ $mpACO^{60s}$}   & $f$                &&&&&&&\\
+		                       &                                 & {\bf run-time (s)} &&&&&&&\\
+		\cmidrule{2-10}		                       
+		                       &\multirow{2}{*}{ $mpACO^{0.7s}$}  & $f$                &&&&&&&\\
+							   &                                 & {\bf run-time (s)} &&&&&&&\\
+		\bottomrule	
+		
 
-		\bottomrule		
 	\end{tabular}
-	\normalsize
+\textsuperscript{The numbers 0.7s and 60s as superscript on the methods names represent the time limit per node.}	
+\normalsize
 \end{table}
 
 
