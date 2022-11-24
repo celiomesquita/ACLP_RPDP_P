@@ -661,14 +661,14 @@ The tactic will be, at each shipping node, to predefine the destinations of the 
 	\caption{Solves ACLP+RPDP for a scenario with certain volume surplus (1.2, 1.5, or 2.0)}  \label{alg:main}
 	\begin{algorithmic}[1]
 		
-		\Procedure{$ACLP+RPDP$}{$scenario,\ surplus,\ numProcs$}
+		\Procedure{$ACLP+RPDP$}{$scenario,\ surplus,\ numProcs,\ timeLim$}
 		
 		\State Let $L, M, C$ be according to $scenario$ \label{main:LMC}
 		\State $N \gets ItemsGeneration(scenario,\ surplus)$ \label{main:items}
 		\For {each $method$}
 				
 			\For {each $\pi \in S_K$} \label{main:loop1}
-				\State $f_{\pi} \gets SolveTour(\pi, L, M, C, N, method, numProcs )$ \label{main:method}
+				\State $f_{\pi} \gets SolveTour(\pi, L, M, C, N, method, numProcs,\ timeLim )$ \label{main:method}
 			\EndFor \label{main:loop2}
 			\State $answer[scenario,surplus,method] \gets \max f$ \label{main:f}
 		\EndFor
@@ -725,7 +725,7 @@ Finally, $SolveNode$\/ includes the edges corresponding to the items shipped at 
 	
 	\begin{algorithmic}[1]
 		
-		\Procedure{$SolveTour$}{$\pi, L, M, C, N, method, numProcs$}
+		\Procedure{$SolveTour$}{$\pi, L, M, C, N, method, numProcs,\ timeLim$}
 		
 		\State $\pi(0) \gets 0$ \label{tour:pi1}
 		\State $\pi(K+1) \gets 0$ \label{tour:pi2}
@@ -744,7 +744,7 @@ Finally, $SolveNode$\/ includes the edges corresponding to the items shipped at 
 				\State Let $G_1(M \cup N_{\pi(k)} \cup Q_{\pi(k)}, E^Q_{\pi(k)})$ \label{tour:g12}
 			\EndIf  \label{tour:lk2}	
 			\State $M \gets SetPalletsDestination( \pi(k) )$ \label{tour:dest2}		
-			\State $G_2 \gets SolveNode(method, \pi(k), G_1, numProcs)$ \label{tour:node}
+			\State $G_2 \gets SolveNode(method, \pi(k), G_1, numProcs,\ timeLim)$ \label{tour:node}
 			\State $s, \epsilon \gets ScoreAndDeviation(\pi(k), G_2)$ \label{tour:analyse}
 			\State $score \gets score + s$ \label{tour:score2}
 			\State $cost \gets cost + c_{\pi(k),\pi(k+1)} * (1 + c_g * |\epsilon|)$ \label{tour:cost2} 
@@ -838,7 +838,7 @@ $SolveNode(mpACO, k, G, numProcs)$ is the main process, while $AntSolve(G^+,\ An
 	\caption{ Solves a node with the {\it mpACO} method } \label{alg:aco}
 	\begin{algorithmic}[1]
 		
-		\Procedure{$SolveNode$}{$mpACO, k, G, numProcs$}
+		\Procedure{$SolveNode$}{$mpACO, k, G, numProcs,\ timeLim$}
 		
 		\State Let $G(V_k, E^Q_k)$ \Comment{This is a partial solution with only consolidated on board}
 		\State $G^*(V_k, E^{N*}_k \cup E^Q_k), \_ \gets Greedy(k, G, 0.9)$  \label{aco:greedy} \Comment{This partial solution is completed by a greedy algorithm}
@@ -864,7 +864,7 @@ $SolveNode(mpACO, k, G, numProcs)$ is the main process, while $AntSolve(G^+,\ An
 			
 				\State $G^{a} \gets \varnothing$
 			
-				\While{$runtime < 0.7s$} \Comment{Wait until there is a solution in the queue}
+				\While{$runtime < timeLim$} \Comment{Wait until there is a solution in the queue}
 			
 					\State $G^{a} \gets AntsQueue.Pop()$
 					
@@ -1053,7 +1053,7 @@ Figure \ref{fig:whip} represents the $n_k$\/ possible edges $e_{ij}^k$\/ of $p_i
 	\caption{Solve a node with {\it mpShims}}  \label{alg:mpshims}
 	\begin{algorithmic}[1]
 		
-		\Procedure{$SolveNode$}{$mpShims, k, G, numProcs$}
+		\Procedure{$SolveNode$}{$mpShims, k, G, numProcs,\ timeLim$}
 		
 		\State $G^* \gets G(V_k, E^Q_k)$ \label{best_so_far}
 		
@@ -1077,7 +1077,7 @@ Figure \ref{fig:whip} represents the $n_k$\/ possible edges $e_{ij}^k$\/ of $p_i
 			
 			\State $G \gets \varnothing$
 
-			\While{$runtime < 0.7s$} \Comment{Wait until there is a solution in the queue}
+			\While{$runtime < timeLim$} \Comment{Wait until there is a solution in the queue}
 			
 			\State $G \gets shimsQueue.Pop()$
 				\If{$G \ne \varnothing$}
