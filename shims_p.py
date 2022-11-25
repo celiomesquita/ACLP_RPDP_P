@@ -3,8 +3,8 @@ import numpy as np
 import multiprocessing as mp
 import shims
 
-def shimsQueue(           edges, pallets, items, limit, cfg, k, outQueue ):
-    outQueue.put( Compute(edges, pallets, items, limit, cfg, k) )
+def shimsEnqueue(outQueue, edges, pallets, items, limit, cfg, k ):
+    outQueue.put( Compute( edges, pallets, items, limit, cfg, k) )
 
 def Compute(edges, pallets, items, limit, cfg, k) :
 
@@ -34,6 +34,7 @@ def Compute(edges, pallets, items, limit, cfg, k) :
 
     return sol
 
+# parallel Shims based on different limits
 def Solve(pallets, items, cfg, k, minLim, numProcs): # items include kept on board
 
     print(f"\nParallel Shims for ACLP+RPDP")
@@ -57,7 +58,7 @@ def Solve(pallets, items, cfg, k, minLim, numProcs): # items include kept on boa
         limit = limits[i]
 
         # create a child process for each limit
-        procs[i] = mp.Process( target=shimsQueue,args=( edges, pallets, items, limit, cfg, k, outQueue  ) )
+        procs[i] = mp.Process( target=shimsEnqueue,args=( outQueue, edges, pallets, items, limit, cfg, k  ) )
         
     for p in procs:
         p.start()
@@ -72,7 +73,6 @@ def Solve(pallets, items, cfg, k, minLim, numProcs): # items include kept on boa
             bestID = i
 
     return mno.getSolMatrix(sols[bestID].Edges, numPallets, numItems)
-        
         
 if __name__ == "__main__":
 

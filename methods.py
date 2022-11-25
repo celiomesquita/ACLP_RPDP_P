@@ -122,7 +122,7 @@ class Solution(object):
         self.Edges[e.ID].InSol = True
 
     # check constraints for greedy, Shims and metaheuristics
-    def isFeasible(self, ce, limit, cfg, k):
+    def isFeasible(self, ce, limit, cfg, k, torque=0.0):
 
         if ce.Item.ID > len(self.Included)-1:
             return False # this item was already inserted. Equation 19        
@@ -142,7 +142,10 @@ class Solution(object):
             return False #this item volume would exceed pallet volumetric limit. Equation 18
         
         # if this inclusion increases torque and is turns it greater than the maximum
-        newTorque = abs(self.T + ce.Torque)
+        if torque == 0.0:
+            newTorque = abs(self.T + ce.Torque)
+        else:
+            newTorque = abs(torque + ce.Torque)
         if newTorque > cfg.maxTorque:
             return False
  

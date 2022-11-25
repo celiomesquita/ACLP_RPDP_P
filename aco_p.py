@@ -22,8 +22,6 @@ def antSolve(Gant, cfg, k, antsField, bestScore):
         if Gant.isFeasible(ce, 1.0, cfg, k):
             Gant.putInSol(ce)
     
-    # aco.updatePheroAttract(Gant.S, bestScore, antsField)
-
     return Gant
 
 def enqueue( antsQueue,     Gant, cfg, k, antsField, bestScore ):

@@ -20,8 +20,8 @@ bests = []
 for scenario in scenarios:
 
     if scenario == 1:
-        # instances = [1,2,3,4,5,6,7]
-        instances = [1]
+        instances = [1,2,3,4,5,6,7]
+        # instances = [1]
     if scenario == 2:
         instances = [1,2,3,4,5,6,7]
         # instances = [1]
@@ -68,8 +68,7 @@ for scenario in scenarios:
     totElapsed = 0
     sumScores = 0
 
-    numProcs = [1,2,4,6,8,10,12,14,16]
-    # numProcs = [8]
+    numProcs = [1,4,8,12,16]
 
     if method == "Shims" or method == "ACO" or method == "Greedy":
         numProcs = [1]
@@ -116,8 +115,8 @@ for scenario in scenarios:
             if method == "Greedy":
                 E = greedy.Solve(pallets, items, cfg, k)
 
-            if method == "Shims_p": # 6 CPU
-                E = shims_p.Solve(pallets, items, cfg, k, minLim, procs)
+            if method == "Shims_p":
+                E = shims_p.Solve(pallets, items, cfg, k, minLim, procs)           
 
             if method == "Shims":
                 E = shims.Solve(pallets, items, cfg, k, limit)
@@ -211,7 +210,7 @@ for scenario in scenarios:
                     runtimes[ix]  += elapsed
                     scores[ix] += sNodeAccum # * (2-abs(epsilom))
 
-    if method == "Shims_p" or method == "ACO_p":
+    if len(numProcs) > 1:
 
         text = "np,time,score\n"
         for i, _ in enumerate(numProcs):
@@ -241,14 +240,16 @@ for scenario in scenarios:
 
         for i, _ in enumerate(numProcs):
 
-            yLeg = (maxScore - scores[i])/(maxScore - minScore)
-            xLeg = (runtimes[i] - minTime)  /(maxTime  - minTime)
+            if (maxScore - minScore) and (maxTime  - minTime) > 0:
 
-            distance = math.sqrt(xLeg**2 + yLeg**2)
+                yLeg = (maxScore - scores[i])/(maxScore - minScore)
+                xLeg = (runtimes[i] - minTime)  /(maxTime  - minTime)
 
-            if minDist > distance:
-                minDist = distance
-                bestNumProcs = numProcs[i]
+                distance = math.sqrt(xLeg**2 + yLeg**2)
+
+                if minDist > distance:
+                    minDist = distance
+                    bestNumProcs = numProcs[i]
             
             # print(f"{numProcs[i]}\t{distance:.2f}\t{xLeg:.2f}\t{yLeg:.2f}")
 
