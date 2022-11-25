@@ -56,15 +56,15 @@ class Edge(object):
         # 5100 = 15m x 340kg, maximum torque possible
         factor = abs(self.Torque) / (cfg.maxD*340) # less than 1
 
-        self.Heuristic = ( float(item.S) / ( 3000 * float(item.V) ) ) * (1.02 - factor)
+        self.Heuristic = ( float(item.S) / ( 500 * float(item.V) ) ) * (1.0 - factor)
 
         self.Pheromone = 0.5# for ACO
-        self.Attract   = self.Pheromone**Alpha + self.Heuristic**Beta # for ACO
+        self.Attract   = self.Pheromone**Alpha * self.Heuristic**Beta # for ACO
         self.InSol     = False
 
     # for ACO
     def updateAttract(self, Alpha, Beta):
-        self.Attract = self.Pheromone**Alpha + self.Heuristic**Beta
+        self.Attract = self.Pheromone**Alpha * self.Heuristic**Beta
 
 def edgesCopy(edges):
     output = edges.copy()

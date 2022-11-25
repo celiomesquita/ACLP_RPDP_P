@@ -771,7 +771,7 @@ $UpdateConsolidated$, $MinCGDeviation$, $SetPalletsDestination$, and $ScoreAndDe
 \label{methods}
 
 
-In this subsection we present implementations of $SolveNode(method,k, G)$, where $method$\/ corresponds to a heuristic, $k$\/ is the index of the current node and $G$\/ is the allocation graph of the consolidated items that remain on board at node $l_k$.
+In this subsection we present implementations of $SolveNode(...)$, where $method$\/ corresponds to a heuristic, $k$\/ is the index of the current node and $G$\/ is the allocation graph of the consolidated items that remain on board at node $l_k$.
 
 An important issue on meta-heuristics is that they are known for the hard work in tuning parameters. For this, when we use the word {\it empirically}\/ throughout the text, we want to say that we accomplished many tests with the hardest instances to fit these values. This does not guarantee best results for all instances, but, on average, overall results are acceptable. Another important observation is that our {\it ACO} implementations were designed based on traditional ideas from the literature \cite{Fidanova2006} and on the experiences learned during tests, plus the special features to process-based parallelism.
 
@@ -830,7 +830,7 @@ In ACO \cite{Dorigo1992}, a population of $A$\/ ants performs independent search
 
 Algorithm \ref{alg:aco} presents this heuristic in its parallel multi-process version as we have implemented.
 
-$SolveNode(mpACO, k, G, numProcs)$ is the main process, while $AntSolve(G^+,\ AntsQueue,\ ga^k_{ij})$ is executed the child concurrent processes.
+$SolveNode(mpACO, ...)$ is the main process, while $AntSolve(...)$ is executed the child concurrent processes.
 
 \begin{algorithm}[H] 
 	

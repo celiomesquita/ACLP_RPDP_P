@@ -13,15 +13,15 @@ import sys
 method   = f"{sys.argv[1]}"
 mno.DATA = f"{sys.argv[2]}"
 
-scenarios = [1,2,3,4,5,6]
-# scenarios = [1]
+# scenarios = [1,2,3,4,5,6]
+scenarios = [1]
 bests = []
 
 for scenario in scenarios:
 
     if scenario == 1:
-        instances = [1,2,3,4,5,6,7]
-        # instances = [1]
+        # instances = [1,2,3,4,5,6,7]
+        instances = [1]
     if scenario == 2:
         instances = [1,2,3,4,5,6,7]
         # instances = [1]
@@ -69,6 +69,7 @@ for scenario in scenarios:
     sumScores = 0
 
     numProcs = [1,2,4,6,8,10,12,14,16]
+    # numProcs = [8]
 
     if method == "Shims" or method == "ACO" or method == "Greedy":
         numProcs = [1]
@@ -239,8 +240,6 @@ for scenario in scenarios:
         minTime = min(runtimes)  
 
         for i, _ in enumerate(numProcs):
-
-
 
             yLeg = (maxScore - scores[i])/(maxScore - minScore)
             xLeg = (runtimes[i] - minTime)  /(maxTime  - minTime)

@@ -7,7 +7,7 @@ import random
 from scipy import stats
 
 ALPHA = 1   # pheromone exponent (linearly affects attractivity)
-BETA  = 4   # heuristic exponent (exponentialy affects attractivity)
+BETA  = 5   # heuristic exponent (exponentialy affects attractivity)
 NANTS = 6
 
 def rouletteSelection(values): # at least 15 times faster than randomChoice
@@ -42,7 +42,8 @@ def updatePheroAttract(score, bestSoFar, edges):
 
     deltaTau = getDeltaTau(score, bestSoFar)
 
-    # Pheromone = [] 
+    Pheromone = []
+    Attractiveness = []
 
     # update pheromone level in all edges
     for id, e in enumerate(edges):
@@ -51,19 +52,23 @@ def updatePheroAttract(score, bestSoFar, edges):
         edges[id].Pheromone = math.sqrt(e.Pheromone) / 1.4 # RHO = 0.2
 
         # update pheromone level
-        if e.Pheromone + deltaTau > 0 and e.Pheromone + deltaTau <= 1:
+        if edges[id].Pheromone + deltaTau > 0:
             edges[id].Pheromone += deltaTau
         
-        # Pheromone.append(e.Pheromone)
+        Pheromone.append(e.Pheromone)
+        Attractiveness.append(e.Attract)
         
         # update the general attractiveness
         edges[id].updateAttract(ALPHA, BETA)
 
         # mpAttract[id] = edges[id].Attract
 
-    # mean = stats.tmean(Pheromone)
-    # sdev = stats.tstd(Pheromone)
-    # print(f"Mean: {mean:.2f} | StdDev: {sdev:.2f}")
+    # meanp = stats.tmean(Pheromone)
+    # meana = stats.tmean(Attractiveness)
+    # deva = stats.tstd(Attractiveness)
+    # devp = stats.tstd(Pheromone)
+    # print(f"Pheromone:\t{meanp:.2f}\t{devp:.5f} | Attractiveness:\t{meana:.2f}\t{deva:.2f}")    
+   
 
 # pick and delete an edge from the neighborhood by a proportional roulette wheel
 def pickFromNbhood(nbhood, values):
