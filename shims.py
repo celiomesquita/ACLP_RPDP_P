@@ -24,7 +24,7 @@ class Shim(object):
         self.Edges.append(e)
         self.Included[e.Item.ID] = 1        
 
-    def shimIsFeasible(self, ce, sol, maxTorque, k, torque=0.0 ):
+    def shimIsFeasible(self, ce, sol, maxTorque, k):
 
         if ce.Item.ID > len(self.Included)-1:
             return False
@@ -40,15 +40,10 @@ class Shim(object):
             return False #this item weight would exceed pallet weight limit. Equation 17
         
         # Pallet Acumulated Volume
-        if sol.PAV[ce.Pallet.ID] + self.V + ce.Item.V > ce.Pallet.V:
+        if sol.PAV[ce.Pallet.ID] + self.V + ce.Item.V > ce.Pallet.V*1.03:
             return False #this item volume would exceed pallet volumetric limit. Equation 18
         
-        newTorque = self.T + ce.Torque
-        if torque == 0.0:
-            newTorque += sol.T
-        else:
-            newTorque += torque
-
+        newTorque = self.T + sol.T + ce.Torque
         if abs(newTorque) > maxTorque:
             return False
         
@@ -58,7 +53,7 @@ class Shim(object):
 
 # solve a Subset Selection Problem for this pallet, by selecting
 # the best shim and including its edges in solution.
-def getBestShims(p, notInSol, sol, limit, numItems, maxTorque, k, torque=0.0):
+def getBestShims(p, notInSol, sol, limit, numItems, maxTorque, k):
 
     # create the first shim
     sh = Shim(numItems)
@@ -69,10 +64,8 @@ def getBestShims(p, notInSol, sol, limit, numItems, maxTorque, k, torque=0.0):
     # of the partial solution's volume.
     # Only a small portion of the notInSol vector is assessed to find the a local best Shim.
 
-    vol = sol.PAV[p.ID] # current pallet ocupation
-    # slack = 1.0 - limit
-    maxVol = vol * (2. - limit)
-    # maxVol = (1+3*slack)*vol
+    vol = sol.PAV[p.ID] # current pallet volume
+    maxVol = vol * (4. - 3*limit)
    
     k2 = 0
     for e in notInSol:
@@ -88,12 +81,12 @@ def getBestShims(p, notInSol, sol, limit, numItems, maxTorque, k, torque=0.0):
     # First Fit Decrease - equivalente ao KP, mas mais rápido
     for i, oe in enumerate(outter):
         for sh in Set:
-            if sh.shimIsFeasible(oe, sol, maxTorque, k, torque):
+            if sh.shimIsFeasible(oe, sol, maxTorque, k):
                 sh.AppendEdge(oe)
                 break
         else:
             sh = Shim(numItems) # create a new Shim
-            if sh.shimIsFeasible(oe, sol, maxTorque, k, torque): # try to insert the edge "oe" in the new Shim
+            if sh.shimIsFeasible(oe, sol, maxTorque, k): # try to insert the edge "oe" in the new Shim
                 sh.AppendEdge(oe)
             Set.append(sh)
 

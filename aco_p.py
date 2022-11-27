@@ -7,7 +7,7 @@ import aco
 
 # Process-based parallelism
 
-def antSolve(Gant, cfg, k, antsField, bestScore):
+def antSolve(Gant, cfg, k):
     
     Nbhood   = [ce for ce in Gant.Edges if not ce.InSol]
     attracts = [ce.Attract for ce in Nbhood]
@@ -24,20 +24,17 @@ def antSolve(Gant, cfg, k, antsField, bestScore):
     
     return Gant
 
-def enqueue( antsQueue,     Gant, cfg, k, antsField, bestScore ):
-    antsQueue.put( antSolve(Gant, cfg, k, antsField, bestScore) )
+def enqueue( antsQueue,     Gant, cfg, k):
+    antsQueue.put( antSolve(Gant, cfg, k) )
 
-def publish(antsQueue, procs, limits, antsField, pallets, items, cfg, k, bestScore ):
+def publish(antsQueue, procs, limit, antsField, pallets, items, cfg, k ):
 
     for i, _ in enumerate(procs):
-
-        limit = limits[i] # greedy limit
 
         Glocal = mno.Solution(antsField, pallets, items, limit, cfg, k)
 
         # create a child process for each ant
-        procs[i] = mp.Process( target=enqueue, args=( antsQueue, Glocal, cfg, k, antsField, bestScore ) ) # faster than thread
-        # procs[i] = thrd.Thread( target=enqueue, args=( antsQueue, Glocal, cfg, k, antsField, bestScore ) )
+        procs[i] = mp.Process( target=enqueue, args=( antsQueue, Glocal, cfg, k ) ) # faster than thread
     
         procs[i].start()
          
@@ -57,7 +54,9 @@ def Solve( pallets, items, startTime, cfg, k, minLim, numProcs, secBreak):  # it
     antsField = mno.mountEdges(pallets, items, cfg)
 
     # set of unique greedy limit values
-    limits = mno.getLimits(minLim, numProcs) 
+    # limits = mno.getLimits(minLim, numProcs) 
+
+    limit = 0.95
 
     # initialize the best solution so far           1.0 totally greedy
     Gbest = mno.Solution(antsField, pallets, items, 0.95, cfg, k)
@@ -78,7 +77,7 @@ def Solve( pallets, items, startTime, cfg, k, minLim, numProcs, secBreak):  # it
 
         antsQueue = mp.Queue()
 
-        publish(antsQueue, procs, limits, antsField, pallets, items, cfg, k, Gbest.S)
+        publish(antsQueue, procs, limit, antsField, pallets, items, cfg, k)
 
         sols = subscribe(antsQueue, procs, startTime, secBreak)
 

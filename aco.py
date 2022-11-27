@@ -11,14 +11,16 @@ BETA  = 5   # heuristic exponent (exponentialy affects attractivity)
 NANTS = 6
 
 def rouletteSelection(values): # at least 15 times faster than randomChoice
-    max = sum(values)
-    pick = random.uniform(0, max)
-    current = 0
+    s = sum(values)
+    pick = random.uniform(0, s)
+    current = 0.
     for key, value in enumerate(values):
         current += value
         if current > pick:
             return key
 
+    return 0
+        
 def randomChoice(values):
     sumVal = sum([v for v in values])
     probabilities = [v/sumVal for v    in           values ]
@@ -72,7 +74,9 @@ def updatePheroAttract(score, bestSoFar, edges):
 
 # pick and delete an edge from the neighborhood by a proportional roulette wheel
 def pickFromNbhood(nbhood, values):
+    
     i = rouletteSelection(values)
+
     e = nbhood[i]
     nbhood.pop(i)
     values.pop(i)

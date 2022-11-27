@@ -156,7 +156,7 @@ def getLimits(minLim, numProcs): # pid: 0 - numProcs-1
 
     limitSet = set()
 
-    maxLim = 0.98
+    maxLim = 0.99
 
     delta = (maxLim - minLim)/(numProcs+1)
 

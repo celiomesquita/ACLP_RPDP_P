@@ -1,5 +1,4 @@
 import methods as mno
-import numpy as np
 import multiprocessing as mp
 import shims
 
@@ -20,22 +19,14 @@ def Compute(edges, pallets, items, limit, cfg, k) :
 
 		# get the best shim of edges             greedy limit
         BestShims = shims.getBestShims(p, notInSol[p.ID], sol, limit, len(items), cfg.maxTorque, k)
-
-        # move the best shim of edges to solution
+ 
         for e in BestShims:
             sol.putInSol(e)
-            notInSol[e.Pallet.ID].remove(e)
-
-    # local search: Maybe still exists any edge that fit in solution
-    for nis in notInSol: # for each row
-        for ce in nis:
-            if sol.isFeasible(ce, 1.0, cfg, k):
-                sol.putInSol(ce)
 
     return sol
 
 # parallel Shims based on different limits
-def Solve(pallets, items, cfg, k, minLim, numProcs): # items include kept on board
+def Solve(pallets, items, cfg, k, limit, numProcs): # items include kept on board
 
     print(f"\nParallel Shims for ACLP+RPDP")
 
@@ -47,15 +38,10 @@ def Solve(pallets, items, cfg, k, minLim, numProcs): # items include kept on boa
 	# pallets closer to the CG are completed first
     pallets.sort(key=lambda x: abs(x.D), reverse=False)
 
-    # set of unique limit values
-    limits = mno.getLimits(minLim, numProcs)    
-
-    procs = [None for _ in limits]
+    procs = [None for _ in range(numProcs)]
     outQueue = mp.Queue()
 
     for i, p in enumerate(procs):
-
-        limit = limits[i]
 
         # create a child process for each limit
         procs[i] = mp.Process( target=shimsEnqueue,args=( outQueue, edges, pallets, items, limit, cfg, k  ) )
@@ -71,6 +57,15 @@ def Solve(pallets, items, cfg, k, minLim, numProcs): # items include kept on boa
         if sol.S > bestScore:
             bestScore = sol.S
             bestID = i
+
+    # local search
+    counter = 0
+    for e in sols[bestID].Edges:
+        if not e.InSol and sol.isFeasible(e, 1.03, cfg, k):
+            sol.putInSol(e)
+            counter += 1
+
+    print(f"{counter} extra edges put in the best solution")
 
     return mno.getSolMatrix(sols[bestID].Edges, numPallets, numItems)
         

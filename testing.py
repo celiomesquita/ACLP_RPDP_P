@@ -34,12 +34,8 @@ for scenario in scenarios:
     if scenario == 6:
         instances = [1,2,3] 
 
-    minLim = 0.75 # Shims_p
-    limit  = 0.95 # Shims and ACO
-    secBreak = 10.0 # seconds
-
-    if method == "ACO_p":
-        minLim = 0.9
+    limit    = 0.92 # Shims and ACO
+    secBreak = 0.7 # seconds
 
     cfg = mno.Config(scenario)                                      
 
@@ -52,7 +48,6 @@ for scenario in scenarios:
             costs[i][j] = cfg.kmCost*value
 
     pallets = mno.loadPallets(cfg)
-
 
     # pallets capacity
     cfg.weiCap = 0
@@ -109,6 +104,7 @@ for scenario in scenarios:
             print()
 
             E = []
+            bestLim = 0.
 
             startNodeTime = time.perf_counter()
 
@@ -116,7 +112,7 @@ for scenario in scenarios:
                 E = greedy.Solve(pallets, items, cfg, k)
 
             if method == "Shims_p":
-                E = shims_p.Solve(pallets, items, cfg, k, minLim, procs)           
+                E = shims_p.Solve(pallets, items, cfg, k, limit, procs)           
 
             if method == "Shims":
                 E = shims.Solve(pallets, items, cfg, k, limit)
@@ -125,7 +121,7 @@ for scenario in scenarios:
                 E =   aco.Solve( pallets, items, startNodeTime, cfg, k, limit, secBreak)
 
             if method == "ACO_p":
-                E = aco_p.Solve( pallets, items, startNodeTime, cfg, k, minLim, procs, secBreak)
+                E = aco_p.Solve( pallets, items, startNodeTime, cfg, k, limit, procs, secBreak)
 
             elapsed = time.perf_counter() - startNodeTime
 
@@ -208,7 +204,7 @@ for scenario in scenarios:
 
                 if method == "Shims_p" or method == "ACO_p":
                     runtimes[ix]  += elapsed
-                    scores[ix] += sNodeAccum # * (2-abs(epsilom))
+                    scores[ix] += sNodeAccum
 
     if len(numProcs) > 1:
 
