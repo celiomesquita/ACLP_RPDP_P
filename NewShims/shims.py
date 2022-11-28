@@ -1,5 +1,7 @@
 import methods as mno
 import numpy as np
+import math
+import knapsack as kp
 
 # A Shim is a thin and often tapered or wedged piece of material, used to fill small gaps or spaces between objects.
 # Set are typically used in order to support, adjust for better fit, or provide a level surface.
@@ -29,8 +31,8 @@ class Shim(object):
         # if ce.Item.ID > len(self.Included)-1:
         #     return False
 
-        if self.Included[ce.Item.ID] > 0 or sol.Included[ce.Item.ID] > 0:
-            return False # this item was already inserted.
+        # if self.Included[ce.Item.ID] > 0 or sol.Included[ce.Item.ID] > 0:
+        #     return False # this item was already inserted.
           
         # if ce.Item.To != ce.Pallet.Dests[k]:
         #     return False #item and pallet destinations are different. Equation 21
@@ -55,9 +57,9 @@ class Shim(object):
 # the best shim and including its edges in solution.
 def getBestShims(p, notInSol, sol, limit, numItems, maxTorque, k):
 
-    # create the first shim
+    # create the first empty shims
     sh = Shim(numItems)
-    Set = [sh]
+    Set = [sh] # the set of shims contains an empty shims
 
     # calculate the k2 length
     # it is calculated by a volume estimation of 1 + 3*slack volume percent
@@ -76,16 +78,18 @@ def getBestShims(p, notInSol, sol, limit, numItems, maxTorque, k):
     
     # First Fit Decrease - equivalente ao KP, mas mais rápido
     for i, ce in enumerate(notInSol[:k2-1]):
-        for sh in Set:
+        
+        for sh in Set: # try to insert in any of the previous shims
+        
             if sh.shimIsFeasible(ce, sol, maxTorque, k):
                 sh.AppendEdge(ce)
-                break
-        else:
+                break # go to next candidate edge
+        
+        else: # if it did not fit in any of the previous shims
             sh = Shim(numItems) # create a new Shim
-            if sh.shimIsFeasible(ce, sol, maxTorque, k): # try to insert the edge "oe" in the new Shim
-                sh.AppendEdge(ce)
-            Set.append(sh)
-
+            sh.AppendEdge(ce) # include it
+            Set.append(sh) # the new shims is added to the set
+            
     # all Set of edges are feasible, but one has a better score
     if len(Set) > 0 :
         #look for the best weight and volume Set
@@ -97,6 +101,9 @@ def getBestShims(p, notInSol, sol, limit, numItems, maxTorque, k):
         bestScoreV = 0
 
         for i, sh in enumerate(Set):
+
+            # print(len(sh.Edges))
+
             #max weight shim, usefull if weight is maximized
             if maxW < sh.W :
                 maxW = sh.W
@@ -106,7 +113,7 @@ def getBestShims(p, notInSol, sol, limit, numItems, maxTorque, k):
             #max volume shim, useful volume is maximized
             if maxV < sh.V  :
                 maxV = sh.V
-                bsV = i# best score volume index
+                bsV = i # best score volume index
                 bestScoreV = sh.S
             
             #best score shim index
@@ -133,6 +140,8 @@ def Compute(edges, pallets, items, limit, cfg, k, secBreak) :
 
 		# get the best shim of edges             greedy limit
         BestShims = getBestShims(p, notInSol[p.ID], sol, limit, len(items), cfg.maxTorque, k)
+
+        # print(len(BestShims))
 
         # move the best shim of edges to solution
         for e in BestShims:

@@ -5,8 +5,8 @@ import time
 import shims_p
 import shims
 
-# surplus = "data20"
-surplus = "data50"
+surplus = "data20"
+# surplus = "data50"
 # surplus = "data100"
 
 # method = "Shims_p"
@@ -95,7 +95,6 @@ for scenario in scenarios:
         print()
 
         E = []
-        bestLim = 0.
 
         startNodeTime = time.perf_counter()
 

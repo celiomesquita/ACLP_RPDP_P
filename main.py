@@ -167,9 +167,6 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg, numProcs, secB
             # write consolidated contents from this node in file
             methods.writeNodeCons(scenario, instance, consNodeT, pi, node)
 
-
-           
-
     methods.writeTourSol(method, scenario, instance, pi, tour, cfg, pallets, consJK, False) # False -  does not generate latex solution table
             
     return broke
