@@ -557,7 +557,7 @@ def writeTourSol(method, scenario, instance, pi, tour, cfg, pallets, cons, write
         sol += '\\bottomrule \n'
         sol += '\end{tabular} \n'
 
-    print(sol)
+    # print(sol)
 
     if write:
         dirname = f"./results/{surplus}/{method}_{scenario}"

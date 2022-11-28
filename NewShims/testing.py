@@ -4,12 +4,12 @@ import time
 
 import shims_p
 
-surplus = "data20"
+# surplus = "data20"
 # surplus = "data50"
-# surplus = "data100"
+surplus = "data100"
 
 # scenarios = [1,2,3,4,5,6]
-scenarios = [1]
+scenarios = [3]
 bests = []
 
 for scenario in scenarios:
@@ -21,7 +21,8 @@ for scenario in scenarios:
         instances = [1,2,3,4,5,6,7]
         # instances = [1]
     if scenario == 3:
-        instances = [1,2,3,4,5,6,7]
+        # instances = [1,2,3,4,5,6,7]
+        instances = [1]
     if scenario == 4:
         instances = [1,2,3,4,5,6,7]
     if scenario == 5:
@@ -29,7 +30,7 @@ for scenario in scenarios:
     if scenario == 6:
         instances = [1,2,3] 
 
-    limit    = 0.92
+    limit    = 0.95
     secBreak = 0.7 # seconds
 
     cfg = mno.Config(scenario)                                      
@@ -93,7 +94,7 @@ for scenario in scenarios:
 
         startNodeTime = time.perf_counter()
 
-        E = shims_p.Solve(pallets, items, cfg, k, limit)           
+        E = shims_p.Solve(pallets, items, cfg, k, limit, secBreak)           
 
         elapsed = time.perf_counter() - startNodeTime
 
@@ -156,13 +157,13 @@ for scenario in scenarios:
                     state = "Unfeasible"
 
             if wNodeAccum/cfg.weiCap > 1.0:
-                state = "Unfeasible"
+                state = "Weight Unfeasible"
 
-            if vNodeAccum/cfg.volCap > 1.0:
-                state = "Unfeasible"
+            if vNodeAccum/cfg.volCap > 1.03:
+                state = "Volume Unfeasible"
 
             if abs(epsilom) > 1.0:
-                state = "Unfeasible"
+                state = "Torque Unfeasible"
 
             sol += f"State: {state}\n"
 
@@ -170,6 +171,10 @@ for scenario in scenarios:
 
             totElapsed += elapsed
             sumScores  += sNodeAccum
+    
+            # mno.writeTourSol("Shims_p", scenario, inst, pi, tour, cfg, pallets, consJK, True, surplus)
 
-    print(f"Elapsed per instance: {totElapsed/len(instances):.0f}")
+    # print(f"Elapsed per instance: {totElapsed/len(instances):.0f}")
+    # print(f"Elapsed per instance: {sumScores/len(instances):.0f}")
+
 
