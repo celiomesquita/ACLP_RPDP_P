@@ -1,12 +1,11 @@
 import methods as mno
-import multiprocessing as mp
 import numpy as np
 
 # A Shim is a thin and often tapered or wedged piece of material, used to fill small gaps or spaces between objects.
 # Set are typically used in order to support, adjust for better fit, or provide a level surface.
 # Set may also be used as spacers to fill gaps between parts subject to wear.
 
-# Shims fit in a pallet slack
+# Shim fits in a slack in a pallet
 class Shim(object):
     def __init__(self, numItems):
         self.W        = 0   # total weight of the shim set (must fit the slack)
@@ -83,7 +82,7 @@ def getBestShims(p, notInSol, sol, limit, numItems, maxTorque, k):
                 break
         else:
             sh = Shim(numItems) # create a new Shim
-            if sh.shimIsFeasible(ce, sol, maxTorque, k): # try to insert the candidate edge "ce" in the new Shim
+            if sh.shimIsFeasible(ce, sol, maxTorque, k): # try to insert the edge "oe" in the new Shim
                 sh.AppendEdge(ce)
             Set.append(sh)
 
@@ -118,52 +117,57 @@ def getBestShims(p, notInSol, sol, limit, numItems, maxTorque, k):
         return Set[bsi].Edges #this Set enters the solution
         
     return []
-      
 
 
-def shimsEnqueue( outQueue,    p, notInSol, sol, limit, numItems, maxTorque, k):
-    outQueue.put( getBestShims(p, notInSol, sol, limit, numItems, maxTorque, k) )
+def Compute(edges, pallets, items, limit, cfg, k, secBreak) :
 
-# parallel Shims based on different limits
+    sol = mno.Solution(edges, pallets, items, limit, cfg, k)
+
+    #edges not in sol groupped by pallets
+    notInSol = [ [] for _ in range(len(pallets)) ]
+
+	# get the best shim that fills the slack
+    for p in (pallets):
+
+        notInSol[p.ID] = [e for e in sol.Edges if e.Pallet.ID == p.ID and not e.InSol  ]
+
+		# get the best shim of edges             greedy limit
+        BestShims = getBestShims(p, notInSol[p.ID], sol, limit, len(items), cfg.maxTorque, k)
+
+        # move the best shim of edges to solution
+        for e in BestShims:
+            sol.putInSol(e)
+            notInSol[e.Pallet.ID].remove(e)
+
+    counter = 0
+    # local search: Maybe still exists any edge that fit in solution
+    # for nis in notInSol: # for each row
+    #     for ce in nis:
+    #         if sol.isFeasible(ce, 1.0, cfg, k):
+    #             sol.putInSol(ce)
+    #             counter += 1
+
+    print(f"{counter} edges included by the local search\n")
+
+    return sol
+
+
 def Solve(pallets, items, cfg, k, limit, secBreak): # items include kept on board
 
-    print(f"\nParallel Shims for ACLP+RPDP")
+    print(f"\nShims for ACLP+RPDP")
 
     numItems   = len(items)
     numPallets = len(pallets)
 
     edges = mno.mountEdges(pallets, items, cfg)
 
-    sol = mno.Solution(edges, pallets, items, limit, cfg, k)
+	# pallets closer to the CG are completed first
+    pallets.sort(key=lambda x: abs(x.D), reverse=False)      
 
-    notInSol = [ [] for _ in range(len(pallets)) ]
-
-    procs = [None for _ in pallets]
-    outQueue = mp.Queue()
-
-    for i, p in enumerate(pallets):
-
-        notInSol[i] = [e for e in sol.Edges if e.Pallet.ID == p.ID and not e.InSol  ]
-
-        procs[i] = mp.Process( target=shimsEnqueue,args=( outQueue, p, notInSol[i], sol, limit, numItems, cfg.maxTorque, k  ) )
-        
-    for p in procs:
-        p.start()
-    
-    for _ in procs:
-        BestShims = outQueue.get( timeout=secBreak )
-        for e in BestShims:
-            sol.putInSol(e)
-
-    # local search
-    # counter = 0
-    # for e in sol.Edges:
-    #     if not e.InSol and sol.isFeasible(e, 1.05, cfg, k):
-    #         sol.putInSol(e)
-    #         counter += 1
-    # print(f"{counter} extra edges put in the best solution")
+    sol = Compute(edges, pallets, items, limit, cfg, k, secBreak)
 
     return mno.getSolMatrix(sol.Edges, numPallets, numItems)
+        
         
 if __name__ == "__main__":
 

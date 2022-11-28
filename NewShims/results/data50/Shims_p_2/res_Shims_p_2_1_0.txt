@@ -1,0 +1,77 @@
+\begin{tabular}{c c c c} 
+\toprule 
+\rowcolor{Gray}\multicolumn{4}{l}{Node 0: GRU solution} \\ 
+$Pallet$ & $From:To$ & $Kg$ & $m^3$ \\ 
+\midrule 
+1 & GRU:GIG &   71 &  0.3 \\ 
+2 & GRU:GIG &   96 &  0.3 \\ 
+3 & GRU:GIG &  122 &  0.5 \\ 
+4 & GRU:GIG &  138 &  0.5 \\ 
+5 & GRU:GIG &  178 &  0.7 \\ 
+6 & GRU:GIG &  197 &  0.7 \\ 
+7 & GRU:GIG &  195 &  0.7 \\ 
+8 & GRU:GIG &  211 &  0.7 \\ 
+9 & GRU:SSA &  201 &  0.7 \\ 
+10 & GRU:SSA &  198 &  0.7 \\ 
+11 & GRU:SSA &  183 &  0.7 \\ 
+12 & GRU:SSA &  174 &  0.7 \\ 
+13 & GRU:SSA &  186 &  0.7 \\ 
+14 & GRU:SSA &  194 &  0.7 \\ 
+15 & GRU:SSA &  178 &  0.7 \\ 
+16 & GRU:SSA &  208 &  0.7 \\ 
+17 & GRU:SSA &  195 &  0.7 \\ 
+18 & GRU:GIG &  188 &  0.7 \\ 
+\midrule 
+Score: 12785.0 & Weight: 0.04 & Volume: 0.05 & Torque: -0.07 \\ 
+\toprule 
+\rowcolor{Gray}\multicolumn{4}{l}{Node 1: GIG solution} \\ 
+$Pallet$ & $From:To$ & $Kg$ & $m^3$ \\ 
+\midrule 
+1 & GIG:REC &    0 &  0.0 \\ 
+2 & GIG:REC &    0 &  0.0 \\ 
+3 & GIG:REC &    0 &  0.0 \\ 
+4 & GIG:REC &    0 &  0.0 \\ 
+5 & GIG:REC &    0 &  0.0 \\ 
+6 & GIG:REC &    0 &  0.0 \\ 
+7 & GIG:REC &    0 &  0.0 \\ 
+8 & GIG:REC &    0 &  0.0 \\ 
+9 & GIG:REC &    0 &  0.0 \\ 
+10 & GIG:REC &    0 &  0.0 \\ 
+11 & GIG:REC &    0 &  0.0 \\ 
+12 & GIG:REC &    0 &  0.0 \\ 
+13 & GIG:REC &    0 &  0.0 \\ 
+14 & GIG:REC &    0 &  0.0 \\ 
+15 & GIG:REC &    0 &  0.0 \\ 
+16 & GIG:REC &    0 &  0.0 \\ 
+17 & GIG:REC &    0 &  0.0 \\ 
+18 & GIG:REC &    0 &  0.0 \\ 
+\midrule 
+Score: 0.0 & Weight: 0.00 & Volume: 0.00 & Torque: 0.00 \\ 
+\toprule 
+\rowcolor{Gray}\multicolumn{4}{l}{Node 2: SSA solution} \\ 
+$Pallet$ & $From:To$ & $Kg$ & $m^3$ \\ 
+\midrule 
+1 & SSA:REC &    0 &  0.0 \\ 
+2 & SSA:REC &    0 &  0.0 \\ 
+3 & SSA:REC &    0 &  0.0 \\ 
+4 & SSA:REC &    0 &  0.0 \\ 
+5 & SSA:REC &    0 &  0.0 \\ 
+6 & SSA:REC &    0 &  0.0 \\ 
+7 & SSA:REC &    0 &  0.0 \\ 
+8 & SSA:REC &    0 &  0.0 \\ 
+9 & SSA:REC &    0 &  0.0 \\ 
+10 & SSA:REC &    0 &  0.0 \\ 
+11 & SSA:REC &    0 &  0.0 \\ 
+12 & SSA:REC &    0 &  0.0 \\ 
+13 & SSA:REC &    0 &  0.0 \\ 
+14 & SSA:REC &    0 &  0.0 \\ 
+15 & SSA:REC &    0 &  0.0 \\ 
+16 & SSA:REC &    0 &  0.0 \\ 
+17 & SSA:REC &    0 &  0.0 \\ 
+18 & SSA:REC &    0 &  0.0 \\ 
+\midrule 
+Score: 0.0 & Weight: 0.00 & Volume: 0.00 & Torque: 0.00 \\ 
+\bottomrule 
+\multicolumn{4}{l}{Tour 0\ \ \ \ \ S/C: 0.867\ \ \ \ \ \ \ \ \ \ elapsed: -1\ \ \ \ \ method:\ Shims_p} \\ 
+\bottomrule 
+\end{tabular} 
