@@ -1,107 +1,158 @@
 
 import methods as mno
 import numpy as np
+import multiprocessing as mp
+import time
 
-class Edge(object):
-    def __init__(self, id, pallet, item, cfg):
+# A Shims fits in a pallet slack
+class Shims(object):
+    def __init__(self, pallet):
+        self.SCW     = 0   # shims current weight (must fit the slack)
+        self.SCV     = 0.0 # shims current volume (must fit the slack)
+        self.SCS     = 0   # shims current score
+        self.SCT     = 0.0 # shims current torque
+        self.InSol = [False for _ in items] # True if an item is in the shims
+        self.Pallet = pallet # this shims is one of the possible for this pallet
+        self.Items = []
 
-        self.ID      = id # index in the solution edges (it must be preserved in case of sorting)
-        self.Pallet  = pallet
-        self.Item    = item
-        self.Torque  = float(item.W) * float(pallet.D)
+    def putItem(self, item, k, solTorque, cfg):
 
-        # marginal torque
-        # 5100 = 15m x 340kg, maximum torque possible
-        marginal = abs(self.Torque) / (cfg.maxD*340) # less than 1
+        deltaTau = float(item.W) * float(self.Pallet.D)
 
-        self.Heuristic = ( float(item.S) / ( 500 * float(item.V) ) ) * (1.0 - marginal)
+        if  item.To == self.Pallet.Dests[k] and \
+            self.Pallet.PCW + self.SCW + item.W <= self.Pallet.W and \
+            self.Pallet.PCV + self.SCV + item.V <= self.Pallet.V and \
+            not self.Pallet.InSol[item.ID] and not self.InSol[item.ID] and \
+            abs(solTorque.value + deltaTau) <= cfg.maxTorque:
+            
+            self.SCW += item.W
+            self.SCV += item.V
+            self.InSol[item.ID] = True
+            self.SCS += item.S
 
-# Edges sorted by heuristic attractiveness
-def mountEdges(pallets, items, cfg):
-   
-    # items include kept on board, are from this node (k), and destined to unattended nodes
-    m = len(pallets)
-    n = len(items)
+            self.Items.append(item)
 
-    edges = [None for _ in np.arange(m*n)]
-
-    i = 0
-    for p in pallets:           
-        for it in items:
-            e = Edge(i, p, it, cfg)
-            edges[i] = e
-            i += 1
-
-    # greater heuristic's attractivity are included first
-    edges.sort(key=lambda x: x.Heuristic, reverse=True) # best result
-
-    # as edges have its order changed the ID must in the original order to preserve reference
-    for i, e in enumerate(edges):
-        edges[i].ID = i
-
-    return edges
-
-class Sol(object):
-    def __init__(self, pallets, items, cfg):
-
-        self.PCW = [ 0   for _ in pallets] # set of pallets current weights
-        self.PCV = [ 0.0 for _ in pallets] # set of pallets current volumes
-        self.T = sum(140 * p.D for p in pallets)  # solution total torque
-        self.S = 0 # solution total score
-        self.InSol = [False for _ in np.arange(len(pallets)*len(items))]
-
-    def put(self, ce): # mark this edge as in solution
-
-        self.PCW[ce.Pallet.ID] += ce.Item.W
-        self.PCV[ce.Pallet.ID] += ce.Item.V
-        self.S += ce.Item.S
-        self.T += ce.Torque
-        self.InSol[ce.ID] = True
-
-    def isFeasible(self, ce, limit, cfg, k):
-
-        if self.InSol[ce.ID]:
-            return False
-
-        if ce.Item.To != ce.Pallet.Dests[k]:
-            return False
+            return True
         
-        if self.PCW[ce.Pallet.ID] + ce.Item.W > ce.Pallet.W:
-             return False
+        return False
+
+# create a set of shims for this pallet and selects the best shims
+def getBestShims(pallet, limit, items, k, solTorque, cfg):
+
+    # create the first shim
+    sh = Shims(pallet)
+    Set = [sh]
+
+    maxVol = pallet.PCV * (4. - 3*limit)
+
+    vol = 0.
+    whip = []
+    for item in items:
+        if not pallet.InSol[item.ID]:
+            vol += item.V
+            whip.append(item)
+            if vol > maxVol:
+                break
+
+    # First Fit Decrease - equivalente ao KP, mas mais rápido
+    for item in whip:
+        for sh in Set:
+            if sh.putItem(item, k, solTorque, cfg):
+                break
+        else:
+            sh = Shims(pallet) # create a new Shim
+            sh.putItem(item, k, solTorque, cfg) # insert the item in the new Shim
+            Set.append(sh)
+
+    bestScore = 0
+    bestIndex = 0
+    for i, shims in enumerate(Set):
+        if shims.SCS > bestScore:
+            bestScore = shims.SCS
+            bestIndex = i
+
+    return Set[bestIndex] 
+
+
+class Pallet(object):
+    def __init__(self, id, d, v, w, numNodes, items):
+        self.ID = id
+        self.D  = d  # centroid distance to CG
+        self.V  = v  # volume limit
+        self.W  = w  # weight limit
+        self.Dests = np.full(numNodes, -1)
+        self.InSol = [False for _ in items] # True if an item is in this pallet
+        self.PCW = 0 # pallet current weight
+        self.PCV = 0.
+        self.S = 0.
+
+    def putItem(self, item, limit, k, solTorque, cfg):
+
+        deltaTau = float(item.W) * float(self.D)
+
+        if  item.To == self.Dests[k] and \
+            self.PCW + item.W <= self.W and \
+            self.PCV + item.V <= self.V * limit and \
+            not self.InSol[item.ID] and \
+            abs(solTorque.value + deltaTau) <= cfg.maxTorque:
+            
+            self.PCW += item.W
+            self.PCV += item.V
+            self.InSol[item.ID] = True
+
+            with solTorque.get_lock():
+                solTorque.value += deltaTau
+
+            self.S += item.S
+
+def loadPallets(cfg, items):
+
+    fname = f"./params/{cfg.size}.txt"
+      
+    reader = open(fname,"r")
+    lines = reader.readlines()    
+    pallets = []
+    id = 0
+    cfg.maxD = 0
+    try:
+        for line in lines:
+            cols = line.split()
+            d = float(cols[0])
+            v = float(cols[1])
+            w = float(cols[2])
+            pallets.append( Pallet(id, d, v, w, cfg.numNodes, items) )
+            id += 1
+
+            if d > cfg.maxD:
+                cfg.maxD = d
+    finally:
+        reader.close()    
+    return pallets
+  
         
-        if self.PCV[ce.Pallet.ID] + ce.Item.V > ce.Pallet.V * limit:
-            return False
-        
-        if abs(self.T + ce.Torque) > cfg.maxTorque:
-            return False
- 
-        return True        
-        
+def fillPallet(p, items, limit, k, solTorque, cfg):
+    for item in items:
+        p.putItem(item, limit, k, solTorque, cfg)
+    return p
+
+def palletsEnqueue(palletsQueue, p, items, limit, k, solTorque, cfg):
+    palletsQueue.put( fillPallet(p, items, limit, k, solTorque, cfg) )
+
+def printPallets(pallets, cfg, solTorque, message):
+    print(message)
+    pallets.sort(key=lambda x: abs(x.ID))
+    solScore  = 0.
+    for p in pallets:
+        solScore += p.S
+        print(f"{p.ID}\t{p.PCW}\t{p.PCV:.2f}")
+    print(f"{solScore}\t{solTorque.value/cfg.maxTorque:.2f}")
+
 if __name__ == "__main__":
 
     scenario = 1
+    inst = 1
 
     cfg = mno.Config(scenario)
-
-    pallets = mno.loadPallets(cfg)
-
-    # for p in pallets:
-        # print(p.ID, p.D, p.W, p.V, p.Dests)
-
-    # pallets capacity
-    cfg.weiCap = 0
-    cfg.volCap = 0
-    for p in pallets:
-        cfg.weiCap += p.W
-        cfg.volCap += p.V
-
-    # smaller aircrafts may have a payload lower than pallets capacity
-    if cfg.weiCap > cfg.payload:
-        cfg.weiCap = cfg.payload 
-
-    # print(cfg.weiCap, cfg.volCap)
-
-    inst = 1
 
     dists = mno.loadDistances()
 
@@ -130,31 +181,55 @@ if __name__ == "__main__":
 
     items = mno.loadNodeItems(scenario, inst, node, unattended, surplus)
 
-    # print(len(items))
+    pallets = loadPallets(cfg, items)
 
     mno.setPalletsDestinations(items, pallets, tour.nodes, k, unattended)
 
-    # for p in pallets:
-        # print(p.ID, p.D, p.W, p.V, p.Dests)
+    # pallets capacity
+    cfg.weiCap = 0
+    cfg.volCap = 0
+    for p in pallets:
+        cfg.weiCap += p.W
+        cfg.volCap += p.V
 
-    sol = Sol(pallets, items, cfg)
+    # smaller aircrafts may have a payload lower than pallets capacity
+    if cfg.weiCap > cfg.payload:
+        cfg.weiCap = cfg.payload 
 
-    limit = 1.0
+    limit = 0.5
 
-    edges = mno.mountEdges(pallets, items, cfg)
+    solTorque = mp.Value('d') # solution global torque to be shared and changed by all pallets concurrently
 
-    for ce in edges:
+    # for i, p in enumerate(pallets):
+    #     pallets[i] = fillPallet(p, items, limit, k, solTorque, cfg)
 
-        if sol.isFeasible(ce, limit, cfg, k):
-            sol.put(ce)
 
-    print("---------")
-    print(f"Sol. epsilon = {sol.T/cfg.maxTorque:.2f}\tSol. score = {sol.S}")
+    procs = [None for _ in pallets]
+    palletsQueue = mp.Queue()
 
-    print("---------")
-    for p, vol in enumerate(sol.PCV):
-        print(f"{p}\t{vol:.1f}\t{vol/pallets[p].V:.3f}")
+    # sort ascendent by CG distance
+    pallets.sort(key=lambda x: abs(x.D), reverse=False) 
+
+    for i, p in enumerate(pallets):
+        procs[i] = mp.Process( target=palletsEnqueue,args=( palletsQueue, p, items, limit, k, solTorque, cfg ) )
+        
+    for i, proc in enumerate(procs):
+        # closer to CG pallets start to be solved first
+        time.sleep(abs(pallets[i].D)/1000.)
+
+        proc.start()
     
-    print("---------")
-    for p, wei in enumerate(sol.PCW):
-        print(f"{p}\t{wei:.0f}\t{wei/pallets[p].W:.2f}")        
+    for i, _ in enumerate(procs):
+        pallets[i] = palletsQueue.get( timeout = 0.7 )
+
+    printPallets(pallets, cfg, solTorque, "\n---Greedy solution---")
+
+
+
+    for i, pallet in enumerate(pallets):
+        shims = getBestShims(pallet, limit, items, k, solTorque, cfg)
+
+        for item in shims.Items:
+            pallets[i].putItem(item, limit, k, solTorque, cfg)
+
+    printPallets(pallets, cfg, solTorque, "\n---Shims solution---")
