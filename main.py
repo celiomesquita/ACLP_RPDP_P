@@ -202,8 +202,8 @@ if __name__ == "__main__":
         [0, 10, 8,  2, 10,  6,  6]  # ACO_p   2.0
     ]
 
-    scenarios = [1,2,3,4,5,6]
-    # scenarios = [5,6]
+    # scenarios = [1,2,3,4,5,6]
+    scenarios = [5,6]
     secBreak  = 0.7
 
     dists = methods.loadDistances()

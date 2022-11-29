@@ -64,6 +64,8 @@ def getBestShims(pallet, limit, items, k, solTorque, cfg):
             sh.putItem(item, k, solTorque, cfg) # insert the item in the new Shim
             Set.append(sh)
 
+    # print(len(whip), len(Set))
+
     bestScore = 0
     bestIndex = 0
     for i, shims in enumerate(Set):
@@ -100,10 +102,11 @@ class Pallet(object):
             self.PCV += item.V
             self.InSol[item.ID] = True
 
-            with solTorque.get_lock():
-                solTorque.value += deltaTau
+            # with solTorque.get_lock():
+            solTorque.value += deltaTau
 
             self.S += item.S
+
 
 def loadPallets(cfg, items):
 
@@ -222,14 +225,15 @@ if __name__ == "__main__":
     for i, _ in enumerate(procs):
         pallets[i] = palletsQueue.get( timeout = 0.7 )
 
-    printPallets(pallets, cfg, solTorque, "\n---Greedy solution---")
+    printPallets(pallets, cfg, solTorque, f"\n---Greedy solution---{limit}---{len(items)} items")
 
 
-
+    counter = 0
     for i, pallet in enumerate(pallets):
         shims = getBestShims(pallet, limit, items, k, solTorque, cfg)
 
         for item in shims.Items:
             pallets[i].putItem(item, limit, k, solTorque, cfg)
+            counter += 1
 
-    printPallets(pallets, cfg, solTorque, "\n---Shims solution---")
+    printPallets(pallets, cfg, solTorque, f"\n---Shims solution---{counter} items")
