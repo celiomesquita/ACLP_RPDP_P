@@ -16,13 +16,15 @@ class Shims(object):
         self.Items = []
 
     def putItem(self, item, k, solTorque, cfg):
+     
 
         deltaTau = float(item.W) * float(self.Pallet.D)
 
-        if  item.To == self.Pallet.Dests[k] and \
+        if  item.To == self.Pallet.Dests[k]                      and \
             self.Pallet.PCW + self.SCW + item.W <= self.Pallet.W and \
             self.Pallet.PCV + self.SCV + item.V <= self.Pallet.V and \
-            not self.Pallet.InSol[item.ID] and not self.InSol[item.ID] and \
+            not self.Pallet.InSol[item.ID]                       and \
+            not self.InSol[item.ID]                              and \
             abs(solTorque.value + deltaTau) <= cfg.maxTorque:
             
             self.SCW += item.W
@@ -55,16 +57,20 @@ def getBestShims(pallet, limit, items, k, solTorque, cfg):
                 break
 
     # First Fit Decrease - equivalente ao KP, mas mais rápido
+    included = 0
     for item in whip:
+        NotIncluded = True
         for sh in Set:
             if sh.putItem(item, k, solTorque, cfg):
+                NotIncluded = False
+                included += 1
                 break
-        else:
-            sh = Shims(pallet) # create a new Shim
-            sh.putItem(item, k, solTorque, cfg) # insert the item in the new Shim
-            Set.append(sh)
 
-    # print(len(whip), len(Set))
+        if NotIncluded:
+            sh = Shims(pallet) # create a new Shim
+            if sh.putItem(item, k, solTorque, cfg): # insert the item in the new Shim
+                Set.append(sh)
+                # included += 1
 
     bestScore = 0
     bestIndex = 0
@@ -72,6 +78,8 @@ def getBestShims(pallet, limit, items, k, solTorque, cfg):
         if shims.SCS > bestScore:
             bestScore = shims.SCS
             bestIndex = i
+
+    print(len(whip), len(Set), bestIndex, included)
 
     return Set[bestIndex] 
 
@@ -229,6 +237,7 @@ if __name__ == "__main__":
 
 
     counter = 0
+    # limit = 1.
     for i, pallet in enumerate(pallets):
         shims = getBestShims(pallet, limit, items, k, solTorque, cfg)
 
