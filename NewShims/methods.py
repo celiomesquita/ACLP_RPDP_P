@@ -384,7 +384,13 @@ def loadNodeItems(scenario, instance, node, unatended, surplus): # unatended, fu
                 items.append( Item(id, -1, w, s, v, frm, to) ) # P:-1 item, -2: consolidated
                 id += 1
     finally:
-        reader.close()    
+        reader.close()  
+          
+    items.sort(key=lambda x: abs(x.S/x.V), reverse=True)
+    id = 0
+    for i, _ in enumerate(items):
+        items[i].ID = id
+        id += 1
 
     return items
 

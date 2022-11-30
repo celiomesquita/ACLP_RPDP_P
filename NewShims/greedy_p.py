@@ -7,36 +7,44 @@ import time
 # A Shims fits in a pallet slack
 class Shims(object):
     def __init__(self, pallet):
-        self.SCW     = 0   # shims current weight (must fit the slack)
-        self.SCV     = 0.0 # shims current volume (must fit the slack)
-        self.SCS     = 0   # shims current score
-        self.SCT     = 0.0 # shims current torque
-        self.InSol = [False for _ in items] # True if an item is in the shims
-        self.Pallet = pallet # this shims is one of the possible for this pallet
-        self.Items = []
+        self.Pallet = pallet # this shims is one of the possibles for this pallet
+        self.SCW    = 0   # shims current weight (must fit the slack)
+        self.SCV    = 0.0 # shims current volume (must fit the slack)
+        self.SCS    = 0   # shims current score
+        # self.SCT    = 0.0 # shims current torque
+        self.InSol  = [False for _ in items] # True if an item is in the shims
 
-    def putItem(self, item, k, solTorque, cfg):
-     
+    def putItem(self, item):
+                 
+            self.SCW += item.W
+            self.SCV += item.V
+            self.SCS += item.S
+            self.InSol[item.ID] = True
+            # self.SCT += float(item.W) * float(self.Pallet.D)
+
+    def isFeasible(self, item, k, solTorque, cfg): # check constraints
+
+        if item.To != self.Pallet.Dests[k]:
+            return False
+
+        if self.Pallet.PCW + self.SCW + item.W > self.Pallet.W:
+            return False
+
+        if self.Pallet.PCV + self.SCV + item.V > self.Pallet.V * limit:
+            return False
+
+        if self.InSol[item.ID]:
+            return False
+
+        if self.Pallet.InSol[item.ID]:
+            return False
 
         deltaTau = float(item.W) * float(self.Pallet.D)
 
-        if  item.To == self.Pallet.Dests[k]                      and \
-            self.Pallet.PCW + self.SCW + item.W <= self.Pallet.W and \
-            self.Pallet.PCV + self.SCV + item.V <= self.Pallet.V and \
-            not self.Pallet.InSol[item.ID]                       and \
-            not self.InSol[item.ID]                              and \
-            abs(solTorque.value + deltaTau) <= cfg.maxTorque:
-            
-            self.SCW += item.W
-            self.SCV += item.V
-            self.InSol[item.ID] = True
-            self.SCS += item.S
+        if abs(solTorque.value + deltaTau) > cfg.maxTorque:
+            return False
 
-            self.Items.append(item)
-
-            return True
-        
-        return False
+        return True        
 
 # create a set of shims for this pallet and selects the best shims
 def getBestShims(pallet, limit, items, k, solTorque, cfg):
@@ -57,20 +65,23 @@ def getBestShims(pallet, limit, items, k, solTorque, cfg):
                 break
 
     # First Fit Decrease - equivalente ao KP, mas mais rápido
-    included = 0
+    included1 = 0
+    included2 = 0
     for item in whip:
-        NotIncluded = True
+        newShims = True
         for sh in Set:
-            if sh.putItem(item, k, solTorque, cfg):
-                NotIncluded = False
-                included += 1
+            if sh.isFeasible(item, k, solTorque, cfg):
+                sh.putItem(item)
+                newShims = False
+                included1 += 1
                 break
 
-        if NotIncluded:
+        if newShims:
             sh = Shims(pallet) # create a new Shim
-            if sh.putItem(item, k, solTorque, cfg): # insert the item in the new Shim
-                Set.append(sh)
-                # included += 1
+            if sh.isFeasible(item, k, solTorque, cfg):
+                sh.putItem(item)
+                included2 += 1
+            Set.append(sh)
 
     bestScore = 0
     bestIndex = 0
@@ -79,42 +90,50 @@ def getBestShims(pallet, limit, items, k, solTorque, cfg):
             bestScore = shims.SCS
             bestIndex = i
 
-    print(len(whip), len(Set), bestIndex, included)
+    print(len(whip), len(Set), bestIndex, included1, included2)
 
     return Set[bestIndex] 
 
 
 class Pallet(object):
-    def __init__(self, id, d, v, w, numNodes, items):
+    def __init__(self, id, d, v, w, numNodes):
         self.ID = id
         self.D  = d  # centroid distance to CG
         self.V  = v  # volume limit
         self.W  = w  # weight limit
         self.Dests = np.full(numNodes, -1)
-        self.InSol = [False for _ in items] # True if an item is in this pallet
         self.PCW = 0 # pallet current weight
         self.PCV = 0.
-        self.S = 0.
+        self.PCS = 0.
 
-    def putItem(self, item, limit, k, solTorque, cfg):
+    def putItem(self, item, solTorque, solItems): # put an item in this pallet
+
+        self.PCW += item.W
+        self.PCV += item.V
+        self.PCS += item.S
+        solTorque.value += float(item.W) * float(self.D)
+        solItems[item.ID] = 1
+
+    def isFeasible(self, item, limit, k, solTorque, solItems, cfg): # check constraints
+
+        if item.To != self.Dests[k]:
+            return False
+
+        if self.PCW + item.W > self.W:
+            return False
+
+        if self.PCV + item.V > self.V * limit:
+            return False
+
+        if solItems[item.ID] == 1:
+            return False
 
         deltaTau = float(item.W) * float(self.D)
 
-        if  item.To == self.Dests[k] and \
-            self.PCW + item.W <= self.W and \
-            self.PCV + item.V <= self.V * limit and \
-            not self.InSol[item.ID] and \
-            abs(solTorque.value + deltaTau) <= cfg.maxTorque:
-            
-            self.PCW += item.W
-            self.PCV += item.V
-            self.InSol[item.ID] = True
+        if abs(solTorque.value + deltaTau) > cfg.maxTorque:
+            return False
 
-            # with solTorque.get_lock():
-            solTorque.value += deltaTau
-
-            self.S += item.S
-
+        return True
 
 def loadPallets(cfg, items):
 
@@ -131,7 +150,7 @@ def loadPallets(cfg, items):
             d = float(cols[0])
             v = float(cols[1])
             w = float(cols[2])
-            pallets.append( Pallet(id, d, v, w, cfg.numNodes, items) )
+            pallets.append( Pallet(id, d, v, w, cfg.numNodes) )
             id += 1
 
             if d > cfg.maxD:
@@ -141,22 +160,36 @@ def loadPallets(cfg, items):
     return pallets
   
         
-def fillPallet(p, items, limit, k, solTorque, cfg):
+def fillPallet(p, items, limit, k, solTorque, solItems, cfg):
     for item in items:
-        p.putItem(item, limit, k, solTorque, cfg)
+        if p.isFeasible(item, limit, k, solTorque, solItems, cfg):
+            p.putItem(item, solTorque, solItems)
     return p
 
-def palletsEnqueue(palletsQueue, p, items, limit, k, solTorque, cfg):
-    palletsQueue.put( fillPallet(p, items, limit, k, solTorque, cfg) )
+def palletsEnqueue(palletsQueue, p, items, limit, k, solTorque, solItems, cfg):
+    palletsQueue.put( fillPallet(p, items, limit, k, solTorque, solItems, cfg) )
 
 def printPallets(pallets, cfg, solTorque, message):
     print(message)
+    print("Pallet\tWeight\t%\tVolume\t%")
     pallets.sort(key=lambda x: abs(x.ID))
-    solScore  = 0.
+    solCScore  = 0.
+    solWeight  = 0.
+    solVolume  = 0.
+    solCWeight  = 0.
+    solCVolume  = 0.    
     for p in pallets:
-        solScore += p.S
-        print(f"{p.ID}\t{p.PCW}\t{p.PCV:.2f}")
-    print(f"{solScore}\t{solTorque.value/cfg.maxTorque:.2f}")
+        solWeight += p.W
+        solVolume += p.V
+
+        solCScore  += p.PCS
+        solCWeight += p.PCW
+        solCVolume += p.PCV
+
+        print(f"{p.ID}\t{p.PCW}\t{p.PCW/p.W:.2f}\t{p.PCV:.2f}\t{p.PCV/p.V:.2f}")
+    print("Score\tTorque\tWeight\tVolume")
+    print(f"{solCScore}\t{solTorque.value/cfg.maxTorque:.2f}\t{solCWeight/solWeight:.2f}\t{solCVolume/solVolume:.2f}")
+    print()
 
 if __name__ == "__main__":
 
@@ -190,6 +223,7 @@ if __name__ == "__main__":
     # surplus = "data50"
     # surplus = "data100"
 
+    # loads items and sort by the Score/Volume ratio
     items = mno.loadNodeItems(scenario, inst, node, unattended, surplus)
 
     pallets = loadPallets(cfg, items)
@@ -207,14 +241,16 @@ if __name__ == "__main__":
     if cfg.weiCap > cfg.payload:
         cfg.weiCap = cfg.payload 
 
-    limit = 0.5
+    limit = 0.50
 
     solTorque = mp.Value('d') # solution global torque to be shared and changed by all pallets concurrently
+    solItems  = mp.Array('i', range(len(items)))
 
     # for i, p in enumerate(pallets):
     #     pallets[i] = fillPallet(p, items, limit, k, solTorque, cfg)
 
 
+    # ------- Greedy parallel pallets --------
     procs = [None for _ in pallets]
     palletsQueue = mp.Queue()
 
@@ -222,7 +258,7 @@ if __name__ == "__main__":
     pallets.sort(key=lambda x: abs(x.D), reverse=False) 
 
     for i, p in enumerate(pallets):
-        procs[i] = mp.Process( target=palletsEnqueue,args=( palletsQueue, p, items, limit, k, solTorque, cfg ) )
+        procs[i] = mp.Process( target=palletsEnqueue,args=( palletsQueue, p, items, limit, k, solTorque, solItems, cfg ) )
         
     for i, proc in enumerate(procs):
         # closer to CG pallets start to be solved first
@@ -236,13 +272,14 @@ if __name__ == "__main__":
     printPallets(pallets, cfg, solTorque, f"\n---Greedy solution---{limit}---{len(items)} items")
 
 
-    counter = 0
-    # limit = 1.
-    for i, pallet in enumerate(pallets):
-        shims = getBestShims(pallet, limit, items, k, solTorque, cfg)
+    # counter = 0
+    # for i, pallet in enumerate(pallets):
+    #     shims = getBestShims(pallet, limit, items, k, solTorque, cfg)
 
-        for item in shims.Items:
-            pallets[i].putItem(item, limit, k, solTorque, cfg)
-            counter += 1
+    #     for item in items:
+    #         if shims.InSol[item.ID]:
 
-    printPallets(pallets, cfg, solTorque, f"\n---Shims solution---{counter} items")
+    #             pallets[i].putItem(item, solTorque)
+    #             counter += 1
+
+    # printPallets(pallets, cfg, solTorque, f"\n---Shims solution---{counter} items included")
