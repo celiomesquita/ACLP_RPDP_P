@@ -38,7 +38,7 @@ class Shims(object):
         return True        
 
 # create a set of shims for this pallet and selects the best shims
-def getBestShims(pallet, items, limit, k, solTorque, X, cfg):
+def getBestShims(pallet, items, limit, k, solTorque, solItems, cfg):
 
     # create the first shim
     sh = Shims(pallet, len(items))
@@ -50,7 +50,7 @@ def getBestShims(pallet, items, limit, k, solTorque, X, cfg):
     whip = []
     
     for item in items:
-        if X[pallet.ID][item.ID] == 0:
+        if solItems[item.ID] == -1: # not allocated in any pallet
             vol += item.V
             whip.append(item)
             if vol > whipLen:
@@ -88,7 +88,7 @@ def getBestShims(pallet, items, limit, k, solTorque, X, cfg):
 
 
 class Pallet(object):
-    def __init__(self, id, d, v, w, numNodes):
+    def __init__(self, id, d, v, w, numNodes, numItems):
         self.ID = id
         self.D  = d  # centroid distance to CG
         self.V  = v  # volume limit
@@ -97,19 +97,21 @@ class Pallet(object):
         self.PCW = 0 # pallet current weight
         self.PCV = 0.
         self.PCS = 0.
+        # self.InSol = [0 for _ in np.arange(numItems)] # 1 if an item is in the pallet
 
-    def putItem(self, item, solTorque, X): # put an item in this pallet
+    def putItem(self, item, solTorque, solItems): # put an item in this pallet
 
         self.PCW += item.W
         self.PCV += item.V
         self.PCS += item.S
 
-        with solTorque.get_lock():
-            solTorque.value += float(item.W) * float(self.D)
+        solTorque.value += float(item.W) * float(self.D)
 
-        X[self.ID][item.ID] = 1
+        solItems[item.ID] = self.ID # mark item as alocated to this pallet
 
-    def isFeasible(self, item, limit, k, solTorque, X, cfg): # check constraints
+        # self.InSol[item.ID] = 1 # mark item as alocated to this pallets
+
+    def isFeasible(self, item, limit, k, solTorque, solItems, cfg): # check constraints
 
         if item.To != self.Dests[k]:
             return False
@@ -117,7 +119,7 @@ class Pallet(object):
         if self.PCV + item.V > self.V * limit:
             return False
 
-        if X[self.ID][item.ID] == 1:
+        if solItems[item.ID] > -1: # if item is alocated in some pallet
             return False
 
         deltaTau = float(item.W) * float(self.D)
@@ -126,7 +128,7 @@ class Pallet(object):
 
         return True
  
-def loadPallets(cfg):
+def loadPallets(cfg, numItems):
     """
     Load pallets attributes based on aircraft size
     """
@@ -143,7 +145,7 @@ def loadPallets(cfg):
             d = float(cols[0])
             v = float(cols[1])
             w = float(cols[2])
-            pallets.append( Pallet(id, d, v, w, cfg.numNodes) )
+            pallets.append( Pallet(id, d, v, w, cfg.numNodes, numItems) )
             id += 1
 
             if d > cfg.maxD:
@@ -152,20 +154,29 @@ def loadPallets(cfg):
         reader.close()    
     return pallets
         
-def fillPallet(p, items, limit, k, solTorque, X, cfg):
+def fillPallet(p, items, limit, k, solTorque, solItems, cfg):
     for item in items:
-        if p.isFeasible(item, limit, k, solTorque, X, cfg):
-            p.putItem(item, solTorque, X)
+        if p.isFeasible(item, limit, k, solTorque, solItems, cfg):
+            p.putItem(item, solTorque, solItems)
     return p
 
-def palletsEnqueue(palletsQueue, p, items, limit, k, solTorque, X, cfg):
-    palletsQueue.put( fillPallet(p, items, limit, k, solTorque, X, cfg) )
+def palletsEnqueue(palletsQueue, p, items, limit, k, solTorque, solItems, cfg):
+    palletsQueue.put( fillPallet(p, items, limit, k, solTorque, solItems, cfg) )
 
-def shimsEnqueue( palletsQueue,    p, items, limit, k, solTorque, X, cfg):
-    palletsQueue.put( getBestShims(p, items, limit, k, solTorque, X, cfg))    
+def shimsEnqueue( palletsQueue,    p, items, limit, k, solTorque, solItems, cfg):
+    palletsQueue.put( getBestShims(p, items, limit, k, solTorque, solItems, cfg))    
 
-def printPallets(pallets, cfg, solTorque, message):
-    print(message)
+
+def printPallets(pallets, cfg, solTorque, X, message):
+
+
+    counter = 0
+    for i, row in enumerate(X):
+        for j in row:
+            if j > -1 and  X[i][j] == 1:
+                counter += 1
+
+    print(message + f"{counter} alocated")
     print("Pallet\tWeight\t%\tVolume\t%")
     pallets.sort(key=lambda x: abs(x.ID))
     solCScore  = 0.
@@ -185,6 +196,7 @@ def printPallets(pallets, cfg, solTorque, message):
     print("Score\tTorque\tWeight\tVolume")
     print(f"{solCScore}\t{solTorque.value/cfg.maxTorque:.2f}\t{solCWeight/solWeight:.2f}\t{solCVolume/solVolume:.2f}")
     print()
+
 
 if __name__ == "__main__":
     
@@ -221,8 +233,10 @@ if __name__ == "__main__":
 
     # loads items and sort by the Score/Volume ratio
     items = mno.loadNodeItems(scenario, inst, node, unattended, surplus)
+    numItems   = len(items)
 
-    pallets = loadPallets(cfg)
+    pallets = loadPallets(cfg, numItems)
+    numPallets = len(pallets)
 
     mno.setPalletsDestinations(items, pallets, tour.nodes, k, unattended)
 
@@ -239,15 +253,14 @@ if __name__ == "__main__":
 
     limit = 0.5 # greedy limit
 
-    numPallets = len(pallets)
-    numItems   = len(items)
-
     solTorque = mp.Value('d') # solution global torque to be shared and changed by all pallets concurrently
     solTorque.value = 0.0
 
-    arr = mp.Array('i', range(numPallets*numItems))
-    arr = np.frombuffer(arr.get_obj(), ct.c_int)
-    X = arr.reshape((numPallets,numItems))
+    solItems = mp.Array('i', range(numItems))
+    for i, _ in enumerate(solItems):
+        solItems[i] = -1 # not alocated to any pallet
+
+    X = [ solItems for _ in range(numPallets) ]
 
     # for i, p in enumerate(pallets):
     #     pallets[i] = fillPallet(p, items, limit, k, solTorque, X, cfg)
@@ -261,7 +274,7 @@ if __name__ == "__main__":
     pallets.sort(key=lambda x: abs(x.D), reverse=False) 
 
     for i, p in enumerate(pallets):
-        procs[i] = mp.Process( target=palletsEnqueue,args=( palletsQueue, p, items, limit, k, solTorque, X, cfg ) )
+        procs[i] = mp.Process( target=palletsEnqueue,args=( palletsQueue, p, items, limit, k, solTorque, solItems, cfg ) )
         
     for i, proc in enumerate(procs):
         # closer to CG pallets start to be solved first
@@ -272,30 +285,35 @@ if __name__ == "__main__":
     for i, _ in enumerate(procs):
         pallets[i] = palletsQueue.get( timeout = 0.7 )
 
-    printPallets(pallets, cfg, solTorque, f"\n---Greedy solution---{limit}---{len(items)} items")
 
-   
+    for j, i in enumerate(solItems):
+        if i > -1: # alocated to some pallet
+            X[i][j] = 1
+
+    printPallets(pallets, cfg, solTorque, X, f"\n---Greedy solution---{limit}---{len(items)} items->")
+
+
+
     # multiprocessing shims solution
-    for i, p in enumerate(pallets):
-        procs[i] = mp.Process( target=shimsEnqueue,args=( palletsQueue, p, items, limit, k, solTorque, X, cfg ) )
-        
-    for i, proc in enumerate(procs):
-        # closer to CG pallets start to be solved first
-        time.sleep(abs(pallets[i].D)/1000.)        
-        proc.start()
-    
-    for i, _ in enumerate(procs):
-        shims = palletsQueue.get( timeout = 0.7 )
-        for item in items:
-            if shims.InSol[item.ID]:
-                pallets[i].putItem(item, solTorque, X)
+    # for i, p in enumerate(pallets):
+    #     procs[i] = mp.Process( target=shimsEnqueue,args=( palletsQueue, p, items, limit, k, solTorque, solItems, cfg ) )
+
+    # for i, proc in enumerate(procs):
+    #     # closer to CG pallets start to be solved first
+    #     time.sleep(abs(pallets[i].D)/1000.)        
+    #     proc.start()
+
+    # for i, _ in enumerate(procs):
+    #     shims = palletsQueue.get( timeout = 0.7 )
+    #     for j, v in enumerate(shims.InSol):
+    #         if v == 1:
+    #             pallets[i].putItem(items[j], solTorque, solItems)
 
 
     # for i, pallet in enumerate(pallets):
-    #     shims = getBestShims(pallet, items, limit, k, solTorque, X, cfg)
-    #     for item in items:
-    #         if shims.InSol[item.ID]:
-    #             pallets[i].putItem(item, solTorque)
+    #     shims = getBestShims(pallet, items, limit, k, solTorque, solItems, cfg)
+    #     for j, v in enumerate(shims.InSol):
+    #         if v == 1:
+    #             pallets[i].putItem(items[j], solTorque, solItems)
 
-
-    printPallets(pallets, cfg, solTorque, f"\n---Shims solution---")
+    # printPallets(pallets, items, cfg, solTorque, X, f"\n---Shims solution--->")
