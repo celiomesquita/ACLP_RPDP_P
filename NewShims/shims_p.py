@@ -1,169 +1,222 @@
 import methods as mno
-import multiprocessing as mp
 import numpy as np
+import multiprocessing as mp
+import time
 
-# A Shim is a thin and often tapered or wedged piece of material, used to fill small gaps or spaces between objects.
-# Set are typically used in order to support, adjust for better fit, or provide a level surface.
-# Set may also be used as spacers to fill gaps between parts subject to wear.
+# A Shims fits in a pallet slack
+class Shims(object):
+    def __init__(self, pallet, numItems):
+        self.Pallet = pallet # this shims is one of the possibles for this pallet
+        self.SCW    = 0   # shims current weight (must fit the slack)
+        self.SCV    = 0.0 # shims current volume (must fit the slack)
+        self.SCS    = 0   # shims current score
+        self.InSol  = [0 for _ in range(numItems)] # 1 if an item is in the shims
+        self.SCT    = 0. # shims current torque
 
-# Shims fit in a pallet slack
-class Shim(object):
-    def __init__(self, numItems):
-        self.W        = 0   # total weight of the shim set (must fit the slack)
-        self.V        = 0.0 # total volume of the shim set (must fit the slack)
-        self.S        = 0   # score of the shim set
-        self.T        = 0.0 # torque of the shim set
-        self.Edges    = []
-        self.Included = [ 0  for _ in np.arange(numItems) ]   # items included in shim set edges
-        self.numItems = numItems
+    def putItem(self, item):
+                 
+            self.SCW += item.W
+            self.SCV += item.V
+            self.SCS += item.S
+            self.InSol[item.ID] = 1
+            self.SCT += float(item.W) * float(self.Pallet.D)
 
-    def AppendEdge(self, e):
-        self.W += e.Item.W
-        self.V += e.Item.V
-        self.S += e.Item.S
-        self.T += float(e.Item.W) * e.Pallet.D
-        self.Edges.append(e)
-        self.Included[e.Item.ID] = 1        
+    def isFeasible(self, item, k, solTorque, cfg): # check constraints
 
-    def shimIsFeasible(self, ce, sol, maxTorque, k):
+        if item.To != self.Pallet.Dests[k]:
+            return False
 
-        # if ce.Item.ID > len(self.Included)-1:
-        #     return False
+        if self.Pallet.PCV + self.SCV + item.V > self.Pallet.V:
+            return False
 
-        if self.Included[ce.Item.ID] > 0 or sol.Included[ce.Item.ID] > 0:
-            return False # this item was already inserted.
-          
-        # if ce.Item.To != ce.Pallet.Dests[k]:
-        #     return False #item and pallet destinations are different. Equation 21
-        
-        # Pallet Acumulated Weight
-        # if sol.PAW[ce.Pallet.ID] + self.W + ce.Item.W > ce.Pallet.W:
-        #     return False #this item weight would exceed pallet weight limit. Equation 17
-        
-        # Pallet Acumulated Volume
-        # if sol.PAV[ce.Pallet.ID] + self.V + ce.Item.V > ce.Pallet.V*1.03:
-        #     return False #this item volume would exceed pallet volumetric limit. Equation 18
-        
-        # newTorque = self.T + sol.T + ce.Torque
-        # if abs(newTorque) > maxTorque:
-        #     return False
-        
-        return True
-        
+        deltaTau = float(item.W) * float(self.Pallet.D)
+        if abs(solTorque.value + self.SCT + deltaTau) > cfg.maxTorque:
+            return False
 
+        return True        
 
-# solve a Subset Selection Problem for this pallet, by selecting
-# the best shim and including its edges in solution.
-def getBestShims(p, notInSol, sol, limit, numItems, maxTorque, k):
+# create a set of shims for this pallet and selects the best shims
+def getBestShims(pallet, items, limit, k, solTorque, solItems, cfg):
 
     # create the first shim
-    sh = Shim(numItems)
+    sh = Shims(pallet, len(items))
     Set = [sh]
 
-    # calculate the k2 length
-    # it is calculated by a volume estimation of 1 + 3*slack volume percent
-    # of the partial solution's volume.
-    # Only a small portion of the notInSol vector is assessed to find the a local best Shim.
+    whipLen = pallet.V * (3. - 2*limit) # whip length
 
-    vol = sol.PAV[p.ID] # current pallet volume
-    maxVol = vol * (4. - 3*limit)
-   
-    k2 = 0
-    for e in notInSol:
-        vol += e.Item.V
-        k2 += 1
-        if vol > maxVol:
-            break
+    vol = 0.
+    whip = []
     
-    # First Fit Decrease - equivalente ao KP, mas mais rápido
-    for i, ce in enumerate(notInSol[:k2-1]):
-        for sh in Set:
-            if sh.shimIsFeasible(ce, sol, maxTorque, k):
-                sh.AppendEdge(ce)
+    for item in items:
+        if solItems[item.ID] == 0:
+            vol += item.V
+            whip.append(item)
+            if vol > whipLen:
                 break
-        else:
-            sh = Shim(numItems) # create a new Shim
-            if sh.shimIsFeasible(ce, sol, maxTorque, k): # try to insert the candidate edge "ce" in the new Shim
-                sh.AppendEdge(ce)
-            Set.append(sh)
 
-    # all Set of edges are feasible, but one has a better score
-    if len(Set) > 0 :
-        #look for the best weight and volume Set
-        maxW = 0
-        maxV = 0.0
-        bsW = 0
-        bsV = 0
-        bestScoreW = 0
-        bestScoreV = 0
+    # First Fit Decrease - equivalente ao KP, mas mais rápido
+    # included1 = 0
+    # included2 = 0
+    for item in whip:
+        newShims = True
+        for sh in Set:
+            if sh.isFeasible(item, k, solTorque, cfg):
+                sh.putItem(item)
+                newShims = False
+                # included1 += 1
+                break
 
-        for i, sh in enumerate(Set):
-            #max weight shim, usefull if weight is maximized
-            if maxW < sh.W :
-                maxW = sh.W
-                bsW = i # best score weight index
-                bestScoreW = sh.S
-            
-            #max volume shim, useful volume is maximized
-            if maxV < sh.V  :
-                maxV = sh.V
-                bsV = i# best score volume index
-                bestScoreV = sh.S
-            
-            #best score shim index
-            bsi = bsW
-            if bestScoreW < bestScoreV :
-                bsi = bsV
-            
-        return Set[bsi].Edges #this Set enters the solution
+        if newShims:
+            sh = Shims(pallet, len(items)) # create a new Shim
+            if sh.isFeasible(item, k, solTorque, cfg):
+                sh.putItem(item)
+                Set.append(sh)
+                # included2 += 1
+
+    bestScore = 0
+    bestIndex = 0
+    for i, shims in enumerate(Set):
+        if shims.SCS > bestScore:
+            bestScore = shims.SCS
+            bestIndex = i
+
+    # print(len(whip), len(Set), bestIndex, included1, included2)
+
+    return Set[bestIndex] 
+
+
+class Pallet(object):
+    def __init__(self, id, d, v, w, numNodes):
+        self.ID = id
+        self.D  = d  # centroid distance to CG
+        self.V  = v  # volume limit
+        self.W  = w  # weight limit
+        self.Dests = np.full(numNodes, -1)
+        self.PCW = 0 # pallet current weight
+        self.PCV = 0.
+        self.PCS = 0.
+
+    def putItem(self, item, solTorque, solItems): # put an item in this pallet
+
+        self.PCW += item.W
+        self.PCV += item.V
+        self.PCS += item.S
+
+        with solTorque.get_lock():
+            solTorque.value += float(item.W) * float(self.D)
+
+        with solItems.get_lock():
+            solItems[item.ID] = 1
+
+    def isFeasible(self, item, limit, k, solTorque, solItems, cfg): # check constraints
+
+        if item.To != self.Dests[k]:
+            return False
+
+        if self.PCV + item.V > self.V * limit:
+            return False
+
+        if solItems[item.ID] == 1:
+            return False
+
+        deltaTau = float(item.W) * float(self.D)
+        if abs(solTorque.value + deltaTau) > cfg.maxTorque:
+            return False
+
+        return True  
         
-    return []
-      
+def fillPallet(p, items, limit, k, solTorque, solItems, cfg):
+    for item in items:
+        if p.isFeasible(item, limit, k, solTorque, solItems, cfg):
+            p.putItem(item, solTorque, solItems)
+    return p
 
+def palletsEnqueue(palletsQueue, p, items, limit, k, solTorque, solItems, cfg):
+    palletsQueue.put( fillPallet(p, items, limit, k, solTorque, solItems, cfg) )
 
-def shimsEnqueue( outQueue,    p, notInSol, sol, limit, numItems, maxTorque, k):
-    outQueue.put( getBestShims(p, notInSol, sol, limit, numItems, maxTorque, k) )
+def shimsEnqueue( palletsQueue,    p, items, limit, k, solTorque, solItems, cfg):
+    palletsQueue.put( getBestShims(p, items, limit, k, solTorque, solItems, cfg))    
+
+def printPallets(pallets, cfg, solTorque, message):
+    print(message)
+    print("Pallet\tWeight\t%\tVolume\t%")
+    pallets.sort(key=lambda x: abs(x.ID))
+    solCScore  = 0.
+    solWeight  = 0.
+    solVolume  = 0.
+    solCWeight  = 0.
+    solCVolume  = 0.    
+    for p in pallets:
+        solWeight += p.W
+        solVolume += p.V
+
+        solCScore  += p.PCS
+        solCWeight += p.PCW
+        solCVolume += p.PCV
+
+        print(f"{p.ID}\t{p.PCW}\t{p.PCW/p.W:.2f}\t{p.PCV:.2f}\t{p.PCV/p.V:.2f}")
+    print("Score\tTorque\tWeight\tVolume")
+    print(f"{solCScore}\t{solTorque.value/cfg.maxTorque:.2f}\t{solCWeight/solWeight:.2f}\t{solCVolume/solVolume:.2f}")
+    print()
+
 
 # parallel Shims based on different limits
 def Solve(pallets, items, cfg, k, limit, secBreak): # items include kept on board
 
     print(f"\nParallel Shims for ACLP+RPDP")
 
-    numItems   = len(items)
     numPallets = len(pallets)
+    numItems   = len(items)
 
-    edges = mno.mountEdges(pallets, items, cfg)
+    X = np.zeros((numPallets,numItems)) # solution matrix
 
-    sol = mno.Solution(edges, pallets, items, limit, cfg, k)
+    solTorque = mp.Value('d') # solution global torque to be shared and changed by all pallets concurrently
+    solTorque.value = 0.0
+    solItems  = mp.Array('i', range(len(items)))
+    for i, _ in enumerate(solItems):
+        solItems[i] = 0
 
-    notInSol = [ [] for _ in range(len(pallets)) ]
-
+    # ------- parallel pallets --------
     procs = [None for _ in pallets]
-    outQueue = mp.Queue()
+    palletsQueue = mp.Queue()
+
+    # sort ascendent by CG distance
+    pallets.sort(key=lambda x: abs(x.D), reverse=False) 
 
     for i, p in enumerate(pallets):
-
-        notInSol[i] = [e for e in sol.Edges if e.Pallet.ID == p.ID and not e.InSol  ]
-
-        procs[i] = mp.Process( target=shimsEnqueue,args=( outQueue, p, notInSol[i], sol, limit, numItems, cfg.maxTorque, k  ) )
+        procs[i] = mp.Process( target=palletsEnqueue,args=( palletsQueue, p, items, limit, k, solTorque, solItems, cfg ) )
         
-    for p in procs:
-        p.start()
+    for i, proc in enumerate(procs):
+        # closer to CG pallets start to be solved first
+        time.sleep(abs(pallets[i].D)/1000.)
+
+        proc.start()
     
-    for _ in procs:
-        BestShims = outQueue.get( timeout=secBreak )
-        for e in BestShims:
-            sol.putInSol(e)
+    for i, _ in enumerate(procs):
+        pallets[i] = palletsQueue.get( timeout = 0.7 )
 
-    # local search
-    # counter = 0
-    # for e in sol.Edges:
-    #     if not e.InSol and sol.isFeasible(e, 1.05, cfg, k):
-    #         sol.putInSol(e)
-    #         counter += 1
-    # print(f"{counter} extra edges put in the best solution")
 
-    return mno.getSolMatrix(sol.Edges, numPallets, numItems)
+
+    # multiprocessing shims solution
+    for i, p in enumerate(pallets):
+        procs[i] = mp.Process( target=shimsEnqueue,args=( palletsQueue, p, items, limit, k, solTorque, solItems, cfg ) )
+        
+    for i, proc in enumerate(procs):
+        # closer to CG pallets start to be solved first
+        time.sleep(abs(pallets[i].D)/1000.)        
+        proc.start()
+    
+    for i, _ in enumerate(procs):
+        shims = palletsQueue.get( timeout = 0.7 )
+        for item in items:
+            if shims.InSol[item.ID]:
+                pallets[i].putItem(item, solTorque, solItems)
+
+
+    for v in solItems:
+        X[pallet.ID][item.ID] = 1
+
+    return X
         
 if __name__ == "__main__":
 

@@ -5,12 +5,12 @@ import time
 import shims_p
 import shims
 
-surplus = "data20"
-# surplus = "data50"
+# surplus = "data20"
+surplus = "data50"
 # surplus = "data100"
 
-# method = "Shims_p"
-method = "Shims"
+method = "Shims_p"
+# method = "Shims"
 
 # scenarios = [1,2,3,4,5,6]
 scenarios = [1]
