@@ -1,7 +1,6 @@
 import methods as mno
 import numpy as np
 import multiprocessing as mp
-import time
 
 # A Shims fits in a pallet slack
 class Shims(object):
@@ -10,7 +9,7 @@ class Shims(object):
         self.SCW    = 0   # shims current weight (must fit the slack)
         self.SCV    = 0.0 # shims current volume (must fit the slack)
         self.SCS    = 0   # shims current score
-        self.InSol  = [0 for _ in range(numItems)] # 1 if an item is in the shims
+        self.InSol  = [0 for _ in np.arange(numItems)] # 1 if an item is in the shims
         self.SCT    = 0. # shims current torque
 
     def putItem(self, item):
@@ -48,7 +47,7 @@ def getBestShims(pallet, items, limit, k, solTorque, solItems, cfg):
     whip = []
     
     for item in items:
-        if solItems[item.ID] == 0:
+        if solItems[item.ID] == -1: # not allocated in any pallet
             vol += item.V
             whip.append(item)
             if vol > whipLen:
@@ -102,11 +101,9 @@ class Pallet(object):
         self.PCV += item.V
         self.PCS += item.S
 
-        with solTorque.get_lock():
-            solTorque.value += float(item.W) * float(self.D)
+        solTorque.value += float(item.W) * float(self.D)
 
-        with solItems.get_lock():
-            solItems[item.ID] = 1
+        solItems[item.ID] = self.ID # mark item as alocated to this pallet
 
     def isFeasible(self, item, limit, k, solTorque, solItems, cfg): # check constraints
 
@@ -116,14 +113,40 @@ class Pallet(object):
         if self.PCV + item.V > self.V * limit:
             return False
 
-        if solItems[item.ID] == 1:
+        if solItems[item.ID] > -1: # if item is alocated in some pallet
             return False
 
         deltaTau = float(item.W) * float(self.D)
         if abs(solTorque.value + deltaTau) > cfg.maxTorque:
             return False
 
-        return True  
+        return True
+ 
+def loadPallets(cfg):
+    """
+    Load pallets attributes based on aircraft size
+    """
+    fname = f"./params/{cfg.size}.txt"
+      
+    reader = open(fname,"r")
+    lines = reader.readlines()    
+    pallets = []
+    id = 0
+    cfg.maxD = 0
+    try:
+        for line in lines:
+            cols = line.split()
+            d = float(cols[0])
+            v = float(cols[1])
+            w = float(cols[2])
+            pallets.append( Pallet(id, d, v, w, cfg.numNodes) )
+            id += 1
+
+            if d > cfg.maxD:
+                cfg.maxD = d
+    finally:
+        reader.close()    
+    return pallets
         
 def fillPallet(p, items, limit, k, solTorque, solItems, cfg):
     for item in items:
@@ -137,44 +160,24 @@ def palletsEnqueue(palletsQueue, p, items, limit, k, solTorque, solItems, cfg):
 def shimsEnqueue( palletsQueue,    p, items, limit, k, solTorque, solItems, cfg):
     palletsQueue.put( getBestShims(p, items, limit, k, solTorque, solItems, cfg))    
 
-def printPallets(pallets, cfg, solTorque, message):
-    print(message)
-    print("Pallet\tWeight\t%\tVolume\t%")
-    pallets.sort(key=lambda x: abs(x.ID))
-    solCScore  = 0.
-    solWeight  = 0.
-    solVolume  = 0.
-    solCWeight  = 0.
-    solCVolume  = 0.    
-    for p in pallets:
-        solWeight += p.W
-        solVolume += p.V
 
-        solCScore  += p.PCS
-        solCWeight += p.PCW
-        solCVolume += p.PCV
-
-        print(f"{p.ID}\t{p.PCW}\t{p.PCW/p.W:.2f}\t{p.PCV:.2f}\t{p.PCV/p.V:.2f}")
-    print("Score\tTorque\tWeight\tVolume")
-    print(f"{solCScore}\t{solTorque.value/cfg.maxTorque:.2f}\t{solCWeight/solWeight:.2f}\t{solCVolume/solVolume:.2f}")
-    print()
-
-
-# parallel Shims based on different limits
 def Solve(pallets, items, cfg, k, limit, secBreak): # items include kept on board
 
     print(f"\nParallel Shims for ACLP+RPDP")
 
-    numPallets = len(pallets)
     numItems   = len(items)
-
-    X = np.zeros((numPallets,numItems)) # solution matrix
+    numPallets = len(pallets)
 
     solTorque = mp.Value('d') # solution global torque to be shared and changed by all pallets concurrently
     solTorque.value = 0.0
-    solItems  = mp.Array('i', range(len(items)))
+
+    solItems = mp.Array('i', range(numItems))
     for i, _ in enumerate(solItems):
-        solItems[i] = 0
+        solItems[i] = -1 # not alocated to any pallet
+
+    # for i, p in enumerate(pallets):
+    #     pallets[i] = fillPallet(p, items, limit, k, solTorque, solItems, cfg)
+
 
     # ------- parallel pallets --------
     procs = [None for _ in pallets]
@@ -187,37 +190,32 @@ def Solve(pallets, items, cfg, k, limit, secBreak): # items include kept on boar
         procs[i] = mp.Process( target=palletsEnqueue,args=( palletsQueue, p, items, limit, k, solTorque, solItems, cfg ) )
         
     for i, proc in enumerate(procs):
-        # closer to CG pallets start to be solved first
-        time.sleep(abs(pallets[i].D)/1000.)
-
         proc.start()
     
     for i, _ in enumerate(procs):
-        pallets[i] = palletsQueue.get( timeout = 0.7 )
+        pallets[i] = palletsQueue.get( timeout = secBreak )
 
-
-
-    # multiprocessing shims solution
+    # ----- parallel shims -----
     for i, p in enumerate(pallets):
         procs[i] = mp.Process( target=shimsEnqueue,args=( palletsQueue, p, items, limit, k, solTorque, solItems, cfg ) )
-        
+
     for i, proc in enumerate(procs):
-        # closer to CG pallets start to be solved first
-        time.sleep(abs(pallets[i].D)/1000.)        
         proc.start()
-    
+
     for i, _ in enumerate(procs):
-        shims = palletsQueue.get( timeout = 0.7 )
-        for item in items:
-            if shims.InSol[item.ID]:
-                pallets[i].putItem(item, solTorque, solItems)
+        shims = palletsQueue.get( timeout = secBreak )
+        for j, v in enumerate(shims.InSol):
+            if v == 1:
+                pallets[i].putItem(items[j], solTorque, solItems)
 
+    # --- mount solution matrix
+    Z = np.zeros((numPallets,numItems))
+    for j, i in enumerate(solItems):
+        if i > -1: # alocated to some pallet
+            Z[i][j] = 1
 
-    for v in solItems:
-        X[pallet.ID][item.ID] = 1
+    return Z
 
-    return X
-        
 if __name__ == "__main__":
 
     print("----- Please execute module main -----")

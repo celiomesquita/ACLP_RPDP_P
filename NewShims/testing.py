@@ -48,7 +48,7 @@ for scenario in scenarios:
         for j, value in enumerate(cols):
             costs[i][j] = cfg.kmCost*value
 
-    pallets = mno.loadPallets(cfg)
+    pallets = shims_p.loadPallets(cfg)
 
     # pallets capacity
     cfg.weiCap = 0
