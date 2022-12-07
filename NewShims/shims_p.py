@@ -1,6 +1,7 @@
-import methods as mno
+# import methods as mno
 import numpy as np
 import multiprocessing as mp
+import time
 
 # A Shims fits in a pallet slack
 class Shims(object):
@@ -102,7 +103,6 @@ class Pallet(object):
         self.PCS += item.S
 
         solTorque.value += float(item.W) * float(self.D)
-
         solItems[item.ID] = self.ID # mark item as alocated to this pallet
 
     def isFeasible(self, item, limit, k, solTorque, solItems, cfg): # check constraints
@@ -112,10 +112,10 @@ class Pallet(object):
 
         if self.PCV + item.V > self.V * limit:
             return False
-
+        
         if solItems[item.ID] > -1: # if item is alocated in some pallet
             return False
-
+        
         deltaTau = float(item.W) * float(self.D)
         if abs(solTorque.value + deltaTau) > cfg.maxTorque:
             return False
@@ -175,11 +175,7 @@ def Solve(pallets, items, cfg, k, limit, secBreak): # items include kept on boar
     for i, _ in enumerate(solItems):
         solItems[i] = -1 # not alocated to any pallet
 
-    # for i, p in enumerate(pallets):
-    #     pallets[i] = fillPallet(p, items, limit, k, solTorque, solItems, cfg)
-
-
-    # ------- parallel pallets --------
+    # ------- parallel greedy pallets --------
     procs = [None for _ in pallets]
     palletsQueue = mp.Queue()
 
@@ -190,16 +186,23 @@ def Solve(pallets, items, cfg, k, limit, secBreak): # items include kept on boar
         procs[i] = mp.Process( target=palletsEnqueue,args=( palletsQueue, p, items, limit, k, solTorque, solItems, cfg ) )
         
     for i, proc in enumerate(procs):
+        time.sleep(0.001)
         proc.start()
     
     for i, _ in enumerate(procs):
         pallets[i] = palletsQueue.get( timeout = secBreak )
+
+    # ------- serial greedy pallets --------
+    # for i, p in enumerate(pallets):
+    #     pallets[i] = fillPallet(p, items, limit, k, solTorque, solItems, cfg)
+
 
     # ----- parallel shims -----
     for i, p in enumerate(pallets):
         procs[i] = mp.Process( target=shimsEnqueue,args=( palletsQueue, p, items, limit, k, solTorque, solItems, cfg ) )
 
     for i, proc in enumerate(procs):
+        # time.sleep(0.001)
         proc.start()
 
     for i, _ in enumerate(procs):
@@ -207,6 +210,14 @@ def Solve(pallets, items, cfg, k, limit, secBreak): # items include kept on boar
         for j, v in enumerate(shims.InSol):
             if v == 1:
                 pallets[i].putItem(items[j], solTorque, solItems)
+
+    # ------- serial shims --------
+    # for i, p in enumerate(pallets):
+    #     bestShims = getBestShims(p, items, limit, k, solTorque, solItems, cfg)
+    #     for j, v in enumerate(bestShims.InSol):
+    #         if v == 1:
+    #             pallets[i].putItem(items[j], solTorque, solItems)
+
 
     # --- mount solution matrix
     Z = np.zeros((numPallets,numItems))
