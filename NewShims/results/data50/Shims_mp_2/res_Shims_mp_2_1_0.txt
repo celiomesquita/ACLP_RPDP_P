@@ -3,26 +3,26 @@
 \rowcolor{Gray}\multicolumn{4}{l}{Node 0: GRU solution} \\ 
 $Pallet$ & $From:To$ & $Kg$ & $m^3$ \\ 
 \midrule 
-1 & GRU:GIG & 2345 &  9.2 \\ 
-2 & GRU:GIG & 2181 &  8.6 \\ 
-3 & GRU:GIG &   24 &  0.1 \\ 
-4 & GRU:GIG &   22 &  0.1 \\ 
-5 & GRU:GIG &   43 &  0.1 \\ 
-6 & GRU:GIG &   29 &  0.1 \\ 
-7 & GRU:GIG &   44 &  0.1 \\ 
-8 & GRU:GIG &   34 &  0.1 \\ 
-9 & GRU:SSA &   35 &  0.1 \\ 
-10 & GRU:SSA &   35 &  0.1 \\ 
-11 & GRU:SSA &   42 &  0.1 \\ 
-12 & GRU:SSA &   38 &  0.1 \\ 
-13 & GRU:SSA & 1186 &  4.9 \\ 
-14 & GRU:SSA &   35 &  0.1 \\ 
-15 & GRU:SSA &   36 &  0.1 \\ 
-16 & GRU:SSA &   37 &  0.1 \\ 
-17 & GRU:SSA & 2891 & 11.3 \\ 
-18 & GRU:SSA & 1742 &  6.9 \\ 
+1 & GRU:GIG & 1589 &  6.9 \\ 
+2 & GRU:GIG & 1675 &  6.9 \\ 
+3 & GRU:GIG & 2496 &  9.9 \\ 
+4 & GRU:GIG & 2295 &  9.9 \\ 
+5 & GRU:GIG & 3700 & 14.6 \\ 
+6 & GRU:GIG & 3714 & 14.6 \\ 
+7 & GRU:GIG & 3604 & 14.6 \\ 
+8 & GRU:GIG & 3688 & 14.6 \\ 
+9 & GRU:SSA & 3773 & 14.6 \\ 
+10 & GRU:SSA & 3691 & 14.6 \\ 
+11 & GRU:SSA & 3438 & 14.7 \\ 
+12 & GRU:SSA &   78 &  0.4 \\ 
+13 & GRU:SSA & 3762 & 14.5 \\ 
+14 & GRU:SSA & 3772 & 14.6 \\ 
+15 & GRU:SSA & 3587 & 14.6 \\ 
+16 & GRU:SSA & 3439 & 14.6 \\ 
+17 & GRU:SSA & 2886 & 11.3 \\ 
+18 & GRU:SSA & 3603 & 14.6 \\ 
 \midrule 
-Score: 25709.0 & Weight: 0.14 & Volume: 0.18 & Torque: -0.28 \\ 
+Score: 50079.0 & Weight: 0.73 & Volume: 0.92 & Torque: -1.00 \\ 
 \toprule 
 \rowcolor{Gray}\multicolumn{4}{l}{Node 1: GIG solution} \\ 
 $Pallet$ & $From:To$ & $Kg$ & $m^3$ \\ 
@@ -72,6 +72,6 @@ $Pallet$ & $From:To$ & $Kg$ & $m^3$ \\
 \midrule 
 Score: 0.0 & Weight: 0.00 & Volume: 0.00 & Torque: 0.00 \\ 
 \bottomrule 
-\multicolumn{4}{l}{Tour 0\ \ \ \ \ S/C: 1.725\ \ \ \ \ \ \ \ \ \ elapsed: -1\ \ \ \ \ method:\ Shims_p} \\ 
+\multicolumn{4}{l}{Tour 0\ \ \ \ \ S/C: 3.245\ \ \ \ \ \ \ \ \ \ elapsed: -1\ \ \ \ \ method:\ Shims_mp} \\ 
 \bottomrule 
 \end{tabular} 

@@ -2,6 +2,7 @@ import methods as mno
 import numpy as np
 import time
 
+import shims_mp
 import shims_p
 import shims
 
@@ -9,11 +10,12 @@ import shims
 surplus = "data50"
 # surplus = "data100"
 
-method = "Shims_p"
+# method = "Shims_p"
+method = "Shims_mp"
 # method = "Shims"
 
 # scenarios = [1,2,3,4,5,6]
-scenarios = [1]
+scenarios = [2]
 bests = []
 
 for scenario in scenarios:
@@ -35,7 +37,7 @@ for scenario in scenarios:
         instances = [1,2,3] 
 
     # limit    = 0.95 # best
-    limit    = 0.05
+    limit    = 0.99
     secBreak = 0.7 # seconds
 
     cfg = mno.Config(scenario)                                      
@@ -48,7 +50,11 @@ for scenario in scenarios:
         for j, value in enumerate(cols):
             costs[i][j] = cfg.kmCost*value
 
-    pallets = shims_p.loadPallets(cfg)
+    if method == "Shims_p":
+        pallets = shims_p.loadPallets(cfg)
+        
+    if method == "Shims_mp":
+        pallets = shims_mp.loadPallets(cfg)
 
     # pallets capacity
     cfg.weiCap = 0
@@ -100,6 +106,9 @@ for scenario in scenarios:
 
         if method == "Shims_p":
             E = shims_p.Solve(pallets, items, cfg, k, limit, secBreak)
+
+        if method == "Shims_mp":
+            E = shims_mp.Solve(pallets, items, cfg, k, limit, secBreak)
 
         if method == "Shims":            
             E = shims.Solve(pallets, items, cfg, k, limit, secBreak)         

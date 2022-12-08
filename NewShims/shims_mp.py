@@ -102,31 +102,36 @@ class Pallet(object):
         self.PCV = 0.
         self.PCS = 0.
 
-    def putItem(self, item, solTorque, solItems): # put an item in this pallet
+    def putItem(self, item, solTorque, solItems, lock): # put an item in this pallet
 
         self.PCW += item.W
         self.PCV += item.V
         self.PCS += item.S
 
-        solTorque.value += float(item.W) * float(self.D)
-        solItems[item.ID] = self.ID # mark item as alocated to this pallet
+        with lock:
+            solTorque.value += float(item.W) * float(self.D)
+            solItems[item.ID] = self.ID # mark item as alocated to this pallet
 
-    def isFeasible(self, item, limit, k, solTorque, solItems, cfg): # check constraints
+    def isFeasible(self, item, limit, k, solTorque, solItems, cfg, lock): # check constraints
 
         if item.To != self.Dests[k]:
             return False
 
         if self.PCV + item.V > self.V * limit:
             return False
-        
-        if solItems[item.ID] > -1: # if item is alocated in some pallet
-            return False
-        
-        deltaTau = float(item.W) * float(self.D)
-        if abs(solTorque.value + deltaTau) > cfg.maxTorque:
-            return False
 
-        return True
+        deltaTau = float(item.W) * float(self.D)
+        ret = True
+
+        with lock:
+
+            if solItems[item.ID] > -1: # if item is alocated in some pallet
+                ret =  False
+            
+            if abs(solTorque.value + deltaTau) > cfg.maxTorque:
+                ret =  False
+
+        return ret
  
 def loadPallets(cfg):
     """
@@ -154,31 +159,15 @@ def loadPallets(cfg):
         reader.close()    
     return pallets
         
-def fillPallet(pallet, items, limit, k, solTorque, solItems, cfg):
+def fillPallet(pallet, items, limit, k, solTorque, solItems, cfg, lock):
     for item in items:
-        if pallet.isFeasible(item, limit, k, solTorque, solItems, cfg):
-            pallet.putItem(item, solTorque, solItems)
-    return pallet
-
-def palletsEnqueue(palletsQueue, p, items, limit, k, solTorque, solItems, cfg):
-    palletsQueue.put( fillPallet(p, items, limit, k, solTorque, solItems, cfg) )
-
-def shimsEnqueue( palletsQueue,    p, items, limit, k, solTorque, solItems, cfg, surplus):
-    palletsQueue.put( getBestShims(p, items, limit, k, solTorque, solItems, cfg, surplus))    
-
+        if pallet.isFeasible(item, limit, k, solTorque, solItems, cfg, lock):
+            pallet.putItem(item, solTorque, solItems, lock)
 
 def Solve(pallets, items, cfg, k, limit, secBreak): # items include kept on board
 
-    serial = False
-    # serial = True
+    print(f"\nParallel Shims for ACLP+RPDP")
 
-    if serial:
-        print(f"\nSerial Shims for ACLP+RPDP")
-    else:
-        print(f"\nParallel Shims for ACLP+RPDP")
-
-
-    # surplus = 2. - limit
     surplus = math.exp(-limit) + 0.9
     print(f"surplus: {surplus:.2f}")
 
@@ -193,46 +182,32 @@ def Solve(pallets, items, cfg, k, limit, secBreak): # items include kept on boar
         solItems[i] = -1 # not alocated to any pallet
 
     procs = [None for _ in pallets]
-    palletsQueue = mp.Queue()
+
+    lock  = mp.Lock()
 
     # sort ascendent by CG distance
     pallets.sort(key=lambda x: abs(x.D), reverse=False)
 
-    # ------- serial greedy pallets --------
-    # for i, p in enumerate(pallets):
-    #     pallets[i] = fillPallet(p, items, limit, k, solTorque, solItems, cfg)
-
-    # ------- parallel greedy pallets --------
-    for i, p in enumerate(pallets):
-        procs[i] = mp.Process( target=palletsEnqueue,args=( palletsQueue, p, items, limit, k, solTorque, solItems, cfg ) )
-        
-    for i, proc in enumerate(procs):
-        time.sleep(0.001)
-        proc.start()
-    
     for i, _ in enumerate(procs):
-        pallets[i] = palletsQueue.get( timeout = secBreak )
+        procs[i] = mp.Process( target=fillPallet, args=( pallets[i], items, limit, k, solTorque, solItems, cfg, lock) )
+        time.sleep(0.001)
+        procs[i].start()
+    
+    for proc in procs:
+        proc.join()
 
-    if serial: # ------- serial shims --------
-        for i, p in enumerate(pallets):
-            bestShims = getBestShims(p, items, limit, k, solTorque, solItems, cfg, surplus)
-            for item in bestShims.Items:
-                if item != None:
-                    pallets[i].putItem(item, solTorque, solItems)
+    # for i, p in enumerate(pallets):
+    #     procs[i] = mp.Process( target=shimsEnqueue,args=( palletsQueue, p, items, limit, k, solTorque, solItems, cfg, surplus ) )
 
-    else: #----- parallel shims -----
-        for i, p in enumerate(pallets):
-            procs[i] = mp.Process( target=shimsEnqueue,args=( palletsQueue, p, items, limit, k, solTorque, solItems, cfg, surplus ) )
+    # for i, proc in enumerate(procs):
+    #     time.sleep(0.001)
+    #     proc.start()
 
-        for i, proc in enumerate(procs):
-            time.sleep(0.001)
-            proc.start()
-
-        for i, _ in enumerate(procs):
-            bestShims = palletsQueue.get( timeout = secBreak )
-            for item in bestShims.Items:
-                if item != None:
-                    pallets[i].putItem(item, solTorque, solItems)
+    # for i, _ in enumerate(procs):
+    #     bestShims = palletsQueue.get( timeout = secBreak )
+    #     for item in bestShims.Items:
+    #         if item != None:
+    #             pallets[i].putItem(item, solTorque, solItems)
 
     # --- mount solution matrix
     Z = np.zeros((numPallets,numItems))

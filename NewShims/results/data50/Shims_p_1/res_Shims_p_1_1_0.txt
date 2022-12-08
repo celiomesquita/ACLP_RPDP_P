@@ -3,15 +3,15 @@
 \rowcolor{Gray}\multicolumn{4}{l}{Node 0: GRU solution} \\ 
 $Pallet$ & $From:To$ & $Kg$ & $m^3$ \\ 
 \midrule 
-1 & GRU:GIG & 1854 &  7.5 \\ 
-2 & GRU:GIG & 3310 & 13.4 \\ 
-3 & GRU:GIG &  182 &  0.7 \\ 
-4 & GRU:SSA &  159 &  0.7 \\ 
-5 & GRU:SSA &  190 &  0.7 \\ 
-6 & GRU:SSA &  175 &  0.7 \\ 
-7 & GRU:GIG & 1699 &  6.9 \\ 
+1 & GRU:GIG & 1315 &  5.3 \\ 
+2 & GRU:GIG & 2099 &  8.9 \\ 
+3 & GRU:GIG & 2828 & 11.4 \\ 
+4 & GRU:SSA & 2533 & 10.7 \\ 
+5 & GRU:SSA & 3336 & 13.7 \\ 
+6 & GRU:SSA & 3502 & 13.6 \\ 
+7 & GRU:GIG & 3424 & 13.7 \\ 
 \midrule 
-Score: 13809.0 & Weight: 0.29 & Volume: 0.36 & Torque: 1.95 \\ 
+Score: 19504.0 & Weight: 0.73 & Volume: 0.92 & Torque: 0.99 \\ 
 \toprule 
 \rowcolor{Gray}\multicolumn{4}{l}{Node 1: GIG solution} \\ 
 $Pallet$ & $From:To$ & $Kg$ & $m^3$ \\ 
@@ -39,6 +39,6 @@ $Pallet$ & $From:To$ & $Kg$ & $m^3$ \\
 \midrule 
 Score: 0.0 & Weight: 0.00 & Volume: 0.00 & Torque: 0.00 \\ 
 \bottomrule 
-\multicolumn{4}{l}{Tour 0\ \ \ \ \ S/C: 3.813\ \ \ \ \ \ \ \ \ \ elapsed: -1\ \ \ \ \ method:\ Shims_p} \\ 
+\multicolumn{4}{l}{Tour 0\ \ \ \ \ S/C: 5.632\ \ \ \ \ \ \ \ \ \ elapsed: -1\ \ \ \ \ method:\ Shims_p} \\ 
 \bottomrule 
 \end{tabular} 
