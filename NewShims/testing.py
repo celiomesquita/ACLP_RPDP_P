@@ -37,7 +37,7 @@ for scenario in scenarios:
         instances = [1,2,3] 
 
     # limit    = 0.95 # best
-    limit    = 0.99
+    limit    = 0.95
     secBreak = 0.7 # seconds
 
     cfg = mno.Config(scenario)                                      
