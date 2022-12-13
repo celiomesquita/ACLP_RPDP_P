@@ -5,7 +5,7 @@
 #define GPIO_ECHO   11
  
 /* Definições de operação do sensor ultrasônico */
-#define MINIMUM_DISTANCE 10.0 //cm
+#define MINIMUM_DISTANCE 30.0 //cm
 #define TIME_BETWEEN_READINGS   250  //ms
  
 /* Definições para controle dos dois motores */

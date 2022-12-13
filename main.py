@@ -7,8 +7,7 @@ import os
 # local packages
 import methods
 import optcgcons
-import shims
-import shims_p
+import shims_mp
 import aco
 import aco_p
 import greedy
@@ -53,7 +52,7 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg, numProcs, secB
 
         # reset pallets destinations
         for i, _ in enumerate(pallets):
-            pallets[i].Dests = [-1]*cfg.numNodes
+            pallets[i].Dests = np.full(cfg.numNodes, -1)
 
         if k > 0: # not in the base
 
@@ -103,20 +102,18 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg, numProcs, secB
         print(f"-> {numItems} items with {numKept} kept on board in {node.ICAO}")
 
         E = []
-        opt = 0
         startNodeTime = time()
 
-        minLim = 0.75 # Shims_p
         limit  = 0.95 # Shims and ACO
+
+        if method == "Shims_mp":
+            E = shims_mp.Solve(pallets, items, cfg, k, limit, secBreak, "p")
+
+        if method == "Shims":            
+            E = shims_mp.Solve(pallets, items, cfg, k, limit, secBreak, "s")
 
         if method == "Greedy":
             E = greedy.Solve(pallets, items, cfg, k)
-
-        if method == "Shims_p":
-            E = shims_p.Solve(pallets, items, cfg, k, minLim, numProcs)
-
-        if method == "Shims":
-            E = shims.Solve(pallets, items, cfg, k, limit)
 
         if method == "ACO":
             E =   aco.Solve( pallets, items, startNodeTime, cfg, k, limit, secBreak)
@@ -193,18 +190,10 @@ def writeAvgResults(method, scenario, line):
 if __name__ == "__main__":
 
 
-    bestNPP = [
-        [0,  6, 4,  4,  4,  2,  2], # Shims_p 1.2
-        [0,  4, 4,  4,  4,  4,  4], # Shims_p 1.5
-        [0,  4, 4,  4,  2,  2,  4], # Shims_p 2.0
-        [0, 10, 8, 10,  6, 10, 10], # ACO_p   1.2
-        [0, 10, 6, 12,  8, 10,  8], # ACO_p   1.5
-        [0, 10, 8,  2, 10,  6,  6]  # ACO_p   2.0
-    ]
-
     # scenarios = [1,2,3,4,5,6]
-    scenarios = [5,6]
+    scenarios = [1]
     secBreak  = 0.7
+    numProcs  = 10
 
     dists = methods.loadDistances()
 
@@ -216,25 +205,9 @@ if __name__ == "__main__":
 
     for scenario in scenarios:
 
-        numProcs = 1
-        if method == "Shims_p":
-            if methods.DATA == "data20":
-                numProcs =  bestNPP[0][scenario]
-            if methods.DATA == "data50":
-                numProcs =  bestNPP[1][scenario]
-            if methods.DATA == "data100":
-                numProcs =  bestNPP[2][scenario]
-        if method == "ACO_p":
-            if methods.DATA == "data20":
-                numProcs =  bestNPP[3][scenario]
-            if methods.DATA == "data50":
-                numProcs =  bestNPP[4][scenario]
-            if methods.DATA == "data100":
-                numProcs =  bestNPP[5][scenario]
-
         if scenario == 1:
-            instances = [1,2,3,4,5,6,7]
-            # instances = [1]
+            # instances = [1,2,3,4,5,6,7]
+            instances = [1]
         if scenario == 2:
             instances = [1,2,3,4,5,6,7]
             # instances = [1]
@@ -253,7 +226,10 @@ if __name__ == "__main__":
             for j, value in enumerate(cols):
                 costs[i][j] = cfg.kmCost*value
 
-        pallets = methods.loadPallets(cfg)
+        if method == "Shims_mp" or method == "Shims":
+            pallets = shims_mp.loadPallets(cfg)
+        else:
+            pallets = methods.loadPallets(cfg)
 
         # pallets capacity
         cfg.weiCap = 0
@@ -289,9 +265,8 @@ if __name__ == "__main__":
 
                 # if tour.elapsed > worstDuration :
                     # worstDuration = tour.elapsed
-                                
+                    
                 curSC = tour.score / tour.cost
-
 
                 # best tour parameters
                 if curSC > bestSC:

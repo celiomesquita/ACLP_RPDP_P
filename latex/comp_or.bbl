@@ -1,4 +1,4 @@
-\begin{thebibliography}{34}
+\begin{thebibliography}{33}
 \expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
 \providecommand{\url}[1]{\texttt{#1}}
 \providecommand{\href}[2]{#2}
@@ -213,12 +213,6 @@
 \newblock \bibinfo{title}{A survey on parallel ant colony optimization}.
 \newblock \bibinfo{journal}{Applied soft computing} \bibinfo{volume}{11},
   \bibinfo{pages}{5181--5197}.
-%Type = Misc
-\bibitem[{{Python}(2022)}]{multiprocessing}
-\bibinfo{author}{{Python}}, \bibinfo{year}{2022}.
-\newblock \bibinfo{title}{{Process-based parallelism}}.
-\newblock \URLprefix
-  \url{https://docs.python.org/3/library/multiprocessing.html}.
 %Type = Article
 \bibitem[{Roesener and Barnes(2016)}]{RoesenerBarnes2016}
 \bibinfo{author}{Roesener, A.}, \bibinfo{author}{Barnes, J.},
