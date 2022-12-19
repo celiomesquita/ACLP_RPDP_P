@@ -161,7 +161,7 @@ def fillPallet(pallet, items, k, solTorque, solItems, cfg, lock, limit):
         if pallet.isFeasible(item, limit, k, solTorque, solItems, cfg, lock):
             pallet.putItem(item, solTorque, solItems, lock)
 
-def Solve(pallets, items, cfg, k, limit, secBreak, mode): # items include kept on board
+def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque): # items include kept on board
 
     if mode == "p":
         print(f"\nParallel Shims for ACLP+RPDP")
@@ -177,8 +177,8 @@ def Solve(pallets, items, cfg, k, limit, secBreak, mode): # items include kept o
     numItems   = len(items)
     numPallets = len(pallets)
 
-    solTorque = mp.Value('d') # solution global torque to be shared and changed by all pallets concurrently
-    solTorque.value = 0.0
+    # solTorque = mp.Value('d') # solution global torque to be shared and changed by all pallets concurrently
+    # solTorque.value = 0.0
 
     solItems = mp.Array('i', range(numItems))
     for j, _ in enumerate(solItems):

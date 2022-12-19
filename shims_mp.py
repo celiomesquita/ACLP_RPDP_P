@@ -161,7 +161,7 @@ def fillPallet(pallet, items, k, solTorque, solItems, cfg, lock, limit):
         if pallet.isFeasible(item, limit, k, solTorque, solItems, cfg, lock):
             pallet.putItem(item, solTorque, solItems, lock)
 
-def Solve(pallets, items, cfg, k, limit, secBreak, mode): # items include kept on board
+def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque): # items include kept on board
 
     if mode == "p":
         print(f"\nParallel Shims for ACLP+RPDP")
@@ -177,23 +177,14 @@ def Solve(pallets, items, cfg, k, limit, secBreak, mode): # items include kept o
     numItems   = len(items)
     numPallets = len(pallets)
 
-    solTorque = mp.Value('d') # solution global torque to be shared and changed by all pallets concurrently
-    solTorque.value = 0.0
+    # solTorque = mp.Value('d') # solution global torque to be shared and changed by all pallets concurrently
+    # solTorque.value = 0.0
 
     solItems = mp.Array('i', range(numItems))
     for j, _ in enumerate(solItems):
         solItems[j] = -1 # not alocated to any pallet
 
     lock  = mp.Lock()
-
-    for j, item in enumerate(items):
-        items[j].ID = j
-        if item.P > -1: # if alocated to a pallet
-            for i, p in enumerate(pallets):
-                if item.P == p.ID: # in case there is some consolidated among the items
-                    pallets[i].putItem(item, solTorque, solItems, lock)
-
-    # item.P = -1 if an item, -2 if a consollidated, or pallet ID.
 
     procs = [None for _ in pallets] # each pallets has its own process
 

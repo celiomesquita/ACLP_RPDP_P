@@ -4,6 +4,8 @@ from time import time
 import math
 from os import path
 import os
+import multiprocessing as mp
+
 # local packages
 import methods
 import optcgcons
@@ -12,6 +14,8 @@ import aco
 import aco_p
 import greedy
 
+solTorque = mp.Value('d') # solution global torque to be shared and changed by all pallets concurrently
+solTorque.value = 0.0
 
 def solveTour(scenario, instance, pi, tour, method, pallets, cfg, numProcs, secBreak):
     """
@@ -45,6 +49,10 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg, numProcs, secB
 
         numItems = len(items)
         numKept = 0
+
+        solItems = mp.Array('i', range(numItems))
+        for j, _ in enumerate(solItems):
+            solItems[j] = -1 # not alocated to any pallet        
 
         print(f"-> Tour:{pi} sequence:{k} city:{node.ICAO} items:{numItems}")
 
@@ -81,14 +89,24 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg, numProcs, secB
             if prevNode.ID < len(methods.CITIES):
                 print(f"\n-----Consolidated contents from tour {pi}, {methods.CITIES[prevNode.ID]} kept on board -----")
 
-            print("P\tW\tS\tV\tFROM\tTO")
-            for c in kept:
-                items.append(c)
-                numItems += 1
-                numKept  += 1
-                if prevNode.ID < len(methods.CITIES):
-                    print("%d\t%d\t%d\t%.1f\t%s\t%s" % (
-                        c.P,c.W, c.S, c.V, methods.CITIES[c.Frm], methods.CITIES[c.To]))
+            if method != "Shims_mp":
+                print("P\tW\tS\tV\tFROM\tTO")
+                for c in kept:
+                    items.append(c)
+                    numItems += 1
+                    numKept  += 1
+                    if prevNode.ID < len(methods.CITIES):
+                        print("%d\t%d\t%d\t%.1f\t%s\t%s" % (
+                            c.P,c.W, c.S, c.V, methods.CITIES[c.Frm], methods.CITIES[c.To]))
+            else:
+                for i, p in enumerate(pallets):
+                    for c in kept:
+                        if c.To == p.Dests[k]: # p.Dests[k] is updated by OptCGCons
+                            pallets[i].PCW += c.W
+                            pallets[i].PCV += c.V
+                            pallets[i].PCS += c.S
+                            solTorque.value += float(c.W) * float(p.D)
+
 
         # set pallets destinations with items and consolidated to be delivered
         print("\n----- setPalletsDestinations, Carlos' version -----")
@@ -107,7 +125,7 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg, numProcs, secB
         limit  = 0.95 # Shims and ACO
 
         if method == "Shims_mp":
-            E = shims_mp.Solve(pallets, items, cfg, k, limit, secBreak, "p")
+            E = shims_mp.Solve(pallets, items, cfg, k, limit, secBreak, "p", solTorque)
 
         if method == "Shims":            
             E = shims_mp.Solve(pallets, items, cfg, k, limit, secBreak, "s")
