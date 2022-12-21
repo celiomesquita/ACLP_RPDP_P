@@ -18,7 +18,7 @@ def OptCGCons(kept, pallets, maxTorque, method, k):
     torque1 = xsum( X[i][j] * (kept[j].W *    pallets[i].D) for i in PalletsRange for j in KeptRange ) 
     torque2 = xsum( X[i][j] * (kept[j].W * -1*pallets[i].D) for i in PalletsRange for j in KeptRange ) 
 
-    mod.objective = minimize( torque1 + torque2 )  
+    mod.objective = minimize( torque1 + torque2 )
 
     for j in KeptRange:
         # all consolidated must be embarked
@@ -64,30 +64,46 @@ if __name__ == "__main__":
     # DO NOT CHANGE THESE PARAMETERS
     scenario = 4
     instance = 1
-    node     = 1
+    k        = 1
     tix      = 0 # tour index in the permutations
-    tour     = [0, 1, 2, 3, 4, 0]
+    # tour     = [0, 1, 2, 3, 4, 0]
 
     cfg = methods.Config(scenario)
 
-    pallets = methods.loadPallets(cfg.Acft)
+    pallets = methods.loadPallets(cfg)
     PalletsRange = range(len(pallets))
 
-    nix        = tour.index(node) # node index in the tour
-    unattended = tour[nix+1:]
+    dists = methods.loadDistances()
 
-    items = methods.loadNodeItems(scenario, instance, node, unattended, "")
+    costs = [[0.0 for _ in dists] for _ in dists]
+
+    for i, cols in enumerate(dists):
+        for j, value in enumerate(cols):
+            costs[i][j] = cfg.kmCost*value
+
+    tours = methods.getTours(cfg.numNodes, costs, 0.25)
+
+    tour = tours[0]
+
+    node = tour.nodes[1]
+
+    # L_k destination nodes set
+    unattended = []
+    for n in tour.nodes[k+1:]:
+        unattended.append(n.ID)    
+
+    items = methods.loadNodeItems(scenario, instance, node, unattended)
 
     # pallets capacity
-    weiCap = 0
-    volCap = 0
+    cfg.weiCap = 0
+    cfg.volCap = 0
     for p in pallets:
-        weiCap += p.W
-        volCap += p.V
+        cfg.weiCap += p.W
+        cfg.volCap += p.V
 
     # smaller aircrafts may have a payload lower than pallets capacity
-    if weiCap > cfg.Payload:
-        weiCap = cfg.Payload
+    if cfg.weiCap > cfg.payload:
+        cfg.weiCap = cfg.payload
 
     # consolidated generated in node 0, to be dealt with in node 1
     cons = []
@@ -124,7 +140,8 @@ if __name__ == "__main__":
 
     start_time = time()
 
-    OptCGCons(kept, pallets, cfg.aircraft.maxTorque, "GRB")
+    # OptCGCons(kept, pallets, cfg.maxTorque, "CBC", k)
+    OptCGCons(kept, pallets, cfg.maxTorque, "GRB", k)
 
     elapsed = time() - start_time
     elapsed = math.ceil(1000*elapsed)  # milliseconds    

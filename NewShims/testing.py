@@ -11,40 +11,52 @@ import optcgcons
 # some pallets already have their destinations set by the consolidated
 def setPalletsDestinations(items, pallets, nodes, k, L_k):
 
-    vol       = [0]*len(nodes)
-    PalConsol = [0]*len(nodes)
-    max   = 0
-    total = 0
+    itemVols = [0]*len(nodes)
+    consNums = [0]*len(nodes)
+    lastDest  = 0
+    totalVol = 0
 
-    # all items from unnatended nodes (no consolidated)
+    # all items to unnatended nodes (no consolidated)
     for it in items:
         # the items from this node
-        if it.Frm == nodes[k].ID:
+        if it.Frm == nodes[k].ID and it.P == -1:
             d = it.To
             if d in L_k:
-                vol[d] += it.V
-                total  += it.V
-                if vol[d] > max:
-                    max = d
-        
+                itemVols[d] += it.V
+                totalVol       += it.V
+                if itemVols[d] > lastDest:
+                    lastDest = d
+
+    # all consolidated to unnatended nodes
+    for it in items:
+        # the consolidated from this node
+        if it.Frm == nodes[k].ID and it.P == -2:    
+            d = it.To
+            consNums[d] += 1
+            if d in L_k:
+                itemVols[d] += it.V
+                totalVol    += it.V
+                if itemVols[d] > lastDest:
+                    lastDest = d
+
     for n in nodes:
-        if vol[n.ID] > 0:
-            np = math.floor( len(pallets) * vol[n.ID] / total)
-            # quant = max(1, np - PalConsol[n.ID])
-            quant = np - PalConsol[n.ID]
+        if itemVols[n.ID] > 0:
+            np = math.floor( len(pallets) * itemVols[n.ID] / totalVol)
+            # quant = lastDest(1, np - consNums[n.ID])
+            quant = np - consNums[n.ID]
             count = 0
             for p in pallets:
                 if count == quant:
                     break
-                if p.Dests[k] == -1:
+                if p.Dests[k] == -1: # destination not set
                     pallets[p.ID].Dests[k] = n.ID
                     count += 1
 
     for p in pallets:
-        if p.Dests[k] == -1:
-            pallets[p.ID].Dests[k] = max
+        if p.Dests[k] == -1:  # destination not set
+            pallets[p.ID].Dests[k] = lastDest
 
-
+# item or consolidated
 class Item(object):
     """
     A candidate item "j" to be loaded on a pallet "i" if X_ij == 1
@@ -108,6 +120,7 @@ secBreak = 0.7 # seconds
 
 cfg = mno.Config(scenario)                                      
 
+# --- distances and costs matrix ---
 dists = mno.loadDistances()
 
 costs = [[0.0 for _ in dists] for _ in dists]
@@ -118,7 +131,7 @@ for i, cols in enumerate(dists):
 
 pallets = shims_mp.loadPallets(cfg)
 
-# pallets capacity
+# pallets capacities
 cfg.weiCap = 0
 cfg.volCap = 0
 for p in pallets:
@@ -129,11 +142,12 @@ for p in pallets:
 if cfg.weiCap > cfg.payload:
     cfg.weiCap = cfg.payload   
 
+# solution global parameters
 solElapsed = 0
 solScore   = 0
 
 # solution global torque to be shared and changed by all pallets concurrently
-solTorque = mp.Value('d') 
+solTorque = mp.Value('d') # a multiprocessing double type variable
 solTorque.value = 0.0
 
 for inst in instances:    
@@ -147,7 +161,7 @@ for inst in instances:
     k = 1 # the first node after the base
 
     node = tour.nodes[k]
-    print(f"ICAO node: {node.ICAO}")
+    # print(f"ICAO node: {node.ICAO}")
     
     # L_k destination nodes set
     unattended = [n.ID for n in tour.nodes[k+1:]]
@@ -155,67 +169,90 @@ for inst in instances:
     # load items parameters from this node and problem instance, that go to unnatended
     items = mno.loadNodeItems(scenario, inst, node, unattended, surplus)
     numItems = len(items)
-    print(f"number of items: {numItems}")
+    # print(f"number of items: {numItems}")
 
     # load consolidated generated in the previous node
     prevNode = tour.nodes[k-1]
     cons = loadNodeCons(surplus, scenario, inst, pi, prevNode, numItems ) # numItems = first cons ID
 
-    if prevNode.ID < len(mno.CITIES):
-        print(f"\n-----Loaded from tour {pi} {mno.CITIES[prevNode.ID]} -----")
-        print("P\tW\tS\tV\tFROM\tTO")
-        for c in cons:
-            print("%d\t%d\t%d\t%.1f\t%s\t%s" % (
-                    c.P, c.W, c.S, c.V, mno.CITIES[c.Frm], mno.CITIES[c.To]))
-    print()
+    # if prevNode.ID < len(mno.CITIES):
+    #     print(f"\n-----Loaded in {mno.CITIES[prevNode.ID]} -----")
+    #     print("ID\tP\tW\tS\tV\tFROM\tTO")
+    #     for c in cons:
+    #         print(f"{c.ID}\t{c.P}\t{c.W}\t{c.S}\t{c.V:.1f}\t{mno.CITIES[c.Frm]}\t{mno.CITIES[c.To]}")
+    # print(f"({numItems} items to embark)")
 
-    # consolidated contents not destined to this point are kept on board
+
+    # consolidated contents not destined to this point are kept on board ...
     kept = []
     for c in cons:
         if c.To in unattended:
-            kept.append(c)
-        
+            c.ID = numItems
+            kept.append(c) #... and included in the items set
+            numItems += 1
 
-    print("P\tW\tS\tV\tFROM\tTO")
-    for c in kept:
-        print("%d\t%d\t%d\t%.1f\t%s\t%s" % (
-                c.P, c.W, c.S, c.V, mno.CITIES[c.Frm], mno.CITIES[c.To]))
-    print("Pallets positions to be defined.\n")
+    # print(f"\n----- Kept on board at {mno.CITIES[node.ID]} -----")        
+    # print("ID\tP\tW\tS\tV\tFROM\tTO")
+    # for c in kept:
+    #     print(f"{c.ID}\t{c.P}\t{c.W}\t{c.S}\t{c.V:.1f}\t{mno.CITIES[c.Frm]}\t{mno.CITIES[c.To]}")
+    # print(f"Kept positions to be defined: ({numItems} items to embark)\n")
 
     # optimize consolidated positions to minimize CG deviation
-    optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, "CBC", k)
+    optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, "GRB", k)
+    # pallets destinations are also set, according to kept on board in new positions
+
+    # Kept P is not -2 anymore, but the pallet ID.
     
-    print("P\tW\tS\tV\tFROM\tTO")
+    # print("ID\tP\tW\tS\tV\tFROM\tTO")
     for c in kept:
-        print("%d\t%d\t%d\t%.1f\t%s\t%s" % (
-                c.P, c.W, c.S, c.V, mno.CITIES[c.Frm], mno.CITIES[c.To]))
-    print("Pallets positions defined.\n")
+        # consolidated are appended to the items set
+        items.append(c)
+        # print(f"{c.ID}\t{c.P}\t{c.W}\t{c.S}\t{c.V:.1f}\t{mno.CITIES[c.Frm]}\t{mno.CITIES[c.To]}")
+    # print(f"Kept positions defined ({numItems} items to embark)\n")
+
+    # print("ID\tDest\tPCW\tPCV\tPCS")
+    # for p in pallets:
+    #     print(f"{p.ID}\t{p.Dests[k]}\t{p.PCW}\t{p.PCV:.2f}\t{p.PCS}")
+    # print("Pallets destinations to be defined.\n")
 
     # set pallets destinations with items and consolidated to be delivered
     setPalletsDestinations(items, pallets, tour.nodes, k, unattended)
-    print("Pallets destinations set.\n") 
 
+    # print("ID\tDest\tPCW\tPCV\tPCS")
+    # for p in pallets:
+    #     print(f"{p.ID}\t{p.Dests[k]}\t{p.PCW}\t{p.PCV:.2f}\t{p.PCS}")
+    # print("Pallets destinations defined.\n")
+
+
+    # to control solution items
+    solItems = mp.Array('i', range(numItems))
+    for j, _ in enumerate(solItems):
+        solItems[j] = -1 # not alocated to any pallet
+    # put the kept on board in solution
+    for c in kept:
+        solItems[c.ID] = c.P
+
+    # update pallets current parameters and solution torque
     for i, p in enumerate(pallets):
-        for it in kept:
-            if it.P == p.ID:
-                pallets[i].PCW += it.W
-                pallets[i].PCV += it.V
-                pallets[i].PCS += it.S
-                solTorque.value += float(it.W) * float(p.D)
+        for c in kept:
+            if c.P == p.ID:
+                pallets[i].PCW += c.W
+                pallets[i].PCV += c.V
+                pallets[i].PCS += c.S
+                solTorque.value += float(c.W) * float(p.D)
 
-        print(f"{pallets[i].Dests[k]}\t{pallets[i].PCW}\t{pallets[i].PCV:.2f}\t{pallets[i].PCS}")
-    print(f"Pallets are now with accumulated values defined. Torque: {solTorque.value:.2f}\n")
-
+    #     print(f"{p.ID}\t{p.Dests[k]}\t{p.PCW}\t{p.PCV:.2f}\t{p.PCS}")
+    # print(f"Pallets are now with current values defined. Torque: {solTorque.value/cfg.maxTorque:.2f}\n")
     
     E = []
 
     startNodeTime = time.perf_counter()
 
     if method == "Shims_mp":
-        E = shims_mp.Solve(pallets, items, cfg, k, limit, secBreak, "p", solTorque)
+        E = shims_mp.Solve(pallets, items, cfg, k, limit, secBreak, "p", solTorque, solItems)
 
     if method == "Shims":            
-        E = shims_mp.Solve(pallets, items, cfg, k, limit, secBreak, "s")         
+        E = shims_mp.Solve(pallets, items, cfg, k, limit, secBreak, "s", solTorque, solItems)         
 
     elapsed = time.perf_counter() - startNodeTime
 
@@ -238,14 +275,9 @@ for inst in instances:
             consJK[j][k].Frm = node.ID
             consJK[j][k].To  = p.Dests[k]
 
-            itemsCount = [0 for _ in np.arange(numItems)]
-
             for i in np.arange(numItems):
 
                 if E[j][i] == 1:
-
-                    itemsCount[i] += 1
-
                     consJK[j][k].W += items[i].W
                     consJK[j][k].V += items[i].V
                     consJK[j][k].S += items[i].S
@@ -255,16 +287,14 @@ for inst in instances:
         sNodeAccum = 0.
         wNodeAccum = 0.
         vNodeAccum = 0.
-        tau = 0.
         sol = ""
 
         for i, p in enumerate(pallets):
             sNodeAccum += float(consJK[i][k].S)
             wNodeAccum += float(consJK[i][k].W)
             vNodeAccum += float(consJK[i][k].V)
-            tau        += float(consJK[i][k].W) * pallets[i].D
 
-        epsilom = tau/cfg.maxTorque
+        epsilom = solTorque.value/cfg.maxTorque
 
         sol += f"Score: {sNodeAccum}\t"
         sol += f"Weight: {wNodeAccum/cfg.weiCap:.2f}\t"
@@ -273,14 +303,11 @@ for inst in instances:
         sol += f"Elapsed: {elapsed:.2f}\n"
 
         state = "Feasible"
-        for n in itemsCount:
-            if n > 1:
-                state = "Unfeasible"
 
         if wNodeAccum/cfg.weiCap > 1.0:
             state = "Weight Unfeasible"
 
-        if vNodeAccum/cfg.volCap > 1.03:
+        if vNodeAccum/cfg.volCap > 1.0:
             state = "Volume Unfeasible"
 
         if abs(epsilom) > 1.0:
@@ -291,11 +318,9 @@ for inst in instances:
         print(sol)
 
         solElapsed += elapsed
-        solScore  += sNodeAccum
+        solScore   += sNodeAccum
 
         mno.writeTourSol(method, scenario, inst, pi, tour, cfg, pallets, consJK, True, surplus)
 
 # print(f"Elapsed per instance: {solElapsed/len(instances):.0f}")
 # print(f"Elapsed per instance: {solScore/len(instances):.0f}")
-
-
