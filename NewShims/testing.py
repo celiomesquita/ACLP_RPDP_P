@@ -1,112 +1,18 @@
-import methods as mno
+import common
 import numpy as np
 import time
 import multiprocessing as mp
-import os
-import math
 
 import shims_mp
+import aco_mp
 import optcgcons
-
-# some pallets already have their destinations set by the consolidated
-def setPalletsDestinations(items, pallets, nodes, k, L_k):
-
-    itemVols = [0]*len(nodes)
-    consNums = [0]*len(nodes)
-    lastDest  = 0
-    totalVol = 0
-
-    # all items to unnatended nodes (no consolidated)
-    for it in items:
-        # the items from this node
-        if it.Frm == nodes[k].ID and it.P == -1:
-            d = it.To
-            if d in L_k:
-                itemVols[d] += it.V
-                totalVol       += it.V
-                if itemVols[d] > lastDest:
-                    lastDest = d
-
-    # all consolidated to unnatended nodes
-    for it in items:
-        # the consolidated from this node
-        if it.Frm == nodes[k].ID and it.P == -2:    
-            d = it.To
-            consNums[d] += 1
-            if d in L_k:
-                itemVols[d] += it.V
-                totalVol    += it.V
-                if itemVols[d] > lastDest:
-                    lastDest = d
-
-    for n in nodes:
-        if itemVols[n.ID] > 0:
-            np = math.floor( len(pallets) * itemVols[n.ID] / totalVol)
-            # quant = lastDest(1, np - consNums[n.ID])
-            quant = np - consNums[n.ID]
-            count = 0
-            for p in pallets:
-                if count == quant:
-                    break
-                if p.Dests[k] == -1: # destination not set
-                    pallets[p.ID].Dests[k] = n.ID
-                    count += 1
-
-    for p in pallets:
-        if p.Dests[k] == -1:  # destination not set
-            pallets[p.ID].Dests[k] = lastDest
-
-# item or consolidated
-class Item(object):
-    """
-    A candidate item "j" to be loaded on a pallet "i" if X_ij == 1
-    """
-    def __init__(self, id, p, w, s, v, frm, to):
-        self.ID = id
-        self.P  = p  # -1 if an item, -2 if a consollidated, or pallet ID.
-        self.W  = w  # weight
-        self.S  = s  # score
-        self.V  = v  # volume
-        self.Frm = frm  # from
-        self.To = to # destination
-
-def loadNodeCons(DATA, scenario, instance, pi, node, id):
-    """
-    Loads consolidated contents file for this instance, tour and node k
-    """
-    dirname = f"./{DATA}/scenario_{scenario}/instance_{instance}"
-    try:
-        os.makedirs(dirname)
-    except FileExistsError:
-        pass    
-
-    fname = f"{dirname}/cons_{pi}_{node.ID}.txt"
-
-    reader = open(fname,"r")
-    lines = reader.readlines() 
-
-    cons = []
-    try:
-        for line in lines:
-            cols = line.split()
-            w   =   int(cols[0])
-            s   =   int(cols[1])
-            v   = float(cols[2])
-            frm =   int(cols[3])
-            to  =   int(cols[4])         
-            if w > 0: #           P = -2 consolidated
-                cons.append( Item(id, -2, w, s, v, frm, to) )
-                id += 1
-    finally:
-        reader.close()
-
-    return cons
 
 surplus = "data20"
 # surplus = "data50"
 # surplus = "data100"
 
-method = "Shims_mp"
+method = "ACO_mp"
+# method = "Shims_mp"
 # method = "Shims"
 
 scenario = 1
@@ -118,10 +24,10 @@ instances = [1]
 limit    = 0.95
 secBreak = 0.7 # seconds
 
-cfg = mno.Config(scenario)                                      
+cfg = common.Config(scenario)                                      
 
 # --- distances and costs matrix ---
-dists = mno.loadDistances()
+dists = common.loadDistances()
 
 costs = [[0.0 for _ in dists] for _ in dists]
 
@@ -129,7 +35,7 @@ for i, cols in enumerate(dists):
     for j, value in enumerate(cols):
         costs[i][j] = cfg.kmCost*value
 
-pallets = shims_mp.loadPallets(cfg)
+pallets = common.loadPallets(cfg)
 
 # pallets capacities
 cfg.weiCap = 0
@@ -152,7 +58,7 @@ solTorque.value = 0.0
 
 for inst in instances:    
 
-    tours = mno.getTours(cfg.numNodes-1, costs, 0.25)
+    tours = common.getTours(cfg.numNodes-1, costs, 0.25)
 
     pi = 0 # the first, not necessarily the best
 
@@ -167,19 +73,21 @@ for inst in instances:
     unattended = [n.ID for n in tour.nodes[k+1:]]
 
     # load items parameters from this node and problem instance, that go to unnatended
-    items = mno.loadNodeItems(scenario, inst, node, unattended, surplus)
+    items = common.loadNodeItems(scenario, inst, node, unattended, surplus)
     numItems = len(items)
     # print(f"number of items: {numItems}")
 
     # load consolidated generated in the previous node
     prevNode = tour.nodes[k-1]
-    cons = loadNodeCons(surplus, scenario, inst, pi, prevNode, numItems ) # numItems = first cons ID
 
-    # if prevNode.ID < len(mno.CITIES):
-    #     print(f"\n-----Loaded in {mno.CITIES[prevNode.ID]} -----")
+     # numItems = first cons ID
+    cons = common.loadNodeCons(surplus, scenario, inst, pi, prevNode, numItems )
+
+    # if prevNode.ID < len(common.CITIES):
+    #     print(f"\n-----Loaded in {common.CITIES[prevNode.ID]} -----")
     #     print("ID\tP\tW\tS\tV\tFROM\tTO")
     #     for c in cons:
-    #         print(f"{c.ID}\t{c.P}\t{c.W}\t{c.S}\t{c.V:.1f}\t{mno.CITIES[c.Frm]}\t{mno.CITIES[c.To]}")
+    #         print(f"{c.ID}\t{c.P}\t{c.W}\t{c.S}\t{c.V:.1f}\t{common.CITIES[c.Frm]}\t{common.CITIES[c.To]}")
     # print(f"({numItems} items to embark)")
 
 
@@ -191,10 +99,10 @@ for inst in instances:
             kept.append(c) #... and included in the items set
             numItems += 1
 
-    # print(f"\n----- Kept on board at {mno.CITIES[node.ID]} -----")        
+    # print(f"\n----- Kept on board at {common.CITIES[node.ID]} -----")        
     # print("ID\tP\tW\tS\tV\tFROM\tTO")
     # for c in kept:
-    #     print(f"{c.ID}\t{c.P}\t{c.W}\t{c.S}\t{c.V:.1f}\t{mno.CITIES[c.Frm]}\t{mno.CITIES[c.To]}")
+    #     print(f"{c.ID}\t{c.P}\t{c.W}\t{c.S}\t{c.V:.1f}\t{common.CITIES[c.Frm]}\t{common.CITIES[c.To]}")
     # print(f"Kept positions to be defined: ({numItems} items to embark)\n")
 
     # optimize consolidated positions to minimize CG deviation
@@ -207,7 +115,7 @@ for inst in instances:
     for c in kept:
         # consolidated are appended to the items set
         items.append(c)
-        # print(f"{c.ID}\t{c.P}\t{c.W}\t{c.S}\t{c.V:.1f}\t{mno.CITIES[c.Frm]}\t{mno.CITIES[c.To]}")
+        # print(f"{c.ID}\t{c.P}\t{c.W}\t{c.S}\t{c.V:.1f}\t{common.CITIES[c.Frm]}\t{common.CITIES[c.To]}")
     # print(f"Kept positions defined ({numItems} items to embark)\n")
 
     # print("ID\tDest\tPCW\tPCV\tPCS")
@@ -216,7 +124,7 @@ for inst in instances:
     # print("Pallets destinations to be defined.\n")
 
     # set pallets destinations with items and consolidated to be delivered
-    setPalletsDestinations(items, pallets, tour.nodes, k, unattended)
+    common.setPalletsDestinations(items, pallets, tour.nodes, k, unattended)
 
     # print("ID\tDest\tPCW\tPCV\tPCS")
     # for p in pallets:
@@ -228,6 +136,8 @@ for inst in instances:
     solItems = mp.Array('i', range(numItems))
     for j, _ in enumerate(solItems):
         solItems[j] = -1 # not alocated to any pallet
+
+        
     # put the kept on board in solution
     for c in kept:
         solItems[c.ID] = c.P
@@ -254,10 +164,22 @@ for inst in instances:
     if method == "Shims":            
         E = shims_mp.Solve(pallets, items, cfg, k, limit, secBreak, "s", solTorque, solItems)         
 
+    if method == "ACO_mp":
+        # to control ants field of pheromone deposition and evaporation
+        antsField = mp.Array('d', range(numItems))
+        for j, _ in enumerate(antsField):
+            antsField[j] = 0.5 # intermediate pheromone level
+
+        Attractiveness = mp.Array('d', range(numItems))
+        for j, _ in enumerate(Attractiveness):
+            Attractiveness[j] = 0.5           
+
+        E = aco_mp.Solve(pallets, items, cfg, k, limit, secBreak, solTorque, solItems, antsField, Attractiveness) 
+
     elapsed = time.perf_counter() - startNodeTime
 
     consJK = [
-                [ mno.Item(-1, -2, 0, 0, 0., -1, -1)
+                [ common.Item(-1, -2, 0, 0, 0., -1, -1)
                 for _ in tour.nodes ]
                 for _ in pallets # a consolidated for each pallet
             ] 
@@ -320,7 +242,7 @@ for inst in instances:
         solElapsed += elapsed
         solScore   += sNodeAccum
 
-        mno.writeTourSol(method, scenario, inst, pi, tour, cfg, pallets, consJK, True, surplus)
+        common.writeTourSol(method, scenario, inst, pi, tour, cfg, pallets, consJK, True, surplus)
 
 # print(f"Elapsed per instance: {solElapsed/len(instances):.0f}")
 # print(f"Elapsed per instance: {solScore/len(instances):.0f}")

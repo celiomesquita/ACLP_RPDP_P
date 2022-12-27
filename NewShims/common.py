@@ -25,116 +25,85 @@ class Item(object):
         self.V  = v  # volume
         self.Frm = frm  # from
         self.To = to # destination
+        self.Attr = 0.0
+
 
 class Pallet(object):
-    """
-    A flat metal surface to hold items to be transported in a airplane
-    """
     def __init__(self, id, d, v, w, numNodes):
         self.ID = id
         self.D  = d  # centroid distance to CG
         self.V  = v  # volume limit
         self.W  = w  # weight limit
         self.Dests = np.full(numNodes, -1)
+        self.PCW = 0 # pallet current weight
+        self.PCV = 0.
+        self.PCS = 0.
 
-# Edge connecting a pallet and an item
-class Edge(object):
-    def __init__(self, id, pallet, item, cfg, Alpha, Beta):
+    def putItem(self, item, solTorque, solItems, lock): # put an item in this pallet
 
-        self.ID      = id # index in the solution edges (it must be preserved in case of sorting)
-        self.Pallet  = pallet
-        self.Item    = item
-        self.Torque  = float(item.W) * float(pallet.D)
+        self.PCW += item.W
+        self.PCV += item.V
+        self.PCS += item.S
 
-        # marginal torque
-        # 5100 = 15m x 340kg, maximum torque possible
-        marginal = abs(self.Torque) / (cfg.maxD*340) # less than 1
+        with lock:
+            solTorque.value += float(item.W) * float(self.D)
+            solItems[item.ID] = self.ID # mark item as alocated to this pallet
 
-        self.Heuristic = ( float(item.S) / ( 500 * float(item.V) ) ) * (1.0 - marginal)
+    def isFeasible(self, item, limit, k, solTorque, solItems, cfg, lock): # check constraints
 
-        self.InSol = False
-
-
-def edgesCopy(edges):
-    output = edges.copy()
-    for i, e in enumerate(edges):
-        output[i].ID        = e.ID
-        output[i].Pallet    = e.Pallet 
-        output[i].Item      = e.Item 
-        output[i].Torque    = e.Torque 
-        output[i].Heuristic = e.Heuristic 
-        output[i].InSol     = False # reset solution
-    return output
-  
-class Solution(object):
-    def __init__(self, edges, pallets, items, limit, cfg, k):
-
-        self.Limit = limit     
-
-        self.Edges = edgesCopy(edges)
-
-        self.S = 0 # solution total score
-        self.W = 0 # solution total weight
-        self.V = 0 # solution total volume
-        self.Heuristic = 0 
-
-        # set of number of times items were included in solution
-        self.Included = [ 0  for _ in items ] 
-
-        # pallets initial torque: 140kg times pallet CG distance
-        self.T = sum(140 * p.D for p in pallets)  # solution total torque
-
-        self.PAW = [ 0   for _ in pallets] # set of pallets accumulated weights
-        self.PAV = [ 0.0 for _ in pallets] # set of pallets accumulated volumes
-
-        # builds a greedy solution until the limited capacity is attained
-        if limit > 0:
-            for ce in self.Edges:
-                if not ce.InSol and self.isFeasible(ce, limit, cfg, k):
-                    self.putInSol(ce)
-
-    def putInSol(self, e):
-        if e.Item.ID > len(self.Included)-1:
-            return
-        if e.Pallet.ID > len(self.PAW)-1:
-            return
-        self.Included[e.Item.ID] += 1
-        self.PAW[e.Pallet.ID] += e.Item.W
-        self.PAV[e.Pallet.ID] += e.Item.V
-        self.S += e.Item.S
-        self.W += e.Item.W
-        self.V += e.Item.V
-        self.T += e.Torque
-        self.Heuristic += e.Heuristic  
-        self.Edges[e.ID].InSol = True
-
-    # check constraints for greedy, Shims and metaheuristics
-    def isFeasible(self, ce, limit, cfg, k):
-
-        if ce.Item.ID > len(self.Included)-1:
-            return False # this item was already inserted. Equation 19        
-
-        if self.Included[ce.Item.ID] > 0:
-            return False # this item was already inserted. Equation 19
-        
-        if ce.Item.To != ce.Pallet.Dests[k]:
-            return False #item and pallet destinations are different. Equation 21
-        
-        # Pallet Acumulated Weight: cancelled because the most constraintive is volume
-        if self.PAW[ce.Pallet.ID] + ce.Item.W > ce.Pallet.W:
-             return False #this item weight would exceed pallet weight limit. Equation 17
-        
-        # Pallet Acumulated Volume
-        if self.PAV[ce.Pallet.ID] + ce.Item.V > ce.Pallet.V * limit:
-            return False #this item volume would exceed pallet volumetric limit. Equation 18
-        
-        # if this inclusion increases torque and is turns it greater than the maximum
-        if abs(self.T + ce.Torque) > cfg.maxTorque:
+        if item.To != self.Dests[k]:
             return False
- 
-        return True
 
-    
+        if self.PCV + item.V > self.V * limit:
+            return False
+
+        deltaTau = float(item.W) * float(self.D)
+        ret = True
+
+        with lock:
+            if solItems[item.ID] > -1: # if item is alocated in some pallet
+                ret =  False
+        
+        if ret:
+            with lock:
+                newTorque = abs(solTorque.value + deltaTau)
+                if newTorque > abs(solTorque.value):
+                    if newTorque > cfg.maxTorque:
+                        ret =  False
+
+        return ret
+ 
+def loadPallets(cfg):
+    """
+    Load pallets attributes based on aircraft size
+    """
+    fname = f"./params/{cfg.size}.txt"
+      
+    reader = open(fname,"r")
+    lines = reader.readlines()    
+    pallets = []
+    id = 0
+    cfg.maxD = 0
+    try:
+        for line in lines:
+            cols = line.split()
+            d = float(cols[0])
+            v = float(cols[1])
+            w = float(cols[2])
+            pallets.append( Pallet(id, d, v, w, cfg.numNodes) )
+            id += 1
+
+            if d > cfg.maxD:
+                cfg.maxD = d
+    finally:
+        reader.close()    
+    return pallets
+        
+def fillPallet(pallet, items, k, solTorque, solItems, cfg, lock, limit):
+    for item in items:
+        if pallet.isFeasible(item, limit, k, solTorque, solItems, cfg, lock):
+            pallet.putItem(item, solTorque, solItems, lock)
+
 # mount the decision matrix for which items will be put in which pallets
 def getSolMatrix(edges, numPallets, numItems):
     X = np.zeros((numPallets,numItems))
@@ -251,58 +220,6 @@ def getTours(num, costs, threshold):
 
     return tours2
 
-def mountEdges(pallets, items, cfg, Alpha=1, Beta=4):
-   
-    # items include kept on board, are from this node (k), and destined to unattended nodes
-    m = len(pallets)
-    n = len(items)
-
-    edges = [None for _ in np.arange(m*n)]
-
-    # mpAttract = mp.Array('d', [0.5 for _ in np.arange(m*n)])
-
-    i = 0
-    for p in pallets:           
-        for it in items:
-            e = Edge(i, p, it, cfg, Alpha, Beta)
-            edges[i] = e
-            i += 1
-
-    # greater heuristic's attractivity are included first
-    edges.sort(key=lambda x: x.Heuristic, reverse=True) # best result
-
-    # as edges have its order changed the ID must in the original order
-    # to preserve reference
-    for i, e in enumerate(edges):
-        edges[i].ID = i
-
-    return edges
-    
-def loadPallets(cfg):
-    """
-    Load pallets attributes based on aircraft size
-    """
-    fname = f"./params/{cfg.size}.txt"
-      
-    reader = open(fname,"r")
-    lines = reader.readlines()    
-    pallets = []
-    id = 0
-    cfg.maxD = 0
-    try:
-        for line in lines:
-            cols = line.split()
-            d = float(cols[0])
-            v = float(cols[1])
-            w = float(cols[2])
-            pallets.append( Pallet(id, d, v, w, cfg.numNodes) )
-            id += 1
-
-            if d > cfg.maxD:
-                cfg.maxD = d
-    finally:
-        reader.close()    
-    return pallets
 
 def writeNodeCons(scenario, instance, cons, pi, node, surplus):
 
@@ -327,7 +244,7 @@ def writeNodeCons(scenario, instance, cons, pi, node, surplus):
         writer.close()  
 
 # used in sequential mode
-def loadNodeCons(scenario, instance, pi, node, id, surplus):
+def loadNodeCons(surplus, scenario, instance, pi, node, id):
     """
     Loads consolidated contents file for this instance, tour and node k
     """
@@ -383,12 +300,15 @@ def loadNodeItems(scenario, instance, node, unatended, surplus): # unatended, fu
             if frm == node.ID and to in unatended:          
                 items.append( Item(id, -1, w, s, v, frm, to) ) # P:-1 item, -2: consolidated
                 id += 1
+
     finally:
         reader.close()  
           
     items.sort(key=lambda x: abs(x.S/x.V), reverse=True)
     id = 0
-    for i, _ in enumerate(items):
+    bestAttr = items[0].S / items[0].V # the first item has the best attractiveness
+    for i, it in enumerate(items):
+        items[i].Attr = (it.S/it.V) / bestAttr
         items[i].ID = id
         id += 1
 
@@ -581,61 +501,4 @@ def writeTourSol(method, scenario, instance, pi, tour, cfg, pallets, cons, write
 
 if __name__ == "__main__":
 
-    scenario = 3
-
-    cfg = Config(scenario)
-
-    pallets = loadPallets(cfg)
-
-    dists = loadDistances()
-
-    costs = [[0.0 for _ in dists] for _ in dists]
-
-    for i, cols in enumerate(dists):
-        for j, value in enumerate(cols):
-            costs[i][j] = cfg.kmCost*value
-
-    tours = getTours(cfg.numNodes-1, costs, 0.25)
-
-
-    pi = 0 # the first, not necessarily the best
-
-    tour = tours[pi]
-
-    k = 0 # the base
-
-    # L_k destination nodes set
-    unattended = [n.ID for n in tour.nodes[k+1:]]
-
-    node = tour.nodes[k]
-
-    scenario = 1
-
-    instance = 1
-
-    items = loadNodeItems(scenario, instance, node, unattended)
-
-    edges = mountEdges(pallets, items, cfg, 1, 3)
-
-    maxHeu = max(e.Heuristic for e in edges)
-
-    minHeu = min(e.Heuristic for e in edges)
-
-    sumHeu = sum(e.Heuristic for e in edges)
-
-    avgHeu = sumHeu/len(edges)
-
-    print(minHeu, avgHeu, maxHeu)
-
-
-    maxAttract = max(e.Attract for e in edges)
-
-    minAttract = min(e.Attract for e in edges)
-
-    sumAttract = sum(e.Attract for e in edges)
-
-    avgAttract = sumAttract/len(edges)
-
-    print(minAttract, avgAttract, maxAttract)
-
-
+    print("----- Please execute module main -----")
