@@ -67,15 +67,24 @@ def rouletteSelection(values): # at least 15 times faster than randomChoice
 # pick and delete an item from the neighborhood by a proportional roulette wheel
 def pickFromNbhood(nbhood, values):
     i = rouletteSelection(values)
-    e = nbhood[i]
+    item = nbhood[i]
     nbhood.pop(i)
     values.pop(i)
-    return e
+    return item
 
 def antSolve(pallets, items, cfg, k, secBreak, solTorque, solItems, antsField, lock):
-    
-    for i, _ in enumerate(pallets):
-        common.fillPallet(pallets[i], items, k, solTorque, solItems, cfg, lock, 1.0)  
+
+    nbhood   = [it for it in items]
+    attracts = [it.Attr for it in nbhood]
+
+    while nbhood:
+
+        item = pickFromNbhood(nbhood, attracts)
+
+        for i, _ in enumerate(pallets):
+            if pallets[i].isFeasible(item, 1.0, k, solTorque, solItems, cfg, lock):
+                pallets[i].putItem(item, solTorque, solItems, lock)
+
     
 
 # def enqueue( antsQueue,     Gant, cfg, k):
@@ -102,7 +111,7 @@ def antSolve(pallets, items, cfg, k, secBreak, solTorque, solItems, antsField, l
 #     return sols  
 
 
-def Solve( pallets, items, cfg, k, limit, secBreak, solTorque, solItems, antsField, Attractiveness ):
+def Solve( pallets, items, cfg, k, limit, secBreak, solTorque, solItems, antsField ):
 
     startTime = time.perf_counter()
 
@@ -112,15 +121,16 @@ def Solve( pallets, items, cfg, k, limit, secBreak, solTorque, solItems, antsFie
 
     lock  = mp.Lock()
 
+    # sort ascendent by CG distance
+    pallets.sort(key=lambda x: abs(x.D), reverse=False)    
+
     for i, _ in enumerate(pallets):
         common.fillPallet(pallets[i], items, k, solTorque, solItems, cfg, lock, limit)     
 
     numPallets = len(pallets)
     numItems   = len(items)
 
-
-    antSolve(pallets, items, cfg, k, limit, secBreak, solTorque, solItems, antsField, items)
-
+    antSolve(pallets, items, cfg, k, secBreak, solTorque, solItems, antsField, lock)
 
     # --- mount solution matrix
     Z = np.zeros((numPallets,numItems))

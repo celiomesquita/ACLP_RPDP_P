@@ -169,12 +169,8 @@ for inst in instances:
         antsField = mp.Array('d', range(numItems))
         for j, _ in enumerate(antsField):
             antsField[j] = 0.5 # intermediate pheromone level
-
-        Attractiveness = mp.Array('d', range(numItems))
-        for j, _ in enumerate(Attractiveness):
-            Attractiveness[j] = 0.5           
-
-        E = aco_mp.Solve(pallets, items, cfg, k, limit, secBreak, solTorque, solItems, antsField, Attractiveness) 
+        
+        E = aco_mp.Solve(pallets, items, cfg, k, limit, secBreak, solTorque, solItems, antsField) 
 
     elapsed = time.perf_counter() - startNodeTime
 
