@@ -3,6 +3,14 @@ import multiprocessing as mp
 import random
 import math
 import numpy as np
+import copy
+# from tabulate import tabulate
+# table =[]
+# row = []
+# row.append(col1)
+# row.append(col2)
+# table.append(row)
+# print( tabulate(table, headers=['col1','col2']) )
 
 import common
 
@@ -10,8 +18,8 @@ import common
 
 ALPHA = 1 # pheromone exponent (linearly affects attractivity)
 BETA  = 5 # heuristic exponent (exponentialy affects attractivity)
-NANTS = 6 # number of ants per aircraft
-ACFTS = 5 # number of aircrafts (solutions)
+NANTS = 4 # number of ants per aircraft
+ACFTS = NANTS # number of aircrafts (solutions)
 
 # getDeltaTau calculates the pheromone to be dropped by each on ants tracks
 def getDeltaTau(score, bestSoFar):
@@ -27,61 +35,72 @@ def getDeltaTau(score, bestSoFar):
 # while the pheromone is deposited by all ants proportionally to their solution quality and
 # is evaporated in all the components. Each Ant makes use of "updateAntsField" to update 
 # item attractiveness according to the its solution value.
-def updateAntsField(score, bestSoFar, antsField, items):
+def updateAntsField(score, bestSoFar, antsField, Pheromone, items, acft, ant):
 
     deltaTau = getDeltaTau(score, bestSoFar)
 
     maxPhero = 0.0
 
     # update pheromone level in all edges
-    for id, phero in enumerate(antsField):
+    for id, phero in enumerate(Pheromone):
 
         #evaporate some pheromone 
-        antsField[id] = math.sqrt(phero) / 1.4 # RHO = 0.2
+        Pheromone[id] = math.sqrt(phero) / 1.2
 
         # update pheromone level
-        if antsField[id] + deltaTau > 0:
-            antsField[id] += deltaTau
+        if Pheromone[id] + deltaTau > 0:
+            Pheromone[id] += deltaTau
 
-        if antsField[id] > maxPhero:
-            maxPhero = antsField[id]
+        if Pheromone[id] > maxPhero:
+            maxPhero = Pheromone[id]
+
+        antsField[id] = Pheromone[id]**ALPHA * items[id].Attr**BETA
                 
-    print(f"maxPhero = {maxPhero:.3f} \t deltaTau = {deltaTau:.3f}")
+    print(f"{acft} \t {ant} \t {maxPhero:.3f} \t \t {deltaTau:.3f}")
 
-    # maxAttr = 0.0
-
-    for id, phero in enumerate(antsField):
-
-        antsField[id] /= maxPhero
-
-        # update the general attractiveness
-        antsField[id] = antsField[id]**ALPHA * items[id].Attr**BETA
-
-    #     if items[id].Attr > maxAttr:
-    #         maxAttr = items[id].Attr
-    # print(f"maxAttr = {maxAttr:.3f}")
 
 def rouletteSelection(values): # at least 15 times faster than randomChoice
     s = sum(values)
-    pick = random.uniform(0, s)
+    pick = random.uniform(0, s) # stop the roulette in a random point
     current = 0.
-    for key, value in enumerate(values):
+    for key, value in enumerate(values): # walk on the roulette
         current += value
         if current > pick:
-            return key
+            return key # return the roulette sector index
     return 0
 
+# for tournament selection
+class Value(object):
+    def __init__(self):
+        self.ID = -1
+        self.V  = 0.0
 
-# pick and delete an item from the neighborhood by a proportional roulette wheel
-def pickFromNbhood(nbhood, values):
+# pick and delete an item from the neighborhood by a tournament selection
+def selectItem(nbhood, values, pallet):
 
-    j = rouletteSelection(values)
+    # update values according to the "point of view" of this pallet
+    maxTorque = 340. * 80. # kg * m, a heavy item on the ramp
+    for j, it in enumerate(nbhood):
+        thisTorque = it.W * abs(pallet.D)
+        epsilon = thisTorque / maxTorque
+        values[j] *= 2 - epsilon
+
+    # make the tournament selection with 5 individuals
+    individuals = [Value() for _ in range(5)]
+
+    for i, _ in enumerate(individuals):
+        individuals[i].ID = rouletteSelection(values)
+        individuals[i].V  = values[individuals[i].ID]
+
+    # choose the best individual
+    individuals.sort(key=lambda x: x.V, reverse=False)
+    j = individuals[0].ID
+
     item = nbhood[j]
-    nbhood.pop(j)
-    values.pop(j)
-    return item
 
-def antSolve(pallets, items, cfg, k, secBreak, solTorque, solItems, antsField, lock, bestSoFar):
+    return item, j
+
+def antSolve(pallets, items, cfg, k, secBreak, solTorque, solItems, antsField, Pheromone, lock, bestSoFar, acft, ant):
 
     nbhood   = [it for it in items]
     values   = [v  for v  in antsField]
@@ -92,17 +111,28 @@ def antSolve(pallets, items, cfg, k, secBreak, solTorque, solItems, antsField, l
 
     while nbhood:
         
-        item = pickFromNbhood(nbhood, values)
+        for i, p in enumerate(pallets):
 
-        for i, _ in enumerate(pallets):
+            if len(nbhood) > 0:
 
-            if pallets[i].isFeasible(item, 1.0, k, solTorque, solItems, cfg, lock):
+                # pick from the neighborhood the probable best item for this pallet
+                item, j = selectItem(nbhood, values, p)
 
-                pallets[i].putItem(item, solTorque, solItems, lock)
+                if pallets[i].isFeasible(item, 1.0, k, solTorque, solItems, cfg, lock):
 
-                score += item.S
+                    pallets[i].putItem(item, solTorque, solItems, lock)
 
-    updateAntsField(score, bestSoFar, antsField, items)
+                    score += item.S
+
+                    nbhood.pop(j)
+                    values.pop(j)
+
+                else:
+                    if i == len(pallets)-1:
+                        nbhood.pop(j)
+                        values.pop(j)        
+
+    updateAntsField(score, bestSoFar, antsField, Pheromone, items, acft, ant)
 
     return score
     
@@ -131,39 +161,57 @@ def antSolve(pallets, items, cfg, k, secBreak, solTorque, solItems, antsField, l
 #     return sols  
 
 
-def Solve( pallets, items, cfg, k, limit, secBreak, solTorque, solItems, antsField ):
+def Solve( pallets, items, cfg, k, limit, secBreak, solTorque, solItems ):
 
     numPallets = len(pallets)
     numItems   = len(items)
+
+    # to control ants field of pheromone deposition and evaporation
+    antsField = mp.Array('d', range(numItems))
+    for j, _ in enumerate(antsField):
+        antsField[j] = 0.5 # intermediate attractivity level    
+
+    Pheromone = mp.Array('d', range(numItems))
+    for j, _ in enumerate(Pheromone):
+        Pheromone[j] = 0.5 # intermediate pheromone level 
 
     startTime = time.perf_counter()
 
     print("\nParallel Ant Colony Optimization for ACLP+RPDP")
 
-    limit = 0.95
+    print(f"acft \t ant \t maxPhero \t deltaTau")
 
-    lock  = mp.Lock()
+    limit = 0.75 # greedy volume limit %
 
-    # sort ascendent by CG distance
+    lock  = mp.Lock() # for use in parallel mode
+
+    # sort pallets ascendent by CG distance
     pallets.sort(key=lambda x: abs(x.D), reverse=False)
 
-    aircrafts = [None for _ in np.arange(ACFTS)]
+    # aircrafts matrix      [columns]              [rows]
+    aircrafts = [[p for p in pallets] for _ in np.arange(ACFTS)]
 
-    for a, _ in enumerate(aircrafts):
-
-        aircrafts[a] = pallets
+    bestAcft = -1
+    for acft, pallets in enumerate(aircrafts):
 
         bestSoFar = 0.0
-        for i, _ in enumerate(aircrafts[a]):
-            common.fillPallet(aircrafts[a][i], items, k, solTorque, solItems, cfg, lock, limit)
-            bestSoFar += aircrafts[a][i].PCS 
 
-        score = antSolve(aircrafts[a], items, cfg, k, secBreak, solTorque, solItems, antsField, lock, bestSoFar)
+        # greedy phase
+        for i, p in enumerate(aircrafts[acft]):
+            common.fillPallet(aircrafts[acft][i], items, k, solTorque, solItems, cfg, lock, limit)
+            bestSoFar += aircrafts[acft][i].PCS 
 
-        if score > bestSoFar:
-            bestSoFar = score
+        # ants phase
+        bestAnt = -1
+        for ant in np.arange(NANTS):
+            score = antSolve(aircrafts[acft], items, cfg, k, secBreak, solTorque, solItems, antsField, Pheromone, lock, bestSoFar, acft, ant)
 
-    print(f"Best score so far: {bestSoFar}")
+            if score > bestSoFar:
+                bestSoFar = score
+                bestAnt   = ant
+                bestAcft  = acft
+
+    print(f"Best score so far: {bestSoFar} (best acft {bestAcft}) (best ant {bestAnt})")
 
     # --- mount solution matrix
     Z = np.zeros((numPallets,numItems))

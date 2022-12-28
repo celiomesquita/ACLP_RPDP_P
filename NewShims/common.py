@@ -304,7 +304,7 @@ def loadNodeItems(scenario, instance, node, unatended, surplus): # unatended, fu
     finally:
         reader.close()  
           
-    items.sort(key=lambda x: abs(x.S/x.V), reverse=True)
+    items.sort(key=lambda x: x.S/x.V, reverse=True)
     id = 0
     bestAttr = items[0].S / items[0].V # the first item has the best attractiveness
     for i, it in enumerate(items):

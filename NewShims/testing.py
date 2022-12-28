@@ -164,13 +164,8 @@ for inst in instances:
     if method == "Shims":            
         E = shims_mp.Solve(pallets, items, cfg, k, limit, secBreak, "s", solTorque, solItems)         
 
-    if method == "ACO_mp":
-        # to control ants field of pheromone deposition and evaporation
-        antsField = mp.Array('d', range(numItems))
-        for j, _ in enumerate(antsField):
-            antsField[j] = 0.5 # intermediate pheromone level
-        
-        E = aco_mp.Solve(pallets, items, cfg, k, limit, secBreak, solTorque, solItems, antsField) 
+    if method == "ACO_mp":       
+        E = aco_mp.Solve(pallets, items, cfg, k, limit, secBreak, solTorque, solItems) 
 
     elapsed = time.perf_counter() - startNodeTime
 
