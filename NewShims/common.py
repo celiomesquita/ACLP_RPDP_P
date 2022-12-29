@@ -307,10 +307,15 @@ def loadNodeItems(scenario, instance, node, unatended, surplus): # unatended, fu
     items.sort(key=lambda x: x.S/x.V, reverse=True)
     id = 0
     bestAttr = items[0].S / items[0].V # the first item has the best attractiveness
+    # avgAttr = 0.0
     for i, it in enumerate(items):
-        items[i].Attr = (it.S/it.V) / bestAttr
+        items[i].Attr = 4. * (it.S/it.V) / bestAttr # 4: to make the average around 0.5
+        # avgAttr += items[i].Attr
         items[i].ID = id
         id += 1
+
+    # avgAttr /= len(items)
+    # print(f"avgAttr = {avgAttr:.3f}")
 
     return items
 

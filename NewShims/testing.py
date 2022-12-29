@@ -165,7 +165,7 @@ for inst in instances:
         E = shims_mp.Solve(pallets, items, cfg, k, limit, secBreak, "s", solTorque, solItems)         
 
     if method == "ACO_mp":       
-        E = aco_mp.Solve(pallets, items, cfg, k, limit, secBreak, solTorque, solItems) 
+        E =   aco_mp.Solve(pallets, items, cfg, k, limit, secBreak, solTorque, solItems) 
 
     elapsed = time.perf_counter() - startNodeTime
 
