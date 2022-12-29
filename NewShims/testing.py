@@ -137,7 +137,6 @@ for inst in instances:
     for j, _ in enumerate(solItems):
         solItems[j] = -1 # not alocated to any pallet
 
-        
     # put the kept on board in solution
     for c in kept:
         solItems[c.ID] = c.P
@@ -165,7 +164,7 @@ for inst in instances:
         E = shims_mp.Solve(pallets, items, cfg, k, limit, secBreak, "s", solTorque, solItems)         
 
     if method == "ACO_mp":       
-        E =   aco_mp.Solve(pallets, items, cfg, k, limit, secBreak, solTorque, solItems) 
+        E =   aco_mp.Solve(pallets, items, cfg, k, limit, secBreak, "a", solTorque, solItems) 
 
     elapsed = time.perf_counter() - startNodeTime
 
@@ -177,6 +176,11 @@ for inst in instances:
 
     # print the solution for this node
     if len(E) > 0:
+
+        sNodeAccum = 0.
+        wNodeAccum = 0.
+        vNodeAccum = 0.
+        sol = ""
 
         consNodeT = [None for _ in pallets]
 
@@ -196,11 +200,6 @@ for inst in instances:
                     consJK[j][k].S += items[i].S
 
             consNodeT[j] = consJK[j][k]
-
-        sNodeAccum = 0.
-        wNodeAccum = 0.
-        vNodeAccum = 0.
-        sol = ""
 
         for i, p in enumerate(pallets):
             sNodeAccum += float(consJK[i][k].S)

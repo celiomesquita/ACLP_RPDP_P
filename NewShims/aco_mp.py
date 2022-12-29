@@ -4,6 +4,7 @@ import random
 import math
 import numpy as np
 import statistics
+import copy
 
 # from tabulate import tabulate
 # table =[]
@@ -19,7 +20,7 @@ import common
 
 ALPHA = 1 # pheromone exponent
 BETA  = 1 # heuristic exponent
-NANTS = 4 # number of ants per aircraft
+NANTS = 10 # number of ants per aircraft
 ACFTS = NANTS # number of aircrafts (solutions)
 
 # getDeltaTau calculates the pheromone to be dropped by each on ants tracks
@@ -35,7 +36,7 @@ def getDeltaTau(score, bestSoFar):
 # while the pheromone is deposited by all ants proportionally to their solution quality and
 # is evaporated in all the components. Each Ant makes use of "updateAntsField" to update 
 # item attractiveness according to the its solution value.
-def updateAntsField(score, bestSoFar, Attract, Phero, items, acft, ant):
+def updateAntsField(score, bestSoFar, Attract, Phero, items):
 
     deltaTau = getDeltaTau(score, bestSoFar)
 
@@ -85,22 +86,24 @@ def selectItem(nbhood, values, pallet, maxTorque):
         individuals[i].V  = values[individuals[i].ID]
 
     # choose the best individual
-    individuals.sort(key=lambda x: x.V, reverse=False)
+    individuals.sort(key=lambda x: x.V, reverse=True)
     j = individuals[0].ID
 
     item = nbhood[j]
 
     return item, j
 
-def antSolve(pallets, items, cfg, k, secBreak, solTorque, solItems, Attract, Phero, lock, bestSoFar, acft, ant):
+def antSolve(pallets, items, cfg, k, secBreak, solTorque, solItems, Attract, Phero, lock, bestSoFar):
 
     nbhood   = [it for it in items]
     values   = [v  for v  in Attract]
 
+    volume = 0.0
     score = 0.0
     maxD = 0.0 # the maximum distance from the CG
     for i, p in enumerate(pallets):
-        score += pallets[i].PCS
+        score  += pallets[i].PCS
+        volume += pallets[i].PCV
         if abs(p.D) > maxD:
             maxD = abs(p.D)
 
@@ -119,7 +122,8 @@ def antSolve(pallets, items, cfg, k, secBreak, solTorque, solItems, Attract, Phe
 
                     pallets[i].putItem(item, solTorque, solItems, lock)
 
-                    score += item.S
+                    score  += item.S
+                    volume += item.V
 
                     nbhood.pop(j) # pop if included in solution
                     values.pop(j)
@@ -129,7 +133,7 @@ def antSolve(pallets, items, cfg, k, secBreak, solTorque, solItems, Attract, Phe
                         nbhood.pop(j)
                         values.pop(j)        
 
-    updateAntsField(score, bestSoFar, Attract, Phero, items, acft, ant)
+    updateAntsField(score, bestSoFar, Attract, Phero, items)
 
     AttractVar  = statistics.variance(Attract)
     PheroVar    = statistics.variance(Phero)
@@ -139,7 +143,7 @@ def antSolve(pallets, items, cfg, k, secBreak, solTorque, solItems, Attract, Phe
     print(f"{PheroVar:.2f}\t\t{PheroMean:.2f}\t\t{AttractVar:.2f}\t\t{AttractMean:.2f}")
 
 
-    return score
+    return score, volume/cfg.volCap
     
 
 # def enqueue( antsQueue,     Gant, cfg, k):
@@ -166,7 +170,7 @@ def antSolve(pallets, items, cfg, k, secBreak, solTorque, solItems, Attract, Phe
 #     return sols  
 
 
-def Solve( pallets, items, cfg, k, limit, secBreak, solTorque, solItems ):
+def Solve( pallets, items, cfg, k, limit, secBreak, a, solTorque, solItems ):
 
     numPallets = len(pallets)
     numItems   = len(items)
@@ -183,42 +187,43 @@ def Solve( pallets, items, cfg, k, limit, secBreak, solTorque, solItems ):
 
     print(f"PheroVar\tPheroMean\tAttractVar\tAttractMean")
 
-    limit = 0.7 # greedy volume limit %
-
     lock  = mp.Lock() # for use in parallel mode
 
     # sort pallets ascendent by CG distance
-    pallets.sort(key=lambda x: abs(x.D), reverse=False)
+    pallets.sort(key=lambda x: abs(x.D))
 
-    # aircrafts matrix      [columns]              [rows]
-    aircrafts = [[p for p in pallets] for _ in np.arange(ACFTS)]
+    bestSoFar = 0.0
 
-    bestAcft = -1
-    for acft, pallets in enumerate(aircrafts):
+    # greedy phase
+    for i, _ in enumerate(pallets):               
+        common.fillPallet(pallets[i], items, k, solTorque, solItems, cfg, lock, limit)
+        bestSoFar += pallets[i].PCS
 
-        bestSoFar = 0.0
+    # ACO phase
+    bestAnt = -1
+    bestAntItems = solItems
+    bestVolume = 0.0    
+    for ant in np.arange(NANTS):
 
-        # greedy phase
-        for i, p in enumerate(aircrafts[acft]):
-            common.fillPallet(aircrafts[acft][i], items, k, solTorque, solItems, cfg, lock, limit)
-            bestSoFar += aircrafts[acft][i].PCS 
+        antPallets = copy.deepcopy(pallets)
+        antTorque  = solTorque
+        antItems   = solItems
 
-        # ants phase
-        bestAnt = -1
-        for ant in np.arange(NANTS):
-            score = antSolve(aircrafts[acft], items, cfg, k, secBreak, solTorque, solItems,\
-                Attract, Phero, lock, bestSoFar, acft, ant)
+        score, volume = antSolve(antPallets, items, cfg, k, secBreak, antTorque, antItems, Attract, Phero, lock, bestSoFar)
 
-            if score > bestSoFar:
-                bestSoFar = score
-                bestAnt   = ant
-                bestAcft  = acft
+        if score > bestSoFar or volume > bestVolume:
+            bestSoFar = score
+            bestAnt   = ant
+            bestAntItems = antItems
+            bestVolume = volume
 
-    print(f"Best score so far: {bestSoFar} (best acft {bestAcft}) (best ant {bestAnt})")
+    endtTime = time.perf_counter()
+
+    print(f"Best ant ({bestAnt}): score {bestSoFar} | volume {bestVolume:.2f} | elapsed {endtTime-startTime:.2f}")
 
     # --- mount solution matrix
     Z = np.zeros((numPallets,numItems))
-    for j, i in enumerate(solItems):
+    for j, i in enumerate(bestAntItems):
         if i > -1: # alocated to some pallet
             Z[i][j] = 1
 
