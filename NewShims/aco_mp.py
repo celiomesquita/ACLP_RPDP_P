@@ -93,7 +93,7 @@ def selectItem(nbhood, values, pallet, maxTorque):
 
     return item, j
 
-def antSolve(pallets, items, cfg, k, secBreak, solTorque, solItems, Attract, Phero, lock, bestSoFar):
+def antSolve(pallets, items, cfg, k, secBreak, solTorque, solItems, Attract, Phero, lock, bestSoFar, stat):
 
     nbhood   = [it for it in items]
     values   = [v  for v  in Attract]
@@ -135,12 +135,13 @@ def antSolve(pallets, items, cfg, k, secBreak, solTorque, solItems, Attract, Phe
 
     updateAntsField(score, bestSoFar, Attract, Phero, items)
 
-    AttractVar  = statistics.variance(Attract)
-    PheroVar    = statistics.variance(Phero)
-    AttractMean = statistics.mean(Attract) 
-    PheroMean   = statistics.mean(Phero)    
+    if stat:
+        AttractVar  = statistics.variance(Attract)
+        PheroVar    = statistics.variance(Phero)
+        AttractMean = statistics.mean(Attract) 
+        PheroMean   = statistics.mean(Phero)    
 
-    print(f"{PheroVar:.2f}\t\t{PheroMean:.2f}\t\t{AttractVar:.2f}\t\t{AttractMean:.2f}")
+        print(f"{PheroVar:.2f}\t\t{PheroMean:.2f}\t\t{AttractVar:.2f}\t\t{AttractMean:.2f}")
 
 
     return score, volume/cfg.volCap
@@ -170,22 +171,28 @@ def antSolve(pallets, items, cfg, k, secBreak, solTorque, solItems, Attract, Phe
 #     return sols  
 
 
-def Solve( pallets, items, cfg, k, limit, secBreak, a, solTorque, solItems ):
-
-    numPallets = len(pallets)
-    numItems   = len(items)
+def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, solItems ):
 
     # to control the general attractiveness for the tournament selection
-    Attract = mp.Array('d', range(numItems))
+    Attract = mp.Array('d', np.arange(len(items)))
 
     # to control pheromone deposition and evaporation
-    Phero = mp.Array('d', range(numItems))
+    Phero = mp.Array('d', np.arange(len(items)))
 
     startTime = time.perf_counter()
 
-    print("\nParallel Ant Colony Optimization for ACLP+RPDP")
+    if mode == "p":
+        mode = "Parallel"
+    else:
+        mode = "Serial"
 
-    print(f"PheroVar\tPheroMean\tAttractVar\tAttractMean")
+    print(f"\n{mode} Ant Colony Optimization for ACLP+RPDP\n")        
+
+    stat = False # True to show statistics
+    limit = 0.75 # ACO greedy limit
+
+    if stat:
+        print(f"PheroVar\tPheroMean\tAttractVar\tAttractMean")
 
     lock  = mp.Lock() # for use in parallel mode
 
@@ -193,41 +200,44 @@ def Solve( pallets, items, cfg, k, limit, secBreak, a, solTorque, solItems ):
     pallets.sort(key=lambda x: abs(x.D))
 
     bestSoFar = 0.0
+    
 
-    # greedy phase
+    # greedy serial phase
     for i, _ in enumerate(pallets):               
         common.fillPallet(pallets[i], items, k, solTorque, solItems, cfg, lock, limit)
         bestSoFar += pallets[i].PCS
 
     # ACO phase
     bestAnt = -1
-    bestAntItems = solItems
     bestVolume = 0.0    
-    for ant in np.arange(NANTS):
+    ant = 0
+    stagnant = 0
+    antPallets = []
+    antTorque  = []
+    antItems   = [] 
+    while stagnant < 3 and (time.perf_counter() - startTime) < secBreak:
 
-        antPallets = copy.deepcopy(pallets)
-        antTorque  = solTorque
-        antItems   = solItems
+        antPallets.append( copy.deepcopy(pallets) )
+        antTorque.append( solTorque )
+        antItems.append( solItems )
 
-        score, volume = antSolve(antPallets, items, cfg, k, secBreak, antTorque, antItems, Attract, Phero, lock, bestSoFar)
+        score, volume = antSolve(antPallets[ant], items, cfg, k, secBreak, antTorque[ant], antItems[ant],\
+            Attract, Phero, lock, bestSoFar, stat)
 
         if score > bestSoFar or volume > bestVolume:
-            bestSoFar = score
-            bestAnt   = ant
-            bestAntItems = antItems
+            bestSoFar  = score
             bestVolume = volume
+            bestAnt    = ant
+            pallets    = copy.deepcopy(antPallets[ant])
+            solItems   = antItems[ant]
+            solTorque  = antTorque[ant]
+            stagnant = 0
+        else:
+            stagnant += 1
 
-    endtTime = time.perf_counter()
+        ant += 1
 
-    print(f"Best ant ({bestAnt}): score {bestSoFar} | volume {bestVolume:.2f} | elapsed {endtTime-startTime:.2f}")
-
-    # --- mount solution matrix
-    Z = np.zeros((numPallets,numItems))
-    for j, i in enumerate(bestAntItems):
-        if i > -1: # alocated to some pallet
-            Z[i][j] = 1
-
-    return Z
+    print(f"Best ant ({bestAnt})")
         
 if __name__ == "__main__":
 

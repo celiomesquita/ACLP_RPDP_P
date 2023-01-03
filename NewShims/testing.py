@@ -12,6 +12,7 @@ surplus = "data20"
 # surplus = "data100"
 
 method = "ACO_mp"
+# method = "ACO"
 # method = "Shims_mp"
 # method = "Shims"
 
@@ -153,86 +154,89 @@ for inst in instances:
     #     print(f"{p.ID}\t{p.Dests[k]}\t{p.PCW}\t{p.PCV:.2f}\t{p.PCS}")
     # print(f"Pallets are now with current values defined. Torque: {solTorque.value/cfg.maxTorque:.2f}\n")
     
-    E = []
-
     startNodeTime = time.perf_counter()
-
+ 
     if method == "Shims_mp":
-        E = shims_mp.Solve(pallets, items, cfg, k, limit, secBreak, "p", solTorque, solItems)
+        shims_mp.Solve(pallets, items, cfg, k, limit, secBreak, "p", solTorque, solItems)
 
     if method == "Shims":            
-        E = shims_mp.Solve(pallets, items, cfg, k, limit, secBreak, "s", solTorque, solItems)         
+        shims_mp.Solve(pallets, items, cfg, k, limit, secBreak, "s", solTorque, solItems)         
 
     if method == "ACO_mp":       
-        E =   aco_mp.Solve(pallets, items, cfg, k, limit, secBreak, "a", solTorque, solItems) 
+        aco_mp.Solve(pallets, items, cfg, k, limit, secBreak, "p", solTorque, solItems) 
+
+    if method == "ACO":       
+        aco_mp.Solve(pallets, items, cfg, k, limit, secBreak, "s", solTorque, solItems) 
 
     elapsed = time.perf_counter() - startNodeTime
 
-    consJK = [
+    # a matrix for all consolidated in the tour
+    consol = [
                 [ common.Item(-1, -2, 0, 0, 0., -1, -1)
                 for _ in tour.nodes ]
                 for _ in pallets # a consolidated for each pallet
             ] 
 
-    # print the solution for this node
-    if len(E) > 0:
+    # Validate the solution for this node
 
-        sNodeAccum = 0.
-        wNodeAccum = 0.
-        vNodeAccum = 0.
-        sol = ""
+    sNodeAccum = 0.
+    wNodeAccum = 0.
+    vNodeAccum = 0.
+    sol = ""
 
-        consNodeT = [None for _ in pallets]
 
-        pallets.sort(key=lambda x: x.ID)  
+    palletsCount = [0 for _ in solItems]
 
-        for j, p in enumerate(pallets):
+    pallets.sort(key=lambda x: x.ID) 
 
-            consJK[j][k].ID  = j+numItems
-            consJK[j][k].Frm = node.ID
-            consJK[j][k].To  = p.Dests[k]
+    for j, i in enumerate(solItems):
+        if i > -1: # i: pallet index
+            consol[i][k].ID  = j+numItems
+            consol[i][k].Frm = node.ID
+            consol[i][k].To  = p.Dests[k]
+            palletsCount[j] += 1
 
-            for i in np.arange(numItems):
+            if palletsCount[j] < 2:
 
-                if E[j][i] == 1:
-                    consJK[j][k].W += items[i].W
-                    consJK[j][k].V += items[i].V
-                    consJK[j][k].S += items[i].S
+                consol[i][k].W += items[j].W
+                consol[i][k].V += items[j].V
+                consol[i][k].S += items[j].S
 
-            consNodeT[j] = consJK[j][k]
+                sNodeAccum += float(items[j].S)
+                wNodeAccum += float(items[j].W)
+                vNodeAccum += float(items[j].V)
 
-        for i, p in enumerate(pallets):
-            sNodeAccum += float(consJK[i][k].S)
-            wNodeAccum += float(consJK[i][k].W)
-            vNodeAccum += float(consJK[i][k].V)
+    consNodeT = [None for _ in pallets]        
+    for i, p in enumerate(pallets):
+        consNodeT[i] = consol[i][k]
 
-        epsilom = solTorque.value/cfg.maxTorque
+    epsilom = solTorque.value/cfg.maxTorque
 
-        sol += f"Score: {sNodeAccum}\t"
-        sol += f"Weight: {wNodeAccum/cfg.weiCap:.2f}\t"
-        sol += f"Volume: {vNodeAccum/cfg.volCap:.2f}\t"
-        sol += f"Torque: {epsilom:.2f}\n"
-        sol += f"Elapsed: {elapsed:.2f}\n"
+    sol += f"Score: {sNodeAccum}\t"
+    sol += f"Weight: {wNodeAccum/cfg.weiCap:.2f}\t"
+    sol += f"Volume: {vNodeAccum/cfg.volCap:.2f}\t"
+    sol += f"Torque: {epsilom:.2f}\n"
+    sol += f"Elapsed: {elapsed:.2f}\n"
 
-        state = "Feasible"
+    state = "Feasible"
 
-        if wNodeAccum/cfg.weiCap > 1.0:
-            state = "Weight Unfeasible"
+    if wNodeAccum/cfg.weiCap > 1.0:
+        state = "Weight Unfeasible"
 
-        if vNodeAccum/cfg.volCap > 1.0:
-            state = "Volume Unfeasible"
+    if vNodeAccum/cfg.volCap > 1.0:
+        state = "Volume Unfeasible"
 
-        if abs(epsilom) > 1.0:
-            state = "Torque Unfeasible"
+    if abs(epsilom) > 1.0:
+        state = "Torque Unfeasible"
 
-        sol += f"State: {state}\n"
+    sol += f"State: {state}\n"
 
-        print(sol)
+    print(sol)
 
-        solElapsed += elapsed
-        solScore   += sNodeAccum
+    solElapsed += elapsed
+    solScore   += sNodeAccum
 
-        common.writeTourSol(method, scenario, inst, pi, tour, cfg, pallets, consJK, True, surplus)
+    common.writeTourSol(method, scenario, inst, pi, tour, cfg, pallets, consol, True, surplus)
 
 # print(f"Elapsed per instance: {solElapsed/len(instances):.0f}")
 # print(f"Elapsed per instance: {solScore/len(instances):.0f}")

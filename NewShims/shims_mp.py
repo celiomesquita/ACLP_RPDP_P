@@ -95,18 +95,17 @@ def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, solItems): #
     # solTorque was first updated when consolidaded were put in the pallets
 
     if mode == "p":
-        print(f"\nParallel Shims for ACLP+RPDP")
+        mode = "Parallel"
     else:
-        print(f"\nSerial Shims for ACLP+RPDP")
+        mode = "Serial"
+
+    print(f"\n{mode} Shims for ACLP+RPDP")
 
     # surplus = math.exp(-limit) + 0.9
     # surplus = 1. + 2. * (1. - limit)
     surplus = (2. - limit)
 
     print(f"surplus: {surplus:.2f}")
-
-    numItems   = len(items)
-    numPallets = len(pallets)
 
     lock  = mp.Lock()
 
@@ -149,14 +148,6 @@ def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, solItems): #
             common.fillPallet(  pallets[i], items, k, solTorque, solItems, cfg, lock, limit) 
             getBestShims(pallets[i], items, k, solTorque, solItems, cfg, lock, surplus)
                
-    # --- mount solution matrix
-    Z = np.zeros((numPallets,numItems))
-    for j, i in enumerate(solItems):
-        if i > -1: # alocated to some pallet
-            Z[i][j] = 1
-
-    return Z
-
 if __name__ == "__main__":
 
     print("----- Please execute module main -----")
