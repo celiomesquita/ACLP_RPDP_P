@@ -49,10 +49,11 @@ class Pallet(object):
             solTorque.value += float(item.W) * float(self.D)
             solItems[item.ID] = self.ID # mark item as alocated to this pallet
 
-    def isFeasible(self, item, limit, k, solTorque, solItems, cfg, lock): # check constraints
+    def isFeasible(self, item, limit, k, solTorque, solItems, lock, cfg): # check constraints
 
         if item.To != self.Dests[k]:
             return False
+
 
         if self.PCV + item.V > self.V * limit:
             return False
@@ -99,9 +100,9 @@ def loadPallets(cfg):
         reader.close()    
     return pallets
         
-def fillPallet(pallet, items, k, solTorque, solItems, cfg, lock, limit):
+def fillPallet(pallet, items, k, solTorque, solItems, lock, cfg, limit):
     for item in items:
-        if pallet.isFeasible(item, limit, k, solTorque, solItems, cfg, lock):
+        if pallet.isFeasible(item, limit, k, solTorque, solItems, lock, cfg):
             pallet.putItem(item, solTorque, solItems, lock)
 
 # mount the decision matrix for which items will be put in which pallets

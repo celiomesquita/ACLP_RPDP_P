@@ -41,7 +41,7 @@ class Shims(object):
         return ret        
 
 # create a set of shims for this pallet and selects the best shims
-def getBestShims(pallet, items, k, solTorque, solItems, cfg, lock, surplus):
+def getBestShims(pallet, items, k, solTorque, solItems, lock, cfg, surplus):
 
     maxVol = pallet.V * surplus
 
@@ -120,7 +120,7 @@ def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, solItems): #
 
         # parallel greedy phase
         for i, _ in enumerate(procs):
-            procs[i] = mp.Process( target=common.fillPallet, args=( pallets[i], items, k, solTorque, solItems, cfg, lock, limit) )
+            procs[i] = mp.Process( target=common.fillPallet, args=( pallets[i], items, k, solTorque, solItems, lock, cfg, limit) )
             time.sleep(0.001)
             procs[i].start()
         
@@ -129,7 +129,7 @@ def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, solItems): #
 
         # parallel shims phase
         for i, _ in enumerate(procs):
-            procs[i] = mp.Process( target=getBestShims, args=( pallets[i], items, k, solTorque, solItems, cfg, lock, surplus) )
+            procs[i] = mp.Process( target=getBestShims, args=( pallets[i], items, k, solTorque, solItems, lock, cfg, surplus) )
             procs[i].start()
                 
         while time.time() - start <= secBreak:
@@ -145,8 +145,8 @@ def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, solItems): #
 
     else: # serial
         for i, _ in enumerate(pallets):
-            common.fillPallet(  pallets[i], items, k, solTorque, solItems, cfg, lock, limit) 
-            getBestShims(pallets[i], items, k, solTorque, solItems, cfg, lock, surplus)
+            common.fillPallet(  pallets[i], items, k, solTorque, solItems, lock, cfg, limit) 
+            getBestShims(pallets[i], items, k, solTorque, solItems, lock, cfg, surplus)
                
 if __name__ == "__main__":
 

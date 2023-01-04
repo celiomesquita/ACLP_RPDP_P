@@ -17,14 +17,14 @@ Score: 0.0 & Weight: 0.00 & Volume: 0.00 & Torque: 0.00 \\
 $Pallet$ & $From:To$ & $Kg$ & $m^3$ \\ 
 \midrule 
 1 & GIG:SSA & 3100 & 13.0 \\ 
-2 & GIG:SSA &  753 &  3.6 \\ 
-3 & GIG:SSA & 3057 & 13.5 \\ 
-4 & GIG:SSA & 1180 &  4.3 \\ 
-5 & GIG:SSA & 3302 & 13.7 \\ 
-6 & GIG:SSA & 5318 & 22.5 \\ 
-7 & GIG:SSA & 3319 & 13.7 \\ 
+2 & GIG:SSA &  148 &  0.7 \\ 
+3 & GIG:SSA & 3088 & 13.7 \\ 
+4 & GIG:REC &    0 &  0.0 \\ 
+5 & GIG:SSA & 3282 & 13.7 \\ 
+6 & GIG:SSA & 3424 & 13.7 \\ 
+7 & GIG:SSA & 3220 & 13.6 \\ 
 \midrule 
-Score: 9341.0 & Weight: 0.77 & Volume: 1.00 & Torque: 1.02 \\ 
+Score: 8659.0 & Weight: 0.63 & Volume: 0.81 & Torque: 0.98 \\ 
 \toprule 
 \rowcolor{Gray}\multicolumn{4}{l}{Node 2: SSA solution} \\ 
 $Pallet$ & $From:To$ & $Kg$ & $m^3$ \\ 
@@ -39,6 +39,6 @@ $Pallet$ & $From:To$ & $Kg$ & $m^3$ \\
 \midrule 
 Score: 0.0 & Weight: 0.00 & Volume: 0.00 & Torque: 0.00 \\ 
 \bottomrule 
-\multicolumn{4}{l}{Tour 0\ \ \ \ \ S/C: 2.694\ \ \ \ \ \ \ \ \ \ elapsed: -1\ \ \ \ \ method:\ Shims_mp} \\ 
+\multicolumn{4}{l}{Tour 0\ \ \ \ \ S/C: 2.501\ \ \ \ \ \ \ \ \ \ elapsed: -1\ \ \ \ \ method:\ Shims_mp} \\ 
 \bottomrule 
 \end{tabular} 

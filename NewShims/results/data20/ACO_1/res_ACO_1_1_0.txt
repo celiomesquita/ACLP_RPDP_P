@@ -17,14 +17,14 @@ Score: 0.0 & Weight: 0.00 & Volume: 0.00 & Torque: 0.00 \\
 $Pallet$ & $From:To$ & $Kg$ & $m^3$ \\ 
 \midrule 
 1 & GIG:SSA & 3100 & 13.0 \\ 
-2 & GIG:SSA &  220 &  1.0 \\ 
-3 & GIG:SSA & 2995 & 13.2 \\ 
-4 & GIG:SSA & 2050 & 10.0 \\ 
-5 & GIG:SSA & 3547 & 14.7 \\ 
-6 & GIG:SSA & 3745 & 14.9 \\ 
-7 & GIG:SSA & 3831 & 15.4 \\ 
+2 & GIG:SSA &  188 &  0.7 \\ 
+3 & GIG:SSA & 3048 & 13.5 \\ 
+4 & GIG:SSA &  295 &  1.6 \\ 
+5 & GIG:SSA & 3317 & 13.7 \\ 
+6 & GIG:SSA & 3486 & 13.6 \\ 
+7 & GIG:SSA & 3283 & 13.6 \\ 
 \midrule 
-Score: 9050.0 & Weight: 0.75 & Volume: 0.98 & Torque: 1.00 \\ 
+Score: 8516.0 & Weight: 0.64 & Volume: 0.83 & Torque: 0.99 \\ 
 \toprule 
 \rowcolor{Gray}\multicolumn{4}{l}{Node 2: SSA solution} \\ 
 $Pallet$ & $From:To$ & $Kg$ & $m^3$ \\ 
@@ -39,6 +39,6 @@ $Pallet$ & $From:To$ & $Kg$ & $m^3$ \\
 \midrule 
 Score: 0.0 & Weight: 0.00 & Volume: 0.00 & Torque: 0.00 \\ 
 \bottomrule 
-\multicolumn{4}{l}{Tour 0\ \ \ \ \ S/C: 2.612\ \ \ \ \ \ \ \ \ \ elapsed: -1\ \ \ \ \ method:\ ACO} \\ 
+\multicolumn{4}{l}{Tour 0\ \ \ \ \ S/C: 2.458\ \ \ \ \ \ \ \ \ \ elapsed: -1\ \ \ \ \ method:\ ACO} \\ 
 \bottomrule 
 \end{tabular} 

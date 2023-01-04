@@ -19,7 +19,7 @@ $Pallet$ & $From:To$ & $Kg$ & $m^3$ \\
 1 & GIG:SSA & 3100 & 13.0 \\ 
 2 & GIG:SSA &  148 &  0.7 \\ 
 3 & GIG:SSA & 3088 & 13.7 \\ 
-4 & GIG:SSA &    0 &  0.0 \\ 
+4 & GIG:REC &    0 &  0.0 \\ 
 5 & GIG:SSA & 3282 & 13.7 \\ 
 6 & GIG:SSA & 3424 & 13.7 \\ 
 7 & GIG:SSA & 3220 & 13.6 \\ 

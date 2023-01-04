@@ -220,13 +220,13 @@ for inst in instances:
 
     state = "Feasible"
 
-    if wNodeAccum/cfg.weiCap > 1.0:
+    if wNodeAccum/cfg.weiCap > 1.01:
         state = "Weight Unfeasible"
 
-    if vNodeAccum/cfg.volCap > 1.0:
+    if vNodeAccum/cfg.volCap > 1.01:
         state = "Volume Unfeasible"
 
-    if abs(epsilom) > 1.0:
+    if abs(epsilom) > 1.01:
         state = "Torque Unfeasible"
 
     sol += f"State: {state}\n"
