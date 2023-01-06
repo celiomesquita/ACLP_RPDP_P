@@ -213,21 +213,28 @@ for inst in instances:
 
     epsilom = solTorque.value/cfg.maxTorque
 
-    sol += f"Score: {sNodeAccum}\t"
-    sol += f"Weight: {wNodeAccum/cfg.weiCap:.2f}\t"
-    sol += f"Volume: {vNodeAccum/cfg.volCap:.2f}\t"
+    vol = vNodeAccum/cfg.volCap
+    wei = wNodeAccum/cfg.weiCap
+    # if vol > 1.0:
+    #     sNodeAccum /= vol
+    #     wei /= vol
+    #     vol = 1.0
+
+    sol += f"Score: {sNodeAccum:.0f}\t"
+    sol += f"Weight: {wei:.2f}\t"
+    sol += f"Volume: {vol:.2f}\t"
     sol += f"Torque: {epsilom:.2f}\n"
     sol += f"Elapsed: {elapsed:.2f}\n"
 
     state = "Feasible"
 
-    if wNodeAccum/cfg.weiCap > 1.01:
+    if wei > 1.001:
         state = "Weight Unfeasible"
 
-    if vNodeAccum/cfg.volCap > 1.01:
+    if vol > 1.001:
         state = "Volume Unfeasible"
 
-    if abs(epsilom) > 1.01:
+    if abs(epsilom) > 1.001:
         state = "Torque Unfeasible"
 
     sol += f"State: {state}\n"
