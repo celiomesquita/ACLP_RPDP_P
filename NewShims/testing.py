@@ -11,8 +11,8 @@ surplus = "data20"
 # surplus = "data50"
 # surplus = "data100"
 
-method = "ACO_mp"
-# method = "ACO"
+# method = "ACO_mp"
+method = "ACO"
 # method = "Shims_mp"
 # method = "Shims"
 
@@ -53,9 +53,6 @@ if cfg.weiCap > cfg.payload:
 solElapsed = 0
 solScore   = 0
 
-# solution global torque to be shared and changed by all pallets concurrently
-solTorque = mp.Value('d') # a multiprocessing double type variable
-solTorque.value = 0.0
 
 for inst in instances:    
 
@@ -142,6 +139,10 @@ for inst in instances:
     for c in kept:
         solItems[c.ID] = c.P
 
+    # solution global torque to be shared and changed by all pallets concurrently
+    solTorque = mp.Value('d') # a multiprocessing double type variable
+    solTorque.value = 0.0        
+
     # update pallets current parameters and solution torque
     for i, p in enumerate(pallets):
         for c in kept:
@@ -163,10 +164,10 @@ for inst in instances:
         shims_mp.Solve(pallets, items, cfg, k, limit, secBreak, "s", solTorque, solItems)         
 
     if method == "ACO_mp":       
-        aco_mp.Solve(pallets, items, cfg, k, limit, secBreak, "p", solTorque, solItems) 
+        aco_mp.Solve(pallets,   items, cfg, k, limit, secBreak, "p", solTorque, solItems) 
 
     if method == "ACO":       
-        aco_mp.Solve(pallets, items, cfg, k, limit, secBreak, "s", solTorque, solItems) 
+        aco_mp.Solve(pallets,   items, cfg, k, limit, secBreak, "s", solTorque, solItems) 
 
     elapsed = time.perf_counter() - startNodeTime
 

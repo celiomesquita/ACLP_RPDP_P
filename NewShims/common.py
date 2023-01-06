@@ -51,28 +51,27 @@ class Pallet(object):
 
     def isFeasible(self, item, limit, k, solTorque, solItems, lock, cfg): # check constraints
 
-        if item.To != self.Dests[k]:
-            return False
+        feasible = True
 
+        if feasible and item.To != self.Dests[k]:
+            feasible = False
 
-        if self.PCV + item.V > self.V * limit:
-            return False
+        if feasible and self.PCV + item.V > self.V * limit:
+            feasible = False
 
-        deltaTau = float(item.W) * float(self.D)
-        ret = True
-
-        with lock:
-            if solItems[item.ID] > -1: # if item is alocated in some pallet
-                ret =  False
-        
-        if ret:
+        if feasible:
             with lock:
-                newTorque = abs(solTorque.value + deltaTau)
-                if newTorque > abs(solTorque.value):
-                    if newTorque > cfg.maxTorque:
-                        ret =  False
 
-        return ret
+                if solItems[item.ID] > -1: # if item is allocated to some pallet
+                    feasible = False
+
+                if feasible:
+                    deltaTau = float(item.W) * float(self.D)
+                    newTorque = abs(solTorque.value + deltaTau)
+                    if newTorque > abs(solTorque.value) and newTorque > cfg.maxTorque:
+                        feasible = False
+
+        return feasible
  
 def loadPallets(cfg):
     """

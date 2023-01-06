@@ -20,13 +20,12 @@ import common
 
 ALPHA = 1 # pheromone exponent
 BETA  = 1 # heuristic exponent
-NANTS = 1 # number of ants per iteration
 
 # getDeltaTau calculates the pheromone to be dropped by each on ants tracks
-def getDeltaTau(score, bestSoFar):
+def getDeltaTau(score, bestScore):
 
     # at this point DeltaTau may be positive ou negative learning
-    DeltaTau = (score - bestSoFar)/bestSoFar
+    DeltaTau = (score - bestScore)/bestScore
     # return DeltaTau + random.uniform(0, 1)
     return DeltaTau
 
@@ -35,21 +34,23 @@ def getDeltaTau(score, bestSoFar):
 # while the pheromone is deposited by all ants proportionally to their solution quality and
 # is evaporated in all the components. Each Ant makes use of "updateAntsField" to update 
 # item attractiveness according to the its solution value.
-def updateAntsField(score, bestSoFar, Attract, Phero, items):
+def updateAntsField(score, bestScore, Attract, Phero, items, lock):
 
-    deltaTau = getDeltaTau(score, bestSoFar)
+    deltaTau = getDeltaTau(score, bestScore)
 
-    # update pheromone level in all edges
-    for id, phero in enumerate(Phero):
+    with lock:
 
-        #evaporate some pheromone 
-        Phero[id] = math.sqrt(phero) / 1.35
+        # update pheromone level in all edges
+        for id, phero in enumerate(Phero):
 
-        # update pheromone level
-        if Phero[id] + deltaTau > 0 and  Phero[id] + deltaTau < 1:
-            Phero[id] += deltaTau
+            #evaporate some pheromone 
+            Phero[id] = math.sqrt(phero) / 1.35
 
-        Attract[id] = Phero[id]**ALPHA * items[id].Attr**BETA
+            # update pheromone level
+            if Phero[id] + deltaTau > 0 and  Phero[id] + deltaTau < 1:
+                Phero[id] += deltaTau
+
+            Attract[id] = Phero[id]**ALPHA * items[id].Attr**BETA
 
 
 # at least 15 times faster than randomChoice
@@ -92,12 +93,15 @@ def selectItem(nbhood, values, pallet, maxTorque):
 
     return item, j
 
-def antSolve(pallets, items, cfg, k, secBreak, solTorque, solItems, Attract, Phero, lock, bestSoFar, stat, thisdict):
+def antSolve(pallets, items, cfg, k, secBreak, solTorque, solItems, Attract, Phero, lock, bestScore, stat, accum, maxD):
 
     nbhood   = [it for it in items]
     values   = [v  for v  in Attract]
 
-    maxTorque = max([it.W * thisdict["maxD"] for it in nbhood])
+    maxTorque = max([it.W * maxD for it in nbhood])
+
+    # accum["score"]  -> accumulated score
+    # accum["volume"] -> accumulated volume
 
     while nbhood:
 
@@ -112,8 +116,8 @@ def antSolve(pallets, items, cfg, k, secBreak, solTorque, solItems, Attract, Phe
 
                     pallets[i].putItem(item, solTorque, solItems, lock)
 
-                    thisdict["score"]  += item.S
-                    thisdict["volume"] += item.V
+                    accum["score"]  += item.S
+                    accum["volume"] += item.V
 
                     nbhood.pop(j) # pop if included in solution
                     values.pop(j)
@@ -123,7 +127,7 @@ def antSolve(pallets, items, cfg, k, secBreak, solTorque, solItems, Attract, Phe
                         nbhood.pop(j)
                         values.pop(j)        
 
-    updateAntsField(thisdict["score"], bestSoFar, Attract, Phero, items)
+    updateAntsField(accum["score"], bestScore, Attract, Phero, items, lock)
 
     if stat:
         AttractVar  = statistics.variance(Attract)
@@ -133,15 +137,19 @@ def antSolve(pallets, items, cfg, k, secBreak, solTorque, solItems, Attract, Phe
 
         print(f"{PheroVar:.2f}\t\t{PheroMean:.2f}\t\t{AttractVar:.2f}\t\t{AttractMean:.2f}")
 
-    thisdict["volume"] /= cfg.volCap
+    accum["volume"] /= cfg.volCap
 
 def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, solItems ):
 
     # to control the general attractiveness for the tournament selection
     Attract = mp.Array('d', np.arange(len(items)))
+    for j, _ in enumerate(Attract):
+        Attract[j] = 0.5
 
     # to control pheromone deposition and evaporation
     Phero = mp.Array('d', np.arange(len(items)))
+    for j, _ in enumerate(Phero):
+        Phero[j] = 0.5
 
     startTime = time.perf_counter()
 
@@ -161,105 +169,87 @@ def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, solItems ):
 
     lock  = mp.Lock() # for use in parallel mode
 
-    # sort pallets ascendent by CG distance
-    pallets.sort(key=lambda x: abs(x.D))
-
-    bestSoFar  = 0.0
-    bestVolume = 0.0
-    maxD       = 0.0 # the maximum distance from the CG
 
     # greedy serial phase (both for serial and parallel modes)
-    for i, _ in enumerate(pallets):               
-        common.fillPallet(pallets[i], items, k, solTorque, solItems, lock, cfg, limit)
-        bestSoFar  += pallets[i].PCS
-        bestVolume += pallets[i].PCV    
-        if abs(pallets[i].D) > maxD:
-            maxD = abs(pallets[i].D)
 
-    thisdict = dict(volume = bestVolume, score = bestSoFar, maxD = maxD)
+    initScore   = 0.0 # best score so far
+    initVolume  = 0.0 # best volume so far
+    maxD        = 0.0 # the maximum distance from the CG
+    initPallets = copy.deepcopy(pallets)
+    initPallets.sort(key=lambda x: abs(x.D)) # sort pallets ascendent by CG distance
 
+    for i, _ in enumerate(initPallets):               
+        common.fillPallet(initPallets[i], items, k, solTorque, solItems, lock, cfg, limit)
+        initScore  += initPallets[i].PCS
+        initVolume += initPallets[i].PCV   
+        if abs(initPallets[i].D) > maxD:
+            maxD = abs(initPallets[i].D)
+
+    # accum = dict(score=initScore, volume=initVolume)
+
+    bestScore  = initScore  # best score so far
+    bestVolume = initVolume # best volume so far
 
     # ACO phase
-    bestIter = -1
+    bestIter = 0
     iter = 0
     stagnant = 0
-    iterPallets = [] # the number of iterations is not known
-    iterTorque  = []
-    iterItems   = []
 
-    while stagnant < 3 and (time.perf_counter() - startTime) < secBreak: # iterations
+    numAnts  = 1 # number of ants per iteration
+    if mode == "Parallel":
+        numAnts = 10
 
-        bestLocalScore  = 0
-        bestLocalVolume = 0
+    while stagnant < 1 and (time.perf_counter() - startTime) < secBreak: # iterations      
 
-        if mode == "Serial":
+        ants       = [None for _ in np.arange(numAnts)]
+        accums     = [None for _ in np.arange(numAnts)] # for ant scores and volumes
+        antPallets = [None for _ in np.arange(numAnts)]
+        antTorque  = [None for _ in np.arange(numAnts)]
+        antItems   = [None for _ in np.arange(numAnts)]
 
-            iterPallets.append( copy.deepcopy(pallets) )
-            iterTorque.append( solTorque )
-            iterItems.append( solItems )
-           
-            antSolve(iterPallets[iter], items, cfg, k, secBreak, iterTorque[iter], iterItems[iter], Attract, Phero,\
-                 lock, bestSoFar, stat, thisdict)
+        bestAnt = 0
+        bestAntScore  = initScore
+        bestAntVolume = initVolume
 
-            bestLocalScore    = thisdict["score"]
-            bestLocalVolume   = thisdict["volume"]             
+        # parallel phase: initialize ants
+        for a, _ in enumerate(ants): # ants
+          
+            antPallets[a] = copy.deepcopy(initPallets)
+            antTorque[a]  = solTorque
+            antItems[a]   = solItems
+            accums[a]     = dict(score=initScore, volume=initVolume)
 
-        else: # parallel
+            ants[a] = mp.Process( target=antSolve, args=( antPallets[a], items, cfg, k, secBreak,\
+                antTorque[a], antItems[a], Attract, Phero, lock, bestScore, stat, accums[a], maxD) )
 
-            ants       = [None for _ in np.arange(NANTS)]
-            dicts      = [None for _ in np.arange(NANTS)] # for ant scores and volumes
-            antPallets = [None for _ in np.arange(NANTS)]
-            antTorque  = [None for _ in np.arange(NANTS)]
-            antItems   = [None for _ in np.arange(NANTS)]
-            dicts      = [None for _ in np.arange(NANTS)]
+            ants[a].start() # send ant
+        
+        # wait until time limit: secBreak
+        while time.perf_counter() - startTime <= secBreak:
+            if not any(p.is_alive() for p in ants):
+                print(f"All the ants ({numAnts}) of iteration {iter} have ended.")
+                break
+        else:
+            # We only enter this if we didn't 'break' above.
+            print("timed out, killing all ants")
+            for p in ants:
+                p.terminate()
+                p.join()
 
-            bestAnt = -1
+        # look for the best ant solution
+        for a, _ in enumerate(ants):
+            if accums[a]["score"] > bestAntScore or accums[a]["volume"] > bestAntVolume:
+                bestAntScore  = accums[a]["score"] 
+                bestAntVolume = accums[a]["volume"] 
+                bestAnt = a
 
-            # parallel shims phase
-            for i, _ in enumerate(ants): # ants
-
-                antPallets[i] = copy.deepcopy(pallets)
-                antTorque[i]  = solTorque
-                antItems[i]   = solItems
-                dicts[i]      = thisdict # for ant scores and volumes
-
-                ants[i] = mp.Process( target=antSolve, args=( antPallets[i], items, cfg, k, secBreak,\
-                    antTorque[i], antItems[i], Attract, Phero, lock, bestSoFar, stat, dicts[i]) )
-
-                ants[i].start()
-                    
-            while time.perf_counter() - startTime <= secBreak:
-                if not any(p.is_alive() for p in ants):
-                    print(f"All the ants of iteration {iter} have ended.")
-                    break
-            else:
-                # We only enter this if we didn't 'break' above.
-                print("timed out, killing all ants")
-                for p in ants:
-                    p.terminate()
-                    p.join()
-
-            iterPallets.append( None )
-            iterTorque.append( None )
-            iterItems.append( None ) 
-
-            for i, _ in enumerate(ants):
-
-                if dicts[i]["score"] > bestLocalScore or dicts[i]["volume"] > bestLocalVolume:
-                    bestLocalScore  = dicts[i]["score"] 
-                    bestLocalVolume = dicts[i]["volume"] 
-                    bestAnt = i
-                    iterPallets[iter] = copy.deepcopy(antPallets[i])
-                    iterTorque[iter]  = antTorque[i]                    
-                    iterItems[iter]   = antItems[i]
-
-        if bestLocalScore > bestSoFar or bestLocalVolume > bestVolume:
-            bestSoFar  = bestLocalScore
-            bestVolume = bestLocalVolume
-            bestIter    = iter
-            pallets    = copy.deepcopy(iterPallets[iter])
-            solTorque  = iterTorque[iter]
-            solItems   = iterItems[iter]
+        if bestAntScore > bestScore or bestAntVolume > bestVolume:
+            bestScore  = bestAntScore
+            bestVolume = bestAntVolume
+            bestIter   = iter
+            pallets    = copy.deepcopy(antPallets[bestAnt])
+            solTorque  = antTorque[bestAnt] 
+            solItems   = antItems[bestAnt]
             stagnant = 0
         else:
             stagnant += 1
@@ -268,7 +258,7 @@ def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, solItems ):
 
     print(f"Best iteration {bestIter}/{iter}.")
     if mode == "Parallel":
-        print(f"Best ant {bestAnt}/{NANTS}.")
+        print(f"Best ant {bestAnt}/{numAnts}.")
 
         
 if __name__ == "__main__":
