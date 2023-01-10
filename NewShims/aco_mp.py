@@ -34,23 +34,21 @@ def getDeltaTau(score, bestScore):
 # while the pheromone is deposited by all ants proportionally to their solution quality and
 # is evaporated in all the components. Each Ant makes use of "updateAntsField" to update 
 # item attractiveness according to the its solution value.
-def updateAntsField(score, bestScore, Attract, Phero, items, lock):
+def updateAntsField(score, bestScore, Attract, Phero, items):
 
     deltaTau = getDeltaTau(score, bestScore)
 
-    with lock:
+    # update pheromone level in all edges
+    for id, phero in enumerate(Phero):
 
-        # update pheromone level in all edges
-        for id, phero in enumerate(Phero):
+        #evaporate some pheromone 
+        Phero[id] = math.sqrt(phero) / 1.35
 
-            #evaporate some pheromone 
-            Phero[id] = math.sqrt(phero) / 1.35
+        # update pheromone level
+        if Phero[id] + deltaTau > 0 and  Phero[id] + deltaTau < 1:
+            Phero[id] += deltaTau
 
-            # update pheromone level
-            if Phero[id] + deltaTau > 0 and  Phero[id] + deltaTau < 1:
-                Phero[id] += deltaTau
-
-            Attract[id] = Phero[id]**ALPHA * items[id].Attr**BETA
+        Attract[id] = Phero[id]**ALPHA * items[id].Attr**BETA
 
 
 # at least 15 times faster than randomChoice
@@ -93,8 +91,8 @@ def selectItem(nbhood, values, pallet, maxTorque):
 
     return item, j
 
-def antSolve(antPallets, items, cfg, k, secBreak, antTorque, antItems, Attract, Phero, lock, bestScore,\
-     accum, maxD, startTime):
+def antSolve(antPallets, items, cfg, k, secBreak, antTorque, antItems, Attract, Phero, lock,\
+     bestScore, maxD, startTime, accumsP, accum):
 
     # items are read only
     # antItems are changed by this ant
@@ -102,7 +100,8 @@ def antSolve(antPallets, items, cfg, k, secBreak, antTorque, antItems, Attract, 
     nbhood   = [it for it in items]
     values   = [v  for v  in Attract]
 
-    # accum["score"] -> accumulated score
+    # accum['score']   -> accumulated score for serial mode
+    # accumsP.value -> accumulated score for parallel mode
 
     while nbhood and (time.perf_counter() - startTime) < secBreak:
 
@@ -129,7 +128,10 @@ def antSolve(antPallets, items, cfg, k, secBreak, antTorque, antItems, Attract, 
                         nbhood.pop(j)
                         values.pop(j)        
 
-    updateAntsField(accum["score"], bestScore, Attract, Phero, items, lock)
+
+    with lock:
+        accumsP.value = accum["score"] 
+        updateAntsField(accum["score"] , bestScore, Attract, Phero, items) 
 
 
 def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, dictItems ):
@@ -146,7 +148,7 @@ def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, dictItems )
 
     startTime = time.perf_counter()
 
-    limit = 0.75 # ACO greedy limit
+    limit = 0.0 # ACO greedy limit: faster and better with 0.0
 
     if mode == "p":
         mode = "Parallel"
@@ -195,12 +197,12 @@ def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, dictItems )
         iterItems.append(None)         
 
         # initialize ants parameters
-        ants       = [None for _ in np.arange(numAnts)]
-        accums     = [None for _ in np.arange(numAnts)] # for ant scores and volumes
-        antPallets = [None for _ in np.arange(numAnts)]
-        antTorque  = [None for _ in np.arange(numAnts)]
-        antItems   = [None for _ in np.arange(numAnts)]
-        antDictItems = dict(antItems=antItems)
+        ants       = [None          for _ in np.arange(numAnts)]
+        accumsS    = [None          for _ in np.arange(numAnts)] # for ant scores and volumes in serial mode
+        accumsP    = [mp.Value('d') for _ in np.arange(numAnts)] # for ant scores and volumes in parallel mode
+        antPallets = [None          for _ in np.arange(numAnts)]
+        antTorque  = [None          for _ in np.arange(numAnts)]
+        antItems   = [None          for _ in np.arange(numAnts)]
 
         bestAntScore = initScore
 
@@ -214,23 +216,26 @@ def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, dictItems )
             antPallets[a] = common.copyPallets(initPallets)              
             antTorque[a]  = initTorque
             antItems[a]   = common.copySolItems(initItems)
-            accums[a]     = dict(score=initScore)
+
+            # initialize accumulated scores
+            accumsS[a]       = dict(score=initScore) # for serial mode
+            accumsP[a].value = 0.0 # for parallel mode
 
             if mode == "Parallel": # send "antSolve" to parallel processes (ants)
 
                 ants[a] = mp.Process( target=antSolve, args=( antPallets[a], items, cfg, k, secBreak,\
-                    antTorque[a], antItems[a], Attract, Phero, lock, bestScore, accums[a], maxD, startTime) )
+                    antTorque[a], antItems[a], Attract, Phero, lock, bestScore, maxD, startTime, accumsP[a], accumsS[a]) )
 
                 ants[a].start() # send ant
 
             else: # solve sequentially
 
                 antSolve( antPallets[a], items, cfg, k, secBreak, antTorque[a], antItems[a], Attract, Phero,\
-                    lock, bestScore, accums[a], maxD, startTime)
+                    lock, bestScore, maxD, startTime, accumsP[a], accumsS[a])
 
-                # serial ant best solution update
-                if accums[a]["score"] > bestAntScore:
-                    bestAntScore  = accums[a]["score"] 
+                # serial ant best solution update  accumsS[a]['score']
+                if accumsS[a]['score'] > bestAntScore:
+                    bestAntScore  = accumsS[a]['score'] 
                     ba = a
                     improvements += 1
 
@@ -250,8 +255,8 @@ def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, dictItems )
                 ants[a].join() # get results from parallel ants
 
                 # parallel ant best solution update
-                if accums[a]["score"] > bestAntScore:
-                    bestAntScore  = accums[a]["score"] 
+                if accumsP[a].value > bestAntScore:
+                    bestAntScore  = accumsP[a].value 
                     ba = a
                     improvements += 1
 
