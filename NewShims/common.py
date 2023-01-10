@@ -2,6 +2,7 @@
 import os
 import math
 import numpy as np
+import multiprocessing as mp
 
 CITIES = ["GRU", "GIG", "SSA", "CNF", "CWB", "BSB", "REC"]
 
@@ -27,6 +28,21 @@ class Item(object):
         self.To = to # destination
         self.Attr = 0.0
 
+def copyPallets(pallets):
+    array = [None for _ in pallets]
+    for i, p in enumerate(pallets):
+        array[i] = Pallet(p.ID, p.D, p.V, p.W, 1)
+        array[i].Dests = p.Dests
+        array[i].PCW   = p.PCW 
+        array[i].PCV   = p.PCV
+        array[i].PCS   = p.PCS
+    return array
+
+def copySolItems(mpItems):
+    mp_array = mp.Array('i', range(len(mpItems)))
+    for j, v in enumerate(mpItems):
+        mp_array[j] = v
+    return mp_array
 
 class Pallet(object):
     def __init__(self, id, d, v, w, numNodes):

@@ -156,6 +156,8 @@ for inst in instances:
     # print(f"Pallets are now with current values defined. Torque: {solTorque.value/cfg.maxTorque:.2f}\n")
     
     startNodeTime = time.perf_counter()
+
+    dictItems = dict(solItems = solItems)
  
     if method == "Shims_mp":
         shims_mp.Solve(pallets, items, cfg, k, limit, secBreak, "p", solTorque, solItems)
@@ -164,11 +166,12 @@ for inst in instances:
         shims_mp.Solve(pallets, items, cfg, k, limit, secBreak, "s", solTorque, solItems)         
 
     if method == "ACO_mp":       
-        aco_mp.Solve(pallets,   items, cfg, k, limit, secBreak, "p", solTorque, solItems) 
+        aco_mp.Solve(pallets,   items, cfg, k, limit, secBreak, "p", solTorque, dictItems) 
 
     if method == "ACO":       
-        aco_mp.Solve(pallets,   items, cfg, k, limit, secBreak, "s", solTorque, solItems) 
+        aco_mp.Solve(pallets,   items, cfg, k, limit, secBreak, "s", solTorque, dictItems) 
 
+    
     elapsed = time.perf_counter() - startNodeTime
 
     # a matrix for all consolidated in the tour
@@ -186,11 +189,13 @@ for inst in instances:
     sol = ""
 
 
-    palletsCount = [0 for _ in solItems]
+    # palletsCount = [0 for _ in solItems]
+    palletsCount = [0 for _ in dictItems["solItems"] ]
 
     pallets.sort(key=lambda x: x.ID) 
 
-    for j, i in enumerate(solItems):
+    # for j, i in enumerate(solItems):
+    for j, i in enumerate(dictItems["solItems"]):
         if i > -1: # i: pallet index
             consol[i][k].ID  = j+numItems
             consol[i][k].Frm = node.ID

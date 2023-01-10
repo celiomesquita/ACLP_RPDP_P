@@ -47,7 +47,7 @@ def getBestShims(pallet, items, k, solTorque, solItems, lock, cfg, surplus):
 
     vol = 0.
     whip = []
-    
+   
     with lock:
         for item in items:
             # not consolidated (-1) and not allocated in any pallet
@@ -113,6 +113,7 @@ def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, solItems): #
 
     # sort ascendent by CG distance
     pallets.sort(key=lambda x: abs(x.D), reverse=False)
+
 
     if mode == "p":
 
