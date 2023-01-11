@@ -165,6 +165,8 @@ def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, dictItems )
     bestScore = 0.0
     pallets.sort(key=lambda x: abs(x.D)) # sort pallets ascendent by CG distance
 
+    print(f"{len(items)} items  {len(pallets)} pallets")
+
     for i, _ in enumerate(pallets):               
         common.fillPallet(pallets[i], items, k, solTorque, dictItems["solItems"], lock, cfg, limit)
         bestScore  += pallets[i].PCS

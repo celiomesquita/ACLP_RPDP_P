@@ -240,7 +240,7 @@ def getTours(num, costs, threshold):
 
 def writeNodeCons(scenario, instance, cons, pi, node, surplus):
 
-    dirname = f"./{surplus}/scenario_{scenario}/instance_{instance}"
+    dirname = f"./results/{surplus}/scenario_{scenario}/instance_{instance}"
 
     try:
         os.makedirs(dirname)
@@ -265,7 +265,7 @@ def loadNodeCons(surplus, scenario, instance, pi, node, id):
     """
     Loads consolidated contents file for this instance, tour and node k
     """
-    dirname = f"./{surplus}/scenario_{scenario}/instance_{instance}"
+    dirname = f"./results/{surplus}/scenario_{scenario}/instance_{instance}"
     try:
         os.makedirs(dirname)
     except FileExistsError:

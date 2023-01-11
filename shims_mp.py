@@ -90,9 +90,11 @@ def getBestShims(pallet, items, k, solTorque, solItems, lock, cfg, surplus):
             pallet.putItem(item, solTorque, solItems, lock)
 
 
-def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, solItems): # items include kept on board
+def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, dictItems): # items include kept on board
 
     # solTorque was first updated when consolidaded were put in the pallets
+
+    solItems = common.copySolItems(dictItems["solItems"])
 
     if mode == "p":
         mode = "Parallel"
@@ -149,6 +151,10 @@ def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, solItems): #
             common.fillPallet(  pallets[i], items, k, solTorque, solItems, lock, cfg, limit) 
             getBestShims(pallets[i], items, k, solTorque, solItems, lock, cfg, surplus)
                
+
+    dictItems["solItems"] = common.copySolItems(solItems)
+
+
 if __name__ == "__main__":
 
     print("----- Please execute module main -----")
