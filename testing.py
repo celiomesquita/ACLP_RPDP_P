@@ -7,14 +7,25 @@ import shims_mp
 import aco_mp
 import optcgcons
 
+"""
+Testing consolidated from cons_0_0.txt
+1230 80 9.000 0 1
+3560 90 10.000 0 2
+2340 70 11.000 0 1
+2360 60 12.000 0 2
+1250 50 13.000 0 1
+2540 40 8.000 0 2
+3540 30 7.000 0 1
+"""
+
 surplus = "data20"
 # surplus = "data50"
 # surplus = "data100"
 #
 # method = "ACO_mp"
-method = "ACO"
+# method = "ACO"
 # method = "Shims_mp"
-# method = "Shims"
+method = "Shims"
 
 scenario = 1
 
@@ -188,9 +199,9 @@ for inst in instances:
 
     pallets.sort(key=lambda x: x.ID) 
 
-    # for j, i in enumerate(solItems):
     for j, i in enumerate(dictItems["solItems"]):
         if i > -1: # i: pallet index
+            p = pallets[i]
             consol[i][k].ID  = j+numItems
             consol[i][k].Frm = node.ID
             consol[i][k].To  = p.Dests[k]
@@ -211,10 +222,6 @@ for inst in instances:
 
     vol = vNodeAccum/cfg.volCap
     wei = wNodeAccum/cfg.weiCap
-    # if vol > 1.0:
-    #     sNodeAccum /= vol
-    #     wei /= vol
-    #     vol = 1.0
 
     sol += f"Score: {sNodeAccum:.0f}\t"
     sol += f"Weight: {wei:.2f}\t"
@@ -237,8 +244,11 @@ for inst in instances:
 
     print(sol)
 
-    solElapsed += elapsed
-    solScore   += sNodeAccum
+    # solElapsed += elapsed
+    # solScore   += sNodeAccum
+
+    # write consolidated contents from this node in file
+    common.writeNodeCons(scenario, inst, consNodeT, pi, node, surplus)
 
     common.writeTourSol(method, scenario, inst, pi, tour, cfg, pallets, consol, True, surplus)
 

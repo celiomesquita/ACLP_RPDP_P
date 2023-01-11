@@ -129,10 +129,10 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
             shims_mp.Solve(pallets, items, cfg, k, 0.95, secBreak, "s", solTorque, dictItems)         
 
         if method == "ACO_mp":       
-            aco_mp.Solve(pallets,   items, cfg, k, 0.00, secBreak, "p", solTorque, dictItems) 
+            aco_mp.Solve(pallets,   items, cfg, k, 0.05, secBreak, "p", solTorque, dictItems) 
 
         if method == "ACO":       
-            aco_mp.Solve(pallets,   items, cfg, k, 0.00, secBreak, "s", solTorque, dictItems) 
+            aco_mp.Solve(pallets,   items, cfg, k, 0.05, secBreak, "s", solTorque, dictItems) 
 
         nodeElapsed = time.perf_counter() - startNodeTime
 
@@ -147,10 +147,6 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
 
         pallets.sort(key=lambda x: x.ID) 
 
-        sNodeAccum = 0.
-        wNodeAccum = 0.
-        vNodeAccum = 0.
-
         for j, i in enumerate(dictItems["solItems"]):
             if i > -1: # i: pallet index
                 p = pallets[i]
@@ -161,10 +157,6 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
                 consol[i][k].W += items[j].W
                 consol[i][k].V += items[j].V
                 consol[i][k].S += items[j].S
-
-                sNodeAccum += float(items[j].S)
-                wNodeAccum += float(items[j].W)
-                vNodeAccum += float(items[j].V)
 
         consNodeT = [None for _ in pallets]        
         for i, p in enumerate(pallets):
