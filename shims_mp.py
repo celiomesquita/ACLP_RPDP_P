@@ -1,9 +1,7 @@
-# import methods as mno
 import numpy as np
 import multiprocessing as mp
 import time
-import math
-# import knapsack as kp
+import common
 
 # A Shims fits in a pallet slack
 class Shims(object):
@@ -34,22 +32,26 @@ class Shims(object):
         deltaTau = float(item.W) * float(self.Pallet.D)
         ret = True
         with lock:
-            if abs(solTorque.value + self.SCT + deltaTau) > cfg.maxTorque:
-                ret = False
+            newTorque = abs(solTorque.value + self.SCT + deltaTau)
+
+            if newTorque > abs(solTorque.value + self.SCT):
+                if newTorque > cfg.maxTorque:
+                    ret = False
 
         return ret        
 
 # create a set of shims for this pallet and selects the best shims
-def getBestShims(pallet, items, k, solTorque, solItems, cfg, lock, surplus):
+def getBestShims(pallet, items, k, solTorque, solItems, lock, cfg, surplus):
 
     maxVol = pallet.V * surplus
 
     vol = 0.
     whip = []
-    
+   
     with lock:
         for item in items:
-            if solItems[item.ID] == -1: # not allocated in any pallet
+            # not consolidated (-1) and not allocated in any pallet
+            if item.P == -1 and solItems[item.ID] == -1: 
                 vol += item.V
                 whip.append(item)
                 if vol > maxVol:
@@ -88,101 +90,22 @@ def getBestShims(pallet, items, k, solTorque, solItems, cfg, lock, surplus):
             pallet.putItem(item, solTorque, solItems, lock)
 
 
-class Pallet(object):
-    def __init__(self, id, d, v, w, numNodes):
-        self.ID = id
-        self.D  = d  # centroid distance to CG
-        self.V  = v  # volume limit
-        self.W  = w  # weight limit
-        self.Dests = np.full(numNodes, -1)
-        self.PCW = 0 # pallet current weight
-        self.PCV = 0.
-        self.PCS = 0.
+def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, solItems): # items include kept on board
 
-    def putItem(self, item, solTorque, solItems, lock): # put an item in this pallet
-
-        self.PCW += item.W
-        self.PCV += item.V
-        self.PCS += item.S
-
-        with lock:
-            solTorque.value += float(item.W) * float(self.D)
-            solItems[item.ID] = self.ID # mark item as alocated to this pallet
-
-    def isFeasible(self, item, limit, k, solTorque, solItems, cfg, lock): # check constraints
-
-        if item.To != self.Dests[k]:
-            return False
-
-        if self.PCV + item.V > self.V * limit:
-            return False
-
-        deltaTau = float(item.W) * float(self.D)
-        ret = True
-
-        with lock:
-
-            if solItems[item.ID] > -1: # if item is alocated in some pallet
-                ret =  False
-            
-            if abs(solTorque.value + deltaTau) > cfg.maxTorque:
-                ret =  False
-
-        return ret
- 
-def loadPallets(cfg):
-    """
-    Load pallets attributes based on aircraft size
-    """
-    fname = f"./params/{cfg.size}.txt"
-      
-    reader = open(fname,"r")
-    lines = reader.readlines()    
-    pallets = []
-    id = 0
-    cfg.maxD = 0
-    try:
-        for line in lines:
-            cols = line.split()
-            d = float(cols[0])
-            v = float(cols[1])
-            w = float(cols[2])
-            pallets.append( Pallet(id, d, v, w, cfg.numNodes) )
-            id += 1
-
-            if d > cfg.maxD:
-                cfg.maxD = d
-    finally:
-        reader.close()    
-    return pallets
-        
-def fillPallet(pallet, items, k, solTorque, solItems, cfg, lock, limit):
-    for item in items:
-        if pallet.isFeasible(item, limit, k, solTorque, solItems, cfg, lock):
-            pallet.putItem(item, solTorque, solItems, lock)
-
-def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque): # items include kept on board
+    # solTorque was first updated when consolidaded were put in the pallets
 
     if mode == "p":
-        print(f"\nParallel Shims for ACLP+RPDP")
+        mode = "Parallel"
     else:
-        print(f"\nSerial Shims for ACLP+RPDP")
+        mode = "Serial"
+
+    print(f"\n{mode} Shims for ACLP+RPDP")
 
     # surplus = math.exp(-limit) + 0.9
     # surplus = 1. + 2. * (1. - limit)
     surplus = (2. - limit)
 
     print(f"surplus: {surplus:.2f}")
-
-    numItems   = len(items)
-    numPallets = len(pallets)
-
-    # solTorque = mp.Value('d') # solution global torque to be shared and changed by all pallets concurrently
-    # solTorque.value = 0.0
-
-    solItems = mp.Array('i', range(numItems))
-    for j, _ in enumerate(solItems):
-        solItems[j] = -1 # not alocated to any pallet
 
     lock  = mp.Lock()
 
@@ -191,10 +114,14 @@ def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque): # items inc
     # sort ascendent by CG distance
     pallets.sort(key=lambda x: abs(x.D), reverse=False)
 
+
     if mode == "p":
+
+        start = time.time()
+
         # parallel greedy phase
         for i, _ in enumerate(procs):
-            procs[i] = mp.Process( target=fillPallet, args=( pallets[i], items, k, solTorque, solItems, cfg, lock, limit) )
+            procs[i] = mp.Process( target=common.fillPallet, args=( pallets[i], items, k, solTorque, solItems, lock, cfg, limit) )
             time.sleep(0.001)
             procs[i].start()
         
@@ -203,10 +130,9 @@ def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque): # items inc
 
         # parallel shims phase
         for i, _ in enumerate(procs):
-            procs[i] = mp.Process( target=getBestShims, args=( pallets[i], items, k, solTorque, solItems, cfg, lock, surplus) )
+            procs[i] = mp.Process( target=getBestShims, args=( pallets[i], items, k, solTorque, solItems, lock, cfg, surplus) )
             procs[i].start()
-        
-        start = time.time()
+                
         while time.time() - start <= secBreak:
             if not any(p.is_alive() for p in procs):
                 # All the processes are done, break now.
@@ -220,18 +146,9 @@ def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque): # items inc
 
     else: # serial
         for i, _ in enumerate(pallets):
-            fillPallet(  pallets[i], items, k, solTorque, solItems, cfg, lock, limit) 
-            getBestShims(pallets[i], items, k, solTorque, solItems, cfg, lock, surplus)
+            common.fillPallet(  pallets[i], items, k, solTorque, solItems, lock, cfg, limit) 
+            getBestShims(pallets[i], items, k, solTorque, solItems, lock, cfg, surplus)
                
-
-    # --- mount solution matrix
-    Z = np.zeros((numPallets,numItems))
-    for j, i in enumerate(solItems):
-        if i > -1: # alocated to some pallet
-            Z[i][j] = 1
-
-    return Z
-
 if __name__ == "__main__":
 
     print("----- Please execute module main -----")

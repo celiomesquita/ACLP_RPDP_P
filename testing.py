@@ -1,256 +1,255 @@
-import methods as mno
+import common
 import numpy as np
 import time
-import math
+import multiprocessing as mp
 
-import shims_p
-import shims
-import aco
-import aco_p
-import greedy
+import shims_mp
+import aco_mp
+import optcgcons
 
-import sys
-method   = f"{sys.argv[1]}"
-mno.DATA = f"{sys.argv[2]}"
+surplus = "data20"
+# surplus = "data50"
+# surplus = "data100"
+#
+# method = "ACO_mp"
+method = "ACO"
+# method = "Shims_mp"
+# method = "Shims"
 
-# scenarios = [1,2,3,4,5,6]
-scenarios = [1]
-bests = []
+scenario = 1
 
-for scenario in scenarios:
+# instances = [1,2,3,4,5,6,7]
+instances = [1]
 
-    if scenario == 1:
-        instances = [1,2,3,4,5,6,7]
-        # instances = [1]
-    if scenario == 2:
-        instances = [1,2,3,4,5,6,7]
-        # instances = [1]
-    if scenario == 3:
-        instances = [1,2,3,4,5,6,7]
-    if scenario == 4:
-        instances = [1,2,3,4,5,6,7]
-    if scenario == 5:
-        instances = [1,2,3,4,5]
-    if scenario == 6:
-        instances = [1,2,3] 
+# limit    = 0.95 # best
+limit    = 0.95
+secBreak = 0.7 # seconds
 
-    limit    = 0.92 # Shims and ACO
-    secBreak = 0.7 # seconds
+cfg = common.Config(scenario)                                      
 
-    cfg = mno.Config(scenario)                                      
+# --- distances and costs matrix ---
+dists = common.loadDistances()
 
-    dists = mno.loadDistances()
+costs = [[0.0 for _ in dists] for _ in dists]
 
-    costs = [[0.0 for _ in dists] for _ in dists]
+for i, cols in enumerate(dists):
+    for j, value in enumerate(cols):
+        costs[i][j] = cfg.kmCost*value
 
-    for i, cols in enumerate(dists):
-        for j, value in enumerate(cols):
-            costs[i][j] = cfg.kmCost*value
+pallets = common.loadPallets(cfg)
 
-    pallets = mno.loadPallets(cfg)
+# pallets capacities
+cfg.weiCap = 0
+cfg.volCap = 0
+for p in pallets:
+    cfg.weiCap += p.W
+    cfg.volCap += p.V
 
-    # pallets capacity
-    cfg.weiCap = 0
-    cfg.volCap = 0
-    for p in pallets:
-        cfg.weiCap += p.W
-        cfg.volCap += p.V
+# smaller aircrafts may have a payload lower than pallets capacity
+if cfg.weiCap > cfg.payload:
+    cfg.weiCap = cfg.payload   
 
-    # smaller aircrafts may have a payload lower than pallets capacity
-    if cfg.weiCap > cfg.payload:
-        cfg.weiCap = cfg.payload   
+# solution global parameters
+solElapsed = 0
+solScore   = 0
 
-    totElapsed = 0
-    sumScores = 0
 
-    numProcs = [1,4,8,12,16]
+for inst in instances:    
+
+    tours = common.getTours(cfg.numNodes-1, costs, 0.25)
 
-    if method == "Shims" or method == "ACO" or method == "Greedy":
-        numProcs = [1]
+    pi = 0 # the first, not necessarily the best
+
+    tour = tours[pi]
+
+    k = 1 # the first node after the base
+
+    node = tour.nodes[k]
+    # print(f"ICAO node: {node.ICAO}")
+    
+    # L_k destination nodes set
+    unattended = [n.ID for n in tour.nodes[k+1:]]
 
-    runtimes = [0 for _ in numProcs]
-    scores = [0 for _ in numProcs]
+    # load items parameters from this node and problem instance, that go to unnatended
+    items = common.loadNodeItems(scenario, inst, node, unattended, surplus)
+    numItems = len(items)
+    # print(f"number of items: {numItems}")
 
-    for inst in instances:    
+    # load consolidated generated in the previous node
+    prevNode = tour.nodes[k-1]
 
-        for ix, procs in enumerate(numProcs):
+     # numItems = first cons ID
+    cons = common.loadNodeCons(surplus, scenario, inst, pi, prevNode, numItems )
+
+    # if prevNode.ID < len(common.CITIES):
+    #     print(f"\n-----Loaded in {common.CITIES[prevNode.ID]} -----")
+    #     print("ID\tP\tW\tS\tV\tFROM\tTO")
+    #     for c in cons:
+    #         print(f"{c.ID}\t{c.P}\t{c.W}\t{c.S}\t{c.V:.1f}\t{common.CITIES[c.Frm]}\t{common.CITIES[c.To]}")
+    # print(f"({numItems} items to embark)")
+
 
-            tours = mno.getTours(cfg.numNodes-1, costs, 0.25)
+    # consolidated contents not destined to this point are kept on board ...
+    kept = []
+    for c in cons:
+        if c.To in unattended:
+            c.ID = numItems
+            kept.append(c) #... and included in the items set
+            numItems += 1
 
-            pi = 0 # the first, not necessarily the best
+    # print(f"\n----- Kept on board at {common.CITIES[node.ID]} -----")        
+    # print("ID\tP\tW\tS\tV\tFROM\tTO")
+    # for c in kept:
+    #     print(f"{c.ID}\t{c.P}\t{c.W}\t{c.S}\t{c.V:.1f}\t{common.CITIES[c.Frm]}\t{common.CITIES[c.To]}")
+    # print(f"Kept positions to be defined: ({numItems} items to embark)\n")
+
+    # optimize consolidated positions to minimize CG deviation
+    optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, "GRB", k)
+    # pallets destinations are also set, according to kept on board in new positions
+
+    # Kept P is not -2 anymore, but the pallet ID.
+    
+    # print("ID\tP\tW\tS\tV\tFROM\tTO")
+    for c in kept:
+        # consolidated are appended to the items set
+        items.append(c)
+        # print(f"{c.ID}\t{c.P}\t{c.W}\t{c.S}\t{c.V:.1f}\t{common.CITIES[c.Frm]}\t{common.CITIES[c.To]}")
+    # print(f"Kept positions defined ({numItems} items to embark)\n")
+
+    # print("ID\tDest\tPCW\tPCV\tPCS")
+    # for p in pallets:
+    #     print(f"{p.ID}\t{p.Dests[k]}\t{p.PCW}\t{p.PCV:.2f}\t{p.PCS}")
+    # print("Pallets destinations to be defined.\n")
+
+    # set pallets destinations with items and consolidated to be delivered
+    common.setPalletsDestinations(items, pallets, tour.nodes, k, unattended)
+
+    # print("ID\tDest\tPCW\tPCV\tPCS")
+    # for p in pallets:
+    #     print(f"{p.ID}\t{p.Dests[k]}\t{p.PCW}\t{p.PCV:.2f}\t{p.PCS}")
+    # print("Pallets destinations defined.\n")
+
+
+    # to control solution items
+    solItems = mp.Array('i', range(numItems))
+    for j, _ in enumerate(solItems):
+        solItems[j] = -1 # not alocated to any pallet
+
+    # put the kept on board in solution
+    for c in kept:
+        solItems[c.ID] = c.P
+
+    # solution global torque to be shared and changed by all pallets concurrently
+    solTorque = mp.Value('d') # a multiprocessing double type variable
+    solTorque.value = 0.0        
+
+    # update pallets current parameters and solution torque
+    for i, p in enumerate(pallets):
+        for c in kept:
+            if c.P == p.ID:
+                pallets[i].PCW += c.W
+                pallets[i].PCV += c.V
+                pallets[i].PCS += c.S
+                solTorque.value += float(c.W) * float(p.D)
 
-            tour = tours[pi]
+    #     print(f"{p.ID}\t{p.Dests[k]}\t{p.PCW}\t{p.PCV:.2f}\t{p.PCS}")
+    # print(f"Pallets are now with current values defined. Torque: {solTorque.value/cfg.maxTorque:.2f}\n")
+    
+    startNodeTime = time.perf_counter()
 
-            k = 0 # the base
+    dictItems = dict(solItems = solItems)
+ 
+    if method == "Shims_mp":
+        shims_mp.Solve(pallets, items, cfg, k, limit, secBreak, "p", solTorque, solItems)
 
-            # L_k destination nodes set
-            unattended = [n.ID for n in tour.nodes[k+1:]]
+    if method == "Shims":            
+        shims_mp.Solve(pallets, items, cfg, k, limit, secBreak, "s", solTorque, solItems)         
 
-            node = tour.nodes[k]
-            print(node.ICAO)
+    if method == "ACO_mp":       
+        aco_mp.Solve(pallets,   items, cfg, k, limit, secBreak, "p", solTorque, dictItems) 
 
-            # load items parameters from this node and problem instance, that go to unnatended
-            items = mno.loadNodeItems(scenario, inst, node, unattended)
+    if method == "ACO":       
+        aco_mp.Solve(pallets,   items, cfg, k, limit, secBreak, "s", solTorque, dictItems) 
 
-            numItems = len(items)
+    
+    elapsed = time.perf_counter() - startNodeTime
 
-            print(f"{numItems} items and {procs} processes")
+    # a matrix for all consolidated in the tour
+    consol = [
+                [ common.Item(-1, -2, 0, 0, 0., -1, -1)
+                for _ in tour.nodes ]
+                for _ in pallets # a consolidated for each pallet
+            ] 
 
-            mno.setPalletsDestinations(items, pallets, tour.nodes, k, unattended)
+    # Validate the solution for this node
 
-            print("Dests: ",end="")
-            for p in pallets:
-                print(f"{mno.CITIES[p.Dests[k]]} ", end='')
-            print()
+    sNodeAccum = 0.
+    wNodeAccum = 0.
+    vNodeAccum = 0.
+    sol = ""
 
-            E = []
-            bestLim = 0.
 
-            startNodeTime = time.perf_counter()
+    # palletsCount = [0 for _ in solItems]
+    palletsCount = [0 for _ in dictItems["solItems"] ]
 
-            if method == "Greedy":
-                E = greedy.Solve(pallets, items, cfg, k)
+    pallets.sort(key=lambda x: x.ID) 
 
-            if method == "Shims_p":
-                E = shims_p.Solve(pallets, items, cfg, k, limit, procs)           
+    # for j, i in enumerate(solItems):
+    for j, i in enumerate(dictItems["solItems"]):
+        if i > -1: # i: pallet index
+            consol[i][k].ID  = j+numItems
+            consol[i][k].Frm = node.ID
+            consol[i][k].To  = p.Dests[k]
+            palletsCount[j] += 1
 
-            if method == "Shims":
-                E = shims.Solve(pallets, items, cfg, k, limit)
+            if palletsCount[j] < 2:
 
-            if method == "ACO":
-                E =   aco.Solve( pallets, items, startNodeTime, cfg, k, limit, secBreak)
+                consol[i][k].W += items[j].W
+                consol[i][k].V += items[j].V
+                consol[i][k].S += items[j].S
 
-            if method == "ACO_p":
-                E = aco_p.Solve( pallets, items, startNodeTime, cfg, k, limit, procs, secBreak)
+                sNodeAccum += float(items[j].S)
+                wNodeAccum += float(items[j].W)
+                vNodeAccum += float(items[j].V)
 
-            elapsed = time.perf_counter() - startNodeTime
+    consNodeT = [None for _ in pallets]        
+    for i, p in enumerate(pallets):
+        consNodeT[i] = consol[i][k]
 
-            consJK = [
-                        [ mno.Item(-1, -2, 0, 0, 0., -1, -1)
-                        for _ in tour.nodes ]
-                        for _ in pallets # a consolidated for each pallet
-                    ] 
+    epsilom = solTorque.value/cfg.maxTorque
 
-            # print the solution for this node
-            if len(E) > 0:
+    vol = vNodeAccum/cfg.volCap
+    wei = wNodeAccum/cfg.weiCap
+    # if vol > 1.0:
+    #     sNodeAccum /= vol
+    #     wei /= vol
+    #     vol = 1.0
 
-                consNodeT = [None for _ in pallets]
+    sol += f"Score: {sNodeAccum:.0f}\t"
+    sol += f"Weight: {wei:.2f}\t"
+    sol += f"Volume: {vol:.2f}\t"
+    sol += f"Torque: {epsilom:.2f}\n"
+    sol += f"Elapsed: {elapsed:.2f}\n"
 
-                pallets.sort(key=lambda x: x.ID)  
+    state = "Feasible"
 
-                for j, p in enumerate(pallets):
+    if wei > 1.001:
+        state = "Weight Unfeasible"
 
-                    consJK[j][k].ID  = j+numItems
-                    consJK[j][k].Frm = node.ID
-                    consJK[j][k].To  = p.Dests[k]
+    if vol > 1.001:
+        state = "Volume Unfeasible"
 
-                    itemsCount = [0 for _ in np.arange(numItems)]
+    if abs(epsilom) > 1.001:
+        state = "Torque Unfeasible"
 
-                    for i in np.arange(numItems):
+    sol += f"State: {state}\n"
 
-                        if E[j][i] == 1:
+    print(sol)
 
-                            itemsCount[i] += 1
+    solElapsed += elapsed
+    solScore   += sNodeAccum
 
-                            consJK[j][k].W += items[i].W
-                            consJK[j][k].V += items[i].V
-                            consJK[j][k].S += items[i].S
+    common.writeTourSol(method, scenario, inst, pi, tour, cfg, pallets, consol, True, surplus)
 
-                    consNodeT[j] = consJK[j][k]
-
-                sNodeAccum = 0.
-                wNodeAccum = 0.
-                vNodeAccum = 0.
-                tau = 0.
-                sol = ""
-
-                for i, p in enumerate(pallets):
-                    sNodeAccum += float(consJK[i][k].S)
-                    wNodeAccum += float(consJK[i][k].W)
-                    vNodeAccum += float(consJK[i][k].V)
-                    tau        += float(consJK[i][k].W) * pallets[i].D
-
-                epsilom = tau/cfg.maxTorque
-
-                # greedyScore = 50842.0 # data50
-
-                sol += f"Score: {sNodeAccum}\t"
-                sol += f"Weight: {wNodeAccum/cfg.weiCap:.2f}\t"
-                sol += f"Volume: {vNodeAccum/cfg.volCap:.2f}\t"
-                sol += f"Torque: {epsilom:.2f}\n"
-                sol += f"Elapsed: {elapsed:.2f}\n"
-                # sol += f"Ratio: {sNodeAccum/greedyScore:.3f}\n"
-
-                state = "Feasible"
-                for n in itemsCount:
-                    if n > 1:
-                        state = "Unfeasible"
-
-                if wNodeAccum/cfg.weiCap > 1.0:
-                    state = "Unfeasible"
-
-                if vNodeAccum/cfg.volCap > 1.0:
-                    state = "Unfeasible"
-
-                if abs(epsilom) > 1.0:
-                    state = "Unfeasible"
-
-                sol += f"State: {state}\n"
-
-                print(sol)
-
-                totElapsed += elapsed
-                sumScores  += sNodeAccum
-
-                if method == "Shims_p" or method == "ACO_p":
-                    runtimes[ix]  += elapsed
-                    scores[ix] += sNodeAccum
-
-    if len(numProcs) > 1:
-
-        text = "np,time,score\n"
-        for i, _ in enumerate(numProcs):
-
-            scores[i] /= len(instances)
-            runtimes[i] /= len(instances)
-
-            text += f"{numProcs[i]},{runtimes[i]:.2f},{scores[i]:.0f}\n"          
-
-        fname = f"./latex/csv/{method}{scenario}{mno.DATA}.csv"
-
-        writer = open(fname,'w+') # + creates the file, if not exists
-
-        try:
-            writer.write(text)
-        finally:
-            writer.close() 
-
-        print(text)
-
-        bestNumProcs = -1
-        minDist = 999999.9
-        maxScore = max(scores)
-        minScore = min(scores)      
-        maxTime = max(runtimes)
-        minTime = min(runtimes)  
-
-        for i, _ in enumerate(numProcs):
-
-            if (maxScore - minScore) and (maxTime  - minTime) > 0:
-
-                yLeg = (maxScore - scores[i])/(maxScore - minScore)
-                xLeg = (runtimes[i] - minTime)  /(maxTime  - minTime)
-
-                distance = math.sqrt(xLeg**2 + yLeg**2)
-
-                if minDist > distance:
-                    minDist = distance
-                    bestNumProcs = numProcs[i]
-            
-            # print(f"{numProcs[i]}\t{distance:.2f}\t{xLeg:.2f}\t{yLeg:.2f}")
-
-        # print(f"The best number of processes is: {bestNumProcs}")
-
-        bests.append(bestNumProcs)
-
-    print(f"{bests}")
+# print(f"Elapsed per instance: {solElapsed/len(instances):.0f}")
+# print(f"Elapsed per instance: {solScore/len(instances):.0f}")
