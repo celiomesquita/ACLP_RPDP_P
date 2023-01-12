@@ -10,6 +10,7 @@ CITIES = ["GRU", "GIG", "SSA", "CNF", "CWB", "BSB", "REC"]
 class Node(object):
     def __init__(self, id, tau):
         self.ID      = id
+        self.next    = 0
         self.tau     = tau # node sum of torques
         self.ICAO = CITIES[0]
         if id < len(CITIES):
@@ -140,10 +141,9 @@ class Tour(object):
     def __init__(self, nodes, cost):
         self.nodes = nodes
         self.cost  = cost # sum of legs costs plus CG deviation costs
-        self.score   = -1 # sum of nodes scores
-        self.elapsed = -1 # seconds
+        self.score   = 0.0 # sum of nodes scores
+        self.elapsed = 0 # seconds
         self.numOpts = 0 # sum of nodes eventual optima solutions
-        self.bestSC  = 0 # best ratio score/cost of this tour
 
 class Config(object):
 
@@ -190,7 +190,9 @@ def getTours(num, costs, threshold):
     p = permutations(num)
 
     #+2: the base before and after the permutation
-    toursInt = [[0 for _ in np.arange(len(p[0])+2)] for _ in np.arange(len(p))]
+    toursInt = [
+        [0 for _ in np.arange(len(p[0])+2)] for _ in np.arange(len(p))
+        ]
 
     # define the core of the tours
     for i, row in enumerate(p):

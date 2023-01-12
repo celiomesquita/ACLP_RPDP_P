@@ -136,6 +136,8 @@ def antSolve(antPallets, items, cfg, k, secBreak, antTorque, antItems, Attract, 
 
 def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, dictItems ):
 
+    solItems = common.copySolItems(dictItems["solItems"])
+
     # to control the general attractiveness for the tournament selection
     Attract = mp.Array('d', np.arange(len(items)))
     for j, _ in enumerate(Attract):
@@ -147,8 +149,6 @@ def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, dictItems )
         Phero[j] = 0.5
 
     startTime = time.perf_counter()
-
-    limit = 0.0 # ACO greedy limit: faster and better with 0.0
 
     if mode == "p":
         mode = "Parallel"
@@ -168,17 +168,17 @@ def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, dictItems )
     print(f"{len(items)} items  {len(pallets)} pallets")
 
     for i, _ in enumerate(pallets):               
-        common.fillPallet(pallets[i], items, k, solTorque, dictItems["solItems"], lock, cfg, limit)
+        common.fillPallet(pallets[i], items, k, solTorque, solItems, lock, cfg, limit)
         bestScore  += pallets[i].PCS
         if abs(pallets[i].D) > maxD:
             maxD = abs(pallets[i].D)
     
     initPallets = common.copyPallets(pallets)              
     initTorque  = solTorque
-    initItems   = common.copySolItems(dictItems["solItems"])
+    initItems   = common.copySolItems(solItems)
     initScore   = bestScore
 
-    print(f"Initial score {initScore}")
+    print(f"Greedy initial score {initScore}")
 
     # ACO phase -------------------------------------------------------------------
     iter     = 0
@@ -262,9 +262,6 @@ def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, dictItems )
                     ba = a
                     improvements += 1
 
-
-        iterItems[0] = common.copySolItems( antItems[ba] )
-
         # iteration best solution update
         if bestAntScore > bestIterScore:
             bestIterScore = bestAntScore
@@ -279,8 +276,9 @@ def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, dictItems )
   
     print(f"{improvements} improvements ({numAnts*iter} total ants).")
 
-    dictItems["solItems"] = common.copySolItems( iterItems[bi] )
-
+    if iterItems[bi] != None:
+        dictItems["solItems"]  = common.copySolItems( iterItems[bi] )
+                
     # AttractVar  = statistics.variance(Attract)
     # PheroVar    = statistics.variance(Phero)
     # AttractMean = statistics.mean(Attract)

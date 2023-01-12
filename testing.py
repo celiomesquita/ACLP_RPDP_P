@@ -23,9 +23,9 @@ surplus = "data20"
 # surplus = "data100"
 #
 # method = "ACO_mp"
-# method = "ACO"
+method = "ACO"
 # method = "Shims_mp"
-method = "Shims"
+# method = "Shims"
 
 scenario = 1
 

@@ -7,26 +7,17 @@ import shims_mp
 import aco_mp
 import optcgcons
 
-
-
 def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus):
     """
     Solves one tour
     """
-    tour.elapsed = 0
-    broke = 0
+    print(f"----- Tour {pi},", end='')
 
-    # first line for result file
-    sol = f"Tour {pi}, with {cfg.numNodes} nodes and the {cfg.size} aircraft\n"
-
-    consJK = [
-                [ common.Item(-1, -2, 0, 0, 0., -1, -1)
-                  for _ in tour.nodes ]
-                for _ in pallets
-             ]          
+    for node in tour.nodes:
+        print(f" {node.ICAO}", end='')
+    print()
 
     for k, node in enumerate(tour.nodes):  # solve each node sequentialy
-
             
         # L_k destination nodes set
         unattended = [n.ID for n in tour.nodes[k+1:]]
@@ -44,12 +35,12 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
             # numItems = first cons ID
             cons = common.loadNodeCons(surplus, scenario, inst, pi, prevNode, numItems )
 
-            if prevNode.ID < len(common.CITIES):
-                print(f"\n-----Loaded in {common.CITIES[prevNode.ID]} -----")
-                print("ID\tP\tW\tS\tV\tFROM\tTO")
-                for c in cons:
-                    print(f"{c.ID}\t{c.P}\t{c.W}\t{c.S}\t{c.V:.1f}\t{common.CITIES[c.Frm]}\t{common.CITIES[c.To]}")
-            print(f"({numItems} items to embark)")
+            # if prevNode.ID < len(common.CITIES):
+            #     print(f"\n-----Loaded in {common.CITIES[prevNode.ID]} -----")
+            #     print("ID\tP\tW\tS\tV\tFROM\tTO")
+            #     for c in cons:
+            #         print(f"{c.ID}\t{c.P}\t{c.W}\t{c.S}\t{c.V:.1f}\t{common.CITIES[c.Frm]}\t{common.CITIES[c.To]}")
+            # print(f"({numItems} items to embark)")
 
 
             # consolidated contents not destined to this point are kept on board ...
@@ -60,11 +51,11 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
                     kept.append(c) #... and included in the items set
                     numItems += 1
 
-            print(f"\n----- Kept on board at {common.CITIES[node.ID]} -----")        
-            print("ID\tP\tW\tS\tV\tFROM\tTO")
-            for c in kept:
-                print(f"{c.ID}\t{c.P}\t{c.W}\t{c.S}\t{c.V:.1f}\t{common.CITIES[c.Frm]}\t{common.CITIES[c.To]}")
-            print(f"Kept positions to be defined: ({numItems} items to embark)\n")
+            # print(f"\n----- Kept on board at {common.CITIES[node.ID]} -----")        
+            # print("ID\tP\tW\tS\tV\tFROM\tTO")
+            # for c in kept:
+            #     print(f"{c.ID}\t{c.P}\t{c.W}\t{c.S}\t{c.V:.1f}\t{common.CITIES[c.Frm]}\t{common.CITIES[c.To]}")
+            # print(f"Kept positions to be defined: ({numItems} items to embark)\n")
 
             # optimize consolidated positions to minimize CG deviation
             optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, "GRB", k)
@@ -72,25 +63,25 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
 
             # Kept P is not -2 anymore, but the pallet ID.
             
-            print("ID\tP\tW\tS\tV\tFROM\tTO")
+            # print("ID\tP\tW\tS\tV\tFROM\tTO")
             for c in kept:
                 # consolidated are appended to the items set
                 items.append(c)
-                print(f"{c.ID}\t{c.P}\t{c.W}\t{c.S}\t{c.V:.1f}\t{common.CITIES[c.Frm]}\t{common.CITIES[c.To]}")
-            print(f"Kept positions defined ({numItems} items to embark)\n")
+            #     print(f"{c.ID}\t{c.P}\t{c.W}\t{c.S}\t{c.V:.1f}\t{common.CITIES[c.Frm]}\t{common.CITIES[c.To]}")
+            # print(f"Kept positions defined ({numItems} items to embark)\n")
 
-            print("ID\tDest\tPCW\tPCV\tPCS")
-            for p in pallets:
-                print(f"{p.ID}\t{p.Dests[k]}\t{p.PCW}\t{p.PCV:.2f}\t{p.PCS}")
-            print("Pallets destinations to be defined.\n")
+            # print("ID\tDest\tPCW\tPCV\tPCS")
+            # for p in pallets:
+            #     print(f"{p.ID}\t{p.Dests[k]}\t{p.PCW}\t{p.PCV:.2f}\t{p.PCS}")
+            # print("Pallets destinations to be defined.\n")
 
         # set pallets destinations with items and consolidated to be delivered
         common.setPalletsDestinations(items, pallets, tour.nodes, k, unattended)
 
-        print("ID\tDest\tPCW\tPCV\tPCS")
-        for p in pallets:
-            print(f"{p.ID}\t{p.Dests[k]}\t{p.PCW}\t{p.PCV:.2f}\t{p.PCS}")
-        print("Pallets destinations defined.\n")
+        # print("ID\tDest\tPCW\tPCV\tPCS")
+        # for p in pallets:
+        #     print(f"{p.ID}\t{p.Dests[k]}\t{p.PCW}\t{p.PCV:.2f}\t{p.PCS}")
+        # print("Pallets destinations defined.\n")
 
         # to control solution items
         solItems = mp.Array('i', range(numItems))
@@ -115,8 +106,8 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
                         pallets[i].PCS += c.S
                         solTorque.value += float(c.W) * float(p.D)
 
-            print(f"{p.ID}\t{p.Dests[k]}\t{p.PCW}\t{p.PCV:.2f}\t{p.PCS}")
-        print(f"Pallets are now with current values defined. Torque: {solTorque.value/cfg.maxTorque:.2f}\n")
+            # print(f"{p.ID}\t{p.Dests[k]}\t{p.PCW}\t{p.PCV:.2f}\t{p.PCS}")
+        # print(f"Pallets are now with current values defined. Torque: {solTorque.value/cfg.maxTorque:.2f}\n")
         
         startNodeTime = time.perf_counter()
 
@@ -129,10 +120,10 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
             shims_mp.Solve(pallets, items, cfg, k, 0.95, secBreak, "s", solTorque, dictItems)         
 
         if method == "ACO_mp":       
-            aco_mp.Solve(pallets,   items, cfg, k, 0.05, secBreak, "p", solTorque, dictItems) 
+            aco_mp.Solve(pallets,   items, cfg, k, 0.85, secBreak, "p", solTorque, dictItems) 
 
         if method == "ACO":       
-            aco_mp.Solve(pallets,   items, cfg, k, 0.05, secBreak, "s", solTorque, dictItems) 
+            aco_mp.Solve(pallets,   items, cfg, k, 0.85, secBreak, "s", solTorque, dictItems) 
 
         nodeElapsed = time.perf_counter() - startNodeTime
 
@@ -145,8 +136,9 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
                     for _ in pallets # a consolidated for each pallet
                 ] 
 
-        pallets.sort(key=lambda x: x.ID) 
+        pallets.sort(key=lambda x: x.ID)   
 
+        # Iterate in the solution
         for j, i in enumerate(dictItems["solItems"]):
             if i > -1: # i: pallet index
                 p = pallets[i]
@@ -158,19 +150,21 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
                 consol[i][k].V += items[j].V
                 consol[i][k].S += items[j].S
 
+                tour.score += items[j].S  
+
+        epsilom = solTorque.value/cfg.maxTorque
+        tour.cost *= ( 1.0 + abs(epsilom)/20.0 )
+
         consNodeT = [None for _ in pallets]        
         for i, p in enumerate(pallets):
             consNodeT[i] = consol[i][k]
 
-        print(f"----- TOUR {pi} {node.ICAO} END -----\n")
+        print(f"----- node {node.ICAO},", end='')
+        print(f" score {tour.score:.0f}, cost {tour.cost:.0f} -----\n")
 
         # write consolidated contents from this node in file
         common.writeNodeCons(scenario, instance, consNodeT, pi, node, surplus)
-
-    common.writeTourSol(method, scenario, instance, pi, tour, cfg, pallets, consJK, False, surplus) # False -  does not generate latex solution table
             
-    return broke
-
 # end of solveTour 
 
 def writeAvgResults(method, scenario, line, surplus):
@@ -192,10 +186,9 @@ def writeAvgResults(method, scenario, line, surplus):
 
 if __name__ == "__main__":
 
-
     # scenarios = [1,2,3,4,5,6]
     scenarios = [1]
-    secBreak  = 0.7
+    secBreak  = 20.0 # second
 
     dists = common.loadDistances()
 
@@ -242,15 +235,11 @@ if __name__ == "__main__":
             cfg.weiCap = cfg.payload
 
         tours = common.getTours(cfg.numNodes-1, costs, 0.25)
+        # tours = common.getTours(cfg.numNodes-1, costs, 0.99)
 
-        broke         = 0
-        avgInstTime   = 0.
-        avgInstNumOpt = 0.
-        avgInstSC     = 0.
-        # worstDuration = 0
+        instanceTime   = 0.
+        instanceSC     = 0.
         for instance in instances:
-
-            # print(f"-> method: {method} scenario: {scenario} instance: {instance} | Tours {len(tours)}")
 
             bestSC = 0. # maximum score/cost relation
 
@@ -258,29 +247,25 @@ if __name__ == "__main__":
             searchTime = 0
             for pi, tour in enumerate(tours):
 
-                broke = solveTour(scenario, instance, pi, tour, method, pallets, cfg, secBreak, surplus) # writeTourSol is True or False
+                tour.elapsed = 0
+                tour.score   = 0.0
+
+                solveTour(scenario, instance, pi, tour, method, pallets, cfg, secBreak, surplus)
 
                 searchTime += tour.elapsed
 
-                # if tour.elapsed > worstDuration :
-                    # worstDuration = tour.elapsed
-                    
-                curSC = tour.score / tour.cost
+                tourSC = tour.score / tour.cost
 
                 # best tour parameters
-                if curSC > bestSC:
-                    bestSC = curSC
+                if tourSC > bestSC:
+                    bestSC = tourSC
             
-            avgInstTime   += searchTime
-            avgInstSC     += bestSC
+            instanceTime += searchTime
+            instanceSC   += bestSC
 
         numInst = float(len(instances))
 
-        timeString = common.getTimeString(avgInstTime, numInst, True)
-
-        avgInstSC /= numInst
-
         # instances average
-        writeAvgResults(method, scenario, f"{avgInstSC:.2f}\t{timeString}\n", surplus)
+        writeAvgResults(method, scenario, f"{instanceSC/numInst:.3f}\t{instanceTime/numInst:.3f}\n", surplus)
 
-        # print(f"{method}\t{scenario}\t{avgInstSC:.2f}\t{timeString}\t{len(tours)} tours")
+        print(f"{method}_{scenario}\t{instanceSC/numInst:.3f}\t{instanceTime/numInst:.3f}\t{len(tours)} tours\t{surplus}")

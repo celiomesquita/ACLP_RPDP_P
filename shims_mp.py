@@ -147,9 +147,13 @@ def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, dictItems): 
                 p.join()
 
     else: # serial
+        initScore = 0.0
         for i, _ in enumerate(pallets):
             common.fillPallet(  pallets[i], items, k, solTorque, solItems, lock, cfg, limit) 
+            initScore += pallets[i].PCS
             getBestShims(pallets[i], items, k, solTorque, solItems, lock, cfg, surplus)
+
+        print(f"Greedy initial score {initScore}")
                
 
     dictItems["solItems"] = common.copySolItems(solItems)
