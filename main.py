@@ -3,9 +3,10 @@ import numpy as np
 import time
 import multiprocessing as mp
 import os
-import shims_mp
-import aco_mp
+import mpShims
+import mpACO
 import optcgcons
+import mipGRB
 
 def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus):
     """
@@ -76,7 +77,8 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
             # print("Pallets destinations to be defined.\n")
 
         # set pallets destinations with items and consolidated to be delivered
-        common.setPalletsDestinations(items, pallets, tour.nodes, k, unattended)
+        if k < len(tour.nodes)-1: # except when the current node is the base
+            common.setPalletsDestinations(items, pallets, tour.nodes, k, unattended)
 
         # print("ID\tDest\tPCW\tPCV\tPCS")
         # for p in pallets:
@@ -113,17 +115,20 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
 
         dictItems = dict(solItems = solItems)
  
-        if method == "Shims_mp":
-            shims_mp.Solve(pallets, items, cfg, k, 0.95, secBreak, "p", solTorque, dictItems)
+        if method == "mpShims":
+            mpShims.Solve(pallets, items, cfg, k, 0.95, secBreak, "p", solTorque, dictItems)
 
         if method == "Shims":            
-            shims_mp.Solve(pallets, items, cfg, k, 0.95, secBreak, "s", solTorque, dictItems)         
+            mpShims.Solve(pallets, items, cfg, k, 0.95, secBreak, "s", solTorque, dictItems)         
 
-        if method == "ACO_mp":       
-            aco_mp.Solve(pallets,   items, cfg, k, 0.85, secBreak, "p", solTorque, dictItems) 
+        if method == "mpACO":       
+            mpACO.Solve(pallets,   items, cfg, k, 0.85, secBreak, "p", solTorque, dictItems) 
 
         if method == "ACO":       
-            aco_mp.Solve(pallets,   items, cfg, k, 0.85, secBreak, "s", solTorque, dictItems) 
+            mpACO.Solve(pallets,   items, cfg, k, 0.85, secBreak, "s", solTorque, dictItems) 
+
+        if method == "GRB":       
+            mipGRB.Solve(  pallets,   items, cfg, k, secBreak, dictItems) 
 
         nodeElapsed = time.perf_counter() - startNodeTime
 
@@ -188,7 +193,7 @@ if __name__ == "__main__":
 
     # scenarios = [1,2,3,4,5,6]
     scenarios = [1]
-    secBreak  = 20.0 # second
+    secBreak  = 5 # second
 
     dists = common.loadDistances()
 

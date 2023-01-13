@@ -3,29 +3,50 @@ import numpy as np
 import time
 import multiprocessing as mp
 
-import shims_mp
-import aco_mp
+import mpShims
+import mpACO
 import optcgcons
+import mipGRB
 
-"""
-Testing consolidated from cons_0_0.txt
-1230 80 9.000 0 1
-3560 90 10.000 0 2
-2340 70 11.000 0 1
-2360 60 12.000 0 2
-1250 50 13.000 0 1
-2540 40 8.000 0 2
-3540 30 7.000 0 1
-"""
+# for testing only
+def getCons(numItems):
+    """
+    Testing consolidated from cons_0_0.txt
+    """
+    cons = []
+
+    lines = [
+        [1230, 80,  9.0, 0, 1],
+        [3560, 90, 10.0, 0, 2],
+        [2340, 70, 11.0, 0, 1],
+        [2360, 60, 12.0, 0, 2],
+        [1250, 50, 13.0, 0, 1],
+        [2540, 40,  8.0, 0, 2],
+        [3540, 30,  7.0, 0, 1]
+    ]
+
+    id = numItems
+    for line in lines:
+        w   =   int(line[0])
+        s   =   int(line[1])
+        v   = float(line[2])
+        frm =   int(line[3])
+        to  =   int(line[4])         
+        cons.append( common.Item(id, -2, w, s, v, frm, to) )
+        id += 1
+
+    return cons
+
 
 surplus = "data20"
 # surplus = "data50"
 # surplus = "data100"
 #
-# method = "ACO_mp"
-method = "ACO"
-# method = "Shims_mp"
+# method = "mpACO"
+# method = "ACO"
+# method = "mpShims"
 # method = "Shims"
+method = "GRB"
 
 scenario = 1
 
@@ -72,7 +93,7 @@ for inst in instances:
 
     tour = tours[pi]
 
-    k = 1 # the first node after the base
+    k = 1 # the first node after the base: cons_0_0.txt
 
     node = tour.nodes[k]
     print(f"ICAO node: {node.ICAO}")
@@ -88,7 +109,8 @@ for inst in instances:
     prevNode = tour.nodes[k-1]
 
      # numItems = first cons ID
-    cons = common.loadNodeCons(surplus, scenario, inst, pi, prevNode, numItems )
+    # cons = common.loadNodeCons(surplus, scenario, inst, pi, prevNode, numItems )
+    cons = getCons(numItems) # for testing only
 
     if prevNode.ID < len(common.CITIES):
         print(f"\n-----Loaded in {common.CITIES[prevNode.ID]} -----")
@@ -168,18 +190,20 @@ for inst in instances:
 
     dictItems = dict(solItems = solItems)
  
-    if method == "Shims_mp":
-        shims_mp.Solve(pallets, items, cfg, k, limit, secBreak, "p", solTorque, dictItems)
+    if method == "mpShims":
+        mpShims.Solve(pallets, items, cfg, k, limit, secBreak, "p", solTorque, dictItems)
 
     if method == "Shims":            
-        shims_mp.Solve(pallets, items, cfg, k, limit, secBreak, "s", solTorque, dictItems)         
+        mpShims.Solve(pallets, items, cfg, k, limit, secBreak, "s", solTorque, dictItems)         
 
-    if method == "ACO_mp":       
-        aco_mp.Solve(pallets,   items, cfg, k, limit, secBreak, "p", solTorque, dictItems) 
+    if method == "mpACO":       
+        mpACO.Solve(pallets,   items, cfg, k, limit, secBreak, "p", solTorque, dictItems) 
 
     if method == "ACO":       
-        aco_mp.Solve(pallets,   items, cfg, k, limit, secBreak, "s", solTorque, dictItems) 
+        mpACO.Solve(pallets,   items, cfg, k, limit, secBreak, "s", solTorque, dictItems) 
 
+    if method == "GRB":       
+        mipGRB.Solve(  pallets,   items, cfg, k, secBreak, dictItems) 
     
     elapsed = time.perf_counter() - startNodeTime
 

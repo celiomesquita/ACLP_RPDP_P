@@ -1,4 +1,4 @@
-from mip import Model, xsum, minimize, BINARY, CBC, OptimizationStatus, GRB
+from mip import Model, xsum, minimize, BINARY
 
 # optimize consolidated positions to minimize CG deviation
 def OptCGCons(kept, pallets, maxTorque, method, k):

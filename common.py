@@ -206,7 +206,7 @@ def getTours(num, costs, threshold):
         nodes = []
         cost = 0.
       
-        for j, nid in enumerate(tour[:-1]):
+        for j, nid in enumerate(tour):
             n = Node(nid, 0.)
             nodes.append( n )
 
