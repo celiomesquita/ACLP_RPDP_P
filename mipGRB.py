@@ -57,7 +57,7 @@ def Solve( pallets, items, cfg, k, secBreak, dictItems ):
         )
 
     # the final torque must be between minus maxTorque and maxTorque
-    
+
         palletWeights[i] = 140 + xsum(X[i][j] * items[j].W  for j in set_N) 
 
     sumTorques = xsum( pallets[i].D * palletWeights[i] for i in set_M )
@@ -82,13 +82,8 @@ def Solve( pallets, items, cfg, k, secBreak, dictItems ):
 
     # checking if a solution was found
     if mod.num_solutions:
-
         for j in set_N:
-
-            dictItems["solItems"][j] = -1 # the default is item not allocated
-
             for i in set_M:
-
                 if X[i][j].x >= 0.99: # put items in solution
 
                     dictItems["solItems"][j] = i # item "j" is allocated to pallet "i"

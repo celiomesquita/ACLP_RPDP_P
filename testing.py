@@ -55,7 +55,8 @@ instances = [1]
 
 # limit    = 0.95 # best
 limit    = 0.95
-secBreak = 0.7 # seconds
+# secBreak = 0.7 # seconds
+secBreak = 5
 
 cfg = common.Config(scenario)                                      
 
@@ -87,7 +88,10 @@ solScore   = 0
 
 for inst in instances:    
 
-    tours = common.getTours(cfg.numNodes-1, costs, 0.25)
+    # tours = common.getTours(cfg.numNodes-1, costs, 0.25)
+    tours = common.getTours(cfg.numNodes-1, costs, 1.0)
+
+    print(f"{len(tours)} tours")
 
     pi = 0 # the first, not necessarily the best
 
@@ -253,18 +257,18 @@ for inst in instances:
     sol += f"Torque: {epsilom:.2f}\n"
     sol += f"Elapsed: {elapsed:.2f}\n"
 
-    state = "Feasible"
+    status = "Feasible"
 
     if wei > 1.001:
-        state = "Weight Unfeasible"
+        status = "Weight Unfeasible"
 
     if vol > 1.001:
-        state = "Volume Unfeasible"
+        status = "Volume Unfeasible"
 
     if abs(epsilom) > 1.001:
-        state = "Torque Unfeasible"
+        status = "Torque Unfeasible"
 
-    sol += f"State: {state}\n"
+    sol += f"Status: {status}\n"
 
     print(sol)
 
@@ -274,7 +278,7 @@ for inst in instances:
     # write consolidated contents from this node in file
     common.writeNodeCons(scenario, inst, consNodeT, pi, node, surplus)
 
-    common.writeTourSol(method, scenario, inst, pi, tour, cfg, pallets, consol, True, surplus)
+    # common.writeTourSol(method, scenario, inst, pi, tour, cfg, pallets, consol, True, surplus)
 
 # print(f"Elapsed per instance: {solElapsed/len(instances):.0f}")
 # print(f"Elapsed per instance: {solScore/len(instances):.0f}")

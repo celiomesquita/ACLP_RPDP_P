@@ -1405,42 +1405,74 @@ To find these values we submitted to test 1, 2, 4, 6, 8, 10, 12, 14, 16 parallel
 \vspace{2.0mm}
 
 \begin{table}[H]
-	\centering
-	\caption{Volume surpluses, methods and scenarios results}  \label{tab:results}
-	\footnotesize
-	%\scriptsize
-	\begin{tabular}{crcccccccc}
-		\toprule
-		                       &                            &                    &\multicolumn{6}{c}{\bf Scenarios}              &{\bf Normalized}\\
-		\cmidrule{4-9}		
-		{\bf Surplus}          & {$method$}                 &{\bf Results}       &{\bf 1}&{\bf 2}&{\bf 3}&{\bf 4}&{\bf 5}&{\bf 6}&{\bf Speed-up} \\
-		\toprule
+\centering
+\caption{Volume surpluses, methods and scenarios results}  \label{tab:results}
+\footnotesize
+%\scriptsize
+\begin{tabular}{crcccccccc}
+\toprule
+&                       &                           &\multicolumn{6}{c}{\bf Scenarios}              &{\bf Normalized}\\
+\cmidrule{4-9}		
+{\bf Surplus}           & {$method$}                &{\bf Results}       &{\bf 1}&{\bf 2}&{\bf 3}&{\bf 4}&{\bf 5}&{\bf 6}&{\bf Speed-up} \\
+\toprule
 
-		\multirow{10}{*}{$1.2$} &\multirow{2}{*}{ $Shims$}   & $f$                & 0.72  &       &        &       &       &       &   \\% 0.722	0.210
-                               &                            & {\bf run-time (s)} & < 1   &       &        &       &       &       &   \\%\cmidrule{2-10}
-		
-		                       &\multirow{2}{*}{ $mpShims$} & $f$                & 0.72  & 3.09  & 2.94  & 2.90  & 2.79  & 5.70  & 0.91  \\%2312
-		                       &                            & {\bf run-time (s)} & < 1   & 3     & 7     & 26    & 97    & 267   & 70  \\%390
-		                       
-		                       \cmidrule{2-10}
-		                       &\multirow{2}{*}{ $ACO$}     & $f$                & 2.88  & 3.78  & 3.19  & 3.17  & 2.97  & 5.87  & 1.00  \\ %2.850   29.488
-                               &                            & {\bf run-time (s)} & 15    & 282   & 314   & 1334  & 6945  & 18883 & 1  \\ %27162
-		\cmidrule{2-10}		                       
-							   &\multirow{2}{*}{ $mpACO$}   & $f$                & 2.62  & 3.94  & 3.17  & 3.10  & 2.95  & 6.03  & 1.00  \\ % 2.644   13.033
-							   &                            & {\bf run-time (s)} & 11     & 24    & 49    & 196   & 1014  & 2759  & 6.8  \\                               
-		
-		\cmidrule{2-10}		                       
-                               &\multirow{2}{*}{ $Gurobi$}  & $f$                & 7.78  & 3.94  & 3.17  & 3.10  & 2.95  & 6.03  & 1.00  \\ % 7.779   1.549
-                               &                            & {\bf run-time (s)} & 2     & 24    & 49    & 196   & 1014  & 2759  & 6.8  \\                               
-		
-		\midrule
-		
+\multirow{10}{*}{$1.2$} &\multirow{2}{*}{ $Shims$}  & $f$                &       &       &        &       &       &       &   \\%
+&                                                   & {\bf run-time (s)} & < 1   &       &        &       &       &       &   \\%
+\cmidrule{2-10}
+&\multirow{2}{*}{ $mpShims$}                        & $f$                &       &       &        &       &       &       &   \\%
+&                                                   & {\bf run-time (s)} & < 1   &       &        &       &       &       &   \\%
 
-		\bottomrule	
-		
+\cmidrule{2-10}
+&\multirow{2}{*}{ $ACO$}                            & $f$                & 2.85  &       &        &       &       &       &   \\%
+&                                                   & {\bf run-time (s)} & 15    &       &        &       &       &       &   \\%
+\cmidrule{2-10}		                       
+&\multirow{2}{*}{ $mpACO$}                          & $f$                & 3.63  &       &        &       &       &       &   \\%
+&                                                   & {\bf run-time (s)} & 11    &       &        &       &       &       &   \\%
 
-	\end{tabular}
-\textsuperscript{The numbers 0.7s and 60s as superscript on the methods names represent the time limit per node.}	
+\cmidrule{2-10}		                       
+&\multirow{2}{*}{ $Gurobi$}                         & $f$                & 6.35  &       &        &       &       &       &   \\%
+&                                                   & {\bf run-time (s)} & 2     &       &        &       &       &       &   \\%
+
+\midrule
+\multirow{10}{*}{$1.5$} &\multirow{2}{*}{ $Shims$}  & $f$                &       &       &        &       &       &       &   \\%
+&                                                   & {\bf run-time (s)} & < 1   &       &        &       &       &       &   \\%
+\cmidrule{2-10}
+&\multirow{2}{*}{ $mpShims$}                        & $f$                &       &       &        &       &       &       &   \\%
+&                                                   & {\bf run-time (s)} & < 1   &       &        &       &       &       &   \\%
+
+\cmidrule{2-10}
+&\multirow{2}{*}{ $ACO$}                            & $f$                & 2.85  &       &        &       &       &       &   \\%
+&                                                   & {\bf run-time (s)} & 15    &       &        &       &       &       &   \\%
+\cmidrule{2-10}		                       
+&\multirow{2}{*}{ $mpACO$}                          & $f$                & 3.63  &       &        &       &       &       &   \\%
+&                                                   & {\bf run-time (s)} & 11    &       &        &       &       &       &   \\%
+
+\cmidrule{2-10}		                       
+&\multirow{2}{*}{ $Gurobi$}                         & $f$                & 6.35  &       &        &       &       &       &   \\%
+&                                                   & {\bf run-time (s)} & 2     &       &        &       &       &       &   \\%
+
+\midrule
+\multirow{10}{*}{$2.0$} &\multirow{2}{*}{ $Shims$}  & $f$                &       &       &        &       &       &       &   \\%
+&                                                   & {\bf run-time (s)} & < 1   &       &        &       &       &       &   \\%
+\cmidrule{2-10}
+&\multirow{2}{*}{ $mpShims$}                        & $f$                &       &       &        &       &       &       &   \\%
+&                                                   & {\bf run-time (s)} & < 1   &       &        &       &       &       &   \\%
+
+\cmidrule{2-10}
+&\multirow{2}{*}{ $ACO$}                            & $f$                & 2.85  &       &        &       &       &       &   \\%
+&                                                   & {\bf run-time (s)} & 15    &       &        &       &       &       &   \\%
+\cmidrule{2-10}		                       
+&\multirow{2}{*}{ $mpACO$}                          & $f$                & 3.63  &       &        &       &       &       &   \\%
+&                                                   & {\bf run-time (s)} & 11    &       &        &       &       &       &   \\%
+
+\cmidrule{2-10}		                       
+&\multirow{2}{*}{ $Gurobi$}                         & $f$                & 6.35  &       &        &       &       &       &   \\%
+&                                                   & {\bf run-time (s)} & 2     &       &        &       &       &       &   \\%
+
+\bottomrule	
+
+\end{tabular}
+%\textsuperscript{The numbers 0.7s and 60s as superscript on the methods names represent the time limit per node.}	
 \normalsize
 \end{table}
 
