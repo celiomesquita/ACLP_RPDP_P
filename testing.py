@@ -16,8 +16,8 @@ def getCons(numItems):
     cons = []
 
     lines = [
-        [1230, 80,  9.0, 0, 1],
-        [3560, 90, 10.0, 0, 2],
+        [1230, 80,  9.0, 0, 1], # from the base to the first node
+        [3560, 90, 10.0, 0, 2], # from the base to the second node
         [2340, 70, 11.0, 0, 1],
         [2360, 60, 12.0, 0, 2],
         [1250, 50, 13.0, 0, 1],
@@ -55,8 +55,8 @@ instances = [1]
 
 # limit    = 0.95 # best
 limit    = 0.95
-# secBreak = 0.7 # seconds
-secBreak = 5
+secBreak = 0.7 # seconds
+# secBreak = 60
 
 cfg = common.Config(scenario)                                      
 
@@ -66,8 +66,8 @@ dists = common.loadDistances()
 costs = [[0.0 for _ in dists] for _ in dists]
 
 for i, cols in enumerate(dists):
-    for j, value in enumerate(cols):
-        costs[i][j] = cfg.kmCost*value
+    for j, dist in enumerate(cols):
+        costs[i][j] = cfg.kmCost*dist
 
 pallets = common.loadPallets(cfg)
 
@@ -88,8 +88,8 @@ solScore   = 0
 
 for inst in instances:    
 
-    # tours = common.getTours(cfg.numNodes-1, costs, 0.25)
-    tours = common.getTours(cfg.numNodes-1, costs, 1.0)
+    tours = common.getTours(cfg.numNodes-1, costs, 0.25)
+    # tours = common.getTours(cfg.numNodes-1, costs, 1.0)
 
     print(f"{len(tours)} tours")
 
@@ -139,7 +139,8 @@ for inst in instances:
     print(f"Kept positions to be defined: ({numItems} items to embark)\n")
 
     # optimize consolidated positions to minimize CG deviation
-    optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, "GRB", k)
+    if method != "GRB":
+        optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, "GRB", k)
     # pallets destinations are also set, according to kept on board in new positions
 
     # Kept P is not -2 anymore, but the pallet ID.

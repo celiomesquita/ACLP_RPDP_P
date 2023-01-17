@@ -4,7 +4,6 @@ from mip import Model, xsum, maximize, BINARY
 from time import time
     
 def Solve( pallets, items, cfg, k, secBreak, dictItems ):
-# def Solve(method, pallets, items, cons, nodes, maxTorque, Limited, maxWei, secBreak):
 
     N = len(items)
     M = len(pallets)
@@ -20,7 +19,7 @@ def Solve( pallets, items, cfg, k, secBreak, dictItems ):
     mod.threads     = 1
     mod.max_seconds = secBreak
 
-    # decision matrix for which items will be put in which pallet in which node
+    # decision matrix for which items will be put in which pallet in node "k"
     X = [
             [ mod.add_var(name=f"X({i},{j})", var_type=BINARY) for j in set_N
             ]                                                  for i in set_M
@@ -32,13 +31,18 @@ def Solve( pallets, items, cfg, k, secBreak, dictItems ):
     mod.objective = maximize( score )
 
     # CONSTRAINTS ----------------------------------------------------------------------------
-    xsum(X[i][j] for i in set_M for j in set_N) <= 1  # each must be included at most once
+    
+    # each item must be included at most once
+    xsum(X[i][j] for i in set_M for j in set_N if items[j].P == -1) <= 1
+
+    # each consolidated must be included exactly once
+    xsum(X[i][j] for i in set_M for j in set_N if items[j].P != -1) == 1
 
     for i in set_M:
 
         for j in set_N:
 
-            # items must be grouped by the same destination
+            # items must be grouped in a pallet with the same destination
             mod.add_constr(
                 X[i][j] <= X[i][j] * ( pallets[i].Dests[k] - items[j].To + 1 )
             )
@@ -56,8 +60,7 @@ def Solve( pallets, items, cfg, k, secBreak, dictItems ):
             xsum(X[i][j] * items[j].V for j in set_N) <= pallets[i].V
         )
 
-    # the final torque must be between minus maxTorque and maxTorque
-
+        # the final torque must be between minus maxTorque and maxTorque
         palletWeights[i] = 140 + xsum(X[i][j] * items[j].W  for j in set_N) 
 
     sumTorques = xsum( pallets[i].D * palletWeights[i] for i in set_M )

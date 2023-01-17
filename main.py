@@ -59,7 +59,8 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
             # print(f"Kept positions to be defined: ({numItems} items to embark)\n")
 
             # optimize consolidated positions to minimize CG deviation
-            optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, "GRB", k)
+            if method != "GRB":
+                optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, "GRB", k)
             # pallets destinations are also set, according to kept on board in new positions
 
             # Kept P is not -2 anymore, but the pallet ID.
@@ -134,7 +135,7 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
 
         tour.elapsed += nodeElapsed
 
-        # consolidated matrix nodes x pallets
+        # consolidated matrix: nodes x pallets
         consol = [
                     [ common.Item(-1, -2, 0, 0, 0., -1, -1)
                     for _ in tour.nodes ]
@@ -193,7 +194,7 @@ if __name__ == "__main__":
 
     # scenarios = [1,2,3,4,5,6]
     scenarios = [1]
-    secBreak  = 5 # second
+    secBreak  = 0.7 # second
 
     dists = common.loadDistances()
 
@@ -223,8 +224,8 @@ if __name__ == "__main__":
         cfg = common.Config(scenario)
         
         for i, cols in enumerate(dists):
-            for j, value in enumerate(cols):
-                costs[i][j] = cfg.kmCost*value
+            for j, dist in enumerate(cols):
+                costs[i][j] = cfg.kmCost*dist
 
         pallets = common.loadPallets(cfg)
 

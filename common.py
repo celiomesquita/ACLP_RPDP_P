@@ -529,6 +529,33 @@ def writeTourSol(method, scenario, instance, pi, tour, cfg, pallets, cons, write
         finally:
             writer.close() 
 
+def getTourValue(tour, cfg, pallets, cons):
+
+    sTourAccum = 0
+
+    for k, _ in enumerate(tour.nodes[:cfg.numNodes]):
+
+        sNodeAccum = 0.
+        wNodeAccum = 0.
+        vNodeAccum = 0.
+        tau = 0.
+
+        for i, _ in enumerate(pallets):
+
+            wNodeAccum += float(cons[i][k].W)
+            vNodeAccum += float(cons[i][k].V)
+            sNodeAccum += float(cons[i][k].S)
+            tau += float(cons[i][k].W) * pallets[i].D
+
+        epsilom = tau/cfg.aircraft.maxTorque
+
+        sTourAccum += sNodeAccum
+
+        # Equation 3: 5% penalty at most, due to CG unbalance
+        tour.cost += abs(epsilom) * (tour.legsCosts[k+1] / 20)
+
+    return float(sTourAccum)/tour.cost
+
 if __name__ == "__main__":
 
     print("----- Please execute module main -----")
