@@ -33,10 +33,9 @@ def Solve( pallets, items, cfg, k, secBreak, dictItems ):
     # CONSTRAINTS ----------------------------------------------------------------------------
     
     # each item must be included at most once
-    xsum(X[i][j] for i in set_M for j in set_N if items[j].P == -1) <= 1
+    xsum(X[i][j] for i in set_M for j in set_N) <= 1
 
-    # each consolidated must be included exactly once
-    xsum(X[i][j] for i in set_M for j in set_N if items[j].P != -1) == 1
+    xsum(X[i][j] for i in set_M for j in set_N if dictItems["solItems"][j] == i) == 1
 
     for i in set_M:
 
@@ -82,11 +81,15 @@ def Solve( pallets, items, cfg, k, secBreak, dictItems ):
     status = mod.optimize()        
 
     print(status)
+    print(mod.objective_value)
 
     # checking if a solution was found
     if mod.num_solutions:
         for j in set_N:
             for i in set_M:
+
+                # dictItems["solItems"][j] = -1
+
                 if X[i][j].x >= 0.99: # put items in solution
 
                     dictItems["solItems"][j] = i # item "j" is allocated to pallet "i"

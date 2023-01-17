@@ -78,7 +78,7 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
             # print("Pallets destinations to be defined.\n")
 
         # set pallets destinations with items and consolidated to be delivered
-        if k < len(tour.nodes)-1: # except when the current node is the base
+        if k < len(tour.nodes)-1: # except when the current node is the base on returning
             common.setPalletsDestinations(items, pallets, tour.nodes, k, unattended)
 
         # print("ID\tDest\tPCW\tPCV\tPCS")
@@ -86,12 +86,14 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
         #     print(f"{p.ID}\t{p.Dests[k]}\t{p.PCW}\t{p.PCV:.2f}\t{p.PCS}")
         # print("Pallets destinations defined.\n")
 
-        # to control solution items
+        # a multiprocessing array to control solution items
         solItems = mp.Array('i', range(numItems))
         for j, _ in enumerate(solItems):
             solItems[j] = -1 # not alocated to any pallet
 
-        solTorque = mp.Value('d') # solution global torque to be shared and changed by all pallets concurrently
+        # a multiprocessing variable: solution global torque to be shared and
+        # changed by all pallets concurrently when solved by mpShims
+        solTorque = mp.Value('d')
         solTorque.value = 0.0
 
         if k > 0: # not in the base
@@ -240,8 +242,11 @@ if __name__ == "__main__":
         if cfg.weiCap > cfg.payload:
             cfg.weiCap = cfg.payload
 
-        tours = common.getTours(cfg.numNodes-1, costs, 0.25)
-        # tours = common.getTours(cfg.numNodes-1, costs, 0.99)
+        perc = 1.0
+        if cfg.numNodes >= 3:
+            perc = 0.25
+
+        tours = common.getTours(cfg.numNodes-1, costs, perc)
 
         instanceTime   = 0.
         instanceSC     = 0.
