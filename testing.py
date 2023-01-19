@@ -183,7 +183,6 @@ for inst in instances:
 
     # solution global torque to be shared and changed by all pallets concurrently
     solTorque = mp.Value('d', 0.0) # a multiprocessing double type variable
-    # solTorque.value = 0.0        
 
     # update pallets current parameters and solution torque
     for i, p in enumerate(pallets):
@@ -200,6 +199,8 @@ for inst in instances:
     startNodeTime = time.perf_counter()
 
     dictItems = dict(solItems = solItems)
+
+    # dictItems["solItems"] = common.copySolItems(solItems)
  
     if method == "mpShims":
         mpShims.Solve(pallets, items, cfg, k, limit, secBreak, "p", solTorque, dictItems)
@@ -232,7 +233,7 @@ for inst in instances:
     vNodeAccum = 0.
     sol = ""
 
-    pallets.sort(key=lambda x: x.ID) 
+    # pallets.sort(key=lambda x: x.ID) 
 
     for j, i in enumerate(dictItems["solItems"]):
         if i > -1: # i: pallet index
@@ -264,7 +265,7 @@ for inst in instances:
     sol += f"Torque: {epsilom:.2f}\n"
     sol += f"Elapsed: {elapsed:.2f}\n"
 
-    print(f"Testing solution ----- \n{sol}")
+    print(f"Testing dictItems solution ----- \n{sol}")
 
     # solElapsed += elapsed
     # solScore   += sNodeAccum

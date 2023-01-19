@@ -63,8 +63,7 @@ class Pallet(object):
 
         if feasible:
             with lock:
-
-                if solItems[item.ID] > -1: # if item is allocated to some pallet
+                if solItems[item.ID] > -1 : # if item is allocated to some pallet
                     feasible = False
 
                 if feasible:
@@ -123,12 +122,12 @@ def fillPallet(pallet, items, k, solTorque, solItems, lock, cfg, limit):
             pallet.putItem(item, solTorque, solItems, lock)
 
 # mount the decision matrix for which items will be put in which pallets
-def getSolMatrix(edges, numPallets, numItems):
-    X = np.zeros((numPallets,numItems))
-    for e in edges:
-        if e.InSol:
-            X[e.Pallet.ID][e.Item.ID] = 1
-    return X
+# def getSolMatrix(edges, numPallets, numItems):
+#     X = np.zeros((numPallets,numItems))
+#     for e in edges:
+#         if e.InSol:
+#             X[e.Pallet.ID][e.Item.ID] = 1
+#     return X
 
 def loadDistances():
     fname =  f"./params/distances.txt"      

@@ -3,10 +3,11 @@
 from mip import Model, xsum, maximize, BINARY
 from time import time
 import common
+import multiprocessing as mp
+import numpy as np
+
     
 def Solve( pallets, items, cfg, k, secBreak, solTorque, dictItems ):
-
-    # solItems = common.copySolItems(dictItems["solItems"])
 
     N = len(items)
     M = len(pallets)
@@ -87,26 +88,27 @@ def Solve( pallets, items, cfg, k, secBreak, solTorque, dictItems ):
     # print(mod.objective_value)
 
     # checking if a solution was found
-    if mod.num_solutions:
+    if mod.num_solutions:   
 
         sNodeAccum = 0.
         wNodeAccum = 0.
         vNodeAccum = 0.
         sol = ""
+        pAccum   = [0.0 for _ in pallets]
 
+        solItems = mp.Array('i', [0]*N*M)
+   
         # reset empty pallets torque
         solTorque.value = 0.0
         for i in set_M:
             solTorque.value += 140.0 * pallets[i].D         
 
-        for j in set_N:
-            dictItems["solItems"][j] = -1 # clean solution vector
-
-            for i in set_M:
+            for j in set_N:
 
                 if X[i][j].x >= 0.99: # put items in solution
 
                     dictItems["solItems"][j] = i # item "j" is allocated to pallet "i"
+                    solItems[N*i+j]          = 1
 
                     solTorque.value += items[j].W * pallets[i].D 
 
@@ -114,6 +116,9 @@ def Solve( pallets, items, cfg, k, secBreak, solTorque, dictItems ):
                     wNodeAccum += float(items[j].W)
                     vNodeAccum += float(items[j].V)
 
+                    pAccum[i] += float(items[j].W)
+
+            print(f"1 pAccum[{i}]: {pAccum[i]}")
 
         epsilom = solTorque.value/cfg.maxTorque
 
@@ -125,27 +130,38 @@ def Solve( pallets, items, cfg, k, secBreak, solTorque, dictItems ):
         sol += f"Volume: {vol:.2f}\t"
         sol += f"Torque: {epsilom:.2f}\n"
 
-        print(f"1: mipGRB solution ----- \n{sol}")
+        print(f"1: mipGRB X[i][j].x solution ----- \n{sol}")
 
         sNodeAccum = 0.
         wNodeAccum = 0.
         vNodeAccum = 0.
         sol = ""
         # reset empty pallets torque
-        solTorque.value = 0.0
+        torque = 0.0
         for i in set_M:
-            solTorque.value += 140.0 * pallets[i].D  
+            torque += 140.0 * pallets[i].D
+            pAccum[i] = 0.0      
 
-        for j, i in enumerate(dictItems["solItems"]):
-            if i > -1: # i: pallet index
+        Y = np.reshape(solItems, (-1, N))
 
-                solTorque.value += items[j].W * pallets[i].D
+        for i, row in enumerate(Y):
+            for j, content in enumerate(row):
 
-                sNodeAccum += float(items[j].S)
-                wNodeAccum += float(items[j].W)
-                vNodeAccum += float(items[j].V)
+                if content == 1:
 
-        epsilom = solTorque.value/cfg.maxTorque
+                    torque += items[j].W * pallets[i].D
+
+                    sNodeAccum += float(items[j].S)
+                    wNodeAccum += float(items[j].W)
+                    vNodeAccum += float(items[j].V)
+
+                    pAccum[i] += float(items[j].W)
+
+
+        for i in set_M:
+            print(f"2 pAccum[{i}]: {pAccum[i]}")
+
+        epsilom = torque/cfg.maxTorque
 
         vol = vNodeAccum/cfg.volCap
         wei = wNodeAccum/cfg.weiCap
@@ -155,7 +171,7 @@ def Solve( pallets, items, cfg, k, secBreak, solTorque, dictItems ):
         sol += f"Volume: {vol:.2f}\t"
         sol += f"Torque: {epsilom:.2f}\n"
 
-        print(f"2: mipGRB solution ----- \n{sol}")
+        print(f"2: mipGRB solItems solution ----- \n{sol}")
 
 
 

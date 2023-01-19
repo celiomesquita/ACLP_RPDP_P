@@ -92,7 +92,11 @@ def getBestShims(pallet, items, k, solTorque, solItems, lock, cfg, surplus):
 
 def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, dictItems): # items include kept on board
 
-    # solTorque was first updated when consolidaded were put in the pallets
+    N = len(items)
+    M = len(pallets)
+
+    set_M = range( M ) # i, pallets
+    set_N = range( N ) # j, items
 
     if mode == "p":
         mode = "Parallel"
@@ -102,8 +106,8 @@ def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, dictItems): 
     print(f"\n{mode} Shims for ACLP+RPDP")
 
     # surplus = math.exp(-limit) + 0.9
-    # surplus = 1. + 2. * (1. - limit)
-    surplus = (2. - limit)
+    surplus = 1. + 3. * (1. - limit)
+    # surplus = (2. - limit)
 
     print(f"surplus: {surplus:.2f}")
 
@@ -113,7 +117,6 @@ def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, dictItems): 
 
     # sort ascendent by CG distance
     pallets.sort(key=lambda x: abs(x.D), reverse=False)
-
 
     if mode == "p":
 
@@ -147,12 +150,11 @@ def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, dictItems): 
     else: # serial
         initScore = 0.0
         for i, _ in enumerate(pallets):
-            common.fillPallet(  pallets[i], items, k, solTorque, dictItems["solItems"], lock, cfg, limit) 
+            common.fillPallet( pallets[i], items, k, solTorque, dictItems["solItems"], lock, cfg, limit) 
             initScore += pallets[i].PCS
-            getBestShims(pallets[i], items, k, solTorque, dictItems["solItems"], lock, cfg, surplus)
+            getBestShims(      pallets[i], items, k, solTorque, dictItems["solItems"], lock, cfg, surplus)
 
-        print(f"Greedy initial score {initScore}")
-               
+        print(f"Greedy initial score {initScore}")            
 
 if __name__ == "__main__":
 
