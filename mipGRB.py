@@ -32,24 +32,24 @@ def Solve( pallets, items, cfg, k, secBreak, solTorque, solDict, mpItemsDict ):
         ]
          
     # consolidated are included in items
-    score = xsum( X[i][j] * items[j].S  for i in set_M for j in set_N)
+    scoreItem = xsum( X[i][j] * items[j].S     for i in set_M for j in set_N if items[j].P == -1)
+    scoreCons = xsum( X[i][j] * items[j].S*50  for i in set_M for j in set_N if items[j].P == -2)
 
-    mod.objective = maximize( score )
+    mod.objective = maximize( scoreItem + scoreCons )
 
     # CONSTRAINTS ----------------------------------------------------------------------------
     
-
     for j in set_N:
         # each item must be included at most once
         mod.add_constr(
             xsum(X[i][j] for i in set_M ) <= 1
         )
 
-        # each consolidated must be included exactly once
-        if items[j].P == -2:
-            mod.add_constr(
-                xsum(X[i][j] for i in set_M ) == 1
-            )
+        # each consolidated must be included exactly once: deactivated because some infesibilities
+        # if items[j].P == -2: # pallet not set
+        #     mod.add_constr(
+        #         xsum(X[i][j] for i in set_M ) == 1
+        #     )
 
     for i in set_M:
 

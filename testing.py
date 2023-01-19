@@ -45,14 +45,14 @@ def getCons(N, rndm):
 
 
 # surplus = "data20"
-surplus = "data50"
-# surplus = "data100"
+# surplus = "data50"
+surplus = "data100"
 #
 # method = "mpACO"
-method = "ACO"
+# method = "ACO"
 # method = "mpShims"
 # method = "Shims"
-# method = "GRB"
+method = "GRB"
 
 scenario = 1
 
@@ -146,8 +146,8 @@ for inst in instances:
     print(f"Kept positions to be defined: ({N} items to embark)\n")
 
     # optimize consolidated positions to minimize CG deviation
-    # if method != "GRB":
-    optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, "GRB", k)
+    if method != "GRB":
+        optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, "GRB", k)
     # pallets destinations are also set, according to kept on board in new positions
 
     # Kept P is not -2 anymore, but the pallet ID.
