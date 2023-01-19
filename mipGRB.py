@@ -7,7 +7,9 @@ import multiprocessing as mp
 import numpy as np
 
     
-def Solve( pallets, items, cfg, k, secBreak, solTorque, solDict ):
+def Solve( pallets, items, cfg, k, secBreak, solTorque, solDict, mpItemsDict ):
+    
+    # mpItemsDict to control items inclusion feasibility
 
     N = len(items)
     M = len(pallets)
@@ -36,17 +38,23 @@ def Solve( pallets, items, cfg, k, secBreak, solTorque, solDict ):
 
     # CONSTRAINTS ----------------------------------------------------------------------------
     
-    # each item must be included at most once
-    xsum(X[i][j] for j in set_N for i in set_M ) <= 1
 
-    # each consolidated must be included exactly once 
-    xsum(X[i][j] for j in set_N for i in set_M if solDict["solMatrix"][N*i+j] == 1) == 1
+    for j in set_N:
+        # each item must be included at most once
+        mod.add_constr(
+            xsum(X[i][j] for i in set_M ) <= 1
+        )
+
+        # each consolidated must be included exactly once
+        if items[j].P == -2:
+            mod.add_constr(
+                xsum(X[i][j] for i in set_M ) == 1
+            )
 
     for i in set_M:
 
+        # items must be grouped in a pallet with the same destination
         for j in set_N:
-
-            # items must be grouped in a pallet with the same destination
             mod.add_constr(
                 X[i][j] <= X[i][j] * ( pallets[i].Dests[k] - items[j].To + 1 )
             )
@@ -64,6 +72,7 @@ def Solve( pallets, items, cfg, k, secBreak, solTorque, solDict ):
             xsum(X[i][j] * items[j].V for j in set_N) <= pallets[i].V
         )
 
+        # for torque calculation
         palletWeights[i] = 140 + xsum(X[i][j] * items[j].W  for j in set_N)
 
     # the final torque must be between minus maxTorque and maxTorque
@@ -103,7 +112,10 @@ def Solve( pallets, items, cfg, k, secBreak, solTorque, solDict ):
 
                     solDict["solMatrix"][N*i+j] = 1
 
-                    solTorque.value += items[j].W * pallets[i].D 
+                    solTorque.value += items[j].W * pallets[i].D
+
+                    if mpItemsDict["mpItems"][j] == 0:
+                        mpItemsDict["mpItems"][j] = 1
 
 if __name__ == "__main__":
 

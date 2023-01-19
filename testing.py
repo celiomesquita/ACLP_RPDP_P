@@ -44,8 +44,8 @@ def getCons(N, rndm):
     return cons
 
 
-surplus = "data20"
-# surplus = "data50"
+# surplus = "data20"
+surplus = "data50"
 # surplus = "data100"
 #
 # method = "mpACO"
@@ -121,7 +121,8 @@ for inst in instances:
      # N = first cons ID
     # cons = common.loadNodeCons(surplus, scenario, inst, pi, prevNode, N )
     # cons = getCons(N, True) # for testing only
-    cons = getCons(N, False) # False: no randomness in consolidated generation 
+    cons = getCons(N, False) # False: no randomness in consolidated generation
+    # cons = getCons(N, True) 
 
     if prevNode.ID < len(common.CITIES):
         print(f"\n-----Loaded in {common.CITIES[prevNode.ID]} -----")
@@ -174,7 +175,8 @@ for inst in instances:
 
     # to control solution items
     M = len(pallets)
-    solMatrix = mp.Array('i', [0 for _ in np.arange(N*M)] )      
+    solMatrix = mp.Array('i', [0 for _ in np.arange(N*M)] )
+    mpItems   = mp.Array('i', [0 for _ in np.arange(N)] ) # to check items inclusions feasibility
 
     # put the kept on board in solution
     for c in kept:
@@ -182,6 +184,7 @@ for inst in instances:
         j = c.ID
         # solItems[j] = i # consol pallet index
         solMatrix[N*i+j] = 1
+        mpItems[j] = 1
 
     # solution global torque to be shared and changed by all pallets concurrently
     solTorque = mp.Value('d', 0.0) # a multiprocessing double type variable
@@ -200,22 +203,23 @@ for inst in instances:
     
     startNodeTime = time.perf_counter()
 
-    solDict = dict(solMatrix=solMatrix)
+    solDict     = dict(solMatrix=solMatrix)
+    mpItemsDict = dict(mpItems=mpItems)
  
     if method == "mpShims":
-        mpShims.Solve(pallets, items, cfg, k, limit, secBreak, "p", solTorque, solDict)
+        mpShims.Solve(pallets, items, cfg, k, limit, secBreak, "p", solTorque, solDict, mpItemsDict)
 
     if method == "Shims":            
-        mpShims.Solve(pallets, items, cfg, k, limit, secBreak, "s", solTorque, solDict)         
+        mpShims.Solve(pallets, items, cfg, k, limit, secBreak, "s", solTorque, solDict, mpItemsDict)         
 
     if method == "mpACO":       
-        mpACO.Solve(pallets,   items, cfg, k, limit, secBreak, "p", solTorque, solDict) 
+        mpACO.Solve(pallets,   items, cfg, k, limit, secBreak, "p", solTorque, solDict, mpItemsDict) 
 
     if method == "ACO":       
-        mpACO.Solve(pallets,   items, cfg, k, limit, secBreak, "s", solTorque, solDict) 
+        mpACO.Solve(pallets,   items, cfg, k, limit, secBreak, "s", solTorque, solDict, mpItemsDict) 
 
     if method == "GRB":       
-        mipGRB.Solve(pallets,  items, cfg, k,        secBreak,      solTorque, solDict) 
+        mipGRB.Solve(pallets,  items, cfg, k,        secBreak,      solTorque, solDict, mpItemsDict) 
     
     elapsed = time.perf_counter() - startNodeTime
 
@@ -233,15 +237,11 @@ for inst in instances:
     vNodeAccum = 0.
     sol = ""
 
-    # pallets.sort(key=lambda x: x.ID) 
-
     Y = np.reshape(solDict["solMatrix"], (-1, N)) # N number of items (columns)
 
     for i, row in enumerate(Y):
-        for j, content in enumerate(row):
-
-            if content:    
-
+        for j, X_ij in enumerate(row):
+            if X_ij:    
                 p = pallets[i]
                 consol[i][k].ID  = j+N
                 consol[i][k].Frm = node.ID
@@ -255,6 +255,12 @@ for inst in instances:
                 wNodeAccum += float(items[j].W)
                 vNodeAccum += float(items[j].V)
 
+    feasible = "Feasible"                
+    for n in mpItemsDict["mpItems"]:
+        if n > 1:
+            feasible = "Unfeasible!!!"
+            break    
+
     consNodeT = [None for _ in pallets]        
     for i, p in enumerate(pallets):
         consNodeT[i] = consol[i][k]
@@ -264,13 +270,16 @@ for inst in instances:
     vol = vNodeAccum/cfg.volCap
     wei = wNodeAccum/cfg.weiCap
 
+
+
     sol += f"Score: {sNodeAccum:.0f}\t"
     sol += f"Weight: {wei:.2f}\t"
     sol += f"Volume: {vol:.2f}\t"
-    sol += f"Torque: {epsilom:.2f}\n"
+    sol += f"Torque: {epsilom:.2f}\t"
+    sol += f"Items: {feasible}\n"
     sol += f"Elapsed: {elapsed:.2f}\n"
 
-    print(f"Testing solution ----- \n{sol}")
+    print(f"Testing solution ----- \n{sol}\n")
 
     # solElapsed += elapsed
     # solScore   += sNodeAccum

@@ -18,7 +18,10 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
         print(f" {node.ICAO}", end='')
     print()
 
+    base = len(tour.nodes)-1
+
     for k, node in enumerate(tour.nodes):  # solve each node sequentialy
+
             
         # L_k destination nodes set
         unattended = [n.ID for n in tour.nodes[k+1:]]
@@ -28,7 +31,7 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
         numItems = len(items)
         # print(f"number of items: {numItems}")
 
-        if k > 0: # not in the base
+        if k > 0 and k < base: # not in the base
 
             # load consolidated generated in the previous node
             prevNode = tour.nodes[k-1]
@@ -59,8 +62,8 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
             # print(f"Kept positions to be defined: ({numItems} items to embark)\n")
 
             # optimize consolidated positions to minimize CG deviation
-            if method != "GRB":
-                optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, "GRB", k)
+            # if method != "GRB":
+            optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, "GRB", k)
             # pallets destinations are also set, according to kept on board in new positions
 
             # Kept P is not -2 anymore, but the pallet ID.
@@ -78,8 +81,10 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
             # print("Pallets destinations to be defined.\n")
 
         # set pallets destinations with items and consolidated to be delivered
-        if k < len(tour.nodes)-1: # except when the current node is the base on returning
+        if k < base: # except when the current node is the base on returning
             common.setPalletsDestinations(items, pallets, tour.nodes, k, unattended)
+        else:
+            return # skip solving because it's the base on returning
 
         # print("ID\tDest\tPCW\tPCV\tPCS")
         # for p in pallets:
@@ -87,20 +92,23 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
         # print("Pallets destinations defined.\n")
 
         # a multiprocessing array to control solution items
-        solItems = mp.Array('i', range(numItems))
-        for j, _ in enumerate(solItems):
-            solItems[j] = -1 # not alocated to any pallet
+        # to control solution items
+        M = len(pallets)
+        N = len(items)
+        solMatrix = mp.Array('i', [0 for _ in np.arange(N*M)] )      
+
 
         # a multiprocessing variable: solution global torque to be shared and
         # changed by all pallets concurrently when solved by mpShims
-        solTorque = mp.Value('d')
-        solTorque.value = 0.0
+        solTorque = mp.Value('d', 0.0)
 
         if k > 0: # not in the base
 
             # put the kept on board in solution
             for c in kept:
-                solItems[c.ID] = c.P
+                i = c.P
+                j = c.ID
+                solMatrix[N*i+j] = 1
 
             # update pallets current parameters and solution torque
             for i, p in enumerate(pallets):
@@ -116,26 +124,30 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
         
         startNodeTime = time.perf_counter()
 
-        dictItems = dict(solItems = solItems)
+        solDict = dict(solMatrix=solMatrix)
  
         if method == "mpShims":
-            mpShims.Solve(pallets, items, cfg, k, 0.95, secBreak, "p", solTorque, dictItems)
+            mpShims.Solve(pallets, items, cfg, k, 0.95, secBreak, "p", solTorque, solDict)
 
         if method == "Shims":            
-            mpShims.Solve(pallets, items, cfg, k, 0.95, secBreak, "s", solTorque, dictItems)         
+            mpShims.Solve(pallets, items, cfg, k, 0.95, secBreak, "s", solTorque, solDict)         
 
         if method == "mpACO":       
-            mpACO.Solve(pallets,   items, cfg, k, 0.85, secBreak, "p", solTorque, dictItems) 
+            mpACO.Solve(pallets,   items, cfg, k, 0.85, secBreak, "p", solTorque, solDict) 
 
         if method == "ACO":       
-            mpACO.Solve(pallets,   items, cfg, k, 0.85, secBreak, "s", solTorque, dictItems) 
+            mpACO.Solve(pallets,   items, cfg, k, 0.85, secBreak, "s", solTorque, solDict) 
 
         if method == "GRB":       
-            mipGRB.Solve(  pallets,   items, cfg, k, secBreak, dictItems) 
+            mipGRB.Solve(pallets,  items, cfg, k,       secBreak,      solTorque, solDict) 
 
         nodeElapsed = time.perf_counter() - startNodeTime
 
         tour.elapsed += nodeElapsed
+
+        if len(solDict["solMatrix"]) == 0:
+            print(f"----- solDict['solMatrix'] is zero lenght on node {common.CITIES[node.ID]} -----")
+            return
 
         # consolidated matrix: nodes x pallets
         consol = [
@@ -147,18 +159,21 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
         pallets.sort(key=lambda x: x.ID)   
 
         # Iterate in the solution
-        for j, i in enumerate(dictItems["solItems"]):
-            if i > -1: # i: pallet index
-                p = pallets[i]
-                consol[i][k].ID  = j+numItems
-                consol[i][k].Frm = node.ID
-                consol[i][k].To  = p.Dests[k]
+        Y = np.reshape(solDict["solMatrix"], (-1, N)) # N number of items (columns)
 
-                consol[i][k].W += items[j].W
-                consol[i][k].V += items[j].V
-                consol[i][k].S += items[j].S
+        for i, row in enumerate(Y):
+            for j, X_ij in enumerate(row):
+                if X_ij: 
+                    p = pallets[i]
+                    consol[i][k].ID  = j+numItems
+                    consol[i][k].Frm = node.ID
+                    consol[i][k].To  = p.Dests[k]
 
-                tour.score += items[j].S  
+                    consol[i][k].W += items[j].W
+                    consol[i][k].V += items[j].V
+                    consol[i][k].S += items[j].S
+
+                    tour.score += items[j].S  
 
         epsilom = solTorque.value/cfg.maxTorque
         tour.cost *= ( 1.0 + abs(epsilom)/20.0 )
