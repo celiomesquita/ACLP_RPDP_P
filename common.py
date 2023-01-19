@@ -41,17 +41,19 @@ class Pallet(object):
         self.PCV = 0.
         self.PCS = 0.
 
-    def putItem(self, item, solTorque, solItems, lock): # put an item in this pallet
+    def putItem(self, item, solTorque, solDict, lock, N): # put an item in this pallet
 
         self.PCW += item.W
         self.PCV += item.V
         self.PCS += item.S
 
         with lock:
+            i = self.ID
+            j = item.ID            
             solTorque.value += float(item.W) * float(self.D)
-            solItems[item.ID] = self.ID # mark item as alocated to this pallet
+            solDict["solMatrix"][N*i+j] = 1
 
-    def isFeasible(self, item, limit, k, solTorque, solItems, lock, cfg): # check constraints
+    def isFeasible(self, item, limit, k, solTorque, solDict, lock, cfg, N): # check constraints
 
         feasible = True
 
@@ -60,10 +62,14 @@ class Pallet(object):
 
         if feasible and self.PCV + item.V > self.V * limit:
             feasible = False
+                
+        i = self.ID
+        j = item.ID
 
         if feasible:
             with lock:
-                if solItems[item.ID] > -1 : # if item is allocated to some pallet
+
+                if solDict["solMatrix"][N*i+j]: # if item is allocated to some pallet
                     feasible = False
 
                 if feasible:
@@ -83,13 +89,17 @@ def copyPallets(pallets):
         array[i].PCV   = p.PCV
         array[i].PCS   = p.PCS
     return array
-
-def copySolItems(mpItems):
-    mp_array = mp.Array('i', range(len(mpItems)))
-    for j, v in enumerate(mpItems):
-        mp_array[j] = v
-    return mp_array
      
+def copySolDict(solDict):
+
+    N_M = len(solDict["solMatrix"])
+    solMatrix = mp.Array('i', [0 for _ in np.arange(N_M)] ) 
+
+    for pos, v in enumerate(solDict["solMatrix"]):
+        solMatrix[pos] = v
+
+    return dict(solMatrix=solMatrix)
+
 def loadPallets(cfg):
     """
     Load pallets attributes based on aircraft size
@@ -116,18 +126,11 @@ def loadPallets(cfg):
         reader.close()    
     return pallets
         
-def fillPallet(pallet, items, k, solTorque, solItems, lock, cfg, limit):
+def fillPallet(pallet, items, k, solTorque, solDict, lock, cfg, limit):
+    N = len(items)
     for item in items:
-        if pallet.isFeasible(item, limit, k, solTorque, solItems, lock, cfg):
-            pallet.putItem(item, solTorque, solItems, lock)
-
-# mount the decision matrix for which items will be put in which pallets
-# def getSolMatrix(edges, numPallets, numItems):
-#     X = np.zeros((numPallets,numItems))
-#     for e in edges:
-#         if e.InSol:
-#             X[e.Pallet.ID][e.Item.ID] = 1
-#     return X
+        if pallet.isFeasible(item, limit, k, solTorque, solDict, lock, cfg, N):
+            pallet.putItem(  item,           solTorque, solDict, lock, N)
 
 def loadDistances():
     fname =  f"./params/distances.txt"      

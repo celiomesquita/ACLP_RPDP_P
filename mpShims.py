@@ -41,17 +41,20 @@ class Shims(object):
         return ret        
 
 # create a set of shims for this pallet and selects the best shims
-def getBestShims(pallet, items, k, solTorque, solItems, lock, cfg, surplus):
+def getBestShims(pallet, items, k, solTorque, solDict, lock, cfg, surplus):
 
     maxVol = pallet.V * surplus
 
     vol = 0.
     whip = []
+    N = len(items)
+    i = pallet.ID
    
-    with lock:
+    with lock:   
         for item in items:
+            j = item.ID
             # not consolidated (-1) and not allocated in any pallet
-            if item.P == -1 and solItems[item.ID] == -1: 
+            if item.P == -1 and solDict["solMatrix"][N*i+j] == 0: 
                 vol += item.V
                 whip.append(item)
                 if vol > maxVol:
@@ -87,16 +90,16 @@ def getBestShims(pallet, items, k, solTorque, solItems, lock, cfg, surplus):
 
     for item in Set[bestIndex].Items:
         if item != None:
-            pallet.putItem(item, solTorque, solItems, lock)
+            pallet.putItem(item, solTorque, solDict, lock, N)
 
 
-def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, dictItems): # items include kept on board
+def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, solDict): # items include kept on board
 
     N = len(items)
     M = len(pallets)
 
-    set_M = range( M ) # i, pallets
-    set_N = range( N ) # j, items
+    # set_M = range( M ) # i, pallets
+    # set_N = range( N ) # j, items
 
     if mode == "p":
         mode = "Parallel"
@@ -124,7 +127,8 @@ def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, dictItems): 
 
         # parallel greedy phase
         for i, _ in enumerate(procs):
-            procs[i] = mp.Process( target=common.fillPallet, args=( pallets[i], items, k, solTorque, dictItems["solItems"], lock, cfg, limit) )
+            procs[i] = mp.Process( target=common.fillPallet, args=( pallets[i], items, k,\
+                 solTorque, solDict, lock, cfg, limit) )
             time.sleep(0.001)
             procs[i].start()
         
@@ -133,7 +137,8 @@ def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, dictItems): 
 
         # parallel shims phase
         for i, _ in enumerate(procs):
-            procs[i] = mp.Process( target=getBestShims, args=( pallets[i], items, k, solTorque, dictItems["solItems"], lock, cfg, surplus) )
+            procs[i] = mp.Process( target=getBestShims, args=( pallets[i], items, k,\
+                 solTorque, solDict, lock, cfg, surplus) )
             procs[i].start()
                 
         while time.time() - start <= secBreak:
@@ -150,9 +155,9 @@ def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, dictItems): 
     else: # serial
         initScore = 0.0
         for i, _ in enumerate(pallets):
-            common.fillPallet( pallets[i], items, k, solTorque, dictItems["solItems"], lock, cfg, limit) 
+            common.fillPallet( pallets[i], items, k, solTorque, solDict, lock, cfg, limit) 
             initScore += pallets[i].PCS
-            getBestShims(      pallets[i], items, k, solTorque, dictItems["solItems"], lock, cfg, surplus)
+            getBestShims(      pallets[i], items, k, solTorque, solDict, lock, cfg, surplus)
 
         print(f"Greedy initial score {initScore}")            
 

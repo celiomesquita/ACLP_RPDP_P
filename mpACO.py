@@ -89,14 +89,15 @@ def selectItem(nbhood, values, pallet, maxTorque):
 
     return item, j
 
-def antSolve(antPallets, items, cfg, k, secBreak, antTorque, antItems, Attract, Phero, lock,\
+def antSolve(antPallets, items, cfg, k, secBreak, antTorque, antSolDict, Attract, Phero, lock,\
      bestScore, maxD, startTime, accumsP, accum):
 
     # items are read only
-    # antItems are changed by this ant
+    # antSolDict are changed by this ant
 
     nbhood   = [it for it in items]
     values   = [v  for v  in Attract]
+    N = len(items)
 
     # accum['score']   -> accumulated score for serial mode
     # accumsP.value -> accumulated score for parallel mode
@@ -112,9 +113,9 @@ def antSolve(antPallets, items, cfg, k, secBreak, antTorque, antItems, Attract, 
                 # pick from the neighborhood the probable best item for this pallet
                 item, j = selectItem(nbhood, values, p, maxTorque)
 
-                if antPallets[i].isFeasible(item, 1.0, k, antTorque, antItems, lock, cfg ):
+                if antPallets[i].isFeasible(item, 1.0, k, antTorque, antSolDict, lock, cfg, N ):
 
-                    antPallets[i].putItem(item, antTorque, antItems, lock)
+                    antPallets[i].putItem(item, antTorque, antSolDict, lock, N)
 
                     accum["score"]  += item.S
 
@@ -132,9 +133,7 @@ def antSolve(antPallets, items, cfg, k, secBreak, antTorque, antItems, Attract, 
         updateAntsField(accum["score"] , bestScore, Attract, Phero, items) 
 
 
-def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, dictItems ):
-
-    solItems = common.copySolItems(dictItems["solItems"])
+def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, solDict ):
 
     # to control the general attractiveness for the tournament selection
     Attract = mp.Array('d', np.arange(len(items)))
@@ -166,14 +165,14 @@ def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, dictItems )
     print(f"{len(items)} items  {len(pallets)} pallets")
 
     for i, _ in enumerate(pallets):               
-        common.fillPallet(pallets[i], items, k, solTorque, solItems, lock, cfg, limit)
+        common.fillPallet(pallets[i], items, k, solTorque, solDict, lock, cfg, limit)
         bestScore  += pallets[i].PCS
         if abs(pallets[i].D) > maxD:
             maxD = abs(pallets[i].D)
     
     initPallets = common.copyPallets(pallets)              
     initTorque  = solTorque
-    initItems   = common.copySolItems(solItems)
+    initSolDict = common.copySolDict(solDict) 
     initScore   = bestScore
 
     print(f"Greedy initial score {initScore}")
@@ -187,14 +186,14 @@ def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, dictItems )
 
     iterPallets = []
     iterTorque  = []
-    iterItems   = []
+    iterSolDict   = []
     bestIterScore = initScore
 
     while stagnant < 5: # iterations
 
         iterPallets.append(None)
         iterTorque.append(None)
-        iterItems.append(None)         
+        iterSolDict.append(None)         
 
         # initialize ants parameters
         ants       = [None          for _ in np.arange(numAnts)]
@@ -202,7 +201,7 @@ def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, dictItems )
         accumsP    = [mp.Value('d') for _ in np.arange(numAnts)] # for ant scores and volumes in parallel mode
         antPallets = [None          for _ in np.arange(numAnts)]
         antTorque  = [None          for _ in np.arange(numAnts)]
-        antItems   = [None          for _ in np.arange(numAnts)]
+        antSolDict = [None          for _ in np.arange(numAnts)]
 
         bestAntScore = initScore
 
@@ -215,7 +214,7 @@ def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, dictItems )
             # modified parameters from the greedy phase
             antPallets[a] = common.copyPallets(initPallets)              
             antTorque[a]  = initTorque
-            antItems[a]   = common.copySolItems(initItems)
+            antSolDict[a] = common.copySolDict(initSolDict)
 
             # initialize accumulated scores
             accumsS[a]       = dict(score=initScore) # for serial mode
@@ -224,13 +223,13 @@ def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, dictItems )
             if mode == "Parallel": # send "antSolve" to parallel processes (ants)
 
                 ants[a] = mp.Process( target=antSolve, args=( antPallets[a], items, cfg, k, secBreak,\
-                    antTorque[a], antItems[a], Attract, Phero, lock, bestScore, maxD, startTime, accumsP[a], accumsS[a]) )
+                    antTorque[a], antSolDict[a], Attract, Phero, lock, bestScore, maxD, startTime, accumsP[a], accumsS[a]) )
 
                 ants[a].start() # send ant
 
             else: # solve sequentially
 
-                antSolve( antPallets[a], items, cfg, k, secBreak, antTorque[a], antItems[a], Attract, Phero,\
+                antSolve( antPallets[a], items, cfg, k, secBreak, antTorque[a], antSolDict[a], Attract, Phero,\
                     lock, bestScore, maxD, startTime, accumsP[a], accumsS[a])
 
                 # serial ant best solution update  accumsS[a]['score']
@@ -264,7 +263,7 @@ def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, dictItems )
         if bestAntScore > bestIterScore:
             bestIterScore = bestAntScore
             print(f"Best iter score {bestIterScore} ({iter})")
-            iterItems[iter] = common.copySolItems( antItems[ba] ) 
+            iterSolDict[iter] = common.copySolDict( antSolDict[ba] ) 
             bi = iter
             stagnant = 0
         else:
@@ -274,8 +273,8 @@ def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, dictItems )
   
     print(f"{improvements} improvements ({numAnts*iter} total ants).")
 
-    if iterItems[bi] != None:
-        dictItems["solItems"]  = common.copySolItems( iterItems[bi] )
+    if iterSolDict[bi] != None:
+        solDict = common.copySolDict( iterSolDict[bi] )
                 
     # AttractVar  = statistics.variance(Attract)
     # PheroVar    = statistics.variance(Phero)

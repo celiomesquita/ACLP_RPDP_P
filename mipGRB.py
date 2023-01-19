@@ -7,7 +7,7 @@ import multiprocessing as mp
 import numpy as np
 
     
-def Solve( pallets, items, cfg, k, secBreak, solTorque, dictItems ):
+def Solve( pallets, items, cfg, k, secBreak, solTorque, solDict ):
 
     N = len(items)
     M = len(pallets)
@@ -39,8 +39,8 @@ def Solve( pallets, items, cfg, k, secBreak, solTorque, dictItems ):
     # each item must be included at most once
     xsum(X[i][j] for j in set_N for i in set_M ) <= 1
 
-    # each consolidated must be included exactly once
-    xsum(X[i][j] for j in set_N for i in set_M if dictItems["solItems"][j] == i) == 1
+    # each consolidated must be included exactly once 
+    xsum(X[i][j] for j in set_N for i in set_M if solDict["solMatrix"][N*i+j] == 1) == 1
 
     for i in set_M:
 
@@ -90,14 +90,6 @@ def Solve( pallets, items, cfg, k, secBreak, solTorque, dictItems ):
     # checking if a solution was found
     if mod.num_solutions:   
 
-        sNodeAccum = 0.
-        wNodeAccum = 0.
-        vNodeAccum = 0.
-        sol = ""
-        pAccum   = [0.0 for _ in pallets]
-
-        solItems = mp.Array('i', [0]*N*M)
-   
         # reset empty pallets torque
         solTorque.value = 0.0
         for i in set_M:
@@ -105,75 +97,13 @@ def Solve( pallets, items, cfg, k, secBreak, solTorque, dictItems ):
 
             for j in set_N:
 
+                solDict["solMatrix"][N*i+j] = 0
+
                 if X[i][j].x >= 0.99: # put items in solution
 
-                    dictItems["solItems"][j] = i # item "j" is allocated to pallet "i"
-                    solItems[N*i+j]          = 1
+                    solDict["solMatrix"][N*i+j] = 1
 
                     solTorque.value += items[j].W * pallets[i].D 
-
-                    sNodeAccum += float(items[j].S)
-                    wNodeAccum += float(items[j].W)
-                    vNodeAccum += float(items[j].V)
-
-                    pAccum[i] += float(items[j].W)
-
-            print(f"1 pAccum[{i}]: {pAccum[i]}")
-
-        epsilom = solTorque.value/cfg.maxTorque
-
-        vol = vNodeAccum/cfg.volCap
-        wei = wNodeAccum/cfg.weiCap
-
-        sol += f"Score: {sNodeAccum:.0f}\t"
-        sol += f"Weight: {wei:.2f}\t"
-        sol += f"Volume: {vol:.2f}\t"
-        sol += f"Torque: {epsilom:.2f}\n"
-
-        print(f"1: mipGRB X[i][j].x solution ----- \n{sol}")
-
-        sNodeAccum = 0.
-        wNodeAccum = 0.
-        vNodeAccum = 0.
-        sol = ""
-        # reset empty pallets torque
-        torque = 0.0
-        for i in set_M:
-            torque += 140.0 * pallets[i].D
-            pAccum[i] = 0.0      
-
-        Y = np.reshape(solItems, (-1, N))
-
-        for i, row in enumerate(Y):
-            for j, content in enumerate(row):
-
-                if content == 1:
-
-                    torque += items[j].W * pallets[i].D
-
-                    sNodeAccum += float(items[j].S)
-                    wNodeAccum += float(items[j].W)
-                    vNodeAccum += float(items[j].V)
-
-                    pAccum[i] += float(items[j].W)
-
-
-        for i in set_M:
-            print(f"2 pAccum[{i}]: {pAccum[i]}")
-
-        epsilom = torque/cfg.maxTorque
-
-        vol = vNodeAccum/cfg.volCap
-        wei = wNodeAccum/cfg.weiCap
-
-        sol += f"Score: {sNodeAccum:.0f}\t"
-        sol += f"Weight: {wei:.2f}\t"
-        sol += f"Volume: {vol:.2f}\t"
-        sol += f"Torque: {epsilom:.2f}\n"
-
-        print(f"2: mipGRB solItems solution ----- \n{sol}")
-
-
 
 if __name__ == "__main__":
 

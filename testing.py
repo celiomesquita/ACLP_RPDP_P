@@ -9,7 +9,7 @@ import optcgcons
 import mipGRB
 
 # for testing only
-def getCons(numItems, rndm):
+def getCons(N, rndm):
     """
     Testing consolidated from cons_0_0.txt
     """
@@ -25,7 +25,7 @@ def getCons(numItems, rndm):
         [3540, 30,  7.0, 0, 1]
     ]
 
-    id = numItems
+    id = N
     for line in lines:
         w   =   int(line[0])
         s   =   int(line[1])
@@ -49,10 +49,10 @@ surplus = "data20"
 # surplus = "data100"
 #
 # method = "mpACO"
-# method = "ACO"
+method = "ACO"
 # method = "mpShims"
 # method = "Shims"
-method = "GRB"
+# method = "GRB"
 
 scenario = 1
 
@@ -113,36 +113,36 @@ for inst in instances:
 
     # load items parameters from this node and problem instance, that go to unnatended
     items = common.loadNodeItems(scenario, inst, node, unattended, surplus)
-    numItems = len(items)
+    N = len(items)
 
     # load consolidated generated in the previous node
     prevNode = tour.nodes[k-1]
 
-     # numItems = first cons ID
-    # cons = common.loadNodeCons(surplus, scenario, inst, pi, prevNode, numItems )
-    # cons = getCons(numItems, True) # for testing only
-    cons = getCons(numItems, False) # False: no randomness in consolidated generation 
+     # N = first cons ID
+    # cons = common.loadNodeCons(surplus, scenario, inst, pi, prevNode, N )
+    # cons = getCons(N, True) # for testing only
+    cons = getCons(N, False) # False: no randomness in consolidated generation 
 
     if prevNode.ID < len(common.CITIES):
         print(f"\n-----Loaded in {common.CITIES[prevNode.ID]} -----")
         print("ID\tP\tW\tS\tV\tFROM\tTO")
         for c in cons:
             print(f"{c.ID}\t{c.P}\t{c.W}\t{c.S}\t{c.V:.1f}\t{common.CITIES[c.Frm]}\t{common.CITIES[c.To]}")
-    print(f"({numItems} items to embark)")
+    print(f"({N} items to embark)")
 
     # consolidated contents not destined to this point are kept on board ...
     kept = []
     for c in cons:
         if c.To in unattended:
-            c.ID = numItems
+            c.ID = N
             kept.append(c) #... and included in the items set
-            numItems += 1
+            N += 1
 
     print(f"\n----- Kept on board at {common.CITIES[node.ID]} -----")        
     print("ID\tP\tW\tS\tV\tFROM\tTO")
     for c in kept:
         print(f"{c.ID}\t{c.P}\t{c.W}\t{c.S}\t{c.V:.1f}\t{common.CITIES[c.Frm]}\t{common.CITIES[c.To]}")
-    print(f"Kept positions to be defined: ({numItems} items to embark)\n")
+    print(f"Kept positions to be defined: ({N} items to embark)\n")
 
     # optimize consolidated positions to minimize CG deviation
     # if method != "GRB":
@@ -156,7 +156,7 @@ for inst in instances:
         # consolidated are appended to the items set
         items.append(c)
         print(f"{c.ID}\t{c.P}\t{c.W}\t{c.S}\t{c.V:.1f}\t{common.CITIES[c.Frm]}\t{common.CITIES[c.To]}")
-    print(f"Kept positions defined ({numItems} items to embark)\n")
+    print(f"Kept positions defined ({N} items to embark)\n")
 
     print("ID\tDest\tPCW\tPCV\tPCS")
     for p in pallets:
@@ -173,13 +173,15 @@ for inst in instances:
 
 
     # to control solution items
-    solItems = mp.Array('i', range(numItems))
-    for j, _ in enumerate(solItems):
-        solItems[j] = -1 # not alocated to any pallet
+    M = len(pallets)
+    solMatrix = mp.Array('i', [0 for _ in np.arange(N*M)] )      
 
     # put the kept on board in solution
     for c in kept:
-        solItems[c.ID] = c.P # consol pallet index
+        i = c.P
+        j = c.ID
+        # solItems[j] = i # consol pallet index
+        solMatrix[N*i+j] = 1
 
     # solution global torque to be shared and changed by all pallets concurrently
     solTorque = mp.Value('d', 0.0) # a multiprocessing double type variable
@@ -198,24 +200,22 @@ for inst in instances:
     
     startNodeTime = time.perf_counter()
 
-    dictItems = dict(solItems = solItems)
-
-    # dictItems["solItems"] = common.copySolItems(solItems)
+    solDict = dict(solMatrix=solMatrix)
  
     if method == "mpShims":
-        mpShims.Solve(pallets, items, cfg, k, limit, secBreak, "p", solTorque, dictItems)
+        mpShims.Solve(pallets, items, cfg, k, limit, secBreak, "p", solTorque, solDict)
 
     if method == "Shims":            
-        mpShims.Solve(pallets, items, cfg, k, limit, secBreak, "s", solTorque, dictItems)         
+        mpShims.Solve(pallets, items, cfg, k, limit, secBreak, "s", solTorque, solDict)         
 
     if method == "mpACO":       
-        mpACO.Solve(pallets,   items, cfg, k, limit, secBreak, "p", solTorque, dictItems) 
+        mpACO.Solve(pallets,   items, cfg, k, limit, secBreak, "p", solTorque, solDict) 
 
     if method == "ACO":       
-        mpACO.Solve(pallets,   items, cfg, k, limit, secBreak, "s", solTorque, dictItems) 
+        mpACO.Solve(pallets,   items, cfg, k, limit, secBreak, "s", solTorque, solDict) 
 
     if method == "GRB":       
-        mipGRB.Solve(pallets,  items, cfg, k,        secBreak,      solTorque, dictItems) 
+        mipGRB.Solve(pallets,  items, cfg, k,        secBreak,      solTorque, solDict) 
     
     elapsed = time.perf_counter() - startNodeTime
 
@@ -235,20 +235,25 @@ for inst in instances:
 
     # pallets.sort(key=lambda x: x.ID) 
 
-    for j, i in enumerate(dictItems["solItems"]):
-        if i > -1: # i: pallet index
-            p = pallets[i]
-            consol[i][k].ID  = j+numItems
-            consol[i][k].Frm = node.ID
-            consol[i][k].To  = p.Dests[k]
+    Y = np.reshape(solDict["solMatrix"], (-1, N)) # N number of items (columns)
 
-            consol[i][k].W += items[j].W
-            consol[i][k].V += items[j].V
-            consol[i][k].S += items[j].S
+    for i, row in enumerate(Y):
+        for j, content in enumerate(row):
 
-            sNodeAccum += float(items[j].S)
-            wNodeAccum += float(items[j].W)
-            vNodeAccum += float(items[j].V)
+            if content:    
+
+                p = pallets[i]
+                consol[i][k].ID  = j+N
+                consol[i][k].Frm = node.ID
+                consol[i][k].To  = p.Dests[k]
+
+                consol[i][k].W += items[j].W
+                consol[i][k].V += items[j].V
+                consol[i][k].S += items[j].S
+
+                sNodeAccum += float(items[j].S)
+                wNodeAccum += float(items[j].W)
+                vNodeAccum += float(items[j].V)
 
     consNodeT = [None for _ in pallets]        
     for i, p in enumerate(pallets):
@@ -265,7 +270,7 @@ for inst in instances:
     sol += f"Torque: {epsilom:.2f}\n"
     sol += f"Elapsed: {elapsed:.2f}\n"
 
-    print(f"Testing dictItems solution ----- \n{sol}")
+    print(f"Testing solution ----- \n{sol}")
 
     # solElapsed += elapsed
     # solScore   += sNodeAccum
