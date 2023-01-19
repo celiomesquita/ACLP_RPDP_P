@@ -23,10 +23,8 @@ BETA  = 4 # heuristic exponent
 
 # getDeltaTau calculates the pheromone to be dropped by each on ants tracks
 def getDeltaTau(score, bestScore):
-
     # at this point DeltaTau may be positive ou negative learning
     DeltaTau = (score - bestScore)/bestScore
-    # return DeltaTau + random.uniform(0, 1)
     return DeltaTau
 
 

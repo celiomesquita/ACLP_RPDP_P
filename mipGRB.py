@@ -2,8 +2,11 @@
 # include the MILP Solver: https://www.python-mip.com/
 from mip import Model, xsum, maximize, BINARY
 from time import time
+import common
     
-def Solve( pallets, items, cfg, k, secBreak, dictItems ):
+def Solve( pallets, items, cfg, k, secBreak, solTorque, dictItems ):
+
+    # solItems = common.copySolItems(dictItems["solItems"])
 
     N = len(items)
     M = len(pallets)
@@ -33,9 +36,10 @@ def Solve( pallets, items, cfg, k, secBreak, dictItems ):
     # CONSTRAINTS ----------------------------------------------------------------------------
     
     # each item must be included at most once
-    xsum(X[i][j] for i in set_M for j in set_N) <= 1
+    xsum(X[i][j] for j in set_N for i in set_M ) <= 1
 
-    xsum(X[i][j] for i in set_M for j in set_N if dictItems["solItems"][j] == i) == 1
+    # each consolidated must be included exactly once
+    xsum(X[i][j] for j in set_N for i in set_M if dictItems["solItems"][j] == i) == 1
 
     for i in set_M:
 
@@ -59,10 +63,10 @@ def Solve( pallets, items, cfg, k, secBreak, dictItems ):
             xsum(X[i][j] * items[j].V for j in set_N) <= pallets[i].V
         )
 
-        # the final torque must be between minus maxTorque and maxTorque
-        palletWeights[i] = 140 + xsum(X[i][j] * items[j].W  for j in set_N) 
+        palletWeights[i] = 140 + xsum(X[i][j] * items[j].W  for j in set_N)
 
-    sumTorques = xsum( pallets[i].D * palletWeights[i] for i in set_M )
+    # the final torque must be between minus maxTorque and maxTorque
+    sumTorques = xsum(pallets[i].D * palletWeights[i] for i in set_M)
     mod.add_constr(
         sumTorques <=    cfg.maxTorque
     )
@@ -71,9 +75,8 @@ def Solve( pallets, items, cfg, k, secBreak, dictItems ):
     )
 
     # the aircraft payload (or maximum pallets capacities) must not be exceeded
-    sumWeights = 140*M + xsum(X[i][j] * items[j].W  for i in set_M for j in set_N) 
     mod.add_constr(
-        sumWeights <= cfg.weiCap
+        xsum(palletWeights[i] for i in set_M) <= cfg.weiCap
     )    
 
     # lateral torque was never significant. So, we did not include lateral torque constraints
@@ -81,18 +84,79 @@ def Solve( pallets, items, cfg, k, secBreak, dictItems ):
     status = mod.optimize()        
 
     print(status)
-    print(mod.objective_value)
+    # print(mod.objective_value)
 
     # checking if a solution was found
     if mod.num_solutions:
-        for j in set_N:
-            for i in set_M:
 
-                # dictItems["solItems"][j] = -1
+        sNodeAccum = 0.
+        wNodeAccum = 0.
+        vNodeAccum = 0.
+        sol = ""
+
+        # reset empty pallets torque
+        solTorque.value = 0.0
+        for i in set_M:
+            solTorque.value += 140.0 * pallets[i].D         
+
+        for j in set_N:
+            dictItems["solItems"][j] = -1 # clean solution vector
+
+            for i in set_M:
 
                 if X[i][j].x >= 0.99: # put items in solution
 
                     dictItems["solItems"][j] = i # item "j" is allocated to pallet "i"
+
+                    solTorque.value += items[j].W * pallets[i].D 
+
+                    sNodeAccum += float(items[j].S)
+                    wNodeAccum += float(items[j].W)
+                    vNodeAccum += float(items[j].V)
+
+
+        epsilom = solTorque.value/cfg.maxTorque
+
+        vol = vNodeAccum/cfg.volCap
+        wei = wNodeAccum/cfg.weiCap
+
+        sol += f"Score: {sNodeAccum:.0f}\t"
+        sol += f"Weight: {wei:.2f}\t"
+        sol += f"Volume: {vol:.2f}\t"
+        sol += f"Torque: {epsilom:.2f}\n"
+
+        print(f"1: mipGRB solution ----- \n{sol}")
+
+        sNodeAccum = 0.
+        wNodeAccum = 0.
+        vNodeAccum = 0.
+        sol = ""
+        # reset empty pallets torque
+        solTorque.value = 0.0
+        for i in set_M:
+            solTorque.value += 140.0 * pallets[i].D  
+
+        for j, i in enumerate(dictItems["solItems"]):
+            if i > -1: # i: pallet index
+
+                solTorque.value += items[j].W * pallets[i].D
+
+                sNodeAccum += float(items[j].S)
+                wNodeAccum += float(items[j].W)
+                vNodeAccum += float(items[j].V)
+
+        epsilom = solTorque.value/cfg.maxTorque
+
+        vol = vNodeAccum/cfg.volCap
+        wei = wNodeAccum/cfg.weiCap
+
+        sol += f"Score: {sNodeAccum:.0f}\t"
+        sol += f"Weight: {wei:.2f}\t"
+        sol += f"Volume: {vol:.2f}\t"
+        sol += f"Torque: {epsilom:.2f}\n"
+
+        print(f"2: mipGRB solution ----- \n{sol}")
+
 
 
 if __name__ == "__main__":

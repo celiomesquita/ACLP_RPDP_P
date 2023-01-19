@@ -2,14 +2,14 @@ import common
 import numpy as np
 import time
 import multiprocessing as mp
-
+import random
 import mpShims
 import mpACO
 import optcgcons
 import mipGRB
 
 # for testing only
-def getCons(numItems):
+def getCons(numItems, rndm):
     """
     Testing consolidated from cons_0_0.txt
     """
@@ -34,6 +34,12 @@ def getCons(numItems):
         to  =   int(line[4])         
         cons.append( common.Item(id, -2, w, s, v, frm, to) )
         id += 1
+
+    if rndm:
+        for i, _ in enumerate(cons):
+            cons[i].W = random.uniform(2000, 4000)
+            cons[i].V = random.uniform(7, 12) 
+            cons[i].S = random.uniform(30, 80) 
 
     return cons
 
@@ -114,7 +120,8 @@ for inst in instances:
 
      # numItems = first cons ID
     # cons = common.loadNodeCons(surplus, scenario, inst, pi, prevNode, numItems )
-    cons = getCons(numItems) # for testing only
+    # cons = getCons(numItems, True) # for testing only
+    cons = getCons(numItems, False) # False: no randomness in consolidated generation 
 
     if prevNode.ID < len(common.CITIES):
         print(f"\n-----Loaded in {common.CITIES[prevNode.ID]} -----")
@@ -122,7 +129,6 @@ for inst in instances:
         for c in cons:
             print(f"{c.ID}\t{c.P}\t{c.W}\t{c.S}\t{c.V:.1f}\t{common.CITIES[c.Frm]}\t{common.CITIES[c.To]}")
     print(f"({numItems} items to embark)")
-
 
     # consolidated contents not destined to this point are kept on board ...
     kept = []
@@ -139,8 +145,8 @@ for inst in instances:
     print(f"Kept positions to be defined: ({numItems} items to embark)\n")
 
     # optimize consolidated positions to minimize CG deviation
-    if method != "GRB":
-        optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, "GRB", k)
+    # if method != "GRB":
+    optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, "GRB", k)
     # pallets destinations are also set, according to kept on board in new positions
 
     # Kept P is not -2 anymore, but the pallet ID.
@@ -176,8 +182,8 @@ for inst in instances:
         solItems[c.ID] = c.P # consol pallet index
 
     # solution global torque to be shared and changed by all pallets concurrently
-    solTorque = mp.Value('d') # a multiprocessing double type variable
-    solTorque.value = 0.0        
+    solTorque = mp.Value('d', 0.0) # a multiprocessing double type variable
+    # solTorque.value = 0.0        
 
     # update pallets current parameters and solution torque
     for i, p in enumerate(pallets):
@@ -208,7 +214,7 @@ for inst in instances:
         mpACO.Solve(pallets,   items, cfg, k, limit, secBreak, "s", solTorque, dictItems) 
 
     if method == "GRB":       
-        mipGRB.Solve(  pallets,   items, cfg, k, secBreak, dictItems) 
+        mipGRB.Solve(pallets,  items, cfg, k,        secBreak,      solTorque, dictItems) 
     
     elapsed = time.perf_counter() - startNodeTime
 
@@ -258,20 +264,7 @@ for inst in instances:
     sol += f"Torque: {epsilom:.2f}\n"
     sol += f"Elapsed: {elapsed:.2f}\n"
 
-    status = "Feasible"
-
-    if wei > 1.001:
-        status = "Weight Unfeasible"
-
-    if vol > 1.001:
-        status = "Volume Unfeasible"
-
-    if abs(epsilom) > 1.001:
-        status = "Torque Unfeasible"
-
-    sol += f"Status: {status}\n"
-
-    print(sol)
+    print(f"Testing solution ----- \n{sol}")
 
     # solElapsed += elapsed
     # solScore   += sNodeAccum

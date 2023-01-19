@@ -94,8 +94,6 @@ def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, dictItems): 
 
     # solTorque was first updated when consolidaded were put in the pallets
 
-    solItems = common.copySolItems(dictItems["solItems"])
-
     if mode == "p":
         mode = "Parallel"
     else:
@@ -123,7 +121,7 @@ def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, dictItems): 
 
         # parallel greedy phase
         for i, _ in enumerate(procs):
-            procs[i] = mp.Process( target=common.fillPallet, args=( pallets[i], items, k, solTorque, solItems, lock, cfg, limit) )
+            procs[i] = mp.Process( target=common.fillPallet, args=( pallets[i], items, k, solTorque, dictItems["solItems"], lock, cfg, limit) )
             time.sleep(0.001)
             procs[i].start()
         
@@ -132,7 +130,7 @@ def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, dictItems): 
 
         # parallel shims phase
         for i, _ in enumerate(procs):
-            procs[i] = mp.Process( target=getBestShims, args=( pallets[i], items, k, solTorque, solItems, lock, cfg, surplus) )
+            procs[i] = mp.Process( target=getBestShims, args=( pallets[i], items, k, solTorque, dictItems["solItems"], lock, cfg, surplus) )
             procs[i].start()
                 
         while time.time() - start <= secBreak:
@@ -149,15 +147,12 @@ def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, dictItems): 
     else: # serial
         initScore = 0.0
         for i, _ in enumerate(pallets):
-            common.fillPallet(  pallets[i], items, k, solTorque, solItems, lock, cfg, limit) 
+            common.fillPallet(  pallets[i], items, k, solTorque, dictItems["solItems"], lock, cfg, limit) 
             initScore += pallets[i].PCS
-            getBestShims(pallets[i], items, k, solTorque, solItems, lock, cfg, surplus)
+            getBestShims(pallets[i], items, k, solTorque, dictItems["solItems"], lock, cfg, surplus)
 
         print(f"Greedy initial score {initScore}")
                
-
-    dictItems["solItems"] = common.copySolItems(solItems)
-
 
 if __name__ == "__main__":
 
