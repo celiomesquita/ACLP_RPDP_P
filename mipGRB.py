@@ -8,7 +8,12 @@ import numpy as np
 
     
 def Solve( pallets, items, cfg, k, secBreak, solTorque, solDict, mpItemsDict ):
-    
+
+    # print("W-PCW\tV-PCV")
+    # for p in pallets:
+    #     print(f"{p.W-p.PCW}\t{p.V-p.PCV:.2f}")    
+    # print()
+
     # mpItemsDict to control items inclusion feasibility
 
     N = len(items)
@@ -32,10 +37,9 @@ def Solve( pallets, items, cfg, k, secBreak, solTorque, solDict, mpItemsDict ):
         ]
          
     # consolidated are included in items
-    scoreItem = xsum( X[i][j] * items[j].S     for i in set_M for j in set_N if items[j].P == -1)
-    scoreCons = xsum( X[i][j] * items[j].S*50  for i in set_M for j in set_N if items[j].P == -2)
+    itemsScore = xsum( X[i][j] * items[j].S for i in set_M for j in set_N )
 
-    mod.objective = maximize( scoreItem + scoreCons )
+    mod.objective = maximize( itemsScore )
 
     # CONSTRAINTS ----------------------------------------------------------------------------
     
@@ -44,12 +48,6 @@ def Solve( pallets, items, cfg, k, secBreak, solTorque, solDict, mpItemsDict ):
         mod.add_constr(
             xsum(X[i][j] for i in set_M ) <= 1
         )
-
-        # each consolidated must be included exactly once: deactivated because some infesibilities
-        # if items[j].P == -2: # pallet not set
-        #     mod.add_constr(
-        #         xsum(X[i][j] for i in set_M ) == 1
-        #     )
 
     for i in set_M:
 
@@ -62,18 +60,18 @@ def Solve( pallets, items, cfg, k, secBreak, solTorque, solDict, mpItemsDict ):
                 X[i][j] <= X[i][j] * ( items[j].To - pallets[i].Dests[k] + 1 )
             )
 
-        # Pallet weight constraint
+        # Pallet weight constraint                      PCW: pallet current weight
         mod.add_constr(
-            xsum(X[i][j] * items[j].W for j in set_N) <= pallets[i].W
+            xsum(X[i][j] * items[j].W for j in set_N) + pallets[i].PCW <= pallets[i].W
         )
 
         # Pallet volume constraint
         mod.add_constr(
-            xsum(X[i][j] * items[j].V for j in set_N) <= pallets[i].V
+            xsum(X[i][j] * items[j].V for j in set_N) + pallets[i].PCV <= pallets[i].V
         )
 
         # for torque calculation
-        palletWeights[i] = 140 + xsum(X[i][j] * items[j].W  for j in set_N)
+        palletWeights[i] = 140 + xsum(X[i][j] * items[j].W  for j in set_N) + pallets[i].PCW
 
     # the final torque must be between minus maxTorque and maxTorque
     sumTorques = xsum(pallets[i].D * palletWeights[i] for i in set_M)

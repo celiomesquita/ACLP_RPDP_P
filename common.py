@@ -48,12 +48,19 @@ class Pallet(object):
         self.PCS += item.S
 
         with lock:
-            i = self.ID
-            j = item.ID            
             solTorque.value += float(item.W) * float(self.D)
+            i = self.ID
+            j = item.ID 
             solDict["solMatrix"][N*i+j] = 1
             mpItemsDict["mpItems"][j]   = 1
 
+    def putConsol(self, consol, solTorque): # put an item in this pallet
+
+        self.PCW += consol.W
+        self.PCV += consol.V
+        self.PCS += consol.S
+        solTorque.value += float(consol.W) * float(self.D)
+            
     def isFeasible(self, item, limit, k, solTorque, solDict, lock, cfg, N, mpItemsDict): # check constraints
 
         feasible = True
@@ -353,8 +360,7 @@ def loadNodeItems(scenario, instance, node, unatended, surplus): # unatended, fu
 
 def setPalletsDestinations(items, pallets, nodes, k, L_k):
 
-    vol       = [0]*len(nodes)
-    PalConsol = [0]*len(nodes)
+    vols  = [0]*len(nodes)
     max   = 0
     total = 0
 
@@ -364,30 +370,21 @@ def setPalletsDestinations(items, pallets, nodes, k, L_k):
         if it.Frm == nodes[k].ID and it.P == -1:
             d = it.To
             if d in L_k:
-                vol[d] += it.V
+                vols[d] += it.V
                 total  += it.V
-                if vol[d] > max:
+                if vols[d] > max:
                     max = d
-    # all items from all nodes
-    for it in items:
-        # the consolidated from this node
-        if it.Frm == nodes[k].ID and it.P == -2:    
-            d = it.To
-            PalConsol[d] += 1
-            if d in L_k:
-                vol[d] += it.V
-                total  += it.V
-                if vol[d] > max:
-                    max = d
-        
+    numEmpty = 0
+    for p in pallets:
+        if p.Dests[k] == -1:
+            numEmpty += 1
+
     for n in nodes:
-        if vol[n.ID] > 0:
-            np = math.floor( len(pallets) * vol[n.ID] / total)
-            # quant = max(1, np - PalConsol[n.ID])
-            quant = np - PalConsol[n.ID]
+        if vols[n.ID] > 0:
+            np = math.floor( numEmpty * vols[n.ID] / total)
             count = 0
             for p in pallets:
-                if count == quant:
+                if count > np:
                     break
                 if p.Dests[k] == -1:
                     pallets[p.ID].Dests[k] = n.ID
@@ -396,8 +393,7 @@ def setPalletsDestinations(items, pallets, nodes, k, L_k):
     for p in pallets:
         if p.Dests[k] == -1:
             pallets[p.ID].Dests[k] = max
-
-
+# end of setPalletsDestinations
  
 def writeResult(fname, value):
 
