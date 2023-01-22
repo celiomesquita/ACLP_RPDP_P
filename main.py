@@ -18,11 +18,27 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
         print(f" {node.ICAO}", end='')
     print()
 
+
+
     base = len(tour.nodes)-1
 
     for k, node in enumerate(tour.nodes):  # solve each node sequentialy
 
-            
+        # solution global torque to be shared and changed by all pallets concurrently
+        solTorque = mp.Value('d', 0.0) # a multiprocessing double type variable
+        
+        # initialize- the accumulated values
+        sNodeAccum = 0.
+        wNodeAccum = 0.
+        vNodeAccum = 0.
+
+        # a matrix for all consolidated in the tour
+        consol = [
+                    [ common.Item(-1, -2, 0, 0, 0., -1, -1)
+                    for _ in tour.nodes ]
+                    for _ in pallets # a consolidated for each pallet
+                ]            
+
         # L_k destination nodes set
         unattended = [n.ID for n in tour.nodes[k+1:]]
 
@@ -36,49 +52,43 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
             # load consolidated generated in the previous node
             prevNode = tour.nodes[k-1]
 
-            # numItems = first cons ID
             cons = common.loadNodeCons(surplus, scenario, inst, pi, prevNode, numItems )
-
-            # if prevNode.ID < len(common.CITIES):
-            #     print(f"\n-----Loaded in {common.CITIES[prevNode.ID]} -----")
-            #     print("ID\tP\tW\tS\tV\tFROM\tTO")
-            #     for c in cons:
-            #         print(f"{c.ID}\t{c.P}\t{c.W}\t{c.S}\t{c.V:.1f}\t{common.CITIES[c.Frm]}\t{common.CITIES[c.To]}")
-            # print(f"({numItems} items to embark)")
-
 
             # consolidated contents not destined to this point are kept on board ...
             kept = []
+            cid = N
             for c in cons:
                 if c.To in unattended:
-                    c.ID = numItems
+                    c.ID = cid
                     kept.append(c) #... and included in the items set
-                    numItems += 1
+                    cid += 1
+            print(f"({len(kept)} consolidated kept on board)")
 
-            # print(f"\n----- Kept on board at {common.CITIES[node.ID]} -----")        
-            # print("ID\tP\tW\tS\tV\tFROM\tTO")
-            # for c in kept:
-            #     print(f"{c.ID}\t{c.P}\t{c.W}\t{c.S}\t{c.V:.1f}\t{common.CITIES[c.Frm]}\t{common.CITIES[c.To]}")
-            # print(f"Kept positions to be defined: ({numItems} items to embark)\n")
-
-            # optimize consolidated positions to minimize CG deviation
-            # if method != "GRB":
-            optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, "GRB", k)
-            # pallets destinations are also set, according to kept on board in new positions
-
+            # Optimize consolidated positions to minimize CG deviation.
+            # Pallets destinations are also set, according to kept on board in new positions
             # Kept P is not -2 anymore, but the pallet ID.
-            
-            # print("ID\tP\tW\tS\tV\tFROM\tTO")
-            for c in kept:
-                # consolidated are appended to the items set
-                items.append(c)
-            #     print(f"{c.ID}\t{c.P}\t{c.W}\t{c.S}\t{c.V:.1f}\t{common.CITIES[c.Frm]}\t{common.CITIES[c.To]}")
-            # print(f"Kept positions defined ({numItems} items to embark)\n")
+            optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, "GRB", k)
 
-            # print("ID\tDest\tPCW\tPCV\tPCS")
-            # for p in pallets:
-            #     print(f"{p.ID}\t{p.Dests[k]}\t{p.PCW}\t{p.PCV:.2f}\t{p.PCS}")
-            # print("Pallets destinations to be defined.\n")
+            # N: number of items to embark
+            # put the consolidated on their assgined pallets (OptCGCons)
+            for c in kept:
+                for i, p in enumerate(pallets):
+                    if c.P == p.ID:
+                        pallets[i].putConsol( c, solTorque)
+
+                        # update the consolidated of the current node "k"
+                        consol[i][k].ID  = j+N
+                        consol[i][k].Frm = node.ID
+                        consol[i][k].To  = pallets[i].Dests[k]
+                        consol[i][k].W  += c.W
+                        consol[i][k].V  += c.V
+                        consol[i][k].S  += c.S
+
+                        # update the accumulated values
+                        sNodeAccum += c.S
+                        wNodeAccum += c.W
+                        vNodeAccum += c.V
+                        tour.score += c.S
 
         # set pallets destinations with items and consolidated to be delivered
         if k < base: # except when the current node is the base on returning
@@ -86,92 +96,48 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
         else:
             return # skip solving because it's the base on returning
 
-        # print("ID\tDest\tPCW\tPCV\tPCS")
-        # for p in pallets:
-        #     print(f"{p.ID}\t{p.Dests[k]}\t{p.PCW}\t{p.PCV:.2f}\t{p.PCS}")
-        # print("Pallets destinations defined.\n")
+        startNodeTime = time.perf_counter()
 
-        # a multiprocessing array to control solution items
         # to control solution items
         M = len(pallets)
         N = len(items)
-        solMatrix = mp.Array('i', [0 for _ in np.arange(N*M)] )      
+        solMatrix = mp.Array('i', [0 for _ in np.arange(N*M)] )
+        mpItems   = mp.Array('i', [0 for _ in np.arange(N)] ) # to check items inclusions feasibility
 
+        solDict   = dict(solMatrix=solMatrix)
+        itemsDict = dict(mpItems=mpItems) 
 
-        # a multiprocessing variable: solution global torque to be shared and
-        # changed by all pallets concurrently when solved by mpShims
-        solTorque = mp.Value('d', 0.0)
-
-        if k > 0: # not in the base
-
-            # put the kept on board in solution
-            for c in kept:
-                i = c.P
-                j = c.ID
-                solMatrix[N*i+j] = 1
-
-            # update pallets current parameters and solution torque
-            for i, p in enumerate(pallets):
-                for c in kept:
-                    if c.P == p.ID:
-                        pallets[i].PCW += c.W
-                        pallets[i].PCV += c.V
-                        pallets[i].PCS += c.S
-                        solTorque.value += float(c.W) * float(p.D)
-
-            # print(f"{p.ID}\t{p.Dests[k]}\t{p.PCW}\t{p.PCV:.2f}\t{p.PCS}")
-        # print(f"Pallets are now with current values defined. Torque: {solTorque.value/cfg.maxTorque:.2f}\n")
-        
-        startNodeTime = time.perf_counter()
-
-        solDict = dict(solMatrix=solMatrix)
- 
         if method == "mpShims":
-            mpShims.Solve(pallets, items, cfg, k, 0.95, secBreak, "p", solTorque, solDict)
+            mpShims.Solve(pallets, items, cfg, k, 0.95, secBreak, "p", solTorque, solDict, itemsDict)
 
         if method == "Shims":            
-            mpShims.Solve(pallets, items, cfg, k, 0.95, secBreak, "s", solTorque, solDict)         
+            mpShims.Solve(pallets, items, cfg, k, 0.95, secBreak, "s", solTorque, solDict, itemsDict)         
 
         if method == "mpACO":       
-            mpACO.Solve(pallets,   items, cfg, k, 0.85, secBreak, "p", solTorque, solDict) 
+            mpACO.Solve(pallets,   items, cfg, k, 0.85, secBreak, "p", solTorque, solDict, itemsDict) 
 
         if method == "ACO":       
-            mpACO.Solve(pallets,   items, cfg, k, 0.85, secBreak, "s", solTorque, solDict) 
+            mpACO.Solve(pallets,   items, cfg, k, 0.85, secBreak, "s", solTorque, solDict, itemsDict) 
 
         if method == "GRB":       
-            mipGRB.Solve(pallets,  items, cfg, k,       secBreak,      solTorque, solDict) 
+            mipGRB.Solve(pallets,  items, cfg, k,       secBreak,      solTorque, solDict, itemsDict) 
 
         nodeElapsed = time.perf_counter() - startNodeTime
 
         tour.elapsed += nodeElapsed
 
-        if len(solDict["solMatrix"]) == 0:
-            print(f"----- solDict['solMatrix'] is zero lenght on node {common.CITIES[node.ID]} -----")
-            return
-
-        # consolidated matrix: nodes x pallets
-        consol = [
-                    [ common.Item(-1, -2, 0, 0, 0., -1, -1)
-                    for _ in tour.nodes ]
-                    for _ in pallets # a consolidated for each pallet
-                ] 
-
-        pallets.sort(key=lambda x: x.ID)   
-
-        # Iterate in the solution
         Y = np.reshape(solDict["solMatrix"], (-1, N)) # N number of items (columns)
 
         for i, row in enumerate(Y):
             for j, X_ij in enumerate(row):
-                if X_ij: 
-                    p = pallets[i]
-                    consol[i][k].ID  = j+numItems
-                    consol[i][k].Frm = node.ID
-                    consol[i][k].To  = p.Dests[k]
-
+                if X_ij:    
                     consol[i][k].W += items[j].W
                     consol[i][k].V += items[j].V
                     consol[i][k].S += items[j].S
+
+                    sNodeAccum += float(items[j].S)
+                    wNodeAccum += float(items[j].W)
+                    vNodeAccum += float(items[j].V)
 
                     tour.score += items[j].S  
 
@@ -209,23 +175,36 @@ def writeAvgResults(method, scenario, line, surplus):
 
 if __name__ == "__main__":
 
+# Shims_6   0.287   336.990 123 tours   data50 worst 3.2
+# mpShims_6 0.287   333.710 123 tours   data50 worst 3.0
+
     # scenarios = [1,2,3,4,5,6]
-    scenarios = [1]
-    secBreak  = 0.7 # second
+    scenarios = [6]
+    secBreak  = 0.5 # second  Shims worst tour time: 3.2 s -> 3.2/7 = 0.46
+
+    # method    = "Shims"
+    # method    = "mpShims"
+    method    = "ACO"
+    # method    = "mpACO"
+    # method    = "GRB"
+
+    # surplus   = "data20"
+    surplus   = "data50"
+    # surplus   = "data100"
 
     dists = common.loadDistances()
 
     costs = [[0.0 for _ in dists] for _ in dists]
 
-    import sys
-    method  =  f"{sys.argv[1]}"
-    surplus =  f"{sys.argv[2]}"
+    # import sys
+    # method  =  f"{sys.argv[1]}"
+    # surplus =  f"{sys.argv[2]}"
 
     for scenario in scenarios:
 
         if scenario == 1:
-            # instances = [1,2,3,4,5,6,7]
-            instances = [1]
+            instances = [1,2,3,4,5,6,7]
+            # instances = [1]
         if scenario == 2:
             instances = [1,2,3,4,5,6,7]
             # instances = [1]
@@ -236,7 +215,7 @@ if __name__ == "__main__":
         if scenario == 5:
             instances = [1,2,3,4,5]
         if scenario == 6:
-            instances = [1,2,3]                                        
+            instances = [1,2,3,4,5,6,7]                                        
 
         cfg = common.Config(scenario)
         
@@ -263,8 +242,9 @@ if __name__ == "__main__":
 
         tours = common.getTours(cfg.numNodes-1, costs, perc)
 
-        instanceTime   = 0.
-        instanceSC     = 0.
+        instanceTime = 0.
+        instanceSC   = 0.
+        worstTime    = 0
         for instance in instances:
 
             bestSC = 0. # maximum score/cost relation
@@ -285,6 +265,9 @@ if __name__ == "__main__":
                 # best tour parameters
                 if tourSC > bestSC:
                     bestSC = tourSC
+
+                if tour.elapsed > worstTime:
+                    worstTime = tour.elapsed
             
             instanceTime += searchTime
             instanceSC   += bestSC
@@ -294,4 +277,4 @@ if __name__ == "__main__":
         # instances average
         writeAvgResults(method, scenario, f"{instanceSC/numInst:.3f}\t{instanceTime/numInst:.3f}\n", surplus)
 
-        print(f"{method}_{scenario}\t{instanceSC/numInst:.3f}\t{instanceTime/numInst:.3f}\t{len(tours)} tours\t{surplus}")
+        print(f"{method}_{scenario}\t{instanceSC/numInst:.3f}\t{instanceTime/numInst:.3f}\t{len(tours)}\ttours\t{surplus}\tWorst tour time: {worstTime:.2f}")
