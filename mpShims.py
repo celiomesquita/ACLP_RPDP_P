@@ -41,7 +41,7 @@ class Shims(object):
         return ret        
 
 # create a set of shims for this pallet and selects the best shims
-def getBestShims(pallet, items, k, solTorque, solDict, lock, cfg, surplus, mpItemsDict):
+def getBestShims(pallet, items, k, solTorque, solDict, lock, cfg, surplus, itemsDict):
 
     maxVol = pallet.V * surplus
 
@@ -90,10 +90,10 @@ def getBestShims(pallet, items, k, solTorque, solDict, lock, cfg, surplus, mpIte
 
     for item in Set[bestIndex].Items:
         if item != None:
-            pallet.putItem(item, solTorque, solDict, lock, N, mpItemsDict)
+            pallet.putItem(item, solTorque, solDict, lock, N, itemsDict)
 
 
-def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, solDict, mpItemsDict): # items include kept on board
+def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, solDict, itemsDict): # items include kept on board
 
     # N = len(items)
     # M = len(pallets)
@@ -108,9 +108,7 @@ def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, solDict, mpI
 
     print(f"\n{mode} Shims for ACLP+RPDP")
 
-    # surplus = math.exp(-limit) + 0.9
-    surplus = 1. + 3. * (1. - limit)
-    # surplus = (2. - limit)
+    surplus = (2. - limit)
 
     print(f"surplus: {surplus:.2f}")
 
@@ -128,7 +126,7 @@ def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, solDict, mpI
         # parallel greedy phase
         for i, _ in enumerate(procs):
             procs[i] = mp.Process( target=common.fillPallet, args=( pallets[i], items, k,\
-                 solTorque, solDict, lock, cfg, limit, mpItemsDict) )
+                 solTorque, solDict, lock, cfg, limit, itemsDict) )
             time.sleep(0.001)
             procs[i].start()
         
@@ -138,7 +136,7 @@ def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, solDict, mpI
         # parallel shims phase
         for i, _ in enumerate(procs):
             procs[i] = mp.Process( target=getBestShims, args=( pallets[i], items, k,\
-                 solTorque, solDict, lock, cfg, surplus, mpItemsDict) )
+                 solTorque, solDict, lock, cfg, surplus, itemsDict) )
             procs[i].start()
                 
         while time.time() - start <= secBreak:
@@ -155,11 +153,25 @@ def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, solDict, mpI
     else: # serial
         initScore = 0.0
         for i, _ in enumerate(pallets):
-            common.fillPallet( pallets[i], items, k, solTorque, solDict, lock, cfg, limit, mpItemsDict) 
+            common.fillPallet( pallets[i], items, k, solTorque, solDict, lock, cfg, limit, itemsDict) 
             initScore += pallets[i].PCS
-            getBestShims(      pallets[i], items, k, solTorque, solDict, lock, cfg, surplus, mpItemsDict)
+            getBestShims(      pallets[i], items, k, solTorque, solDict, lock, cfg, surplus, itemsDict)
 
         print(f"Greedy initial score {initScore}")            
+
+
+    # N = len(items)
+    # Y = np.reshape(solDict["solMatrix"], (-1, N)) # N number of items (columns)
+
+    # counter = 0
+    # for i, row in enumerate(Y):
+    #     for j, X_ij in enumerate(row):
+    #         if X_ij == 0 and pallets[i].isFeasible(items[j], limit, k, solTorque, solDict, lock, cfg, N, itemsDict):
+    #             pallets[i].putItem( items[j], solTorque, solDict, lock, N, itemsDict)
+    #             counter += 1
+
+    # if counter > 0:
+    # print(f"---> {counter} items inserted by the local search.")               
 
 if __name__ == "__main__":
 

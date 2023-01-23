@@ -105,19 +105,22 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
         mpItems   = mp.Array('i', [0 for _ in np.arange(N)] ) # to check items inclusions feasibility
 
         solDict   = dict(solMatrix=solMatrix)
-        itemsDict = dict(mpItems=mpItems) 
+        itemsDict = dict(mpItems=mpItems)
+
+        shimsPerc = 0.25 # best solume threshold
+        acoPerc   = 0.95
 
         if method == "mpShims":
-            mpShims.Solve(pallets, items, cfg, k, 0.95, secBreak, "p", solTorque, solDict, itemsDict)
+            mpShims.Solve(pallets, items, cfg, k, shimsPerc, secBreak, "p", solTorque, solDict, itemsDict)
 
         if method == "Shims":            
-            mpShims.Solve(pallets, items, cfg, k, 0.95, secBreak, "s", solTorque, solDict, itemsDict)         
+            mpShims.Solve(pallets, items, cfg, k, shimsPerc, secBreak, "s", solTorque, solDict, itemsDict)         
 
         if method == "mpACO":       
-            mpACO.Solve(pallets,   items, cfg, k, 0.85, secBreak, "p", solTorque, solDict, itemsDict) 
+            mpACO.Solve(pallets,   items, cfg, k, acoPerc,   secBreak, "p", solTorque, solDict, itemsDict) 
 
         if method == "ACO":       
-            mpACO.Solve(pallets,   items, cfg, k, 0.85, secBreak, "s", solTorque, solDict, itemsDict) 
+            mpACO.Solve(pallets,   items, cfg, k, acoPerc,   secBreak, "s", solTorque, solDict, itemsDict) 
 
         if method == "GRB":       
             mipGRB.Solve(pallets,  items, cfg, k,       secBreak,      solTorque, solDict, itemsDict) 
@@ -175,36 +178,19 @@ def writeAvgResults(method, scenario, line, surplus):
 
 if __name__ == "__main__":
 
-# Shims_6,   0.287, 336.990,  123 tours, data50, Worst tour time: 3.2
+#   Shims_6, 0.525, 1042.255, 123 tours, data50, Worst tour time: 8.98 / 7 = 1.3
 # mpShims_6, 0.287, 333.710,  123 tours, data50, Worst tour time: 3.0
+# 
 # ACO_6,     0.212, 4804.305, 123 tours, data50, Worst tour time: 42.18
-
-"""
-466 items  18 pallets
-Greedy initial score 46657.0
-^CTraceback (most recent call last):
-  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
-    return _run_code(code, main_globals, None,
-  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
-    exec(code, run_globals)
-  File "/home/celio/Projects/ACLP_RPDP_P/main.py", line 260, in <module>
-    solveTour(scenario, instance, pi, tour, method, pallets, cfg, secBreak, surplus)
-  File "/home/celio/Projects/ACLP_RPDP_P/main.py", line 117, in solveTour
-    mpACO.Solve(pallets,   items, cfg, k, 0.85, secBreak, "p", solTorque, solDict, itemsDict) 
-  File "/home/celio/Projects/ACLP_RPDP_P/mpACO.py", line 262, in Solve
-    if accumsP[a].value > bestAntScore:
-  File "<string>", line 3, in getvalue
-KeyboardInterrupt"""
-
 
     # scenarios = [1,2,3,4,5,6]
     scenarios = [6]
-    secBreak  = 0.5 # second  Shims worst tour time: 3.2 s -> 3.2/7 = 0.46
+    secBreak  = 1.3 # seconds:  Shims worst tour time: 9s / 7 nodes = 1.3s per node
 
-    # method    = "Shims"
+    method    = "Shims"
     # method    = "mpShims"
     # method    = "ACO"
-    method    = "mpACO"
+    # method    = "mpACO"
     # method    = "GRB"
 
     # surplus   = "data20"
@@ -222,8 +208,8 @@ KeyboardInterrupt"""
     for scenario in scenarios:
 
         if scenario == 1:
-            instances = [1,2,3,4,5,6,7]
-            # instances = [1]
+            # instances = [1,2,3,4,5,6,7]
+            instances = [1,2,3]
         if scenario == 2:
             instances = [1,2,3,4,5,6,7]
             # instances = [1]

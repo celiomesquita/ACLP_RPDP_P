@@ -41,7 +41,7 @@ class Pallet(object):
         self.PCV = 0.
         self.PCS = 0.
 
-    def putItem(self, item, solTorque, solDict, lock, N, mpItemsDict): # put an item in this pallet
+    def putItem(self, item, solTorque, solDict, lock, N, itemsDict): # put an item in this pallet
 
         self.PCW += item.W
         self.PCV += item.V
@@ -52,7 +52,7 @@ class Pallet(object):
             i = self.ID
             j = item.ID 
             solDict["solMatrix"][N*i+j] = 1
-            mpItemsDict["mpItems"][j]   = 1
+            itemsDict["mpItems"][j]   = 1
 
     def putConsol(self, consol, solTorque): # put an item in this pallet
 
@@ -61,7 +61,7 @@ class Pallet(object):
         self.PCS += consol.S
         solTorque.value += float(consol.W) * float(self.D)
             
-    def isFeasible(self, item, limit, k, solTorque, solDict, lock, cfg, N, mpItemsDict): # check constraints
+    def isFeasible(self, item, limit, k, solTorque, solDict, lock, cfg, N, itemsDict): # check constraints
 
         feasible = True
 
@@ -76,7 +76,7 @@ class Pallet(object):
                 # i = self.ID
                 j = item.ID
                 # if solDict["solMatrix"][N*i+j] > 0: # if item is allocated to some pallet
-                if mpItemsDict["mpItems"][j] > 0:
+                if itemsDict["mpItems"][j] > 0:
                     feasible = False
 
                 if feasible:
@@ -133,11 +133,11 @@ def loadPallets(cfg):
    
     return pallets
         
-def fillPallet(pallet, items, k, solTorque, solDict, lock, cfg, limit, mpItemsDict):
+def fillPallet(pallet, items, k, solTorque, solDict, lock, cfg, limit, itemsDict):
     N = len(items)
     for item in items:
-        if pallet.isFeasible(item, limit, k, solTorque, solDict, lock, cfg, N, mpItemsDict):
-            pallet.putItem(  item,           solTorque, solDict, lock,      N, mpItemsDict)
+        if pallet.isFeasible(item, limit, k, solTorque, solDict, lock, cfg, N, itemsDict):
+            pallet.putItem(  item,           solTorque, solDict, lock,      N, itemsDict)
 
 def loadDistances():
     fname =  f"./params/distances.txt"      

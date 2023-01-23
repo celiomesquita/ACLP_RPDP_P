@@ -7,14 +7,14 @@ import multiprocessing as mp
 import numpy as np
 
     
-def Solve( pallets, items, cfg, k, secBreak, solTorque, solDict, mpItemsDict ):
+def Solve( pallets, items, cfg, k, secBreak, solTorque, solDict, itemsDict ):
 
     # print("W-PCW\tV-PCV")
     # for p in pallets:
     #     print(f"{p.W-p.PCW}\t{p.V-p.PCV:.2f}")    
     # print()
 
-    # mpItemsDict to control items inclusion feasibility
+    # itemsDict to control items inclusion feasibility
 
     N = len(items)
     M = len(pallets)
@@ -112,8 +112,8 @@ def Solve( pallets, items, cfg, k, secBreak, solTorque, solDict, mpItemsDict ):
 
                     solTorque.value += items[j].W * pallets[i].D
 
-                    if mpItemsDict["mpItems"][j] == 0:
-                        mpItemsDict["mpItems"][j] = 1
+                    if itemsDict["mpItems"][j] == 0:
+                        itemsDict["mpItems"][j] = 1
 
 if __name__ == "__main__":
 

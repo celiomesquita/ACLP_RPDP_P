@@ -90,7 +90,7 @@ def selectItem(nbhood, values, pallet, maxTorque):
     return item, j
 
 def antSolve(antPallets, items, cfg, k, secBreak, antTorque, antSolDict, Attract, Phero, lock,\
-     bestScore, maxD, startTime, accumsP, accum, mpItemsDict):
+     bestScore, maxD, startTime, accumsP, accum, itemsDict):
 
     # items are read only
     # antSolDict are changed by this ant
@@ -113,9 +113,9 @@ def antSolve(antPallets, items, cfg, k, secBreak, antTorque, antSolDict, Attract
                 # pick from the neighborhood the probable best item for this pallet
                 item, j = selectItem(nbhood, values, p, maxTorque)
 
-                if antPallets[i].isFeasible(item, 1.0, k, antTorque, antSolDict, lock, cfg, N, mpItemsDict ):
+                if antPallets[i].isFeasible(item, 1.0, k, antTorque, antSolDict, lock, cfg, N, itemsDict ):
 
-                    antPallets[i].putItem(item, antTorque, antSolDict, lock, N, mpItemsDict)
+                    antPallets[i].putItem(item, antTorque, antSolDict, lock, N, itemsDict)
 
                     accum["score"]  += item.S
 
@@ -133,7 +133,7 @@ def antSolve(antPallets, items, cfg, k, secBreak, antTorque, antSolDict, Attract
         updateAntsField(accum["score"] , bestScore, Attract, Phero, items) 
 
 
-def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, solDict, mpItemsDict ):
+def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, solDict, itemsDict ):
 
     # to control the general attractiveness for the tournament selection
     Attract = mp.Array('d', np.arange(len(items)))
@@ -165,7 +165,7 @@ def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, solDict, mp
     print(f"{len(items)} items  {len(pallets)} pallets")
 
     for i, _ in enumerate(pallets):               
-        common.fillPallet(pallets[i], items, k, solTorque, solDict, lock, cfg, limit, mpItemsDict)
+        common.fillPallet(pallets[i], items, k, solTorque, solDict, lock, cfg, limit, itemsDict)
         bestScore  += pallets[i].PCS
         if abs(pallets[i].D) > maxD:
             maxD = abs(pallets[i].D)
@@ -173,7 +173,7 @@ def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, solDict, mp
     initPallets   = common.copyPallets(pallets)              
     initTorque    = solTorque
     initSolDict   = common.copySolDict(solDict) 
-    initItemsDict = common.copyItemsDict(mpItemsDict)
+    initItemsDict = common.copyItemsDict(itemsDict)
     initScore    = bestScore
 
     print(f"Greedy initial score {initScore}")
@@ -281,7 +281,7 @@ def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, solDict, mp
 
     if iterSolDict[bi] != None:
         solDict     = common.copySolDict( iterSolDict[bi] )
-        mpItemsDict = common.copyItemsDict( iterItemsDict[bi] )
+        itemsDict = common.copyItemsDict( iterItemsDict[bi] )
                 
     # AttractVar  = statistics.variance(Attract)
     # PheroVar    = statistics.variance(Phero)
