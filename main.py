@@ -179,6 +179,24 @@ if __name__ == "__main__":
 # mpShims_6, 0.287, 333.710,  123 tours, data50, Worst tour time: 3.0
 # ACO_6,     0.212, 4804.305, 123 tours, data50, Worst tour time: 42.18
 
+"""
+466 items  18 pallets
+Greedy initial score 46657.0
+^CTraceback (most recent call last):
+  File "/usr/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/usr/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/home/celio/Projects/ACLP_RPDP_P/main.py", line 260, in <module>
+    solveTour(scenario, instance, pi, tour, method, pallets, cfg, secBreak, surplus)
+  File "/home/celio/Projects/ACLP_RPDP_P/main.py", line 117, in solveTour
+    mpACO.Solve(pallets,   items, cfg, k, 0.85, secBreak, "p", solTorque, solDict, itemsDict) 
+  File "/home/celio/Projects/ACLP_RPDP_P/mpACO.py", line 262, in Solve
+    if accumsP[a].value > bestAntScore:
+  File "<string>", line 3, in getvalue
+KeyboardInterrupt"""
+
+
     # scenarios = [1,2,3,4,5,6]
     scenarios = [6]
     secBreak  = 0.5 # second  Shims worst tour time: 3.2 s -> 3.2/7 = 0.46
