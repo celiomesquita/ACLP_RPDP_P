@@ -115,26 +115,22 @@ def loadPallets(cfg):
     """
     Load pallets attributes based on aircraft size
     """
-    fname = f"./params/{cfg.size}.txt"
-      
-    reader = open(fname,"r")
-    lines = reader.readlines()    
+    # smaller
+    vol = 13.7
+    wei = 4500
+    dists = [8.39,6.25,4.5,2.1,-0.3,-2.7,-5.1]
+
+    if cfg.size == "larger":
+        vol = 14.8
+        dists = [14.89,14.89,11.47,11.47,8.77,8.77,4.40,4.40,0.00,0.00,-4.40,-4.40,-8.77,-8.77,-13.17,-13.17,-17.57,-17.57]
+   
     pallets = []
     id = 0
-    cfg.maxD = 0
-    try:
-        for line in lines:
-            cols = line.split()
-            d = float(cols[0])
-            v = float(cols[1])
-            w = float(cols[2])
-            pallets.append( Pallet(id, d, v, w, cfg.numNodes) )
-            id += 1
 
-            if d > cfg.maxD:
-                cfg.maxD = d
-    finally:
-        reader.close()    
+    for d in dists:
+        pallets.append( Pallet(id, d, vol, wei, cfg.numNodes) )
+        id += 1
+   
     return pallets
         
 def fillPallet(pallet, items, k, solTorque, solDict, lock, cfg, limit, mpItemsDict):
@@ -163,7 +159,6 @@ class Config(object):
     def __init__(self, scenario):
         self.weiCap = 0
         self.volCap = 0
-        self.maxD   = 0
         self.numNodes = {0:3,  1:3,  2:3,    3:4,    4:5,    5:6,    6:7    }[scenario]
         self.Sce      = {0:1,  1:1,  2:2,    3:3,    4:4,    5:5,    6:6    }[scenario]
 

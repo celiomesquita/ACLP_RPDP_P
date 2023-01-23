@@ -175,8 +175,9 @@ def writeAvgResults(method, scenario, line, surplus):
 
 if __name__ == "__main__":
 
-# Shims_6   0.287   336.990 123 tours   data50 worst 3.2
-# mpShims_6 0.287   333.710 123 tours   data50 worst 3.0
+# Shims_6   0.287   336.990  123 tours   data50 worst 3.2
+# mpShims_6 0.287   333.710  123 tours   data50 worst 3.0
+# ACO_6     0.212   4804.305 123 tours   data50 Worst tour time: 42.18
 
     # scenarios = [1,2,3,4,5,6]
     scenarios = [6]
@@ -184,8 +185,8 @@ if __name__ == "__main__":
 
     # method    = "Shims"
     # method    = "mpShims"
-    method    = "ACO"
-    # method    = "mpACO"
+    # method    = "ACO"
+    method    = "mpACO"
     # method    = "GRB"
 
     # surplus   = "data20"
