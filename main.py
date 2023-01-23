@@ -175,9 +175,9 @@ def writeAvgResults(method, scenario, line, surplus):
 
 if __name__ == "__main__":
 
-# Shims_6   0.287   336.990  123 tours   data50 worst 3.2
-# mpShims_6 0.287   333.710  123 tours   data50 worst 3.0
-# ACO_6     0.212   4804.305 123 tours   data50 Worst tour time: 42.18
+# Shims_6,   0.287, 336.990,  123 tours, data50, Worst tour time: 3.2
+# mpShims_6, 0.287, 333.710,  123 tours, data50, Worst tour time: 3.0
+# ACO_6,     0.212, 4804.305, 123 tours, data50, Worst tour time: 42.18
 
     # scenarios = [1,2,3,4,5,6]
     scenarios = [6]
@@ -278,4 +278,4 @@ if __name__ == "__main__":
         # instances average
         writeAvgResults(method, scenario, f"{instanceSC/numInst:.3f}\t{instanceTime/numInst:.3f}\n", surplus)
 
-        print(f"{method}_{scenario}\t{instanceSC/numInst:.3f}\t{instanceTime/numInst:.3f}\t{len(tours)}\ttours\t{surplus}\tWorst tour time: {worstTime:.2f}")
+        print(f"{method}_{scenario}, {instanceSC/numInst:.3f}, {instanceTime/numInst:.3f}, {len(tours)} tours, {surplus}, Worst tour time: {worstTime:.2f}")
