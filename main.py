@@ -178,19 +178,20 @@ def writeAvgResults(method, scenario, line, surplus):
 
 if __name__ == "__main__":
 
-#   Shims_6, 0.525, 1042.255, 123 tours, data50, Worst tour time: 8.98 / 7 = 1.3
-# mpShims_6, 0.287, 333.710,  123 tours, data50, Worst tour time: 3.0
-# 
-# ACO_6,     0.212, 4804.305, 123 tours, data50, Worst tour time: 42.18
+#   Shims_6, 0.61,  574, 123 tours, data50, Worst tour time: 11s, instance time 9min 36s
+# mpShims_6, 0.61,  538, 123 tours, data50, Worst tour time: 6s,  instance time 9min
+#     ACO_6, 0.22, 5800, 123 tours, data50, Worst tour time: 48s,
+#   mpACO_6, 
+#     GRB_6, 5.65, 2780, 123 tours, data50, Worst tour time: 27s
 
     # scenarios = [1,2,3,4,5,6]
     scenarios = [6]
-    secBreak  = 1.3 # seconds:  Shims worst tour time: 9s / 7 nodes = 1.3s per node
+    secBreak  = 1.6 # seconds:  Shims worst tour time: 11s / 7 nodes = 1.6s per node
 
-    method    = "Shims"
+    # method    = "Shims"
     # method    = "mpShims"
     # method    = "ACO"
-    # method    = "mpACO"
+    method    = "mpACO"
     # method    = "GRB"
 
     # surplus   = "data20"
@@ -207,20 +208,8 @@ if __name__ == "__main__":
 
     for scenario in scenarios:
 
-        if scenario == 1:
-            # instances = [1,2,3,4,5,6,7]
-            instances = [1,2,3]
-        if scenario == 2:
-            instances = [1,2,3,4,5,6,7]
-            # instances = [1]
-        if scenario == 3:
-            instances = [1,2,3,4,5,6,7]
-        if scenario == 4:
-            instances = [1,2,3,4,5,6,7]
-        if scenario == 5:
-            instances = [1,2,3,4,5]
-        if scenario == 6:
-            instances = [1,2,3,4,5,6,7]                                        
+        # instances = [1,2,3,4,5,6,7]
+        instances = [1,2,3]                                      
 
         cfg = common.Config(scenario)
         
@@ -280,6 +269,6 @@ if __name__ == "__main__":
         numInst = float(len(instances))
 
         # instances average
-        writeAvgResults(method, scenario, f"{instanceSC/numInst:.3f}\t{instanceTime/numInst:.3f}\n", surplus)
+        writeAvgResults(method, scenario, f"{instanceSC/numInst:.2f}\t{instanceTime/numInst:.0f}\n", surplus)
 
-        print(f"{method}_{scenario}, {instanceSC/numInst:.3f}, {instanceTime/numInst:.3f}, {len(tours)} tours, {surplus}, Worst tour time: {worstTime:.2f}")
+        print(f"{method}_{scenario}, {instanceSC/numInst:.2f}, {instanceTime/numInst:.0f}, {len(tours)} tours, {surplus}, Worst tour time: {worstTime:.2f}")
