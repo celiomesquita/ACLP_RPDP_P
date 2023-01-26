@@ -34,6 +34,7 @@ def OptCGCons(kept, pallets, maxTorque, method, k):
 
         tTotAccum = 0
         for i, _ in enumerate(pallets):
+            pallets[i].Dests[k] = -1 # reset pallets destinations from this node
             for j in KeptRange:
                 if X[i][j].x >= 0.99:
                     tTotAccum += float(kept[j].W) * pallets[i].D

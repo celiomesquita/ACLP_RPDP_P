@@ -248,7 +248,7 @@ def getTours(num, costs, threshold):
     return tours2
 
 
-def writeNodeCons(scenario, instance, cons, pi, node, surplus):
+def writeNodeCons(scenario, instance, cons, pi, node, surplus, epsilom):
 
     dirname = f"./results/{surplus}/scenario_{scenario}/instance_{instance}"
 
@@ -264,6 +264,7 @@ def writeNodeCons(scenario, instance, cons, pi, node, surplus):
         line = f"{c.W} {c.S} {c.V:.3f} {c.Frm} {c.To}\n"
         lines += line
 
+    lines += f"{epsilom:.2f}"
     writer = open(fname, "w+") 
     try:
         writer.write(lines)

@@ -18,7 +18,12 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
         print(f" {node.ICAO}", end='')
     print()
 
-
+    # a matrix for all consolidated in the tour
+    consol = [
+                [ common.Item(-1, -2, 0, 0, 0., -1, -1) # an empty consolidated
+                for _ in tour.nodes ]
+                for _ in pallets # tour consolidated for each pallet
+            ]
 
     base = len(tour.nodes)-1
 
@@ -32,13 +37,6 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
         wNodeAccum = 0.
         vNodeAccum = 0.
 
-        # a matrix for all consolidated in the tour
-        consol = [
-                    [ common.Item(-1, -2, 0, 0, 0., -1, -1)
-                    for _ in tour.nodes ]
-                    for _ in pallets # a consolidated for each pallet
-                ]            
-
         # L_k destination nodes set
         unattended = [n.ID for n in tour.nodes[k+1:]]
 
@@ -50,9 +48,13 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
         if k > 0 and k < base: # not in the base
 
             # load consolidated generated in the previous node
-            prevNode = tour.nodes[k-1]
+            # prevNode = tour.nodes[k-1]
 
-            cons = common.loadNodeCons(surplus, scenario, inst, pi, prevNode, numItems )
+            # cons = common.loadNodeCons(surplus, scenario, inst, pi, prevNode, numItems )
+
+            cons = []
+            for i, _ in enumerate(pallets):
+                    cons.append( consol[i][k-1] )
 
             # consolidated contents not destined to this point are kept on board ...
             kept = []
@@ -67,28 +69,29 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
             # Optimize consolidated positions to minimize CG deviation.
             # Pallets destinations are also set, according to kept on board in new positions
             # Kept P is not -2 anymore, but the pallet ID.
-            optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, "GRB", k)
+            if len(kept) > 0:
+                optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, "GRB", k)
 
-            # N: number of items to embark
-            # put the consolidated on their assgined pallets (OptCGCons)
-            for c in kept:
-                for i, p in enumerate(pallets):
-                    if c.P == p.ID:
-                        pallets[i].putConsol( c, solTorque)
+                # N: number of items to embark
+                # put the consolidated on their assgined pallets (OptCGCons)
+                for c in kept:
+                    for i, p in enumerate(pallets):
+                        if c.P == p.ID:
+                            pallets[i].putConsol( c, solTorque)
 
-                        # update the consolidated of the current node "k"
-                        consol[i][k].ID  = j+N
-                        consol[i][k].Frm = node.ID
-                        consol[i][k].To  = pallets[i].Dests[k]
-                        consol[i][k].W  += c.W
-                        consol[i][k].V  += c.V
-                        consol[i][k].S  += c.S
+                            # update the consolidated of the current node "k"
+                            consol[i][k].ID  = j+N
+                            consol[i][k].Frm = node.ID
+                            consol[i][k].To  = pallets[i].Dests[k]
+                            consol[i][k].W  += c.W
+                            consol[i][k].V  += c.V
+                            consol[i][k].S  += c.S
 
-                        # update the accumulated values
-                        sNodeAccum += c.S
-                        wNodeAccum += c.W
-                        vNodeAccum += c.V
-                        tour.score += c.S
+                            # update the accumulated values
+                            sNodeAccum += c.S
+                            wNodeAccum += c.W
+                            vNodeAccum += c.V
+                            tour.score += c.S
 
         # set pallets destinations with items and consolidated to be delivered
         if k < base: # except when the current node is the base on returning
@@ -123,7 +126,7 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
             mpACO.Solve(pallets,   items, cfg, k, acoPerc,   secBreak, "s", solTorque, solDict, itemsDict) 
 
         if method == "GRB":       
-            mipGRB.Solve(pallets,  items, cfg, k,       secBreak,      solTorque, solDict, itemsDict) 
+            mipGRB.Solve(pallets,  items, cfg, k,            secBreak,      solTorque, solDict, itemsDict) 
 
         nodeElapsed = time.perf_counter() - startNodeTime
 
@@ -133,11 +136,15 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
 
         for i, row in enumerate(Y):
             for j, X_ij in enumerate(row):
-                if X_ij:    
+                if X_ij:
+                    # mount this node "k" consolidated
+                    consol[i][k].ID  = j+N
+                    consol[i][k].Frm = node.ID
+                    consol[i][k].To  = pallets[i].Dests[k]                    
                     consol[i][k].W += items[j].W
                     consol[i][k].V += items[j].V
                     consol[i][k].S += items[j].S
-
+                    # totalize parameters of this solution
                     sNodeAccum += float(items[j].S)
                     wNodeAccum += float(items[j].W)
                     vNodeAccum += float(items[j].V)
@@ -155,7 +162,7 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
         print(f" score {tour.score:.0f}, cost {tour.cost:.0f} -----\n")
 
         # write consolidated contents from this node in file
-        common.writeNodeCons(scenario, instance, consNodeT, pi, node, surplus)
+        common.writeNodeCons(scenario, instance, consNodeT, pi, node, surplus, epsilom)
             
 # end of solveTour 
 
@@ -185,14 +192,14 @@ if __name__ == "__main__":
 #     GRB_6, 5.65, 2780, 123 tours, data50, Worst tour time: 27s
 
     # scenarios = [1,2,3,4,5,6]
-    scenarios = [6]
+    scenarios = [1]
     secBreak  = 1.6 # seconds:  Shims worst tour time: 11s / 7 nodes = 1.6s per node
 
     # method    = "Shims"
     # method    = "mpShims"
     # method    = "ACO"
-    method    = "mpACO"
-    # method    = "GRB"
+    # method    = "mpACO"
+    method    = "GRB"
 
     # surplus   = "data20"
     surplus   = "data50"
@@ -209,7 +216,7 @@ if __name__ == "__main__":
     for scenario in scenarios:
 
         # instances = [1,2,3,4,5,6,7]
-        instances = [1,2,3]                                      
+        instances = [1]
 
         cfg = common.Config(scenario)
         

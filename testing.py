@@ -9,7 +9,7 @@ import optcgcons
 import mipGRB
 
 # for testing only
-def getCons(N, rndm):
+def testingGetCons(N, rndm):
     """
     Testing consolidated from cons_0_0.txt
     """
@@ -60,7 +60,7 @@ scenario = 1
 instances = [1]
 
 # limit    = 0.95 # best
-limit    = 0.95
+limit    = 0.25
 secBreak = 0.7 # seconds
 # secBreak = 60
 
@@ -119,8 +119,13 @@ for inst in instances:
 
     # N = first cons ID
     # cons = common.loadNodeCons(surplus, scenario, inst, pi, prevNode, N )
-    # cons = getCons(N, True) # for testing only
-    cons = getCons(N, False) # False: no randomness in consolidated generation
+    # cons = testingGetCons(N, True) # for testing only
+    cons = testingGetCons(N, False) # False: no randomness in consolidated generation
+
+    # --- from main
+    # cons = []
+    # for i, _ in enumerate(pallets):
+    #         cons.append( consol[i][k-1] )    
 
     if prevNode.ID < len(common.CITIES):
         print(f"\n-----Loaded in {common.CITIES[prevNode.ID]} -----")
@@ -144,10 +149,7 @@ for inst in instances:
         print(f"{c.ID}\t{c.P}\t{c.W}\t{c.S}\t{c.V:.1f}\t{common.CITIES[c.Frm]}\t{common.CITIES[c.To]}")
     print(f"Kept positions to be defined\n")
 
-    # Optimize consolidated positions to minimize CG deviation.
-    # Pallets destinations are also set, according to kept on board in new positions
-    # Kept P is not -2 anymore, but the pallet ID.
-    optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, "GRB", k)
+
     
     # solution global torque to be shared and changed by all pallets concurrently
     solTorque = mp.Value('d', 0.0) # a multiprocessing double type variable
@@ -164,25 +166,31 @@ for inst in instances:
                 for _ in pallets # a consolidated for each pallet
             ]
 
-    # N: number of items to embark
-    # put the consolidated on their assgined pallets (OptCGCons)
-    for c in kept:
-        for i, p in enumerate(pallets):
-            if c.P == p.ID:
-                pallets[i].putConsol( c, solTorque)
+    # Optimize consolidated positions to minimize CG deviation.
+    # Pallets destinations are also set, according to kept on board in new positions
+    # Kept P is not -2 anymore, but the pallet ID.
+    if len(kept) > 0:
+        optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, "GRB", k)
 
-                # update the consolidated of the current node "k"
-                consol[i][k].ID  = j+N
-                consol[i][k].Frm = node.ID
-                consol[i][k].To  = pallets[i].Dests[k]
-                consol[i][k].W  += c.W
-                consol[i][k].V  += c.V
-                consol[i][k].S  += c.S
+        # N: number of items to embark
+        # put the consolidated on their assgined pallets (OptCGCons)
+        for c in kept:
+            for i, p in enumerate(pallets):
+                if c.P == p.ID:
+                    pallets[i].putConsol( c, solTorque)
 
-                # update the accumulated values
-                sNodeAccum += c.S
-                wNodeAccum += c.W
-                vNodeAccum += c.V
+                    # update the consolidated of the current node "k"
+                    consol[i][k].ID  = j+N
+                    consol[i][k].Frm = node.ID
+                    consol[i][k].To  = pallets[i].Dests[k]
+                    consol[i][k].W  += c.W
+                    consol[i][k].V  += c.V
+                    consol[i][k].S  += c.S
+
+                    # update the accumulated values
+                    sNodeAccum += c.S
+                    wNodeAccum += c.W
+                    vNodeAccum += c.V
 
     print("ID\tDest\tPCW\tPCV\tPCS")
     for p in pallets:
@@ -230,7 +238,10 @@ for inst in instances:
 
     for i, row in enumerate(Y):
         for j, X_ij in enumerate(row):
-            if X_ij:    
+            if X_ij:
+                consol[i][k].ID  = j+N
+                consol[i][k].Frm = node.ID
+                consol[i][k].To  = pallets[i].Dests[k]                   
                 consol[i][k].W += items[j].W
                 consol[i][k].V += items[j].V
                 consol[i][k].S += items[j].S
