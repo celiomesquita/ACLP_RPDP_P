@@ -154,15 +154,18 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
         epsilom = solTorque.value/cfg.maxTorque
         tour.cost *= ( 1.0 + abs(epsilom)/20.0 )
 
+        print(f"----- node {node.ICAO},", end='')
+        print(f" score {tour.score:.0f}, cost {tour.cost:.0f} -----\n")
+
         consNodeT = [None for _ in pallets]        
         for i, p in enumerate(pallets):
             consNodeT[i] = consol[i][k]
 
-        print(f"----- node {node.ICAO},", end='')
-        print(f" score {tour.score:.0f}, cost {tour.cost:.0f} -----\n")
+        vol = vNodeAccum/cfg.volCap
+        wei = wNodeAccum/cfg.weiCap
 
         # write consolidated contents from this node in file
-        common.writeNodeCons(scenario, instance, consNodeT, pi, node, surplus, epsilom)
+        common.writeNodeCons(scenario, instance, consNodeT, pi, node, surplus, epsilom, wei, vol)
             
 # end of solveTour 
 
@@ -198,8 +201,8 @@ if __name__ == "__main__":
     # method    = "Shims"
     # method    = "mpShims"
     # method    = "ACO"
-    # method    = "mpACO"
-    method    = "GRB"
+    method    = "mpACO"
+    # method    = "GRB"
 
     # surplus   = "data20"
     surplus   = "data50"
