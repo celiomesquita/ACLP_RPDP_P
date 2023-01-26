@@ -29,6 +29,9 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
 
     for k, node in enumerate(tour.nodes):  # solve each node sequentialy
 
+        for i, p in enumerate(pallets):
+            pallets[i].reset(cfg.numNodes)
+
         # solution global torque to be shared and changed by all pallets concurrently
         solTorque = mp.Value('d', 0.0) # a multiprocessing double type variable
         
@@ -42,18 +45,15 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
 
         # load items parameters from this node and problem instance, that go to unnatended
         items = common.loadNodeItems(scenario, inst, node, unattended, surplus)
-        numItems = len(items)
-        # print(f"number of items: {numItems}")
 
         if k > 0 and k < base: # not in the base
 
             # load consolidated generated in the previous node
             # prevNode = tour.nodes[k-1]
-
             # cons = common.loadNodeCons(surplus, scenario, inst, pi, prevNode, numItems )
 
             cons = []
-            for i, _ in enumerate(pallets):
+            for i, _ in enumerate(pallets): # previous node consolidated
                     cons.append( consol[i][k-1] )
 
             # consolidated contents not destined to this point are kept on board ...
@@ -64,7 +64,6 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
                     c.ID = cid
                     kept.append(c) #... and included in the items set
                     cid += 1
-            print(f"({len(kept)} consolidated kept on board)")
 
             # Optimize consolidated positions to minimize CG deviation.
             # Pallets destinations are also set, according to kept on board in new positions
@@ -188,21 +187,21 @@ def writeAvgResults(method, scenario, line, surplus):
 
 if __name__ == "__main__":
 
-#   Shims_6, 0.61,  574, 123 tours, data50, Worst tour time: 11s, instance time 9min 36s
-# mpShims_6, 0.61,  538, 123 tours, data50, Worst tour time: 6s,  instance time 9min
-#     ACO_6, 0.22, 5800, 123 tours, data50, Worst tour time: 48s,
-#   mpACO_6, 
-#     GRB_6, 5.65, 2780, 123 tours, data50, Worst tour time: 27s
+#   Shims_6
+# mpShims_6
+#     ACO_6
+#   mpACO_6
+#     GRB_6
 
     # scenarios = [1,2,3,4,5,6]
-    scenarios = [1]
+    scenarios = [6]
     secBreak  = 1.6 # seconds:  Shims worst tour time: 11s / 7 nodes = 1.6s per node
 
     # method    = "Shims"
     # method    = "mpShims"
     # method    = "ACO"
-    method    = "mpACO"
-    # method    = "GRB"
+    # method    = "mpACO"
+    method    = "GRB"
 
     # surplus   = "data20"
     surplus   = "data50"
@@ -218,8 +217,8 @@ if __name__ == "__main__":
 
     for scenario in scenarios:
 
-        # instances = [1,2,3,4,5,6,7]
-        instances = [1]
+        instances = [1,2,3,4,5,6,7]
+        # instances = [1]
 
         cfg = common.Config(scenario)
         
@@ -241,10 +240,9 @@ if __name__ == "__main__":
             cfg.weiCap = cfg.payload
 
         perc = 1.0
-        if cfg.numNodes >= 3:
+        if cfg.numNodes > 3:
             perc = 0.25
 
-        tours = common.getTours(cfg.numNodes-1, costs, perc)
 
         instanceTime = 0.
         instanceSC   = 0.
@@ -252,10 +250,13 @@ if __name__ == "__main__":
         for instance in instances:
 
             bestSC = 0. # maximum score/cost relation
+            tours = common.getTours(cfg.numNodes-1, costs, perc)
 
             # selects the best tour
             searchTime = 0
             for pi, tour in enumerate(tours):
+
+                # if pi == 1:
 
                 tour.elapsed = 0
                 tour.score   = 0.0

@@ -16,14 +16,23 @@ def testingGetCons(N, rndm):
     cons = []
 
     lines = [
-        [1230, 80,  9.0, 0, 1], # from the base to the first node
-        [3560, 90, 10.0, 0, 2], # from the base to the second node
-        [2340, 70, 11.0, 0, 1],
-        [2360, 60, 12.0, 0, 2],
-        [1250, 50, 13.0, 0, 1],
-        [2540, 40,  8.0, 0, 2],
-        [3540, 30,  7.0, 0, 1]
+        [ 620,  406,  4.121, 0, 2],
+        [2595, 2436, 13.690, 0, 2],
+        [3282, 3081, 13.689, 0, 2],
+        [4217, 3856, 13.674, 0, 2],
+        [2558, 3180, 13.692, 0, 1],
+        [3526, 3630, 13.691, 0, 1],
+        [4348, 3509, 13.697, 0, 1]
     ]
+    # lines = [
+    #     [1230, 80,  9.0, 0, 1], # from the base to the first node
+    #     [3560, 90, 10.0, 0, 2], # from the base to the second node
+    #     [2340, 70, 11.0, 0, 1],
+    #     [2360, 60, 12.0, 0, 2],
+    #     [1250, 50, 13.0, 0, 1],
+    #     [2540, 40,  8.0, 0, 2],
+    #     [3540, 30,  7.0, 0, 1]
+    # ]
 
     id = N
     for line in lines:
@@ -48,11 +57,12 @@ def testingGetCons(N, rndm):
 surplus = "data50"
 # surplus = "data100"
 #
-# method = "mpACO"
-# method = "ACO"
-# method = "mpShims"
-# method = "Shims"
-method = "GRB"
+
+method    = "Shims"
+# method    = "mpShims"
+# method    = "ACO"
+# method    = "mpACO"
+# method    = "GRB"
 
 scenario = 1
 
@@ -64,12 +74,13 @@ limit    = 0.25
 secBreak = 0.7 # seconds
 # secBreak = 60
 
-cfg = common.Config(scenario)                                      
 
 # --- distances and costs matrix ---
 dists = common.loadDistances()
 
 costs = [[0.0 for _ in dists] for _ in dists]
+
+cfg = common.Config(scenario)                                      
 
 for i, cols in enumerate(dists):
     for j, dist in enumerate(cols):
@@ -101,7 +112,17 @@ for inst in instances:
 
     tour = tours[pi]
 
+    # a matrix for all consolidated in the tour
+    consol = [
+                [ common.Item(-1, -2, 0, 0, 0., -1, -1)
+                for _ in tour.nodes ]
+                for _ in pallets # a consolidated for each pallet
+            ]
+
     k = 1 # the first node after the base: cons_0_0.txt
+
+    for i, p in enumerate(pallets):
+        pallets[i].reset(cfg.numNodes)
 
     node = tour.nodes[k]
     print(f"ICAO current node: {node.ICAO}")
@@ -149,8 +170,6 @@ for inst in instances:
         print(f"{c.ID}\t{c.P}\t{c.W}\t{c.S}\t{c.V:.1f}\t{common.CITIES[c.Frm]}\t{common.CITIES[c.To]}")
     print(f"Kept positions to be defined\n")
 
-
-    
     # solution global torque to be shared and changed by all pallets concurrently
     solTorque = mp.Value('d', 0.0) # a multiprocessing double type variable
 
@@ -158,13 +177,6 @@ for inst in instances:
     sNodeAccum = 0.
     wNodeAccum = 0.
     vNodeAccum = 0.
-
-    # a matrix for all consolidated in the tour
-    consol = [
-                [ common.Item(-1, -2, 0, 0, 0., -1, -1)
-                for _ in tour.nodes ]
-                for _ in pallets # a consolidated for each pallet
-            ]
 
     # Optimize consolidated positions to minimize CG deviation.
     # Pallets destinations are also set, according to kept on board in new positions
@@ -256,10 +268,6 @@ for inst in instances:
             feasible = "Unfeasible!!!"
             break    
 
-    consNodeT = [None for _ in pallets]        
-    for i, p in enumerate(pallets):
-        consNodeT[i] = consol[i][k]
-
     epsilom = solTorque.value/cfg.maxTorque
 
     vol = vNodeAccum/cfg.volCap
@@ -277,8 +285,12 @@ for inst in instances:
     # solElapsed += elapsed
     # solScore   += sNodeAccum
 
+    consNodeT = [None for _ in pallets]        
+    for i, p in enumerate(pallets):
+        consNodeT[i] = consol[i][k]
+
     # write consolidated contents from this node in file
-    common.writeNodeCons(scenario, inst, consNodeT, pi, node, surplus)
+    common.writeNodeCons(scenario, inst, consNodeT, pi, node, surplus, epsilom, wei, vol)
 
     # common.writeTourSol(method, scenario, inst, pi, tour, cfg, pallets, consol, True, surplus)
 

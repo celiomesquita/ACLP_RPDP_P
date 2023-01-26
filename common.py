@@ -41,8 +41,13 @@ class Pallet(object):
         self.PCV = 0.
         self.PCS = 0.
 
-    def putItem(self, item, solTorque, solDict, lock, N, itemsDict): # put an item in this pallet
+    def reset(self, numNodes):
+        self.Dests = np.full(numNodes, -1)
+        self.PCW = 0
+        self.PCV = 0.
+        self.PCS = 0.
 
+    def putItem(self, item, solTorque, solDict, lock, N, itemsDict): # put an item in this pallet
         self.PCW += item.W
         self.PCV += item.V
         self.PCS += item.S
@@ -52,7 +57,7 @@ class Pallet(object):
             i = self.ID
             j = item.ID 
             solDict["solMatrix"][N*i+j] = 1
-            itemsDict["mpItems"][j]   = 1
+            itemsDict["mpItems"][j]     = 1
 
     def putConsol(self, consol, solTorque): # put an item in this pallet
 
@@ -297,14 +302,15 @@ def loadNodeCons(surplus, scenario, instance, pi, node, id):
         try:
             for line in lines:
                 cols = line.split()
-                w   =   int(cols[0])
-                s   =   int(cols[1])
-                v   = float(cols[2])
-                frm =   int(cols[3])
-                to  =   int(cols[4])         
-                if w > 0: #           P = -2 consolidated
-                    cons.append( Item(id, -2, w, s, v, frm, to) )
-                    id += 1
+                if len(cols) > 1:
+                    w   =   int(cols[0])
+                    s   =   int(cols[1])
+                    v   = float(cols[2])
+                    frm =   int(cols[3])
+                    to  =   int(cols[4])         
+                    if w > 0: #           P = -2 consolidated
+                        cons.append( Item(id, -2, w, s, v, frm, to) )
+                        id += 1
         finally:
             reader.close()
 
