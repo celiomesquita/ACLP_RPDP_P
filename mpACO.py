@@ -283,6 +283,18 @@ def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, solDict, it
         solDict     = common.copySolDict( iterSolDict[bi] )
         itemsDict = common.copyItemsDict( iterItemsDict[bi] )
                 
+    N = len(items)
+    Y = np.reshape(solDict["solMatrix"], (-1, N)) # N number of items (columns)
+
+    counter = 0
+    for i, row in enumerate(Y):
+        for j, X_ij in enumerate(row):
+            if X_ij == 0 and pallets[i].isFeasible(items[j], limit, k, solTorque, solDict, lock, cfg, N, itemsDict):
+                pallets[i].putItem( items[j], solTorque, solDict, lock, N, itemsDict)
+                counter += 1
+
+    print(f"---> {counter} items inserted by the local search.") 
+
     # AttractVar  = statistics.variance(Attract)
     # PheroVar    = statistics.variance(Phero)
     # AttractMean = statistics.mean(Attract)

@@ -8,6 +8,9 @@ import mpACO
 import optcgcons
 import mipGRB
 
+shimsPerc = 0.25 # best solume threshold
+acoPerc   = 0.25
+
 def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus):
     """
     Solves one tour
@@ -109,8 +112,7 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
         solDict   = dict(solMatrix=solMatrix)
         itemsDict = dict(mpItems=mpItems)
 
-        shimsPerc = 0.25 # best solume threshold
-        acoPerc   = 0.95
+
 
         if method == "mpShims":
             mpShims.Solve(pallets, items, cfg, k, shimsPerc, secBreak, "p", solTorque, solDict, itemsDict)
@@ -187,21 +189,29 @@ def writeAvgResults(method, scenario, line, surplus):
 
 if __name__ == "__main__":
 
-#   Shims_6
-# mpShims_6
-#     ACO_6
+#   Shims_6, 16.01, 439, 123 tours, data50, Worst tour time: 4.58
+# mpShims_6, 16.01, 431, 123 tours, data50, Worst tour time: 4.27
+#     ACO_6, 5.72, 4819, 123 tours, data50, Worst tour time: 42.37
 #   mpACO_6
-#     GRB_6
+#     GRB_6 16.01, 2529, 123 tours, data50, Worst tour time: 23.61
+
+
+# mpACO_1,  8.58, 14, 2 tours, data50, Worst tour time: 7.22 0.95
+#
+#   GRB_1, 15.86, 11, 2 tours, data50, Worst tour time: 6.14
 
     # scenarios = [1,2,3,4,5,6]
-    scenarios = [6]
+    scenarios = [1]
     secBreak  = 1.6 # seconds:  Shims worst tour time: 11s / 7 nodes = 1.6s per node
+
+    shimsPerc = 0.25 # best solume threshold
+    acoPerc   = 0.9
 
     # method    = "Shims"
     # method    = "mpShims"
     # method    = "ACO"
-    # method    = "mpACO"
-    method    = "GRB"
+    method    = "mpACO"
+    # method    = "GRB"
 
     # surplus   = "data20"
     surplus   = "data50"
@@ -218,7 +228,7 @@ if __name__ == "__main__":
     for scenario in scenarios:
 
         instances = [1,2,3,4,5,6,7]
-        # instances = [1]
+        # instances = [1,2,3]
 
         cfg = common.Config(scenario)
         
@@ -282,4 +292,4 @@ if __name__ == "__main__":
         # instances average
         writeAvgResults(method, scenario, f"{instanceSC/numInst:.2f}\t{instanceTime/numInst:.0f}\n", surplus)
 
-        print(f"{method}_{scenario}, {instanceSC/numInst:.2f}, {instanceTime/numInst:.0f}, {len(tours)} tours, {surplus}, Worst tour time: {worstTime:.2f}")
+        print(f"{method}_{scenario}, {instanceSC/numInst:.2f}, {instanceTime/numInst:.0f}, {len(tours)} tours, {surplus}, Worst tour time: {worstTime:.2f} acoPerc: {acoPerc:.2f}")
