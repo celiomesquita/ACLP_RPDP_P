@@ -8,8 +8,8 @@ import mpACO
 import optcgcons
 import mipGRB
 
-shimsPerc = 0.25 # best solume threshold
-acoPerc   = 0.25
+shimsThreshold = 0.25 # best solume threshold
+acoThreshold   = 0.25
 
 def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus):
     """
@@ -115,16 +115,16 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
 
 
         if method == "mpShims":
-            mpShims.Solve(pallets, items, cfg, k, shimsPerc, secBreak, "p", solTorque, solDict, itemsDict)
+            mpShims.Solve(pallets, items, cfg, k, shimsThreshold, secBreak, "p", solTorque, solDict, itemsDict)
 
         if method == "Shims":            
-            mpShims.Solve(pallets, items, cfg, k, shimsPerc, secBreak, "s", solTorque, solDict, itemsDict)         
+            mpShims.Solve(pallets, items, cfg, k, shimsThreshold, secBreak, "s", solTorque, solDict, itemsDict)         
 
         if method == "mpACO":       
-            mpACO.Solve(pallets,   items, cfg, k, acoPerc,   secBreak, "p", solTorque, solDict, itemsDict) 
+            mpACO.Solve(pallets,   items, cfg, k, acoThreshold,   secBreak, "p", solTorque, solDict, itemsDict) 
 
         if method == "ACO":       
-            mpACO.Solve(pallets,   items, cfg, k, acoPerc,   secBreak, "s", solTorque, solDict, itemsDict) 
+            mpACO.Solve(pallets,   items, cfg, k, acoThreshold,   secBreak, "s", solTorque, solDict, itemsDict) 
 
         if method == "GRB":       
             mipGRB.Solve(pallets,  items, cfg, k,            secBreak,      solTorque, solDict, itemsDict) 
@@ -200,17 +200,19 @@ if __name__ == "__main__":
 #
 #   GRB_1, 15.86, 11, 2 tours, data50, Worst tour time: 6.14
 
+# GRB_1, 16.36, 7, 2 tours, data50, Worst tour time: 4.02 acoThreshold: 0.25
+
     # scenarios = [1,2,3,4,5,6]
     scenarios = [1]
     secBreak  = 1.6 # seconds:  Shims worst tour time: 11s / 7 nodes = 1.6s per node
 
-    shimsPerc = 0.25 # best solume threshold
-    acoPerc   = 0.9
+    shimsThreshold = 0.25 # best volume threshold
+    acoThreshold   = 0.75
 
     # method    = "Shims"
     # method    = "mpShims"
-    # method    = "ACO"
-    method    = "mpACO"
+    method    = "ACO"
+    # method    = "mpACO"
     # method    = "GRB"
 
     # surplus   = "data20"
@@ -227,8 +229,8 @@ if __name__ == "__main__":
 
     for scenario in scenarios:
 
-        instances = [1,2,3,4,5,6,7]
-        # instances = [1,2,3]
+        # instances = [1,2,3,4,5,6,7]
+        instances = [1]
 
         cfg = common.Config(scenario)
         
@@ -292,4 +294,10 @@ if __name__ == "__main__":
         # instances average
         writeAvgResults(method, scenario, f"{instanceSC/numInst:.2f}\t{instanceTime/numInst:.0f}\n", surplus)
 
-        print(f"{method}_{scenario}, {instanceSC/numInst:.2f}, {instanceTime/numInst:.0f}, {len(tours)} tours, {surplus}, Worst tour time: {worstTime:.2f} acoPerc: {acoPerc:.2f}")
+        print(f"{method}_{scenario}, {instanceSC/numInst:.2f}, {instanceTime/numInst:.0f}, {len(tours)} tours, {surplus}, Worst tour time: {worstTime:.2f}")
+
+        if method == "ACO" or method == "mpACO":
+             print(f"acoThreshold: {acoThreshold:.2f}")
+
+        if method == "Shims" or method == "mpShims":
+             print(f"shimsThreshold: {shimsThreshold:.2f}")

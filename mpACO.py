@@ -24,30 +24,37 @@ BETA  = 4 # heuristic exponent
 # getDeltaTau calculates the pheromone to be dropped by each on ants tracks
 def getDeltaTau(score, bestScore):
     # at this point DeltaTau may be positive ou negative learning
-    DeltaTau = (score - bestScore)/bestScore
-    return DeltaTau
+    deltaTau = (score - bestScore)/bestScore
+    if deltaTau > 0:
+        return deltaTau
+    else:
+        return 0.0
 
 
 # Ant System (AS), the classic method that uses a random proportional state transition rule,
 # while the pheromone is deposited by all ants proportionally to their solution quality and
-# is evaporated in all the components. Each Ant makes use of "updateAntsField" to update 
+# is evaporated in all the components. Each Ant makes use of "depositPhero" to update 
 # item attractiveness according to the its solution value.
-def updateAntsField(score, bestScore, Attract, Phero, items):
+def depositPhero(score, bestScore, Attract, Phero, items):
 
     deltaTau = getDeltaTau(score, bestScore)
 
-    # update pheromone level in all edges
-    for id, phero in enumerate(Phero):
+    if deltaTau > 0:
 
-        #evaporate some pheromone 
-        Phero[id] = math.sqrt(phero) / 1.35
+        for id, _ in enumerate(Phero):
 
-        # update pheromone level
-        if Phero[id] + deltaTau > 0 and  Phero[id] + deltaTau < 1:
             Phero[id] += deltaTau
 
-        Attract[id] = Phero[id]**ALPHA * items[id].Attr**BETA
+            Attract[id] = Phero[id]**ALPHA * items[id].Attr**BETA
 
+def evaporate(Attract, Phero, items):
+
+        for id, phero in enumerate(Phero):
+
+            #evaporate some pheromone 
+            Phero[id] = math.sqrt(phero) / 1.35
+
+            Attract[id] = Phero[id]**ALPHA * items[id].Attr**BETA
 
 # at least 15 times faster than randomChoice
 def rouletteSelection(values): 
@@ -130,7 +137,7 @@ def antSolve(antPallets, items, cfg, k, secBreak, antTorque, antSolDict, Attract
 
     with lock:
         accumsP.value = accum["score"] 
-        updateAntsField(accum["score"] , bestScore, Attract, Phero, items) 
+        depositPhero(accum["score"] , bestScore, Attract, Phero, items) 
 
 
 def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, solDict, itemsDict ):
@@ -243,6 +250,8 @@ def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, solDict, it
                     ba = a
                     improvements += 1
 
+                evaporate(Attract, Phero, items)
+
 
         if mode == "Parallel":
             # wait until time limit or all ants finish their jobs
@@ -275,7 +284,10 @@ def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, solDict, it
         else:
             stagnant += 1
 
-        iter += 1   
+
+        iter += 1
+
+        evaporate(Attract, Phero, items)
   
     print(f"{improvements} improvements ({numAnts*iter} total ants).")
 
@@ -283,24 +295,21 @@ def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, solDict, it
         solDict     = common.copySolDict( iterSolDict[bi] )
         itemsDict = common.copyItemsDict( iterItemsDict[bi] )
                 
-    N = len(items)
-    Y = np.reshape(solDict["solMatrix"], (-1, N)) # N number of items (columns)
+    # N = len(items)
+    # Y = np.reshape(solDict["solMatrix"], (-1, N)) # N number of items (columns)
+    # counter = 0
+    # for i, row in enumerate(Y):
+    #     for j, X_ij in enumerate(row):
+    #         if X_ij == 0 and pallets[i].isFeasible(items[j], limit, k, solTorque, solDict, lock, cfg, N, itemsDict):
+    #             pallets[i].putItem( items[j], solTorque, solDict, lock, N, itemsDict)
+    #             counter += 1
+    # print(f"---> {counter} items inserted by the local search.") 
 
-    counter = 0
-    for i, row in enumerate(Y):
-        for j, X_ij in enumerate(row):
-            if X_ij == 0 and pallets[i].isFeasible(items[j], limit, k, solTorque, solDict, lock, cfg, N, itemsDict):
-                pallets[i].putItem( items[j], solTorque, solDict, lock, N, itemsDict)
-                counter += 1
-
-    print(f"---> {counter} items inserted by the local search.") 
-
-    # AttractVar  = statistics.variance(Attract)
-    # PheroVar    = statistics.variance(Phero)
-    # AttractMean = statistics.mean(Attract)
-    # PheroMean   = statistics.mean(Phero)
-    
-    # print(f"{AttractVar:.1f}\t{AttractMean:.1f}\t{PheroVar:.3f}\t{PheroMean:.3f}")
+    AttractVar  = statistics.variance(Attract)
+    PheroVar    = statistics.variance(Phero)
+    AttractMean = statistics.mean(Attract)
+    PheroMean   = statistics.mean(Phero)
+    print(f"{AttractVar:.1f}\t{AttractMean:.1f}\t{PheroVar:.3f}\t{PheroMean:.3f}")
         
 
 
