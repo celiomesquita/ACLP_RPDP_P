@@ -90,7 +90,7 @@ def getBestShims(pallet, items, k, solTorque, solDict, lock, cfg, surplus, items
 
     for item in Set[bestIndex].Items:
         if item != None:
-            pallet.putItem(item, solTorque, solDict, lock, N, itemsDict)
+            pallet.putItem(item, solTorque, solDict, N, itemsDict, lock)
 
 
 def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, solDict, itemsDict): # items include kept on board
@@ -153,7 +153,7 @@ def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, solDict, ite
     else: # serial
         initScore = 0.0
         for i, _ in enumerate(pallets):
-            common.fillPallet( pallets[i], items, k, solTorque, solDict, lock, cfg, limit, itemsDict) 
+            common.fillPallet( pallets[i], items, k, solTorque, solDict, cfg, limit, itemsDict, lock) 
             initScore += pallets[i].PCS
             getBestShims(      pallets[i], items, k, solTorque, solDict, lock, cfg, surplus, itemsDict)
 

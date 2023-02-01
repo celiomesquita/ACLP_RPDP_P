@@ -195,25 +195,26 @@ if __name__ == "__main__":
 #   mpACO_6
 #     GRB_6 16.01, 2529, 123 tours, data50, Worst tour time: 23.61
 
-
-# mpACO_1,  8.58, 14, 2 tours, data50, Worst tour time: 7.22 0.95
-#
-#   GRB_1, 15.86, 11, 2 tours, data50, Worst tour time: 6.14
-
-# GRB_1, 16.36, 7, 2 tours, data50, Worst tour time: 4.02 acoThreshold: 0.25
+#   Shims_2, 16.00,  2, 2 tours, data50, Worst tour time: 0.97
+# mpShims_2, 16.00,  2, 2 tours, data50, Worst tour time: 0.96
+#     GRB_2, 11.07, 12, 2 tours, data50, Worst tour time: 6.09
+#     ACO_2,  7.02, 18, 2 tours, data50, Worst tour time: 8.95
+#   mpACO_2,  6.99, 14, 2 tours, data50, Worst tour time: 7.21
+#    
 
     # scenarios = [1,2,3,4,5,6]
-    scenarios = [1]
+    scenarios = [2]
     secBreak  = 1.6 # seconds:  Shims worst tour time: 11s / 7 nodes = 1.6s per node
+    # secBreak = 5.0 # parallel ACO
 
     shimsThreshold = 0.25 # best volume threshold
-    acoThreshold   = 0.75
+    acoThreshold   = 0.95
 
     # method    = "Shims"
     # method    = "mpShims"
-    method    = "ACO"
+    # method    = "ACO"
     # method    = "mpACO"
-    # method    = "GRB"
+    method    = "GRB"
 
     # surplus   = "data20"
     surplus   = "data50"
@@ -229,8 +230,8 @@ if __name__ == "__main__":
 
     for scenario in scenarios:
 
-        # instances = [1,2,3,4,5,6,7]
-        instances = [1]
+        instances = [1,2,3,4,5,6,7]
+        # instances = [1]
 
         cfg = common.Config(scenario)
         
@@ -294,7 +295,7 @@ if __name__ == "__main__":
         # instances average
         writeAvgResults(method, scenario, f"{instanceSC/numInst:.2f}\t{instanceTime/numInst:.0f}\n", surplus)
 
-        print(f"{method}_{scenario}, {instanceSC/numInst:.2f}, {instanceTime/numInst:.0f}, {len(tours)} tours, {surplus}, Worst tour time: {worstTime:.2f}")
+        print(f"{method}_{scenario}, {instanceSC/numInst:.2f}, {instanceTime/numInst:.0f}, {len(tours)} tours, {surplus}, Worst tour time: {worstTime:.2f} secBreak: {secBreak}")
 
         if method == "ACO" or method == "mpACO":
              print(f"acoThreshold: {acoThreshold:.2f}")

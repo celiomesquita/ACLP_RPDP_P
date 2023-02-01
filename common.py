@@ -47,7 +47,7 @@ class Pallet(object):
         self.PCV = 0.
         self.PCS = 0.
 
-    def putItem(self, item, solTorque, solDict, lock, N, itemsDict): # put an item in this pallet
+    def putItem(self, item, solTorque, solDict, N, itemsDict, lock): # put an item in this pallet
         self.PCW += item.W
         self.PCV += item.V
         self.PCS += item.S
@@ -66,7 +66,7 @@ class Pallet(object):
         self.PCS += consol.S
         solTorque.value += float(consol.W) * float(self.D)
             
-    def isFeasible(self, item, limit, k, solTorque, solDict, lock, cfg, N, itemsDict): # check constraints
+    def isFeasible(self, item, limit, k, solTorque, cfg, itemsDict, lock): # check constraints
 
         feasible = True
 
@@ -78,9 +78,7 @@ class Pallet(object):
                 
         if feasible:
             with lock:
-                # i = self.ID
                 j = item.ID
-                # if solDict["solMatrix"][N*i+j] > 0: # if item is allocated to some pallet
                 if itemsDict["mpItems"][j] > 0:
                     feasible = False
 
@@ -138,11 +136,11 @@ def loadPallets(cfg):
    
     return pallets
         
-def fillPallet(pallet, items, k, solTorque, solDict, lock, cfg, limit, itemsDict):
+def fillPallet(pallet, items, k, solTorque, solDict, cfg, limit, itemsDict, lock):
     N = len(items)
     for item in items:
-        if pallet.isFeasible(item, limit, k, solTorque, solDict, lock, cfg, N, itemsDict):
-            pallet.putItem(  item,           solTorque, solDict, lock,      N, itemsDict)
+        if pallet.isFeasible(item, limit, k, solTorque, cfg, itemsDict, lock):
+            pallet.putItem(  item,           solTorque, solDict,      N, itemsDict, lock)
 
 def loadDistances():
     fname =  f"./params/distances.txt"      
@@ -352,7 +350,7 @@ def loadNodeItems(scenario, instance, node, unatended, surplus): # unatended, fu
         bestAttr = items[0].S / items[0].V # the first item has the best attractiveness
         # avgAttr = 0.0
         for i, it in enumerate(items):
-            items[i].Attr = 4. * (it.S/it.V) / bestAttr # 4: to make the average around 0.5
+            items[i].Attr = 3. * (it.S/it.V) / bestAttr # 4: to make the average around 0.5
             # avgAttr += items[i].Attr
             items[i].ID = id
             id += 1
