@@ -4,6 +4,7 @@ import time
 import multiprocessing as mp
 import os
 import mpShims
+import mpShims2
 import mpACO
 import optcgcons
 import mipGRB
@@ -84,7 +85,7 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
                             # update the consolidated of the current node "k"
                             consol[i][k].ID  = j+N
                             consol[i][k].Frm = node.ID
-                            consol[i][k].To  = pallets[i].Dests[k]
+                            consol[i][k].To  = pallets[i].Dest[k]
                             consol[i][k].W  += c.W
                             consol[i][k].V  += c.V
                             consol[i][k].S  += c.S
@@ -117,6 +118,9 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
         if method == "mpShims":
             mpShims.Solve(pallets, items, cfg, k, shimsThreshold, secBreak, "p", solTorque, solDict, itemsDict)
 
+        if method == "mpShims2":
+            mpShims2.Solve(pallets, items, cfg, k, shimsThreshold, secBreak, "p", solTorque, solDict, itemsDict)
+
         if method == "Shims":            
             mpShims.Solve(pallets, items, cfg, k, shimsThreshold, secBreak, "s", solTorque, solDict, itemsDict)         
 
@@ -141,7 +145,7 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
                     # mount this node "k" consolidated
                     consol[i][k].ID  = j+N
                     consol[i][k].Frm = node.ID
-                    consol[i][k].To  = pallets[i].Dests[k]                    
+                    consol[i][k].To  = pallets[i].Dest[k]                    
                     consol[i][k].W += items[j].W
                     consol[i][k].V += items[j].V
                     consol[i][k].S += items[j].S
@@ -195,15 +199,16 @@ if __name__ == "__main__":
 #   mpACO_6
 #     GRB_6 16.01, 2529, 123 tours, data50, Worst tour time: 23.61
 
-#   Shims_2, 16.00,  2, 2 tours, data50, Worst tour time: 0.97
-# mpShims_2, 16.00,  2, 2 tours, data50, Worst tour time: 0.96
-#     GRB_2, 11.07, 12, 2 tours, data50, Worst tour time: 6.09
-#     ACO_2,  7.02, 18, 2 tours, data50, Worst tour time: 8.95
-#   mpACO_2,  6.99, 14, 2 tours, data50, Worst tour time: 7.21
-#    
+# --- Home ---
+#  Shims_2, 16.00,  3, 2 tours, data50, Worst tour time:  2.16 secBreak: 1.6
+#mpShims_2, 16.00,  4, 2 tours, data50, Worst tour time:  2.22 secBreak: 1.6
+#    ACO_2,  7.02, 38, 2 tours, data50, Worst tour time: 19.99 secBreak: 1.6
+#  mpACO_2,  7.00, 29, 2 tours, data50, Worst tour time: 15.23 secBreak: 1.6
+#    GRB_2, 10.62, 25, 2 tours, data50, Worst tour time: 12.75 secBreak: 1.6
+ 
 
     # scenarios = [1,2,3,4,5,6]
-    scenarios = [2]
+    scenarios = [6]
     secBreak  = 1.6 # seconds:  Shims worst tour time: 11s / 7 nodes = 1.6s per node
     # secBreak = 5.0 # parallel ACO
 
@@ -212,9 +217,10 @@ if __name__ == "__main__":
 
     # method    = "Shims"
     # method    = "mpShims"
+    # method    = "mpShims2"
     # method    = "ACO"
-    # method    = "mpACO"
-    method    = "GRB"
+    method    = "mpACO"
+    # method    = "GRB"
 
     # surplus   = "data20"
     surplus   = "data50"

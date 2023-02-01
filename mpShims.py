@@ -23,7 +23,7 @@ class Shims(object):
 
     def isFeasible(self, item, k, solTorque, cfg, lock): # check constraints
 
-        if item.To != self.Pallet.Dests[k]:
+        if item.To != self.Pallet.Dest[k]:
             return False
 
         if self.Pallet.PCV + self.SCV + item.V > self.Pallet.V:
@@ -41,7 +41,7 @@ class Shims(object):
         return ret        
 
 # create a set of shims for this pallet and selects the best shims
-def getBestShims(pallet, items, k, solTorque, solDict, lock, cfg, surplus, itemsDict):
+def getBestShims(pallet, items, k, solTorque, solDict, cfg, surplus, itemsDict, lock):
 
     maxVol = pallet.V * surplus
 
@@ -136,7 +136,7 @@ def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, solDict, ite
         # parallel shims phase
         for i, _ in enumerate(procs):
             procs[i] = mp.Process( target=getBestShims, args=( pallets[i], items, k,\
-                 solTorque, solDict, lock, cfg, surplus, itemsDict) )
+                 solTorque, solDict, cfg, surplus, itemsDict, lock) )
             procs[i].start()
                 
         while time.time() - start <= secBreak:
@@ -155,7 +155,7 @@ def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, solDict, ite
         for i, _ in enumerate(pallets):
             common.fillPallet( pallets[i], items, k, solTorque, solDict, cfg, limit, itemsDict, lock) 
             initScore += pallets[i].PCS
-            getBestShims(      pallets[i], items, k, solTorque, solDict, lock, cfg, surplus, itemsDict)
+            getBestShims(      pallets[i], items, k, solTorque, solDict, cfg, surplus, itemsDict, lock)
 
         print(f"Greedy initial score {initScore}")            
 

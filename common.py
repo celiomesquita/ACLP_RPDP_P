@@ -36,13 +36,13 @@ class Pallet(object):
         self.D  = d  # centroid distance to CG
         self.V  = v  # volume limit
         self.W  = w  # weight limit
-        self.Dests = np.full(numNodes, -1)
+        self.Dest = np.full(numNodes, -1)
         self.PCW = 0 # pallet current weight
         self.PCV = 0.
         self.PCS = 0.
 
     def reset(self, numNodes):
-        self.Dests = np.full(numNodes, -1)
+        self.Dest = np.full(numNodes, -1)
         self.PCW = 0
         self.PCV = 0.
         self.PCS = 0.
@@ -70,7 +70,7 @@ class Pallet(object):
 
         feasible = True
 
-        if feasible and item.To != self.Dests[k]:
+        if feasible and item.To != self.Dest[k]:
             feasible = False
 
         if feasible and self.PCV + item.V > self.V * limit:
@@ -94,7 +94,7 @@ def copyPallets(pallets):
     array = [None for _ in pallets]
     for i, p in enumerate(pallets):
         array[i] = Pallet(p.ID, p.D, p.V, p.W, 1)
-        array[i].Dests = p.Dests
+        array[i].Dest = p.Dest
         array[i].PCW   = p.PCW 
         array[i].PCV   = p.PCV
         array[i].PCS   = p.PCS
@@ -135,7 +135,13 @@ def loadPallets(cfg):
         id += 1
    
     return pallets
-        
+
+# def fillDest(d, d_items, pallets, k, solTorque, solDict, cfg, limit, itemsDict, lock):
+#     for i, p in enumerate(pallets):
+#         if p.Dest[k] == d:
+#             fillPallet(pallets[i], d_items, k, solTorque, solDict, cfg, limit, itemsDict, lock)
+
+
 def fillPallet(pallet, items, k, solTorque, solDict, cfg, limit, itemsDict, lock):
     N = len(items)
     for item in items:
@@ -379,7 +385,7 @@ def setPalletsDestinations(items, pallets, nodes, k, L_k):
                     max = d
     numEmpty = 0
     for p in pallets:
-        if p.Dests[k] == -1:
+        if p.Dest[k] == -1:
             numEmpty += 1
 
     for n in nodes:
@@ -389,13 +395,13 @@ def setPalletsDestinations(items, pallets, nodes, k, L_k):
             for p in pallets:
                 if count > np:
                     break
-                if p.Dests[k] == -1:
-                    pallets[p.ID].Dests[k] = n.ID
+                if p.Dest[k] == -1:
+                    pallets[p.ID].Dest[k] = n.ID
                     count += 1
 
     for p in pallets:
-        if p.Dests[k] == -1:
-            pallets[p.ID].Dests[k] = max
+        if p.Dest[k] == -1:
+            pallets[p.ID].Dest[k] = max
 # end of setPalletsDestinations
  
 def writeResult(fname, value):
