@@ -3,8 +3,9 @@ import numpy as np
 import time
 import multiprocessing as mp
 import os
+import math
+
 import mpShims
-import mpShims2
 import mpACO
 import optcgcons
 import mipGRB
@@ -118,9 +119,6 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
         if method == "mpShims":
             mpShims.Solve(pallets, items, cfg, k, shimsThreshold, secBreak, "p", solTorque, solDict, itemsDict)
 
-        if method == "mpShims2":
-            mpShims2.Solve(pallets, items, cfg, k, shimsThreshold, secBreak, "p", solTorque, solDict, itemsDict)
-
         if method == "Shims":            
             mpShims.Solve(pallets, items, cfg, k, shimsThreshold, secBreak, "s", solTorque, solDict, itemsDict)         
 
@@ -193,22 +191,35 @@ def writeAvgResults(method, scenario, line, surplus):
 
 if __name__ == "__main__":
 
+# --- Home ---
 #   Shims_6, 16.01, 439, 123 tours, data50, Worst tour time: 4.58
-# mpShims_6, 16.01, 431, 123 tours, data50, Worst tour time: 4.27
+# 
 #     ACO_6, 5.72, 4819, 123 tours, data50, Worst tour time: 42.37
-#   mpACO_6, 5.74, 3734, 123 tours, data50, Worst tour time: 31.86 secBreak: 1.6
+#   mpACO_6, 5.74, 3734, 123 tours, data50, Worst tour time: 31.86
 #     GRB_6 16.01, 2529, 123 tours, data50, Worst tour time: 23.61
 
-# --- Home ---
-#  Shims_2, 16.00,  3, 2 tours, data50, Worst tour time:  2.16 secBreak: 1.6
-#mpShims_2, 16.00,  4, 2 tours, data50, Worst tour time:  2.22 secBreak: 1.6
-#    ACO_2,  7.02, 38, 2 tours, data50, Worst tour time: 19.99 secBreak: 1.6
-#  mpACO_2,  7.00, 29, 2 tours, data50, Worst tour time: 15.23 secBreak: 1.6
-#    GRB_2, 10.62, 25, 2 tours, data50, Worst tour time: 12.75 secBreak: 1.6
+#   Shims_2, 16.00,  3, 2 tours, data50, Worst tour time:  2.16
+# 
+#     ACO_2,  7.02, 38, 2 tours, data50, Worst tour time: 19.99
+#   mpACO_2,  7.00, 29, 2 tours, data50, Worst tour time: 15.23
+#     GRB_2, 10.62, 25, 2 tours, data50, Worst tour time: 12.75
  
+# --- work ---
+#    Shims_2, 16.00,  2, 2 tours, data50, Worst tour time:  0.97
+#  mpShims_2, 21.50,  1, 2 tours, data50, Worst tour time:  0.50
+#      ACO_2,  7.02, 22, 2 tours, data50, Worst tour time: 11.09
+#    mpACO_2,  6.99, 18, 2 tours, data50, Worst tour time:  8.92
+#      GRB_2, 10.84, 16, 2 tours, data50, Worst tour time:  8.06
+
+#   Shims_1, 12.17,  1, 2 tours, data50, Worst tour time: 0.19
+# mpShims_1, 13.88,  1, 2 tours, data50, Worst tour time: 0.23
+#     ACO_1,  8.54, 12, 2 tours, data50, Worst tour time: 5.73
+#   mpACO_1,  8.57, 11, 2 tours, data50, Worst tour time: 5.51
+#     GRB_1, 15.86, 10, 2 tours, data50, Worst tour time: 5.28
+
 
     # scenarios = [1,2,3,4,5,6]
-    scenarios = [5]
+    scenarios = [1]
     secBreak  = 1.6 # seconds:  Shims worst tour time: 11s / 7 nodes = 1.6s per node
     # secBreak = 5.0 # parallel ACO
 
@@ -217,10 +228,9 @@ if __name__ == "__main__":
 
     # method    = "Shims"
     # method    = "mpShims"
-    # method    = "mpShims2"
     # method    = "ACO"
-    # method    = "mpACO"
-    method    = "GRB"
+    method    = "mpACO"
+    # method    = "GRB"
 
     # surplus   = "data20"
     surplus   = "data50"
@@ -298,13 +308,17 @@ if __name__ == "__main__":
 
         numInst = float(len(instances))
 
+        avgTime = math.ceil(instanceTime/numInst)
+
         # instances average
-        writeAvgResults(method, scenario, f"{instanceSC/numInst:.2f}\t{instanceTime/numInst:.0f}\n", surplus)
+        writeAvgResults(method, scenario, f"{instanceSC/numInst:.2f}\t {avgTime:.0f}\n", surplus)
 
-        print(f"{method}_{scenario}, {instanceSC/numInst:.2f}, {instanceTime/numInst:.0f}, {len(tours)} tours, {surplus}, Worst tour time: {worstTime:.2f} secBreak: {secBreak}")
+        print(f"{method}_{scenario}, {instanceSC/numInst:.2f}, {avgTime:.0f}, {len(tours)} tours, {surplus}, Worst tour time: {worstTime:.2f}")
 
-        if method == "ACO" or method == "mpACO":
+        print(f"secBreak: {secBreak}")
+
+        if "ACO" in method:
              print(f"acoThreshold: {acoThreshold:.2f}")
 
-        if method == "Shims" or method == "mpShims":
+        if "Shims" in method:
              print(f"shimsThreshold: {shimsThreshold:.2f}")

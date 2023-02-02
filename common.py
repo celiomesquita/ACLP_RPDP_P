@@ -95,9 +95,9 @@ def copyPallets(pallets):
     for i, p in enumerate(pallets):
         array[i] = Pallet(p.ID, p.D, p.V, p.W, 1)
         array[i].Dest = p.Dest
-        array[i].PCW   = p.PCW 
-        array[i].PCV   = p.PCV
-        array[i].PCS   = p.PCS
+        array[i].PCW  = p.PCW 
+        array[i].PCV  = p.PCV
+        array[i].PCS  = p.PCS
     return array
      
 def copySolDict(solDict):

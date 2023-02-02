@@ -93,7 +93,7 @@ def getBestShims(pallet, items, k, solTorque, solDict, cfg, surplus, itemsDict, 
             pallet.putItem(item, solTorque, solDict, N, itemsDict, lock)
 
 
-def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, solDict, itemsDict): # items include kept on board
+def Solve(pallets, items, cfg, k, threshold, secBreak, mode, solTorque, solDict, itemsDict): # items include kept on board
 
     # N = len(items)
     # M = len(pallets)
@@ -106,9 +106,9 @@ def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, solDict, ite
     else:
         mode = "Serial"
 
-    print(f"\n{mode} Shims for ACLP+RPDP")
+    print(f"\n{mode} Shims 2 for ACLP+RPDP")
 
-    surplus = (2. - limit)
+    surplus = (2. - threshold)
 
     print(f"surplus: {surplus:.2f}")
 
@@ -119,14 +119,12 @@ def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, solDict, ite
     # sort ascendent by CG distance
     pallets.sort(key=lambda x: abs(x.D), reverse=False)
 
-    if mode == "p":
-
-        start = time.time()
+    if mode == "Parallel":
 
         # parallel greedy phase
-        for i, _ in enumerate(procs):
+        for i, p in enumerate(pallets):
             procs[i] = mp.Process( target=common.fillPallet, args=( pallets[i], items, k,\
-                 solTorque, solDict, lock, cfg, limit, itemsDict) )
+                 solTorque, solDict, cfg, threshold, itemsDict, lock) )
             time.sleep(0.001)
             procs[i].start()
         
@@ -134,44 +132,23 @@ def Solve(pallets, items, cfg, k, limit, secBreak, mode, solTorque, solDict, ite
             proc.join()
 
         # parallel shims phase
-        for i, _ in enumerate(procs):
+        for i, p in enumerate(pallets):
             procs[i] = mp.Process( target=getBestShims, args=( pallets[i], items, k,\
                  solTorque, solDict, cfg, surplus, itemsDict, lock) )
+            time.sleep(0.001)                 
             procs[i].start()
                 
-        while time.time() - start <= secBreak:
-            if not any(p.is_alive() for p in procs):
-                # All the processes are done, break now.
-                break
-        else:
-            # We only enter this if we didn't 'break' above.
-            print("timed out, killing all processes")
-            for p in procs:
-                p.terminate()
-                p.join()
+        for p in procs:
+            p.join()
 
     else: # serial
         initScore = 0.0
         for i, _ in enumerate(pallets):
-            common.fillPallet( pallets[i], items, k, solTorque, solDict, cfg, limit, itemsDict, lock) 
+            common.fillPallet( pallets[i], items, k, solTorque, solDict, cfg, threshold, itemsDict, lock) 
             initScore += pallets[i].PCS
             getBestShims(      pallets[i], items, k, solTorque, solDict, cfg, surplus, itemsDict, lock)
 
-        print(f"Greedy initial score {initScore}")            
-
-
-    # N = len(items)
-    # Y = np.reshape(solDict["solMatrix"], (-1, N)) # N number of items (columns)
-
-    # counter = 0
-    # for i, row in enumerate(Y):
-    #     for j, X_ij in enumerate(row):
-    #         if X_ij == 0 and pallets[i].isFeasible(items[j], limit, k, solTorque, solDict, lock, cfg, N, itemsDict):
-    #             pallets[i].putItem( items[j], solTorque, solDict, lock, N, itemsDict)
-    #             counter += 1
-
-    # if counter > 0:
-    # print(f"---> {counter} items inserted by the local search.")               
+        print(f"Greedy initial score {initScore}")                    
 
 if __name__ == "__main__":
 
