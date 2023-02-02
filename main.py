@@ -196,7 +196,7 @@ if __name__ == "__main__":
 #   Shims_6, 16.01, 439, 123 tours, data50, Worst tour time: 4.58
 # mpShims_6, 16.01, 431, 123 tours, data50, Worst tour time: 4.27
 #     ACO_6, 5.72, 4819, 123 tours, data50, Worst tour time: 42.37
-#   mpACO_6
+#   mpACO_6, 5.74, 3734, 123 tours, data50, Worst tour time: 31.86 secBreak: 1.6
 #     GRB_6 16.01, 2529, 123 tours, data50, Worst tour time: 23.61
 
 # --- Home ---
@@ -208,7 +208,7 @@ if __name__ == "__main__":
  
 
     # scenarios = [1,2,3,4,5,6]
-    scenarios = [6]
+    scenarios = [5]
     secBreak  = 1.6 # seconds:  Shims worst tour time: 11s / 7 nodes = 1.6s per node
     # secBreak = 5.0 # parallel ACO
 
@@ -219,8 +219,8 @@ if __name__ == "__main__":
     # method    = "mpShims"
     # method    = "mpShims2"
     # method    = "ACO"
-    method    = "mpACO"
-    # method    = "GRB"
+    # method    = "mpACO"
+    method    = "GRB"
 
     # surplus   = "data20"
     surplus   = "data50"
