@@ -34,11 +34,11 @@ def OptCGCons(kept, pallets, maxTorque, method, k):
 
         tTotAccum = 0
         for i, _ in enumerate(pallets):
-            pallets[i].Dests[k] = -1 # reset pallets destinations from this node
+            pallets[i].Dest[k] = -1 # reset pallets destinations from this node
             for j in KeptRange:
                 if X[i][j].x >= 0.99:
                     tTotAccum += float(kept[j].W) * pallets[i].D
-                    pallets[i].Dests[k] = kept[j].To
+                    pallets[i].Dest[k] = kept[j].To
                     kept[j].P = i # put the consolidated in the best position to minimize torque                        
 
         tTotAccum /= maxTorque

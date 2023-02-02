@@ -54,10 +54,10 @@ def Solve( pallets, items, cfg, k, secBreak, solTorque, solDict, itemsDict ):
         # items must be grouped in a pallet with the same destination
         for j in set_N:
             mod.add_constr(
-                X[i][j] <= X[i][j] * ( pallets[i].Dests[k] - items[j].To + 1 )
+                X[i][j] <= X[i][j] * ( pallets[i].Dest[k] - items[j].To + 1 )
             )
             mod.add_constr(
-                X[i][j] <= X[i][j] * ( items[j].To - pallets[i].Dests[k] + 1 )
+                X[i][j] <= X[i][j] * ( items[j].To - pallets[i].Dest[k] + 1 )
             )
 
         # Pallet weight constraint                      PCW: pallet current weight
