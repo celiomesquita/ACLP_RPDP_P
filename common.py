@@ -34,8 +34,8 @@ class Pallet(object):
     def __init__(self, id, d, v, w, numNodes):
         self.ID = id
         self.D  = d  # centroid distance to CG
-        self.V  = v  # volume limit
-        self.W  = w  # weight limit
+        self.V  = v  # volume threshold
+        self.W  = w  # weight threshold
         self.Dest = np.full(numNodes, -1)
         self.PCW = 0 # pallet current weight
         self.PCV = 0.
@@ -66,14 +66,14 @@ class Pallet(object):
         self.PCS += consol.S
         solTorque.value += float(consol.W) * float(self.D)
             
-    def isFeasible(self, item, limit, k, solTorque, cfg, itemsDict, lock): # check constraints
+    def isFeasible(self, item, threshold, k, solTorque, cfg, itemsDict, lock): # check constraints
 
         feasible = True
 
         if feasible and item.To != self.Dest[k]:
             feasible = False
 
-        if feasible and self.PCV + item.V > self.V * limit:
+        if feasible and self.PCV + item.V > self.V * threshold:
             feasible = False
                 
         if feasible:
@@ -121,7 +121,7 @@ def loadPallets(cfg):
     # smaller
     vol = 13.7
     wei = 4500
-    dists = [8.39,6.25,4.5,2.1,-0.3,-2.7,-5.1]
+    dists = [8.39,6.25,4.5,2.1,-0.3,-2.7,-5.1] # distances of pallets centroids to the center of gravity
 
     if cfg.size == "larger":
         vol = 14.8
@@ -136,16 +136,16 @@ def loadPallets(cfg):
    
     return pallets
 
-# def fillDest(d, d_items, pallets, k, solTorque, solDict, cfg, limit, itemsDict, lock):
+# def fillDest(d, d_items, pallets, k, solTorque, solDict, cfg, threshold, itemsDict, lock):
 #     for i, p in enumerate(pallets):
 #         if p.Dest[k] == d:
-#             fillPallet(pallets[i], d_items, k, solTorque, solDict, cfg, limit, itemsDict, lock)
+#             fillPallet(pallets[i], d_items, k, solTorque, solDict, cfg, threshold, itemsDict, lock)
 
 
-def fillPallet(pallet, items, k, solTorque, solDict, cfg, limit, itemsDict, lock):
+def fillPallet(pallet, items, k, solTorque, solDict, cfg, threshold, itemsDict, lock):
     N = len(items)
     for item in items:
-        if pallet.isFeasible(item, limit, k, solTorque, cfg, itemsDict, lock):
+        if pallet.isFeasible(item, threshold, k, solTorque, cfg, itemsDict, lock):
             pallet.putItem(  item,           solTorque, solDict,      N, itemsDict, lock)
 
 def loadDistances():

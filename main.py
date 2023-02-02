@@ -74,7 +74,7 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
             # Pallets destinations are also set, according to kept on board in new positions
             # Kept P is not -2 anymore, but the pallet ID.
             if len(kept) > 0:
-                optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, "GRB", k)
+                # optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, "GRB", k)
 
                 # N: number of items to embark
                 # put the consolidated on their assgined pallets (OptCGCons)
@@ -217,9 +217,30 @@ if __name__ == "__main__":
 #   mpACO_1,  8.57, 11, 2 tours, data50, Worst tour time: 5.51
 #     GRB_1, 15.86, 10, 2 tours, data50, Worst tour time: 5.28
 
+# ----- Work without optCGcons -----
+#   Shims_1, 14.89,  1, 2 tours, data50, Worst tour time: 0.12
+# mpShims_1, 17.77,  1, 2 tours, data50, Worst tour time: 0.16
+#     GRB_1, 12.11, 10, 2 tours, data50, Worst tour time: 5.35
+
+#   Shims_2, 13.12, 2, 2 tours, data50, Worst tour time: 0.97
+# mpShims_2, 18.61, 1, 2 tours, data50, Worst tour time: 0.48
+#     GRB_2, 8.47, 16, 2 tours, data50, Worst tour time: 8.03
+
+#   Shims_3, 15.20,  4, 3 tours, data50, Worst tour time:  1.17
+# mpShims_3, 19.72,  2, 3 tours, data50, Worst tour time:  0.64
+#     GRB_3, 10.43, 31, 3 tours, data50, Worst tour time: 10.96
+
+#   Shims_4, 14.18, 13, 10 tours, data50, Worst tour time:  1.38
+# mpShims_4, 17.96,  8, 10 tours, data50, Worst tour time:  0.83
+#     GRB_4, 9.85, 109, 10 tours, data50, Worst tour time: 11.08
+
+#   Shims_5, 12.93, 38, 24 tours, data50, Worst tour time: 1.68
+# 
+#     
+
 
     # scenarios = [1,2,3,4,5,6]
-    scenarios = [1]
+    scenarios = [5]
     secBreak  = 1.6 # seconds:  Shims worst tour time: 11s / 7 nodes = 1.6s per node
     # secBreak = 5.0 # parallel ACO
 
@@ -227,10 +248,11 @@ if __name__ == "__main__":
     acoThreshold   = 0.95
 
     # method    = "Shims"
-    # method    = "mpShims"
-    # method    = "ACO"
-    method    = "mpACO"
+    method    = "mpShims"
     # method    = "GRB"
+
+    # method    = "ACO"
+    # method    = "mpACO"
 
     # surplus   = "data20"
     surplus   = "data50"
@@ -271,7 +293,6 @@ if __name__ == "__main__":
         perc = 1.0
         if cfg.numNodes > 3:
             perc = 0.25
-
 
         instanceTime = 0.
         instanceSC   = 0.

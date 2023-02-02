@@ -106,7 +106,7 @@ def Solve(pallets, items, cfg, k, threshold, secBreak, mode, solTorque, solDict,
     else:
         mode = "Serial"
 
-    print(f"\n{mode} Shims 2 for ACLP+RPDP")
+    print(f"\n{mode} Shims for ACLP+RPDP")
 
     surplus = (2. - threshold)
 
