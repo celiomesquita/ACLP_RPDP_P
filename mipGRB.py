@@ -7,7 +7,7 @@ import multiprocessing as mp
 import numpy as np
 
     
-def Solve( pallets, items, cfg, k, secBreak, solTorque, solDict, itemsDict ):
+def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict ):
 
     # print("W-PCW\tV-PCV")
     # for p in pallets:
@@ -36,10 +36,7 @@ def Solve( pallets, items, cfg, k, secBreak, solTorque, solDict, itemsDict ):
             ]                                                  for i in set_M
         ]
          
-    # consolidated are included in items
-    itemsScore = xsum( X[i][j] * items[j].S for i in set_M for j in set_N )
-
-    mod.objective = maximize( itemsScore )
+    mod.objective = maximize( xsum( X[i][j] * items[j].S for i in set_M for j in set_N ) )
 
     # CONSTRAINTS ----------------------------------------------------------------------------
     
@@ -98,9 +95,9 @@ def Solve( pallets, items, cfg, k, secBreak, solTorque, solDict, itemsDict ):
     if mod.num_solutions:   
 
         # reset empty pallets torque
-        solTorque.value = 0.0
+        nodeTorque.value = 0.0
         for i in set_M:
-            solTorque.value += 140.0 * pallets[i].D         
+            nodeTorque.value += 140.0 * pallets[i].D         
 
             for j in set_N:
 
@@ -110,7 +107,7 @@ def Solve( pallets, items, cfg, k, secBreak, solTorque, solDict, itemsDict ):
 
                     solDict["solMatrix"][N*i+j] = 1
 
-                    solTorque.value += items[j].W * pallets[i].D
+                    nodeTorque.value += items[j].W * pallets[i].D
 
                     if itemsDict["mpItems"][j] == 0:
                         itemsDict["mpItems"][j] = 1

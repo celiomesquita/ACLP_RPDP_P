@@ -16,6 +16,30 @@ import copy
 
 import common
 
+def copyPallets(pallets):
+    array = [None for _ in pallets]
+    for i, p in enumerate(pallets):
+        array[i] = common.Pallet(p.ID, p.D, p.V, p.W, 1)
+        array[i].Dest = p.Dest
+        array[i].PCW  = p.PCW 
+        array[i].PCV  = p.PCV
+        array[i].PCS  = p.PCS
+    return array
+     
+def copySolDict(solDict):
+    N_M = len(solDict["solMatrix"])
+    solMatrix = mp.Array('i', [0 for _ in np.arange(N_M)] ) 
+    for pos, v in enumerate(solDict["solMatrix"]):
+        solMatrix[pos] = v
+    return dict(solMatrix=solMatrix)
+
+def copyItemsDict(itemsDict):
+    N = len(itemsDict["mpItems"])
+    mpItems = mp.Array('i', [0 for _ in np.arange(N)] ) 
+    for pos, v in enumerate(itemsDict["mpItems"]):
+        mpItems[pos] = v
+    return dict(mpItems=mpItems)
+
 # Process-based parallelism
 
 ALPHA = 1 # pheromone exponent
@@ -134,7 +158,7 @@ def antSolve(antPallets, items, cfg, k, secBreak, antTorque, antSolDict, Attract
                         values.pop(j)        
 
 
-def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, solDict, itemsDict ):
+def Solve( pallets, items, cfg, k, limit, secBreak, mode, nodeTorque, solDict, itemsDict ):
 
     # to control the general attractiveness for the tournament selection
     Attract = mp.Array('d', np.arange(len(items)))
@@ -166,15 +190,15 @@ def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, solDict, it
     print(f"{len(items)} items  {len(pallets)} pallets")
 
     for i, _ in enumerate(pallets):               
-        common.fillPallet(pallets[i], items, k, solTorque, solDict, cfg, limit, itemsDict, lock)
+        common.fillPallet(pallets[i], items, k, nodeTorque, solDict, cfg, limit, itemsDict, lock)
         bestScore  += pallets[i].PCS
         if abs(pallets[i].D) > maxD:
             maxD = abs(pallets[i].D)
     
-    initPallets   = common.copyPallets(pallets)              
-    initTorque    = solTorque
-    initSolDict   = common.copySolDict(solDict) 
-    initItemsDict = common.copyItemsDict(itemsDict)
+    initPallets   = copyPallets(pallets)              
+    initTorque    = nodeTorque
+    initSolDict   = copySolDict(solDict) 
+    initItemsDict = copyItemsDict(itemsDict)
     initScore    = bestScore
 
     print(f"Greedy initial score {initScore}")
@@ -217,10 +241,10 @@ def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, solDict, it
         for a, _ in enumerate(ants): # ants
 
             # modified parameters from the greedy phase
-            antPallets[a]   = common.copyPallets(initPallets)              
+            antPallets[a]   = copyPallets(initPallets)              
             antTorque[a]    = initTorque
-            antSolDict[a]   = common.copySolDict(initSolDict)
-            antItemsDict[a] = common.copyItemsDict(initItemsDict)
+            antSolDict[a]   = copySolDict(initSolDict)
+            antItemsDict[a] = copyItemsDict(initItemsDict)
 
             # initialize accumulated scores
             accumsS[a]       = dict(score=initScore) # for serial   mode
@@ -277,8 +301,8 @@ def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, solDict, it
         if bestAntScore > bestIterScore:
             bestIterScore = bestAntScore
             print(f"Best iter score {bestIterScore} ({iter})")
-            iterSolDict[iter] = common.copySolDict( antSolDict[ba] ) 
-            iterItemsDict[iter] = common.copyItemsDict( antItemsDict[ba] )
+            iterSolDict[iter] = copySolDict( antSolDict[ba] ) 
+            iterItemsDict[iter] = copyItemsDict( antItemsDict[ba] )
             bi = iter
             stagnant = 0
         else:
@@ -292,16 +316,16 @@ def Solve( pallets, items, cfg, k, limit, secBreak, mode, solTorque, solDict, it
     print(f"{improvements} improvements ({numAnts*iter} total ants).")
 
     if iterSolDict[bi] != None:
-        solDict   = common.copySolDict( iterSolDict[bi] )
-        itemsDict = common.copyItemsDict( iterItemsDict[bi] )
+        solDict   = copySolDict( iterSolDict[bi] )
+        itemsDict = copyItemsDict( iterItemsDict[bi] )
                 
     # N = len(items)
     # Y = np.reshape(solDict["solMatrix"], (-1, N)) # N number of items (columns)
     # counter = 0
     # for i, row in enumerate(Y):
     #     for j, X_ij in enumerate(row):
-    #         if X_ij == 0 and pallets[i].isFeasible(items[j], limit, k, solTorque, solDict, lock, cfg, N, itemsDict):
-    #             pallets[i].putItem( items[j], solTorque, solDict, lock, N, itemsDict)
+    #         if X_ij == 0 and pallets[i].isFeasible(items[j], limit, k, nodeTorque, solDict, lock, cfg, N, itemsDict):
+    #             pallets[i].putItem( items[j], nodeTorque, solDict, lock, N, itemsDict)
     #             counter += 1
     # print(f"---> {counter} items inserted by the local search.") 
 

@@ -16,7 +16,7 @@ def testingGetCons(N, rndm):
     cons = []
 
     lines = [
-        [ 620,  406,  4.121, 0, 2],
+        [ 2620,  406,  4.121, 0, 2],
         [2595, 2436, 13.690, 0, 2],
         [3282, 3081, 13.689, 0, 2],
         [4217, 3856, 13.674, 0, 2],
@@ -52,17 +52,17 @@ def testingGetCons(N, rndm):
 
     return cons
 
-
-# surplus = "data20"
-surplus = "data50"
+surplus = "data20"
+# surplus = "data50"
 # surplus = "data100"
 #
 
-method    = "Shims"
-# method    = "mpShims"
 # method    = "ACO"
 # method    = "mpACO"
-# method    = "GRB"
+
+# method    = "Shims"   # 19254
+method    = "mpShims" # 20911
+# method    = "GRB"     # 20353
 
 scenario = 1
 
@@ -140,8 +140,8 @@ for inst in instances:
 
     # N = first cons ID
     # cons = common.loadNodeCons(surplus, scenario, inst, pi, prevNode, N )
-    # cons = testingGetCons(N, True) # for testing only
-    cons = testingGetCons(N, False) # False: no randomness in consolidated generation
+    cons = testingGetCons(N, True) # for testing only
+    # cons = testingGetCons(N, False) # False: no randomness in consolidated generation
 
     # --- from main
     # cons = []
@@ -171,7 +171,7 @@ for inst in instances:
     print(f"Kept positions to be defined\n")
 
     # solution global torque to be shared and changed by all pallets concurrently
-    solTorque = mp.Value('d', 0.0) # a multiprocessing double type variable
+    nodeTorque = mp.Value('d', 0.0) # a multiprocessing double type variable
 
     # initialize- the accumulated values
     sNodeAccum = 0.
@@ -182,19 +182,19 @@ for inst in instances:
     # Pallets destinations are also set, according to kept on board in new positions
     # Kept P is not -2 anymore, but the pallet ID.
     if len(kept) > 0:
-        optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, "GRB", k)
+        # optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, "GRB", k)
 
         # N: number of items to embark
         # put the consolidated on their assgined pallets (OptCGCons)
         for c in kept:
             for i, p in enumerate(pallets):
                 if c.P == p.ID:
-                    pallets[i].putConsol( c, solTorque)
+                    pallets[i].putConsol( c, nodeTorque)
 
                     # update the consolidated of the current node "k"
                     consol[i][k].ID  = j+N
                     consol[i][k].Frm = node.ID
-                    consol[i][k].To  = pallets[i].Dests[k]
+                    consol[i][k].To  = pallets[i].Dest[k]
                     consol[i][k].W  += c.W
                     consol[i][k].V  += c.V
                     consol[i][k].S  += c.S
@@ -206,7 +206,7 @@ for inst in instances:
 
     print("ID\tDest\tPCW\tPCV\tPCS")
     for p in pallets:
-        print(f"{p.ID}\t{p.Dests[k]}\t{p.PCW}\t{p.PCV:.2f}\t{p.PCS}")
+        print(f"{p.ID}\t{p.Dest[k]}\t{p.PCW}\t{p.PCV:.2f}\t{p.PCS}")
     print("Pallets destinations to be defined.\n")
 
     # set empty pallets (-1) destinations based on the items to embark
@@ -214,7 +214,7 @@ for inst in instances:
 
     print("ID\tDest\tPCW\tPCV\tPCS")
     for p in pallets:
-        print(f"{p.ID}\t{p.Dests[k]}\t{p.PCW}\t{p.PCV:.2f}\t{p.PCS}")
+        print(f"{p.ID}\t{p.Dest[k]}\t{p.PCW}\t{p.PCV:.2f}\t{p.PCS}")
     print("Pallets destinations defined.\n")
    
     startNodeTime = time.perf_counter()
@@ -228,19 +228,19 @@ for inst in instances:
     itemsDict = dict(mpItems=mpItems)
  
     if method == "mpShims":
-        mpShims.Solve(pallets, items, cfg, k, limit, secBreak, "p", solTorque, solDict, itemsDict)
+        mpShims.Solve(pallets, items, cfg, k, limit, secBreak, "p", nodeTorque, solDict, itemsDict)
 
     if method == "Shims":            
-        mpShims.Solve(pallets, items, cfg, k, limit, secBreak, "s", solTorque, solDict, itemsDict)         
+        mpShims.Solve(pallets, items, cfg, k, limit, secBreak, "s", nodeTorque, solDict, itemsDict)         
 
     if method == "mpACO":       
-        mpACO.Solve(pallets,   items, cfg, k, limit, secBreak, "p", solTorque, solDict, itemsDict) 
+        mpACO.Solve(pallets,   items, cfg, k, limit, secBreak, "p", nodeTorque, solDict, itemsDict) 
 
     if method == "ACO":       
-        mpACO.Solve(pallets,   items, cfg, k, limit, secBreak, "s", solTorque, solDict, itemsDict) 
+        mpACO.Solve(pallets,   items, cfg, k, limit, secBreak, "s", nodeTorque, solDict, itemsDict) 
 
     if method == "GRB":       
-        mipGRB.Solve(pallets,  items, cfg, k,        secBreak,      solTorque, solDict, itemsDict) 
+        mipGRB.Solve(pallets,  items, cfg, k,        secBreak,      nodeTorque, solDict, itemsDict) 
     
     elapsed = time.perf_counter() - startNodeTime
 
@@ -253,7 +253,7 @@ for inst in instances:
             if X_ij:
                 consol[i][k].ID  = j+N
                 consol[i][k].Frm = node.ID
-                consol[i][k].To  = pallets[i].Dests[k]                   
+                consol[i][k].To  = pallets[i].Dest[k]                   
                 consol[i][k].W += items[j].W
                 consol[i][k].V += items[j].V
                 consol[i][k].S += items[j].S
@@ -268,10 +268,9 @@ for inst in instances:
             feasible = "Unfeasible!!!"
             break    
 
-    epsilom = solTorque.value/cfg.maxTorque
-
-    vol = vNodeAccum/cfg.volCap
-    wei = wNodeAccum/cfg.weiCap
+    epsilom = nodeTorque.value/cfg.maxTorque
+    vol     = vNodeAccum/cfg.volCap
+    wei     = wNodeAccum/cfg.weiCap
 
     sol  = f"Score: {sNodeAccum:.0f}\t"
     sol += f"Weight: {wei:.2f}\t"

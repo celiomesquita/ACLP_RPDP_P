@@ -7,6 +7,37 @@ import os.path
 
 CITIES = ["GRU", "GIG", "SSA", "CNF", "CWB", "BSB", "REC"]
 
+# tour is pi in the mathematical formulation
+class Tour(object):
+    def __init__(self, nodes, cost):
+        self.nodes = nodes
+        self.cost  = cost # sum of legs costs plus CG deviation costs
+        self.score   = 0.0 # sum of nodes scores
+        self.elapsed = 0 # seconds
+        self.numOpts = 0 # sum of nodes eventual optima solutions
+        self.AvgVol  = 0.0 # average ocupation rate
+        self.AvgTorque  = 0.0
+
+class Config(object):
+
+    def __init__(self, scenario):
+        self.weiCap = 0
+        self.volCap = 0
+        self.numNodes = {0:3,  1:3,  2:3,    3:4,    4:5,    5:6,    6:7    }[scenario]
+        self.Sce      = {0:1,  1:1,  2:2,    3:3,    4:4,    5:5,    6:6    }[scenario]
+
+        self.size       = "smaller"
+        self.numPallets = 7
+        self.payload    = 26_000
+        self.maxTorque  = 26_000 * 0.556
+        self.kmCost     = 1.1
+        if scenario > 1:
+            self.size       = "larger"
+            self.numPallets = 18
+            self.payload    = 75_000
+            self.maxTorque  = 75_000 * 1.170
+            self.kmCost     = 4.9 
+            
 class Node(object):
     def __init__(self, id, tau):
         self.ID      = id
@@ -47,26 +78,26 @@ class Pallet(object):
         self.PCV = 0.
         self.PCS = 0.
 
-    def putItem(self, item, solTorque, solDict, N, itemsDict, lock): # put an item in this pallet
+    def putItem(self, item, nodeTorque, solDict, N, itemsDict, lock): # put an item in this pallet
         self.PCW += item.W
         self.PCV += item.V
         self.PCS += item.S
 
         with lock:
-            solTorque.value += float(item.W) * float(self.D)
+            nodeTorque.value += float(item.W) * float(self.D)
             i = self.ID
             j = item.ID 
             solDict["solMatrix"][N*i+j] = 1
             itemsDict["mpItems"][j]     = 1
 
-    def putConsol(self, consol, solTorque): # put an item in this pallet
+    def putConsol(self, consol, nodeTorque): # put an item in this pallet
 
         self.PCW += consol.W
         self.PCV += consol.V
         self.PCS += consol.S
-        solTorque.value += float(consol.W) * float(self.D)
+        nodeTorque.value += float(consol.W) * float(self.D)
             
-    def isFeasible(self, item, threshold, k, solTorque, cfg, itemsDict, lock): # check constraints
+    def isFeasible(self, item, threshold, k, nodeTorque, cfg, itemsDict, lock): # check constraints
 
         feasible = True
 
@@ -84,35 +115,11 @@ class Pallet(object):
 
                 if feasible:
                     deltaTau = float(item.W) * float(self.D)
-                    newTorque = abs(solTorque.value + deltaTau)
-                    if newTorque > abs(solTorque.value) and newTorque > cfg.maxTorque:
+                    newTorque = abs(nodeTorque.value + deltaTau)
+                    if newTorque > abs(nodeTorque.value) and newTorque > cfg.maxTorque:
                         feasible = False
 
         return feasible
- 
-def copyPallets(pallets):
-    array = [None for _ in pallets]
-    for i, p in enumerate(pallets):
-        array[i] = Pallet(p.ID, p.D, p.V, p.W, 1)
-        array[i].Dest = p.Dest
-        array[i].PCW  = p.PCW 
-        array[i].PCV  = p.PCV
-        array[i].PCS  = p.PCS
-    return array
-     
-def copySolDict(solDict):
-    N_M = len(solDict["solMatrix"])
-    solMatrix = mp.Array('i', [0 for _ in np.arange(N_M)] ) 
-    for pos, v in enumerate(solDict["solMatrix"]):
-        solMatrix[pos] = v
-    return dict(solMatrix=solMatrix)
-
-def copyItemsDict(itemsDict):
-    N = len(itemsDict["mpItems"])
-    mpItems = mp.Array('i', [0 for _ in np.arange(N)] ) 
-    for pos, v in enumerate(itemsDict["mpItems"]):
-        mpItems[pos] = v
-    return dict(mpItems=mpItems)
 
 def loadPallets(cfg):
     """
@@ -136,17 +143,15 @@ def loadPallets(cfg):
    
     return pallets
 
-# def fillDest(d, d_items, pallets, k, solTorque, solDict, cfg, threshold, itemsDict, lock):
-#     for i, p in enumerate(pallets):
-#         if p.Dest[k] == d:
-#             fillPallet(pallets[i], d_items, k, solTorque, solDict, cfg, threshold, itemsDict, lock)
-
-
-def fillPallet(pallet, items, k, solTorque, solDict, cfg, threshold, itemsDict, lock):
+def fillPallet(pallet, items, k, nodeTorque, solDict, cfg, threshold, itemsDict, lock):
     N = len(items)
+    counter = 0
     for item in items:
-        if pallet.isFeasible(item, threshold, k, solTorque, cfg, itemsDict, lock):
-            pallet.putItem(  item,           solTorque, solDict,      N, itemsDict, lock)
+        if pallet.isFeasible(item, threshold, k, nodeTorque,   cfg,           itemsDict, lock):
+            pallet.putItem(  item,               nodeTorque, solDict,      N, itemsDict, lock)
+            counter += 1
+
+    return counter
 
 def loadDistances():
     fname =  f"./params/distances.txt"      
@@ -154,34 +159,7 @@ def loadDistances():
         distances = [ [ float(num) for num in line.split(' ') ] for line in f ] 
     return distances 
 
-# tour is pi in the mathematical formulation
-class Tour(object):
-    def __init__(self, nodes, cost):
-        self.nodes = nodes
-        self.cost  = cost # sum of legs costs plus CG deviation costs
-        self.score   = 0.0 # sum of nodes scores
-        self.elapsed = 0 # seconds
-        self.numOpts = 0 # sum of nodes eventual optima solutions
 
-class Config(object):
-
-    def __init__(self, scenario):
-        self.weiCap = 0
-        self.volCap = 0
-        self.numNodes = {0:3,  1:3,  2:3,    3:4,    4:5,    5:6,    6:7    }[scenario]
-        self.Sce      = {0:1,  1:1,  2:2,    3:3,    4:4,    5:5,    6:6    }[scenario]
-
-        self.size       = "smaller"
-        self.numPallets = 7
-        self.payload    = 26_000
-        self.maxTorque  = 26_000 * 0.556
-        self.kmCost     = 1.1
-        if scenario > 1:
-            self.size       = "larger"
-            self.numPallets = 18
-            self.payload    = 75_000
-            self.maxTorque  = 75_000 * 1.170
-            self.kmCost     = 4.9 
 
 def factorial(x):
     result = 1

@@ -21,7 +21,7 @@ class Shims(object):
             self.SCT += float(item.W) * float(self.Pallet.D)
             self.Items[whipPos] = item
 
-    def isFeasible(self, item, k, solTorque, cfg, lock): # check constraints
+    def isFeasible(self, item, k, nodeTorque, cfg, lock): # check constraints
 
         if item.To != self.Pallet.Dest[k]:
             return False
@@ -32,16 +32,14 @@ class Shims(object):
         deltaTau = float(item.W) * float(self.Pallet.D)
         ret = True
         with lock:
-            newTorque = abs(solTorque.value + self.SCT + deltaTau)
+            newTorque = abs(nodeTorque.value + self.SCT + deltaTau)
 
-            if newTorque > abs(solTorque.value + self.SCT):
-                if newTorque > cfg.maxTorque:
+            if newTorque > abs(nodeTorque.value + self.SCT) and newTorque > cfg.maxTorque:
                     ret = False
-
-        return ret        
+        return ret
 
 # create a set of shims for this pallet and selects the best shims
-def getBestShims(pallet, items, k, solTorque, solDict, cfg, surplus, itemsDict, lock):
+def getBestShims(pallet, items, k, nodeTorque, solDict, cfg, surplus, itemsDict, lock):
 
     maxVol = pallet.V * surplus
 
@@ -53,8 +51,7 @@ def getBestShims(pallet, items, k, solTorque, solDict, cfg, surplus, itemsDict, 
     with lock:   
         for item in items:
             j = item.ID
-            # not consolidated (-1) and not allocated in any pallet
-            if item.P == -1 and solDict["solMatrix"][N*i+j] == 0: 
+            if itemsDict["mpItems"][j] == 0:
                 vol += item.V
                 whip.append(item)
                 if vol > maxVol:
@@ -70,14 +67,14 @@ def getBestShims(pallet, items, k, solTorque, solDict, cfg, surplus, itemsDict, 
     for whipPos, item in enumerate(whip):
         newShims = True
         for sh in Set:
-            if sh.isFeasible(item, k, solTorque, cfg, lock):
+            if sh.isFeasible(item, k, nodeTorque, cfg, lock):
                 sh.putItem(item, whipPos)
                 newShims = False
                 break
 
         if newShims:
             sh = Shims(pallet, len(whip)) # create a new Shim
-            if sh.isFeasible(item, k, solTorque, cfg, lock):
+            if sh.isFeasible(item, k, nodeTorque, cfg, lock):
                 sh.putItem(item, whipPos)
             Set.append(sh)
                 
@@ -90,16 +87,10 @@ def getBestShims(pallet, items, k, solTorque, solDict, cfg, surplus, itemsDict, 
 
     for item in Set[bestIndex].Items:
         if item != None:
-            pallet.putItem(item, solTorque, solDict, N, itemsDict, lock)
+            pallet.putItem(item, nodeTorque, solDict, N, itemsDict, lock)
 
 
-def Solve(pallets, items, cfg, k, threshold, secBreak, mode, solTorque, solDict, itemsDict): # items include kept on board
-
-    # N = len(items)
-    # M = len(pallets)
-
-    # set_M = range( M ) # i, pallets
-    # set_N = range( N ) # j, items
+def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict, itemsDict):
 
     if mode == "p":
         mode = "Parallel"
@@ -110,21 +101,18 @@ def Solve(pallets, items, cfg, k, threshold, secBreak, mode, solTorque, solDict,
 
     surplus = (2. - threshold)
 
-    print(f"surplus: {surplus:.2f}")
+    # print(f"surplus: {surplus:.2f}")
 
     lock  = mp.Lock()
 
-    procs = [None for _ in pallets] # each pallets has its own process
-
-    # sort ascendent by CG distance
-    pallets.sort(key=lambda x: abs(x.D), reverse=False)
-
     if mode == "Parallel":
+    
+        procs = [None for _ in pallets] # each pallets has its own process
 
         # parallel greedy phase
         for i, p in enumerate(pallets):
             procs[i] = mp.Process( target=common.fillPallet, args=( pallets[i], items, k,\
-                 solTorque, solDict, cfg, threshold, itemsDict, lock) )
+                 nodeTorque, solDict, cfg, threshold, itemsDict, lock) )
             time.sleep(0.001)
             procs[i].start()
         
@@ -134,7 +122,7 @@ def Solve(pallets, items, cfg, k, threshold, secBreak, mode, solTorque, solDict,
         # parallel shims phase
         for i, p in enumerate(pallets):
             procs[i] = mp.Process( target=getBestShims, args=( pallets[i], items, k,\
-                 solTorque, solDict, cfg, surplus, itemsDict, lock) )
+                 nodeTorque, solDict, cfg, surplus, itemsDict, lock) )
             time.sleep(0.001)                 
             procs[i].start()
                 
@@ -142,13 +130,27 @@ def Solve(pallets, items, cfg, k, threshold, secBreak, mode, solTorque, solDict,
             p.join()
 
     else: # serial
-        initScore = 0.0
-        for i, _ in enumerate(pallets):
-            common.fillPallet( pallets[i], items, k, solTorque, solDict, cfg, threshold, itemsDict, lock) 
-            initScore += pallets[i].PCS
-            getBestShims(      pallets[i], items, k, solTorque, solDict, cfg, surplus, itemsDict, lock)
+        # sort ascendent by CG distance
+        pallets.sort(key=lambda x: abs(x.D), reverse=False) 
 
-        print(f"Greedy initial score {initScore}")                    
+        for i, _ in enumerate(pallets):
+            common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, threshold, itemsDict, lock) 
+            getBestShims(      pallets[i], items, k, nodeTorque, solDict, cfg, surplus,   itemsDict, lock)
+
+    # local search itemsDict["mpItems"][j] == 0 and\
+    counter = 0
+    for i, _ in enumerate(pallets):
+        counter += common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, 1.0, itemsDict, lock) 
+
+    # counter = 0
+    # N = len(items)
+    # for i, _ in enumerate(pallets):
+    #     for item in items:
+    #         j = item.ID
+    #         if pallets[i].isFeasible(items[j], threshold, k, nodeTorque, cfg, itemsDict, lock):
+    #             pallets[i].putItem( items[j], nodeTorque, solDict, N, itemsDict, lock)
+    #             counter += 1
+    print(f"---> {counter} items inserted by the local search.")
 
 if __name__ == "__main__":
 
