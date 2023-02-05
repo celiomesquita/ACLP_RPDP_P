@@ -61,7 +61,7 @@ def getBestShims(pallet, items, k, nodeTorque, solDict, cfg, surplus, itemsDict,
     sh = Shims(pallet, len(whip))
     Set = [sh]
 
-    # First Fit Decrease - equivalente ao KP, mas mais rápido
+    # First Fit Decrease - faster than KP
     whip.sort(key=lambda x: abs(x.V), reverse=True)
 
     for whipPos, item in enumerate(whip):
@@ -86,7 +86,7 @@ def getBestShims(pallet, items, k, nodeTorque, solDict, cfg, surplus, itemsDict,
             bestIndex = i
 
     for item in Set[bestIndex].Items:
-        if item != None:
+        if item != None and pallet.isFeasible(item, 1.0, k, nodeTorque,  cfg, itemsDict, lock):
             pallet.putItem(item, nodeTorque, solDict, N, itemsDict, lock)
 
 
@@ -110,7 +110,7 @@ def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict
         procs = [None for _ in pallets] # each pallets has its own process
 
         # parallel greedy phase
-        for i, p in enumerate(pallets):
+        for i, _ in enumerate(pallets):
             procs[i] = mp.Process( target=common.fillPallet, args=( pallets[i], items, k,\
                  nodeTorque, solDict, cfg, threshold, itemsDict, lock) )
             time.sleep(0.001)
@@ -137,19 +137,10 @@ def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict
             common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, threshold, itemsDict, lock) 
             getBestShims(      pallets[i], items, k, nodeTorque, solDict, cfg, surplus,   itemsDict, lock)
 
-    # local search itemsDict["mpItems"][j] == 0 and\
+    # local search
     counter = 0
     for i, _ in enumerate(pallets):
         counter += common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, 1.0, itemsDict, lock) 
-
-    # counter = 0
-    # N = len(items)
-    # for i, _ in enumerate(pallets):
-    #     for item in items:
-    #         j = item.ID
-    #         if pallets[i].isFeasible(items[j], threshold, k, nodeTorque, cfg, itemsDict, lock):
-    #             pallets[i].putItem( items[j], nodeTorque, solDict, N, itemsDict, lock)
-    #             counter += 1
     print(f"---> {counter} items inserted by the local search.")
 
 if __name__ == "__main__":

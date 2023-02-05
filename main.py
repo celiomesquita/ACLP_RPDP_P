@@ -10,9 +10,6 @@ import mpACO
 import optcgcons
 import mipGRB
 
-volThreshold = 0.25 # best solume threshold
-volThreshold   = 0.25
-
 def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus):
     """
     Solves one tour
@@ -32,8 +29,6 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
             ]
 
     base = len(tour.nodes)-1
-
-    epsilom = 0.
 
     for k, node in enumerate(tour.nodes):  # solve each node sequentialy
 
@@ -164,17 +159,15 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
                     tour.score += items[j].S
                     nodeVol    += items[j].V
 
-        # epsilom  += abs(nodeTorque.value/cfg.maxTorque)
-
         nodeVol /= cfg.volCap
 
-        nodeT = nodeTorque.value/cfg.maxTorque
+        epsilon = nodeTorque.value/cfg.maxTorque
 
         tour.AvgVol    += nodeVol
-        tour.AvgTorque += nodeT
+        tour.AvgTorque += epsilon
 
         print(f"----- node {node.ICAO},", end='')
-        print(f" score {tour.score:.0f}, cost {tour.cost:.0f}, vol {nodeVol:.2f}, torque {nodeT:.2f} -----")
+        print(f" score {tour.score:.0f}, cost {tour.cost:.0f}, vol {nodeVol:.2f}, torque {epsilon:.2f} -----")
 
         if writeConsFile:
 
@@ -186,20 +179,20 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
             wei = wNodeAccum/cfg.weiCap
 
             #write consolidated contents from this node in file
-            common.writeNodeCons(scenario, instance, consNodeT, pi, node, surplus, epsilom, wei, vol)
+            common.writeNodeCons(scenario, instance, consNodeT, pi, node, surplus, epsilon, wei, vol)
 
 
 # end of solveTour 
 
 def writeAvgResults(method, scenario, line, surplus):
 
-    dirname = f"./results/{surplus}/{method}_{scenario}"
+    dirname = f"./results/{surplus}/"
     try:
         os.makedirs(dirname)
     except FileExistsError:
         pass  
 
-    fname = f"{dirname}/{method}_{scenario}_avg.txt"
+    fname = f"{dirname}/{method}_{scenario}.avg"
 
     writer = open(fname,'w+') # + creates the file, if not exists
 
@@ -217,18 +210,20 @@ if __name__ == "__main__":
     dists = common.loadDistances()
     costs = [[0.0 for _ in dists] for _ in dists]
 
-    secBreak       = 1.6 # seconds:  Shims worst tour time: 11s / 7 nodes = 1.6s per node
-    volThreshold = 0.5
+    secBreak     = 1.8 # second
+    volThreshold = 0.95
 
     # scenarios = [1,2,3,4,5,6]
-    scenarios = [1]
+    scenarios = [2]
 
     surplus   = "data20"
     # surplus   = "data50"
     # surplus   = "data100"
 
     # methods = ["Shims","mpShims","GRB"]
+    # methods = ["Shims"]
     methods = ["mpShims"]
+    # methods = ["GRB"]
 
     for method in methods:
 
@@ -307,9 +302,8 @@ if __name__ == "__main__":
             numInst = float(len(instances))
 
             avgTime = math.ceil(instanceTime/numInst)
-            worstTime = math.ceil(worstTime)
 
-            str = f"{instanceSC/numInst:.2f}\t {avgTime:.0f}\t {worstTime}\t {bestAV:.2f}\t {bestAT:.2f}\n"
+            str = f"{instanceSC/numInst:.2f}\t {avgTime:.0f}\t {worstTime:.1f}\t {bestAV:.2f}\t {bestAT:.2f}\n"
             # instances average
             writeAvgResults(method, scenario, str, surplus)
             print(f"\n{str}")

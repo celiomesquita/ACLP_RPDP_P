@@ -150,7 +150,6 @@ def fillPallet(pallet, items, k, nodeTorque, solDict, cfg, threshold, itemsDict,
         if pallet.isFeasible(item, threshold, k, nodeTorque,   cfg,           itemsDict, lock):
             pallet.putItem(  item,               nodeTorque, solDict,      N, itemsDict, lock)
             counter += 1
-
     return counter
 
 def loadDistances():
@@ -158,8 +157,6 @@ def loadDistances():
     with open(fname, 'r') as f:
         distances = [ [ float(num) for num in line.split(' ') ] for line in f ] 
     return distances 
-
-
 
 def factorial(x):
     result = 1

@@ -7,7 +7,7 @@ Reallocated singl_function (elt_size=4) to 100 items from 50.
 Warning--empty pages in fok2004optimizing
 You've used 34 entries,
             2990 wiz_defined-function locations,
-            887 strings with 11904 characters,
+            887 strings with 11897 characters,
 and the built_in function-call counts, 21382 in all, are:
 = -- 1633
 > -- 732
