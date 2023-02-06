@@ -1,18 +1,15 @@
 
 # include the MILP Solver: https://www.python-mip.com/
-from mip import Model, xsum, maximize, BINARY
+# from mip import Model, xsum, maximize, BINARY
+
+import gurobipy as gp
+from gurobipy import GRB
+
 from time import time
-import common
-import multiprocessing as mp
-import numpy as np
+# import multiprocessing as mp
+# import numpy as np
 
-    
 def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict ):
-
-    # print("W-PCW\tV-PCV")
-    # for p in pallets:
-    #     print(f"{p.W-p.PCW}\t{p.V-p.PCV:.2f}")    
-    # print()
 
     # itemsDict to control items inclusion feasibility
 
@@ -25,74 +22,73 @@ def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict ):
     set_N = range( N ) # j, items
 
     # initialize a model
-    mod = Model()
-    mod.solver_name = "GRB"
-    mod.threads     = 1
-    mod.max_seconds = secBreak
+    mod = gp.Model()
+    mod.setParam('OutputFlag', 0)
+    mod.Params.TimeLimit = secBreak
 
-    # decision matrix for which items will be put in which pallet in node "k"
-    X = [
-            [ mod.add_var(name=f"X({i},{j})", var_type=BINARY) for j in set_N
-            ]                                                  for i in set_M
-        ]
-         
-    mod.objective = maximize( xsum( X[i][j] * items[j].S for i in set_M for j in set_N ) )
+    # decision matrix for which items will be put in which pallet in node "k"         
+    X = [ [ mod.addVar(name=f"X[{i}],[{j}]", vtype=GRB.BINARY) for j in set_N ] for i in set_M ]      
+
+    mod.setObjective(sum( X[i][j] * items[j].S for i in set_M for j in set_N ))
+
+    mod.ModelSense = GRB.MAXIMIZE
 
     # CONSTRAINTS ----------------------------------------------------------------------------
     
     for j in set_N:
         # each item must be included at most once
-        mod.add_constr(
-            xsum(X[i][j] for i in set_M ) <= 1
+        mod.addConstr(
+            sum(X[i][j] for i in set_M ) <= 1
         )
 
     for i in set_M:
 
         # items must be grouped in a pallet with the same destination
         for j in set_N:
-            mod.add_constr(
+            mod.addConstr(
                 X[i][j] <= X[i][j] * ( pallets[i].Dest[k] - items[j].To + 1 )
             )
-            mod.add_constr(
+            mod.addConstr(
                 X[i][j] <= X[i][j] * ( items[j].To - pallets[i].Dest[k] + 1 )
             )
 
         # Pallet weight constraint                      PCW: pallet current weight
-        mod.add_constr(
-            xsum(X[i][j] * items[j].W for j in set_N) + pallets[i].PCW <= pallets[i].W
+        mod.addConstr(
+            sum(X[i][j] * items[j].W for j in set_N) + pallets[i].PCW <= pallets[i].W
         )
 
         # Pallet volume constraint
-        mod.add_constr(
-            xsum(X[i][j] * items[j].V for j in set_N) + pallets[i].PCV <= pallets[i].V
+        mod.addConstr(
+            sum(X[i][j] * items[j].V for j in set_N) + pallets[i].PCV <= pallets[i].V
         )
 
         # for torque calculation
-        palletWeights[i] = 140 + xsum(X[i][j] * items[j].W  for j in set_N) + pallets[i].PCW
+        palletWeights[i] = 140 + sum(X[i][j] * items[j].W  for j in set_N) + pallets[i].PCW
 
-    # the final torque must be between minus maxTorque and maxTorque
-    sumTorques = xsum(pallets[i].D * palletWeights[i] for i in set_M)
-    mod.add_constr(
+    # the final torque must be between minus maxTorque and maxTorqu
+
+    sumTorques = sum(pallets[i].D * palletWeights[i] for i in set_M)
+    mod.addConstr(
         sumTorques <=    cfg.maxTorque
     )
-    mod.add_constr(
+    mod.addConstr(
         sumTorques >= -1*cfg.maxTorque
-    )
-
-    # the aircraft payload (or maximum pallets capacities) must not be exceeded
-    mod.add_constr(
-        xsum(palletWeights[i] for i in set_M) <= cfg.weiCap
     )    
 
+    # the aircraft payload (or maximum pallets capacities) must not be exceeded 
+    mod.addConstr(
+        sum(palletWeights[i] for i in set_M) <= cfg.weiCap
+    )  
     # lateral torque was never significant. So, we did not include lateral torque constraints
 
-    status = mod.optimize()        
+    mod.optimize()        
 
-    print(status)
-    # print(mod.objective_value)
+    msgdict = {2:'Optimal', 3:'Infeasible', 13:"Suboptimal", 9:"Time limited"}
+
+    print(f"{mod.objVal} {msgdict[mod.status]}")
 
     # checking if a solution was found
-    if mod.num_solutions:   
+    if mod.SolCount > 0:   
 
         # reset empty pallets torque
         nodeTorque.value = 0.0
