@@ -60,8 +60,8 @@ surplus = "data20"
 # method    = "ACO"
 # method    = "mpACO"
 
-# method    = "Shims"   # 19254
-method    = "mpShims" # 20911
+method    = "Shims"   # 19254
+# method    = "mpShims" # 20911
 # method    = "GRB"     # 20353
 
 scenario = 1
@@ -70,7 +70,7 @@ scenario = 1
 instances = [1]
 
 # limit    = 0.95 # best
-limit    = 0.25
+limit    = 0.95
 secBreak = 0.7 # seconds
 # secBreak = 60
 
@@ -152,7 +152,7 @@ for inst in instances:
         print(f"\n-----Loaded in {common.CITIES[prevNode.ID]} -----")
         print("ID\tP\tW\tS\tV\tFROM\tTO")
         for c in cons:
-            print(f"{c.ID}\t{c.P}\t{c.W}\t{c.S}\t{c.V:.1f}\t{common.CITIES[c.Frm]}\t{common.CITIES[c.To]}")
+            print(f"{c.ID}\t{c.P}\t{c.W:.0f}\t{c.S:.0f}\t{c.V:.1f}\t{common.CITIES[c.Frm]}\t{common.CITIES[c.To]}")
 
     # consolidated contents not destined to this point are kept on board ...
     kept = []
@@ -167,7 +167,7 @@ for inst in instances:
     print(f"\n----- Kept on board at {common.CITIES[node.ID]} -----")        
     print("ID\tP\tW\tS\tV\tFROM\tTO")
     for c in kept:
-        print(f"{c.ID}\t{c.P}\t{c.W}\t{c.S}\t{c.V:.1f}\t{common.CITIES[c.Frm]}\t{common.CITIES[c.To]}")
+        print(f"{c.ID}\t{c.P}\t{c.W:.0f}\t{c.S:.0f}\t{c.V:.1f}\t{common.CITIES[c.Frm]}\t{common.CITIES[c.To]}")
     print(f"Kept positions to be defined\n")
 
     # solution global torque to be shared and changed by all pallets concurrently
@@ -182,7 +182,6 @@ for inst in instances:
     # Pallets destinations are also set, according to kept on board in new positions
     # Kept P is not -2 anymore, but the pallet ID.
     if len(kept) > 0:
-        # optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, "GRB", k)
 
         # N: number of items to embark
         # put the consolidated on their assgined pallets (OptCGCons)
@@ -204,9 +203,11 @@ for inst in instances:
                     wNodeAccum += c.W
                     vNodeAccum += c.V
 
-    print("ID\tDest\tPCW\tPCV\tPCS")
+        nodeTorque.value += optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, k)
+
+    print(f"ID\tDest\tPCW\tPCV\tPCS")
     for p in pallets:
-        print(f"{p.ID}\t{p.Dest[k]}\t{p.PCW}\t{p.PCV:.2f}\t{p.PCS}")
+        print(f"{p.ID}\t{p.Dest[k]}\t{p.PCW:.0f}\t{p.PCV:.2f}\t{p.PCS:.0f}")
     print("Pallets destinations to be defined.\n")
 
     # set empty pallets (-1) destinations based on the items to embark
@@ -214,7 +215,7 @@ for inst in instances:
 
     print("ID\tDest\tPCW\tPCV\tPCS")
     for p in pallets:
-        print(f"{p.ID}\t{p.Dest[k]}\t{p.PCW}\t{p.PCV:.2f}\t{p.PCS}")
+        print(f"{p.ID}\t{p.Dest[k]}\t{p.PCW:.0f}\t{p.PCV:.2f}\t{p.PCS:.0f}")
     print("Pallets destinations defined.\n")
    
     startNodeTime = time.perf_counter()

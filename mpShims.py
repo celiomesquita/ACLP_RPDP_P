@@ -86,7 +86,7 @@ def getBestShims(pallet, items, k, nodeTorque, solDict, cfg, surplus, itemsDict,
             bestIndex = i
 
     for item in Set[bestIndex].Items:
-        if item != None and pallet.isFeasible(item, 1.0, k, nodeTorque,  cfg, itemsDict, lock):
+        if item != None:# and pallet.isFeasible(item, 1.0, k, nodeTorque,  cfg, itemsDict, lock):
             pallet.putItem(item, nodeTorque, solDict, N, itemsDict, lock)
 
 
@@ -101,14 +101,7 @@ def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict
 
     surplus = (2. - threshold)
 
-    # print(f"surplus: {surplus:.2f}")
-
     lock  = mp.Lock()
-
-    # vol = 0.0
-    # for p in pallets:
-    #     vol += p.PCV
-    # print(f"1 vol: {vol:.2f}")
 
     if mode == "Parallel":
     
@@ -140,33 +133,13 @@ def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict
 
         for i, _ in enumerate(pallets):
             common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, threshold, itemsDict, lock) 
-
-        # vol = 0.0
-        # for p in pallets:
-        #     vol += p.PCV
-        # print(f"2 vol: {vol:.2f}")
-
-        for i, _ in enumerate(pallets):
-            getBestShims(      pallets[i], items, k, nodeTorque, solDict, cfg, surplus,   itemsDict, lock)
-
-
-    # pallets.sort(key=lambda x: abs(x.ID)) 
-
-    # vol = 0.0
-    # for p in pallets:
-    #     vol += p.PCV
-    # print(f"3 vol: {vol:.2f}")
+            # getBestShims(      pallets[i], items, k, nodeTorque, solDict, cfg, surplus,   itemsDict, lock)
 
     # local search
-    counter = 0
-    for i, _ in enumerate(pallets):
-        counter += common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, 1.0, itemsDict, lock) 
-    print(f"---> {counter} items inserted by the local search.")
-
-    # vol = 0.0
-    # for p in pallets:
-    #     vol += p.PCV
-    # print(f"4 vol: {vol:.2f}")
+    # counter = 0
+    # for i, _ in enumerate(pallets):
+    #     counter += common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, 1.0, itemsDict, lock) 
+    # print(f"---> {counter} items inserted by the local search.")
 
 
 if __name__ == "__main__":

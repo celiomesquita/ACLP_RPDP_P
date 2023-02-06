@@ -1,5 +1,6 @@
 import gurobipy as gp
 from gurobipy import GRB
+import common
 
 # optimize consolidated positions to minimize CG deviation
 def OptCGCons(kept, pallets, maxTorque, k):
@@ -39,8 +40,7 @@ def OptCGCons(kept, pallets, maxTorque, k):
                 pallets[i].Dest[k] = kept[j].To
                 kept[j].P = i # put the consolidated in the best position to minimize torque                        
 
-    msgdict = {2:'Optimal', 3:'Infeasible', 13:"Suboptimal", 9:"Time limited"}
-    print(f"--- Center of gravity deviation minimized as {msgdict[mod.status]} {tTotAccum/maxTorque:.2f}")
+    print(f"--- {common.CITIES[k]} CG deviation minimized {tTotAccum/maxTorque:.2f}")
 
     return tTotAccum
 

@@ -76,16 +76,7 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
             # Pallets destinations are also set, according to kept on board in new positions
             # Kept P is not -2 anymore, but the pallet ID.
             if len(kept) > 0:
-                # This time, without OptCGCons, no infeasibilities were found.
-                nodeTorque.value = optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, k)
-
-                # vol = 0.0
-                # for p in pallets:
-                #     vol += p.PCV
-                # print(f"before putConsol vol: {vol:.2f}")
-
                 # N: number of items to embark
-                # put the consolidated on their assgined pallets (OptCGCons)
                 for c in kept:
                     for i, p in enumerate(pallets):
                         if c.P == p.ID:
@@ -107,10 +98,7 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
                             tour.score += c.S
                             nodeVol    += c.V
 
-                # vol = 0.0
-                # for p in pallets:
-                #     vol += p.PCV
-                # print(f"after putConsol vol: {vol:.2f}")
+                nodeTorque.value += optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, k)
 
         # set pallets destinations with items and consolidated to be delivered
         if k < base: # except when the current node is the base on returning
@@ -233,9 +221,9 @@ if __name__ == "__main__":
     # surplus   = "data100"
 
     # methods = ["Shims","mpShims","GRB"]
-    # methods = ["Shims"]
+    methods = ["Shims"]
     # methods = ["mpShims"]
-    methods = ["GRB"]
+    # methods = ["GRB"]
 
     for method in methods:
 
