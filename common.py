@@ -90,12 +90,10 @@ class Pallet(object):
             solDict["solMatrix"][N*i+j] = 1
             itemsDict["mpItems"][j]     = 1
 
-    def putConsol(self, consol, nodeTorque): # put an item in this pallet
-
+    def putConsol(self, consol): # put an item in this pallet
         self.PCW += consol.W
         self.PCV += consol.V
         self.PCS += consol.S
-        nodeTorque.value += float(consol.W) * float(self.D)
             
     def isFeasible(self, item, threshold, k, nodeTorque, cfg, itemsDict, lock): # check constraints
 

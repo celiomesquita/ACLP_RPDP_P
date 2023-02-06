@@ -70,17 +70,18 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
                     kept.append(c) #... and included in the items set
                     cid += 1
 
-
-
             # Optimize consolidated positions to minimize CG deviation.
             # Pallets destinations are also set, according to kept on board in new positions
             # Kept P is not -2 anymore, but the pallet ID.
             if len(kept) > 0:
+
+                nodeTorque.value += optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, k)
+
                 # N: number of items to embark
                 for c in kept:
                     for i, p in enumerate(pallets):
                         if c.P == p.ID:
-                            pallets[i].putConsol( c, nodeTorque)
+                            pallets[i].putConsol(c)
 
                             # update the consolidated of the current node "k"
                             consol[i][k].ID  = j+N
@@ -98,7 +99,6 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
                             tour.score += c.S
                             nodeVol    += c.V
 
-                nodeTorque.value += optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, k)
 
         # set pallets destinations with items and consolidated to be delivered
         if k < base: # except when the current node is the base on returning

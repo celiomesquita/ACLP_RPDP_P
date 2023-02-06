@@ -88,7 +88,7 @@ def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict ):
     print(f"{mod.objVal} {msgdict[mod.status]}")
 
     # checking if a solution was found
-    if mod.SolCount > 0:   
+    if mod.SolCount > 0:  
 
         # reset empty pallets torque
         nodeTorque.value = 0.0
@@ -105,8 +105,12 @@ def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict ):
 
                     nodeTorque.value += items[j].W * pallets[i].D
 
-                    if itemsDict["mpItems"][j] == 0:
-                        itemsDict["mpItems"][j] = 1
+                    itemsDict["mpItems"][j] = 1
+
+                    # consolidated are on pallets
+                    pallets[i].PCW += items[j].W
+                    pallets[i].PCS += items[j].S
+                    pallets[i].PCV += items[j].V
 
 if __name__ == "__main__":
 

@@ -60,9 +60,9 @@ surplus = "data20"
 # method    = "ACO"
 # method    = "mpACO"
 
-method    = "Shims"   # 19254
-# method    = "mpShims" # 20911
-# method    = "GRB"     # 20353
+# method    = "Shims"  
+# method    = "mpShims"
+method    = "GRB"   
 
 scenario = 1
 
@@ -162,7 +162,7 @@ for inst in instances:
             c.ID = cid
             kept.append(c) #... and included in the items set
             cid += 1
-    print(f"({len(kept)} consolidated kept on board)")
+    print(f"({len(kept)} consolidated to be kept on board)")
 
     print(f"\n----- Kept on board at {common.CITIES[node.ID]} -----")        
     print("ID\tP\tW\tS\tV\tFROM\tTO")
@@ -182,13 +182,14 @@ for inst in instances:
     # Pallets destinations are also set, according to kept on board in new positions
     # Kept P is not -2 anymore, but the pallet ID.
     if len(kept) > 0:
+        nodeTorque.value += optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, k)
 
         # N: number of items to embark
         # put the consolidated on their assgined pallets (OptCGCons)
         for c in kept:
             for i, p in enumerate(pallets):
                 if c.P == p.ID:
-                    pallets[i].putConsol( c, nodeTorque)
+                    pallets[i].putConsol(c)
 
                     # update the consolidated of the current node "k"
                     consol[i][k].ID  = j+N
@@ -203,7 +204,6 @@ for inst in instances:
                     wNodeAccum += c.W
                     vNodeAccum += c.V
 
-        nodeTorque.value += optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, k)
 
     print(f"ID\tDest\tPCW\tPCV\tPCS")
     for p in pallets:
@@ -244,6 +244,12 @@ for inst in instances:
         mipGRB.Solve(pallets,  items, cfg, k,        secBreak,      nodeTorque, solDict, itemsDict) 
     
     elapsed = time.perf_counter() - startNodeTime
+
+
+    print("ID\tDest\tPCW\tPCV\tPCS")
+    for p in pallets:
+        print(f"{p.ID}\t{p.Dest[k]}\t{p.PCW:.0f}\t{p.PCV:.2f}\t{p.PCS:.0f}")
+    print("Pallets filled-up.\n")
 
     # Validate the solution for this node
 
