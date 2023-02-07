@@ -133,13 +133,13 @@ def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict
 
         for i, _ in enumerate(pallets):
             common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, threshold, itemsDict, lock) 
-            # getBestShims(      pallets[i], items, k, nodeTorque, solDict, cfg, surplus,   itemsDict, lock)
+            getBestShims(      pallets[i], items, k, nodeTorque, solDict, cfg, surplus,   itemsDict, lock)
 
     # local search
-    # counter = 0
-    # for i, _ in enumerate(pallets):
-    #     counter += common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, 1.0, itemsDict, lock) 
-    # print(f"---> {counter} items inserted by the local search.")
+    counter = 0
+    for i, _ in enumerate(pallets):
+        counter += common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, 1.0, itemsDict, lock) 
+    print(f"---> {counter} items inserted by the local search.")
 
 
 if __name__ == "__main__":

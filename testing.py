@@ -61,8 +61,8 @@ surplus = "data20"
 # method    = "mpACO"
 
 # method    = "Shims"  
-# method    = "mpShims"
-method    = "GRB"   
+method    = "mpShims"
+# method    = "GRB"   
 
 scenario = 1
 

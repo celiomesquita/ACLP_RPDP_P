@@ -107,7 +107,7 @@ def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict ):
 
                     itemsDict["mpItems"][j] = 1
 
-                    # consolidated are on pallets
+                    # consolidated are yet on pallets
                     pallets[i].PCW += items[j].W
                     pallets[i].PCS += items[j].S
                     pallets[i].PCV += items[j].V

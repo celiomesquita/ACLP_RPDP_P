@@ -140,7 +140,7 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
 
         Y = np.reshape(solDict["solMatrix"], (-1, N)) # N number of items (columns)
 
-
+        nodeScore = 0
         for i, row in enumerate(Y):
             for j, X_ij in enumerate(row):
                 if X_ij:
@@ -156,12 +156,19 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
                         wNodeAccum += float(items[j].W)
                         vNodeAccum += float(items[j].V)
 
-                    tour.score += items[j].S
+                    # tour.score += items[j].S
+                    nodeScore  += items[j].S
                     nodeVol    += items[j].V
 
         nodeVol /= cfg.volCap
+        if nodeVol > 1.0: # if volume infeasible, no score
+            nodeScore /= nodeVol
 
         epsilon = nodeTorque.value/cfg.maxTorque
+        if abs(epsilon) > 1.0: # if torque infeasible, no score
+            nodeScore /= abs(epsilon)
+
+        tour.score += nodeScore
 
         tour.AvgVol    += nodeVol
         tour.AvgTorque += epsilon
@@ -214,14 +221,14 @@ if __name__ == "__main__":
     volThreshold = 0.95
 
     # scenarios = [1,2,3,4,5,6]
-    scenarios = [1]
+    scenarios = [5,6]
 
     surplus   = "data20"
     # surplus   = "data50"
     # surplus   = "data100"
 
-    # methods = ["Shims","mpShims","GRB"]
-    methods = ["Shims"]
+    methods = ["Shims","mpShims","GRB"]
+    # methods = ["Shims"]
     # methods = ["mpShims"]
     # methods = ["GRB"]
 
@@ -229,8 +236,8 @@ if __name__ == "__main__":
 
         for scenario in scenarios:
 
-            # instances = [1,2,3,4,5,6,7]
-            instances = [1]
+            instances = [1,2,3,4,5,6,7]
+            # instances = [1]
 
             cfg = common.Config(scenario)
             
