@@ -1301,21 +1301,25 @@ By Amdahl's law, there is an optimal number of parallel executions for each prob
 %\scriptsize
 \begin{tabular}{crcccccccc}
 \toprule
-&                       &                       &\multicolumn{6}{c}{\bf Scenarios}              &{\bf Normalized}\\
-\cmidrule{4-9}		
-{\bf Surplus}           & {$method$}            &{\bf Results}       &{\bf 1}      &{\bf 2}    &{\bf 3}      &{\bf 4}     &{\bf 5}    &{\bf 6}&{\bf Speed-up} \\
+                      &                          &                   &\multicolumn{6}{c}{\bf Scenarios}              &{\bf Normalized}\\
+                                                                     \cmidrule{4-9}		
+{\bf Surplus}         & {$method$}               &{\bf Results}      &{\bf 1}      &{\bf 2}     &{\bf 3}      &{\bf 4}     &{\bf 5}       &{\bf 6}      &{\bf Speed-up} \\
 \toprule
 
-\multirow{6}{*}{$1.2$} &\multirow{2}{*}{ Gurobi}& $f$                & {\bf 12.00} & {\bf 8.28} & {\bf 12.19} &  13.38     &       &       &   \\%
-&                                               & {\bf run-time (s)} &  8          &   19       &  35         &  133     &    315   &       &   \\%
+\multirow{6}{*}{$1.2$}&\multirow{1}{*}{$Gurobi^*$}& $f$ upper bound & {\it 12.00} & {\it 8.22} & {\it 12.18} & {\it } &  {\it }      & {\it }      &   \\% $
 
-\cmidrule{2-10}		                       
-&\multirow{2}{*}{ $Shims$}                      & $f$                & 8.02        &  6.00      &  6.00       &  5.57      &       &       &   \\%
-&                                               & {\bf run-time (s)} &  < 1        &   2        &    3        &   12       &   38    &       &   \\%
 
-\cmidrule{2-10}		                       
-&\multirow{2}{*}{ $mpShims$}                    & $f$                & 8.58        &  6.87      &  10.90      & 12.99 &  {\bf }     &       &   \\%
-&                                               & {\bf run-time (s)} &  < 1        &   2        &    3        &  9        &    27   &       &   \\%
+%                      \cmidrule{2-10}		                       
+%                      &\multirow{2}{*}{ $Gurobi$}& $f$               & {\bf 12.00} & {\bf 8.28} & {\bf 12.19} & {\bf 13.38} &  14.41      &  13.25      &   \\%
+%                      &                          & {\bf run-time (s)}&  80          &   19       &  35         &  133        &    325      &  1719       &   \\%
+
+                      \cmidrule{2-10}		                       
+                      &\multirow{2}{*}{ $Shims$} & $f$               & 8.33        &  6.52      &  7.47       &  8.17       &   7.79      & 6.74        & \\%
+                      &                          & {\it run-time (s)}&  < 1        &   3        &    5        &   21        &   58        &  342        &\\%
+
+                      \cmidrule{2-10}		                       
+                      &\multirow{2}{*}{ $mpShims$}& $f$               & 11.87        &  7.28      &  9.90      & 11.81       & {\bf 14.53} & {\bf 13.74} &   \\%
+                      &                           & {\it run-time (s)}&  < 1        &   2        &    3        &  10          &    27       &   165       &   \\%
 
 \midrule
 
@@ -1323,11 +1327,10 @@ By Amdahl's law, there is an optimal number of parallel executions for each prob
 \bottomrule	
 
 \end{tabular}
-%\textsuperscript{$Gurobi^*$ was run with a time limit of 60s per node.}	
+\textsuperscript{$Gurobi^*$ had variables integrality relaxed and was run with a time limit of 60s per node.}	
 \normalsize
 \end{table}
 
-All methods were run with a time limit of 1.8s per node, the worst time {\it Shims} took to solve a node, considering all scenarios and instances.
 
 \section{Conclusions}
 \label{sec7}

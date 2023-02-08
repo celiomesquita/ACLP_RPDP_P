@@ -9,9 +9,13 @@ from time import time
 # import multiprocessing as mp
 # import numpy as np
 
-def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict ):
+def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict, relaxed=False ):
 
     # itemsDict to control items inclusion feasibility
+
+    score = 0
+    for p in pallets:
+        score += p.PCS
 
     N = len(items)
     M = len(pallets)
@@ -23,8 +27,8 @@ def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict ):
 
     # initialize a model
     mod = gp.Model()
-    mod.setParam('OutputFlag', 0)
-    mod.Params.TimeLimit = secBreak
+    
+
 
     # decision matrix for which items will be put in which pallet in node "k"         
     X = [ [ mod.addVar(name=f"X[{i}],[{j}]", vtype=GRB.BINARY) for j in set_N ] for i in set_M ]      
@@ -81,11 +85,20 @@ def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict ):
     )  
     # lateral torque was never significant. So, we did not include lateral torque constraints
 
+    if relaxed:
+        mod.Params.TimeLimit = 60
+        for v in mod.getVars():
+            v.setAttr('vtype', 'C') 
+    else:
+        mod.setParam('OutputFlag', 0)
+        mod.Params.TimeLimit = secBreak
+        mod.Params.Threads = 1
+
     mod.optimize()        
 
     msgdict = {2:'Optimal', 3:'Infeasible', 13:"Suboptimal", 9:"Time limited"}
 
-    print(f"{mod.objVal} {msgdict[mod.status]}")
+    print(f"{mod.objVal} {msgdict[mod.status]} {mod.ObjBound}")
 
     # checking if a solution was found
     if mod.SolCount > 0:  
@@ -111,6 +124,8 @@ def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict ):
                     pallets[i].PCW += items[j].W
                     pallets[i].PCS += items[j].S
                     pallets[i].PCV += items[j].V
+
+    return mod.objVal + score
 
 if __name__ == "__main__":
 

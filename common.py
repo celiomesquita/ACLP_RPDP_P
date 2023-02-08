@@ -95,7 +95,7 @@ class Pallet(object):
         self.PCV += consol.V
         self.PCS += consol.S
             
-    def isFeasible(self, item, threshold, k, nodeTorque, cfg, itemsDict, lock): # check constraints
+    def isFeasible(self, item, threshold, k, nodeTorque, cfg, itemsDict, lock, torqueSurplus=1.0): # check constraints
 
         feasible = True
 
@@ -104,7 +104,10 @@ class Pallet(object):
 
         if feasible and self.PCV + item.V > self.V * threshold:
             feasible = False
-                
+
+        if feasible and self.PCW + item.W > self.W * threshold:
+            feasible = False
+
         if feasible:
             with lock:
                 j = item.ID
@@ -114,7 +117,7 @@ class Pallet(object):
                 if feasible:
                     deltaTau = float(item.W) * float(self.D)
                     newTorque = abs(nodeTorque.value + deltaTau)
-                    if newTorque > abs(nodeTorque.value) and newTorque > cfg.maxTorque:
+                    if newTorque > abs(nodeTorque.value) and newTorque > cfg.maxTorque * torqueSurplus:
                         feasible = False
 
         return feasible
@@ -141,11 +144,11 @@ def loadPallets(cfg):
    
     return pallets
 
-def fillPallet(pallet, items, k, nodeTorque, solDict, cfg, threshold, itemsDict, lock):
+def fillPallet(pallet, items, k, nodeTorque, solDict, cfg, threshold, itemsDict, lock, torqueSurplus=1.0):
     N = len(items)
     counter = 0
     for item in items:
-        if pallet.isFeasible(item, threshold, k, nodeTorque,   cfg,           itemsDict, lock):
+        if pallet.isFeasible(item, threshold, k, nodeTorque,   cfg,           itemsDict, lock, torqueSurplus):
             pallet.putItem(  item,               nodeTorque, solDict,      N, itemsDict, lock)
             counter += 1
     return counter

@@ -120,10 +120,10 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
         itemsDict = dict(mpItems=mpItems)
 
         if method == "mpShims":
-            mpShims.Solve(pallets, items, cfg, k, volThreshold, secBreak, "p", nodeTorque, solDict, itemsDict)
+            mpShims.Solve(pallets, items, cfg, k, volThreshold, secBreak, "p", nodeTorque, solDict, itemsDict, tipo)
 
         if method == "Shims":            
-            mpShims.Solve(pallets, items, cfg, k, volThreshold, secBreak, "s", nodeTorque, solDict, itemsDict)         
+            mpShims.Solve(pallets, items, cfg, k, volThreshold, secBreak, "s", nodeTorque, solDict, itemsDict, tipo)         
 
         if method == "mpACO":       
             mpACO.Solve(  pallets, items, cfg, k, volThreshold, secBreak, "p", nodeTorque, solDict, itemsDict) 
@@ -131,8 +131,11 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
         if method == "ACO":       
             mpACO.Solve(  pallets, items, cfg, k, volThreshold, secBreak, "s", nodeTorque, solDict, itemsDict) 
 
-        if "GRB" in method:       
+        if method == "GRB":
             mipGRB.Solve( pallets, items, cfg, k,               secBreak,      nodeTorque, solDict, itemsDict) 
+
+        if method == "GRB*":       
+            mipGRB.Solve( pallets, items, cfg, k,               secBreak,      nodeTorque, solDict, itemsDict, True) 
 
         nodeElapsed = time.perf_counter() - startNodeTime
 
@@ -221,16 +224,21 @@ if __name__ == "__main__":
     volThreshold = 0.95
 
     # scenarios = [1,2,3,4,5,6]
-    scenarios = [5,6]
+    scenarios = [2,3,4,5,6]
 
     surplus   = "data20"
     # surplus   = "data50"
     # surplus   = "data100"
 
-    methods = ["Shims","mpShims","GRB"]
+    # methods = ["Shims","mpShims","GRB","GRB*"]
+    
     # methods = ["Shims"]
     # methods = ["mpShims"]
+    # tipo = "KP"
+    tipo = "FFD"
+
     # methods = ["GRB"]
+    methods = ["GRB*"]
 
     for method in methods:
 
@@ -282,7 +290,7 @@ if __name__ == "__main__":
                     tour.score   = 0.0
                     tour.AvgVol  = 0.0
 
-                    solveTour(scenario, instance, pi, tour, method, pallets, cfg, secBreak, surplus)
+                    solveTour(scenario, instance, pi, tour, method, pallets, cfg, secBreak, surplus, tipo)
 
                     # the tour cost is increased by the average torque deviation, limited to 5%
                     tour.AvgTorque /= cfg.numNodes

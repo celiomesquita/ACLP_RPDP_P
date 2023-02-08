@@ -57,12 +57,13 @@ surplus = "data20"
 # surplus = "data100"
 #
 
-# method    = "ACO"
-# method    = "mpACO"
+# method = "ACO"
+# method = "mpACO"
 
-# method    = "Shims"  
-method    = "mpShims"
-# method    = "GRB"   
+# method = "Shims"  
+# method = "mpShims"
+# method = "GRB"
+method = "GRB*"
 
 scenario = 1
 
@@ -140,8 +141,8 @@ for inst in instances:
 
     # N = first cons ID
     # cons = common.loadNodeCons(surplus, scenario, inst, pi, prevNode, N )
-    cons = testingGetCons(N, True) # for testing only
-    # cons = testingGetCons(N, False) # False: no randomness in consolidated generation
+    # cons = testingGetCons(N, True) # for testing only
+    cons = testingGetCons(N, False) # False: no randomness in consolidated generation
 
     # --- from main
     # cons = []
@@ -227,6 +228,8 @@ for inst in instances:
 
     solDict   = dict(solMatrix=solMatrix)
     itemsDict = dict(mpItems=mpItems)
+
+    objValue = 0.0
  
     if method == "mpShims":
         mpShims.Solve(pallets, items, cfg, k, limit, secBreak, "p", nodeTorque, solDict, itemsDict)
@@ -243,6 +246,9 @@ for inst in instances:
     if method == "GRB":       
         mipGRB.Solve(pallets,  items, cfg, k,        secBreak,      nodeTorque, solDict, itemsDict) 
     
+    if method == "GRB*":       
+        mipGRB.Solve( pallets, items, cfg, k,        secBreak,      nodeTorque, solDict, itemsDict, True) 
+
     elapsed = time.perf_counter() - startNodeTime
 
 
@@ -291,12 +297,12 @@ for inst in instances:
     # solElapsed += elapsed
     # solScore   += sNodeAccum
 
-    consNodeT = [None for _ in pallets]        
-    for i, p in enumerate(pallets):
-        consNodeT[i] = consol[i][k]
+    # consNodeT = [None for _ in pallets]        
+    # for i, p in enumerate(pallets):
+    #     consNodeT[i] = consol[i][k]
 
     # write consolidated contents from this node in file
-    common.writeNodeCons(scenario, inst, consNodeT, pi, node, surplus, epsilom, wei, vol)
+    # common.writeNodeCons(scenario, inst, consNodeT, pi, node, surplus, epsilom, wei, vol)
 
     # common.writeTourSol(method, scenario, inst, pi, tour, cfg, pallets, consol, True, surplus)
 
