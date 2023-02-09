@@ -10,7 +10,7 @@ import mpACO
 import optcgcons
 import mipGRB
 
-def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus):
+def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus, tipo, numOptDict):
     """
     Solves one tour
     """
@@ -118,6 +118,7 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
         # I use dict to pass by reference
         solDict   = dict(solMatrix=solMatrix)
         itemsDict = dict(mpItems=mpItems)
+        modStatus = 0
 
         if method == "mpShims":
             mpShims.Solve(pallets, items, cfg, k, volThreshold, secBreak, "p", nodeTorque, solDict, itemsDict, tipo)
@@ -132,10 +133,10 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus)
             mpACO.Solve(  pallets, items, cfg, k, volThreshold, secBreak, "s", nodeTorque, solDict, itemsDict) 
 
         if method == "GRB":
-            mipGRB.Solve( pallets, items, cfg, k,               secBreak,      nodeTorque, solDict, itemsDict) 
+            modStatus = mipGRB.Solve( pallets, items, cfg, k,               secBreak,      nodeTorque, solDict, itemsDict) 
 
-        if method == "GRB*":       
-            mipGRB.Solve( pallets, items, cfg, k,               secBreak,      nodeTorque, solDict, itemsDict, True) 
+        if modStatus == 2: # 2: optimal
+            numOptDict["numOpt"] += 1
 
         nodeElapsed = time.perf_counter() - startNodeTime
 
@@ -221,16 +222,16 @@ if __name__ == "__main__":
     costs = [[0.0 for _ in dists] for _ in dists]
 
     secBreak     = 1.8 # second
-    volThreshold = 0.95
+    volThreshold = 0.92 # 0.92 best for scenario 1
 
     # scenarios = [1,2,3,4,5,6]
-    scenarios = [2,3,4,5,6]
+    scenarios = [5]
 
     surplus   = "data20"
     # surplus   = "data50"
     # surplus   = "data100"
 
-    # methods = ["Shims","mpShims","GRB","GRB*"]
+    methods = ["Shims","mpShims","GRB"]
     
     # methods = ["Shims"]
     # methods = ["mpShims"]
@@ -238,7 +239,6 @@ if __name__ == "__main__":
     tipo = "FFD"
 
     # methods = ["GRB"]
-    methods = ["GRB*"]
 
     for method in methods:
 
@@ -273,6 +273,9 @@ if __name__ == "__main__":
             instanceTime = 0.
             instanceSC   = 0.
             worstTime    = 0
+
+            numOptDict = {"numOpt":0}
+
             for instance in instances:
 
                 bestSC = 0. # maximum score/cost relation
@@ -290,7 +293,7 @@ if __name__ == "__main__":
                     tour.score   = 0.0
                     tour.AvgVol  = 0.0
 
-                    solveTour(scenario, instance, pi, tour, method, pallets, cfg, secBreak, surplus, tipo)
+                    solveTour(scenario, instance, pi, tour, method, pallets, cfg, secBreak, surplus, tipo, numOptDict)
 
                     # the tour cost is increased by the average torque deviation, limited to 5%
                     tour.AvgTorque /= cfg.numNodes
@@ -316,9 +319,15 @@ if __name__ == "__main__":
 
             numInst = float(len(instances))
 
+            numOptDict["numOpt"] /= numInst
+            numOptDict["numOpt"] /= cfg.numNodes
+            numOptDict["numOpt"] /= len(tours)
+
+            print(f"\n% of optima: {numOptDict['numOpt']:.1f}")
+
             avgTime = math.ceil(instanceTime/numInst)
 
-            str = f"{instanceSC/numInst:.2f}\t {avgTime:.0f}\t {worstTime:.1f}\t {bestAV:.2f}\t {bestAT:.2f}\n"
+            str = f"{instanceSC/numInst:.2f}\t {avgTime:.0f}\t {worstTime:.1f}\t {bestAV:.2f}\t {bestAT:.2f}\t {numOptDict['numOpt']:.1f}\n"
             # instances average
             writeAvgResults(method, scenario, str, surplus)
             print(f"\n{str}")

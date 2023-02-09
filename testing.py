@@ -62,8 +62,9 @@ surplus = "data20"
 
 # method = "Shims"  
 # method = "mpShims"
-# method = "GRB"
-method = "GRB*"
+tipo = "FFD"
+
+method = "GRB"
 
 scenario = 1
 
@@ -232,10 +233,10 @@ for inst in instances:
     objValue = 0.0
  
     if method == "mpShims":
-        mpShims.Solve(pallets, items, cfg, k, limit, secBreak, "p", nodeTorque, solDict, itemsDict)
+        mpShims.Solve(pallets, items, cfg, k, limit, secBreak, "p", nodeTorque, solDict, itemsDict, tipo)
 
     if method == "Shims":            
-        mpShims.Solve(pallets, items, cfg, k, limit, secBreak, "s", nodeTorque, solDict, itemsDict)         
+        mpShims.Solve(pallets, items, cfg, k, limit, secBreak, "s", nodeTorque, solDict, itemsDict, tipo)         
 
     if method == "mpACO":       
         mpACO.Solve(pallets,   items, cfg, k, limit, secBreak, "p", nodeTorque, solDict, itemsDict) 
@@ -246,11 +247,7 @@ for inst in instances:
     if method == "GRB":       
         mipGRB.Solve(pallets,  items, cfg, k,        secBreak,      nodeTorque, solDict, itemsDict) 
     
-    if method == "GRB*":       
-        mipGRB.Solve( pallets, items, cfg, k,        secBreak,      nodeTorque, solDict, itemsDict, True) 
-
     elapsed = time.perf_counter() - startNodeTime
-
 
     print("ID\tDest\tPCW\tPCV\tPCS")
     for p in pallets:

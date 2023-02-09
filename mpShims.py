@@ -130,14 +130,14 @@ def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict
         # parallel greedy phase
         for i, _ in enumerate(pallets):
             procs[i] = mp.Process( target=common.fillPallet, args=( pallets[i], items, k,\
-                 nodeTorque, solDict, cfg, threshold, itemsDict, lock, 1.0) )
+                 nodeTorque, solDict, cfg, threshold, itemsDict, lock, 1.1) ) # 1.1 torque surplus
             time.sleep(0.001)
             procs[i].start()
         
         for proc in procs:
             proc.join()
 
-        # optcgcons.OptCG(pallets, k, nodeTorque)
+        optcgcons.OptCG(pallets, k, nodeTorque)
 
         # parallel shims phase
         for i, p in enumerate(pallets):
@@ -153,8 +153,8 @@ def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict
         # sort ascendent by CG distance
         pallets.sort(key=lambda x: abs(x.D), reverse=False) 
         counter = 0
-        for i, _ in enumerate(pallets): # torque surplus = 3.0
-            common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, threshold, itemsDict, lock, 3.0) 
+        for i, _ in enumerate(pallets):                                                 # torque surplus = 1.3
+            common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, threshold, itemsDict, lock, 1.3) 
             optcgcons.OptCG(pallets, k, nodeTorque)
             getBestShims(      pallets[i], items, k, nodeTorque, solDict, cfg, surplus,   itemsDict, lock, tipo)
             counter += common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, 1.0, itemsDict, lock) 
