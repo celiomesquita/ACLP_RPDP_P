@@ -33,6 +33,9 @@ class Shims(object):
         if self.Pallet.PCV + self.SCV + item.V > self.Pallet.V:
             return False
 
+        if self.Pallet.PCW + self.SCW + item.W > self.Pallet.W:
+            return False
+
         deltaTau = float(item.W) * float(self.Pallet.D)
         ret = True
         with lock:
@@ -97,16 +100,16 @@ def getBestShims(pallet, items, k, nodeTorque, solDict, cfg, surplus, itemsDict,
                 if sh.isFeasible(item, k, nodeTorque, cfg, lock):
                     sh.putItem(item, w)
                 Set.append(sh)
-                
+        # select the best Shim
         bestScore = 0
         bestIndex = 0
         for i, shims in enumerate(Set):
             if shims.SCS > bestScore:
                 bestScore = shims.SCS
                 bestIndex = i
-
+        # put the best Shim in the solution
         for item in Set[bestIndex].Items:
-            if item != None:# and pallet.isFeasible(item, 1.0, k, nodeTorque,  cfg, itemsDict, lock):
+            if item != None and pallet.isFeasible(item, 1.0, k, nodeTorque,  cfg, itemsDict, lock):
                 pallet.putItem(item, nodeTorque, solDict, N, itemsDict, lock)
 
 

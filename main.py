@@ -167,10 +167,12 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
         nodeVol /= cfg.volCap
         if nodeVol > 1.0: # if volume infeasible, no score
             nodeScore /= nodeVol
+            nodeVol = 1.0
 
         epsilon = nodeTorque.value/cfg.maxTorque
         if abs(epsilon) > 1.0: # if torque infeasible, no score
             nodeScore /= abs(epsilon)
+            epsilon = 1.0
 
         tour.score += nodeScore
 
@@ -225,10 +227,10 @@ if __name__ == "__main__":
     volThreshold = 0.92 # 0.92 best for scenario 1
 
     # scenarios = [1,2,3,4,5,6]
-    scenarios = [5]
+    scenarios = [2,3,4,5,6]
 
-    surplus   = "data20"
-    # surplus   = "data50"
+    # surplus   = "data20"
+    surplus   = "data50"
     # surplus   = "data100"
 
     methods = ["Shims","mpShims","GRB"]
