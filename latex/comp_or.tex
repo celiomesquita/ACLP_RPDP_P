@@ -111,17 +111,15 @@ S\~{a}o Jos\'{e} dos Campos - SP - 12.228-900 - Brazil}
 
 \begin{abstract}
 
-Transport aviation faces risks of cargo imbalance in the set of circumstances of aerial pickup and shipment of goods in a distribution system given the urgency required for loading for fast takeoff and mission accomplishment, notably in moments of crisis, public emergency, client contract short turnaround times, or any external forces for instant takeoff. Furthermore, there is no computer support available to aid load and trip programmers with the massive transportation demands in each location.
+Parallelism is crucial for mobile computers to be capable of doing complicated operations while conserving energy. By leveraging parallelism, handheld computers can divide tasks into numerous smaller sections and execute these parts simultaneously, so utilizing multiple cores of the processor and offering a substantial performance improvement. This enables for more complicated applications and speedier performance, making mobile computers more competent than ever before.
 
-Other dangers are made possible as a result, including poor delivery, excessive fuel consumption, and longer turnaround times than necessary.
-
-We developed an efficient solution by means of computer parallelism to the problem involving scheduling the loading and routing of an airplane in a tour of simultaneous pickup and delivery at intermediate hubs while taking into account a utility score, weight and balance rules, and fuel usage.
+In this work, we explore computer parallelism in solving the problem involving scheduling the loading and routing of an airplane in a tour of simultaneous pickup and delivery at intermediate hubs while taking into account a utility score, weight and balance rules, and fuel usage.
 
 This hard problem, named {\it Air Cargo Load Planning with Routing, Pickup, and Delivery Problem} considers using standardized pallets in fixed positions, obeying the center of gravity constraints, delivering each item to its destination, and minimizing fuel consumption costs.
 
-We also contributed by carrying out multiple experiments with the well-known Ant Colony Optimization on synthetic data based on real data from the {\it Brazilian Air Force}\/ transportation history and a new procedure to minimize the distance from the next node destined pallet to the ramp door.
+We also contributed by carrying out multiple experiments with the Shims heuristic on synthetic data based on real data from the {\it Brazilian Air Force} transportation history and a new procedure to minimize the distance from the next node destined pallet to the ramp door.
 
-We also created a process-based parallel computing heuristic that quickly finds good solutions for a wide range of problem sizes, an essential contribution as it surpassed all Shims results and some of the Gurobi results, all methods under a time limit.
+We converted Shims into a process-based parallel computing heuristic that quickly finds good solutions for a wide range of problem sizes, an essential contribution as it surpassed all Shims results and some of the integer programming results, all methods under a time limit to guarantee that a distribution plan is yielded in less than one hour.
 
 \end{abstract}
 
@@ -1307,12 +1305,12 @@ By Amdahl's law, there is an optimal number of parallel executions for each prob
 \toprule
 
 
-\multirow{7}{*}{$1.2$}&\multirow{2}{*}{ $Gurobi$}& $f$                & 12.00       & {\bf 8.38} & {\bf 12.19} & 13.38       &  14.42      &           &   \\%
+\multirow{7}{*}{$1.2$}&\multirow{2}{*}{ $Gurobi$}& $f$                & 12.00       & {\bf 8.38} & {\bf 12.19} & 13.38       &  14.42      & 13.25          &   \\%
                       &                          & {\it run-time (s)} &  8          &   14       &  25         &  95         &    217      &  1719       &   \\%
 
                       \cmidrule{2-10}		                       
                       &\multirow{2}{*}{ $Shims$} & $f$                & 8.37        &  6.40      &  7.68       &  8.05       &   7.72      & 6.74        & \\%
-                      &                          & {\it run-time (s)} &  < 1        &  < 1       &    3        &   11         &   27       &  342        &\\%
+                      &                          & {\it run-time (s)} &  < 1        &  < 1       &    3        &   11        &   27        &  342        &\\%
 
                       \cmidrule{2-10}		                       
                       &\multirow{2}{*}{ $mpShims$}& $f$               & {\bf 12.24} &  7.95      &  11.59      & {\bf 13.80} & {\bf 16.16} & {\bf 13.74} &   \\%
