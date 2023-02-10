@@ -132,7 +132,7 @@ def loadPallets(cfg):
     dists = [8.39,6.25,4.5,2.1,-0.3,-2.7,-5.1] # distances of pallets centroids to the center of gravity
 
     if cfg.size == "larger":
-        vol = 14.8
+        vol = 14.8 # ramp                                                                        forward
         dists = [14.89,14.89,11.47,11.47,8.77,8.77,4.40,4.40,0.00,0.00,-4.40,-4.40,-8.77,-8.77,-13.17,-13.17,-17.57,-17.57]
    
     pallets = []
@@ -142,7 +142,7 @@ def loadPallets(cfg):
         pallets.append( Pallet(id, d, vol, wei, cfg.numNodes) )
         id += 1
    
-    return pallets
+    return pallets, dists[0]
 
 def fillPallet(pallet, items, k, nodeTorque, solDict, cfg, threshold, itemsDict, lock, torqueSurplus=1.0):
     N = len(items)

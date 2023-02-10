@@ -10,7 +10,7 @@ import mpACO
 import optcgcons
 import mipGRB
 
-def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus, tipo, numOptDict):
+def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus, tipo, numOptDict, rampDistCG):
     """
     Solves one tour
     """
@@ -144,8 +144,14 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
 
         Y = np.reshape(solDict["solMatrix"], (-1, N)) # N number of items (columns)
 
+        nodeSumDistsFromRamp = 0
+        
         nodeScore = 0
         for i, row in enumerate(Y):
+            
+            if pallets[i].Dest[k] == k+1:
+                nodeSumDistsFromRamp += rampDistCG - pallets[i].D # distance from the pallet to the ramp door
+
             for j, X_ij in enumerate(row):
                 if X_ij:
                     # mount this node "k" consolidated
@@ -165,14 +171,8 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
                     nodeVol    += items[j].V
 
         nodeVol /= cfg.volCap
-        if nodeVol > 1.0: # if volume infeasible, no score
-            nodeScore /= nodeVol
-            nodeVol = 1.0
 
         epsilon = nodeTorque.value/cfg.maxTorque
-        if abs(epsilon) > 1.0: # if torque infeasible, no score
-            nodeScore /= abs(epsilon)
-            epsilon = 1.0
 
         tour.score += nodeScore
 
@@ -181,6 +181,7 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
 
         print(f"----- node {node.ICAO},", end='')
         print(f" score {tour.score:.0f}, cost {tour.cost:.0f}, vol {nodeVol:.2f}, torque {epsilon:.2f} -----")
+        print(f"nodeSumDistsFromRamp: {nodeSumDistsFromRamp}")
 
         if writeConsFile:
 
@@ -227,20 +228,20 @@ if __name__ == "__main__":
     volThreshold = 0.92 # 0.92 best for scenario 1
 
     # scenarios = [1,2,3,4,5,6]
-    scenarios = [1,2,3,4,5,6]
+    scenarios = [6]
 
     # surplus   = "data20"
     # surplus   = "data50"
     surplus   = "data100"
 
-    methods = ["Shims","mpShims","GRB"]
+    # methods = ["Shims","mpShims","GRB"]
     
     # methods = ["Shims"]
     # methods = ["mpShims"]
     # tipo = "KP"
     tipo = "FFD"
 
-    # methods = ["GRB"]
+    methods = ["GRB"]
 
     for method in methods:
 
@@ -255,7 +256,7 @@ if __name__ == "__main__":
                 for j, dist in enumerate(cols):
                     costs[i][j] = cfg.kmCost*dist
 
-            pallets = common.loadPallets(cfg)
+            pallets, rampDistCG = common.loadPallets(cfg)
 
             # pallets capacity
             cfg.weiCap = 0
@@ -295,7 +296,7 @@ if __name__ == "__main__":
                     tour.score   = 0.0
                     tour.AvgVol  = 0.0
 
-                    solveTour(scenario, instance, pi, tour, method, pallets, cfg, secBreak, surplus, tipo, numOptDict)
+                    solveTour(scenario, instance, pi, tour, method, pallets, cfg, secBreak, surplus, tipo, numOptDict, rampDistCG)
 
                     # the tour cost is increased by the average torque deviation, limited to 5%
                     tour.AvgTorque /= cfg.numNodes
