@@ -1,4 +1,4 @@
-\begin{thebibliography}{34}
+\begin{thebibliography}{29}
 \expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
 \providecommand{\url}[1]{\texttt{#1}}
 \providecommand{\href}[2]{#2}
@@ -49,27 +49,6 @@
   genetic algorithm}.
 \newblock \bibinfo{journal}{MATEC Web of Conferences} \bibinfo{volume}{179},
   \bibinfo{pages}{1--6}.
-%Type = Phdthesis
-\bibitem[{Dorigo(1992)}]{Dorigo1992}
-\bibinfo{author}{Dorigo, M.}, \bibinfo{year}{1992}.
-\newblock \bibinfo{title}{Optimization, Learning and Natural Algorithms}.
-\newblock \bibinfo{type}{Phd thesis}. Politecnico di Milano.
-  \bibinfo{address}{Milano, Italia}.
-%Type = Article
-\bibitem[{Dorigo et~al.(1996)Dorigo, Maniezzo and
-  Colorni}]{DorigoManiezzoColorni1996}
-\bibinfo{author}{Dorigo, M.}, \bibinfo{author}{Maniezzo, V.},
-  \bibinfo{author}{Colorni, A.}, \bibinfo{year}{1996}.
-\newblock \bibinfo{title}{The ant system: optimization by a colony of
-  cooperating agents}.
-\newblock \bibinfo{journal}{IEEE Transactions on Systems, Man, and Cybernetics}
-  \bibinfo{volume}{26}, \bibinfo{pages}{29--41}.
-%Type = Book
-\bibitem[{Fidanova(2006)}]{Fidanova2006}
-\bibinfo{author}{Fidanova, S.}, \bibinfo{year}{2006}.
-\newblock \bibinfo{title}{Ant Colony Optimization and Multiple Knapsack
-  Problem}. volume \bibinfo{volume}{Chapter 33}.
-\newblock \bibinfo{publisher}{J--Ph. Renard editor}.
 %Type = Inproceedings
 \bibitem[{Fok and Chun(2004)}]{fok2004optimizing}
 \bibinfo{author}{Fok, K.}, \bibinfo{author}{Chun, A.}, \bibinfo{year}{2004}.
@@ -177,15 +156,6 @@
 \newblock \bibinfo{journal}{Operations Research} \bibinfo{volume}{40},
   \bibinfo{pages}{1200--1205}.
 %Type = Article
-\bibitem[{Nurcahyadi and Blum(2021)}]{math9040361}
-\bibinfo{author}{Nurcahyadi, T.}, \bibinfo{author}{Blum, C.},
-  \bibinfo{year}{2021}.
-\newblock \bibinfo{title}{Adding negative learning to ant colony optimization:
-  A comprehensive study}.
-\newblock \bibinfo{journal}{Mathematics} \bibinfo{volume}{9}.
-\newblock \URLprefix \url{https://www.mdpi.com/2227-7390/9/4/361},
-  \DOIprefix\doi{10.3390/math9040361}.
-%Type = Article
 \bibitem[{Paquay et~al.(2018)Paquay, Limbourg, Schyns and
   Oliveira}]{PaquayLimbourgSchynsOliveira2018}
 \bibinfo{author}{Paquay, C.}, \bibinfo{author}{Limbourg, S.},
@@ -205,14 +175,6 @@
   application}.
 \newblock \bibinfo{journal}{International Transactions in Operational Research}
   \bibinfo{volume}{23}, \bibinfo{pages}{187--213}.
-%Type = Article
-\bibitem[{Pedemonte et~al.(2011)Pedemonte, Nesmachnow and
-  Cancela}]{Pedemonte2011}
-\bibinfo{author}{Pedemonte, M.}, \bibinfo{author}{Nesmachnow, S.},
-  \bibinfo{author}{Cancela, H.}, \bibinfo{year}{2011}.
-\newblock \bibinfo{title}{A survey on parallel ant colony optimization}.
-\newblock \bibinfo{journal}{Applied soft computing} \bibinfo{volume}{11},
-  \bibinfo{pages}{5181--5197}.
 %Type = Misc
 \bibitem[{{Python}(2022)}]{multiprocessing}
 \bibinfo{author}{{Python}}, \bibinfo{year}{2022}.

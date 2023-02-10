@@ -1103,6 +1103,20 @@ It is known that working concurrently opens up synchronization issues. But the 
 
 By Amdahl's law, there is an optimal number of parallel executions for each problem in each environment. While working at IBM in 1967, Gene Amdahl developed the foundation for what became known as Amdahl's Law or Amdahl's Argument. Essentially, the law states that while a process can be decomposed into steps that may then be run in parallel, the time taken for the whole process will be significantly limited by the steps that remain serialized.
 
+We ran Algorithm \ref{alg:main} in the 6 scenarios described in Table \ref{tab:scenarios}, considering 3 methods for node-by-node resolution: {\it Gurobi}, {\it Shims} (Algorithm \ref{alg:shims}), and {\it mpShims} (Algorithm \ref{alg:mpshims}).
+
+In generating the items in each node, we consider 3 values for the parameter ${\it surplus}$. The results obtained for the function $f$, with the corresponding runtime in seconds, are shown in Tables \ref{tab:results} (${\it surplus} = 1.2$, ${\it surplus} = 1.5$, and ${\it surplus} = 2.0$).
+
+For each $method$, $scenario$ and $surplus$, 7 different instances were generated. Therefore, 126 tests (6 scenarios $\times$ 3 volumes $\times$ 7 instances) were performed for each method. 
+
+The average tour values were presented for $f$ and, for the runtime, the worst result obtained. To facilitate the comparison between the methods, we added a last column in these tables, where two values are indicated:
+\begin{itemize}
+	\item {\bf Normalized}: value between 0 and 1, which corresponds to the ratio between the sum of $f$\/ values obtained by the method in all scenarios and the sum of the best values obtained among all methods in all scenarios. The higher the value of {\bf Normalized}, the closer the method approached the best solutions found.
+	\item {\bf Speed-up}: ratio of the sums of the worst runtimes of all scenarios and the sum of the method runtimes in all scenarios. The method with the highest {\bf Speed-up}\/ is the fastest.
+\end{itemize}
+
+In each $scenario$, we indicate in bold the best value of $f$\/ found. In each table, we also indicate in bold the best {\bf Normalized}\/ and {\bf Speed-up}\/ values.
+
 
 \vspace{2.0mm}
 
@@ -1115,35 +1129,45 @@ By Amdahl's law, there is an optimal number of parallel executions for each prob
 \toprule
 &                          &                     &\multicolumn{6}{c}{\bf Scenarios}                                                                        &{\bf Normalized}\\
                                                  \cmidrule{4-9}		
-{\bf Surplus}         & {$method$}               & {\bf Results}      &{\bf 1}      &{\bf 2}      &{\bf 3}      &{\bf 4}      &{\bf 5}       &{\bf 6}      &{\bf Speed-up} \\
+{\it surplus}         & {$method$}               & {\bf Results}      &{\bf 1}      &{\bf 2}      &{\bf 3}      &{\bf 4}      &{\bf 5}       &{\bf 6}      &{\bf Speed-up} \\
 \toprule
 
 
-\multirow{7}{*}{$1.2$}&\multirow{2}{*}{ $Gurobi$}& $f$                & 12.00       & {\bf 8.38}  & {\bf 12.19} & 13.38       &  14.42      & 13.25        &   \\%
-&                                                & {\it run-time (s)} &  8          &   14        &  25         &  95         &    217      &  1719        &   \\%
+\multirow{7}{*}{$1.2$}&\multirow{2}{*}{ $Gurobi$}& $f$                & 12.00       & {\bf 8.38}  & {\bf 12.19} & 13.38       &  14.42      & 13.25        & 0.96 \\% 7651
+&                                                & {\it run-time (s)} &  8          &   14        &  25         &  95         &    217      &  1719        & 1.0  \\%2078
 
 \cmidrule{2-10}		                       
-&\multirow{2}{*}{ $Shims$}                       & $f$                & 8.37        &  6.40       &  7.68       &  8.05       &   7.72      & 6.74         & \\%
-&                                                & {\it run-time (s)} &  < 1        &  < 1        &    3        &   11        &   27        &  342         &\\%
+&\multirow{2}{*}{ $Shims$}                       & $f$                & 8.37        &  6.40       &  7.68       &  8.05       &   7.72      & 6.74         & 0.56 \\%
+&                                                & {\it run-time (s)} &  < 1        &  < 1        &    3        &   11        &   27        &  342         & 5.4   \\%385
 
 \cmidrule{2-10}		                       
-&\multirow{2}{*}{ $mpShims$}                     & $f$                & {\bf 12.24} &  7.95       &  11.59      & {\bf 13.80} & {\bf 16.16} & {\bf 13.74}  &   \\%
-&                                                & {\it run-time (s)} &  < 1        &  < 1        &    2        &   6         &    15       &   165        &   \\%
+&\multirow{2}{*}{ $mpShims$}                     & $f$                & {\bf 12.24} &  7.95       &  11.59      & {\bf 13.80} & {\bf 16.16} & {\bf 13.74}  & {\bf 0.99} \\%
+&                                                & {\it run-time (s)} &  < 1        &  < 1        &    2        &   6         &    15       &   165        & {\bf 10.9}  \\% 190
 
 \midrule
 
-\multirow{7}{*}{$1.5$}&\multirow{2}{*}{ $Gurobi$}& $f$                & 16.49       & 0        & 0 & 13.38       &  0      & 0        &   \\%
-&                                                & {\it run-time (s)} &  12         &   14        &  25         &  95         &    217      &  1719        &   \\%
+\multirow{7}{*}{$1.5$}&\multirow{2}{*}{ $Gurobi$}& $f$                & 16.49       & {\bf 11.60} & {\bf 16.68} & 18.33       &  20.10      & 17.94        & 0.97  \\%10402
+&                                                & {\it run-time (s)} &  12         &   25        &  45         &  169        &   437       &  2377        & 1.0  \\%3065
+
+\cmidrule{2-10}		                       
+&\multirow{2}{*}{ $Shims$}                       & $f$                & 12.53       &  8.31       &  10.04      &  10.94      &   11.72     & 10.13        & 0.61 \\%
+&                                                & {\it run-time (s)} &  < 1        &  3          &    6        &   24        &   70        &  419         & 5.9 \\%523
+
+\cmidrule{2-10}		                       
+&\multirow{2}{*}{ $mpShims$}                     & $f$                & {\bf 16.71} & 10.86       & {\bf 16.68} & {\bf 18.84} & {\bf 21.30} & {\bf 19.39}  & {\bf 1.00}  \\%
+&                                                & {\it run-time (s)} &  < 1        &  2          &    3        &   9         &   26        &   158        & {\bf 15.4}  \\%199
+
+\midrule
+\multirow{7}{*}{$2.0$}&\multirow{2}{*}{ $Gurobi$}& $f$                & 16.49       & {\bf 11.60} & {\bf 16.68} & 18.33       &  20.10      & 17.94        &   \\%
+&                                                & {\it run-time (s)} &  12         &   25        &  45         &  169        &   437       &  2377        &   \\%
 
 \cmidrule{2-10}		                       
 &\multirow{2}{*}{ $Shims$}                       & $f$                & 12.53       &  8.31       &  10.04      &  10.94      &   11.72     & 10.13        & \\%
 &                                                & {\it run-time (s)} &  < 1        &  3          &    6        &   24        &   70        &  419         &\\%
 
 \cmidrule{2-10}		                       
-&\multirow{2}{*}{ $mpShims$}                     & $f$                & {\bf 16.59} & {\bf 10.49} &  16.82      & 18.46        & 22.19      & {\bf 0}  &   \\%
-&                                                & {\it run-time (s)} &  < 1        &  2          &    3        &   10         &   27       &   165        &   \\%
-
-\midrule
+&\multirow{2}{*}{ $mpShims$}                     & $f$                & {\bf 16.71} & 10.86       & {\bf 16.68} & {\bf 18.84} & {\bf 21.30} & {\bf 19.39}  &   \\%
+&                                                & {\it run-time (s)} &  < 1        &  2          &    3        &   9         &   26        &   158        &   \\%
 
 \bottomrule	
 
@@ -1152,7 +1176,7 @@ By Amdahl's law, there is an optimal number of parallel executions for each prob
 \normalsize
 \end{table}
 
-For {\it Gurobi} in {\bf Scenario 1}, 50\% of the results were optimal, but the remaining were suboptimal due to the time limit. This explains that {\it mpShims} surpassed {\it Gurobi} results. The same applies to scenarios 4, 5 and 6, where {\it Gurobi} obtained less than 30\% optimal results.
+For {\it Gurobi} in some scenarios, less than 50\% of the results were optimal, and the remaining were suboptimal due to the time limit. This explains that {\it mpShims} surpassed {\it Gurobi} results. 
 
 
 \section{Conclusions}

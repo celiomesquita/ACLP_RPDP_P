@@ -227,11 +227,11 @@ if __name__ == "__main__":
     volThreshold = 0.92 # 0.92 best for scenario 1
 
     # scenarios = [1,2,3,4,5,6]
-    scenarios = [2,3,4,5,6]
+    scenarios = [1,2,3,4,5,6]
 
     # surplus   = "data20"
-    surplus   = "data50"
-    # surplus   = "data100"
+    # surplus   = "data50"
+    surplus   = "data100"
 
     methods = ["Shims","mpShims","GRB"]
     
