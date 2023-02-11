@@ -1103,7 +1103,7 @@ It is known that working concurrently opens up synchronization issues. But the 
 
 By Amdahl's law, there is an optimal number of parallel executions for each problem in each environment. While working at IBM in 1967, Gene Amdahl developed the foundation for what became known as Amdahl's Law or Amdahl's Argument. Essentially, the law states that while a process can be decomposed into steps that may then be run in parallel, the time taken for the whole process will be significantly limited by the steps that remain serialized.
 
-We ran Algorithm \ref{alg:main} in the 6 scenarios described in Table \ref{tab:scenarios}, considering 3 methods for node-by-node resolution: {\it Gurobi}, {\it Shims} (Algorithm \ref{alg:shims}), and {\it mpShims} (Algorithm \ref{alg:mpshims}).
+We ran Algorithm \ref{alg:main} in the 6 scenarios described in Table \ref{tab:scenarios}, considering 3 methods for node-by-node resolution: the {\it Gurobi} MIP solver, {\it Shims}, and {\it mpShims} (Algorithm \ref{alg:mpshims}).
 
 In generating the items in each node, we consider 3 values for the parameter ${\it surplus}$. The results obtained for the function $f$, with the corresponding runtime in seconds, are shown in Tables \ref{tab:results} (${\it surplus} = 1.2$, ${\it surplus} = 1.5$, and ${\it surplus} = 2.0$).
 
@@ -1158,16 +1158,16 @@ In each $scenario$, we indicate in bold the best value of $f$\/ found. In each t
 &                                                & {\it run-time (s)} &  < 1        &  2          &    3        &   9         &   26        &   158        & {\bf 15.4}  \\%199
 
 \midrule
-\multirow{7}{*}{$2.0$}&\multirow{2}{*}{ $Gurobi$}& $f$                & 24.04       & {\bf 17.33} & 24.62       & {\bf 26.36} &  28.88      & 0        &   \\%
-&                                                & {\it run-time (s)} &  14         &   34        &  62         &  236        &   609       & 0        &   \\%
+\multirow{7}{*}{$2.0$}&\multirow{2}{*}{ $Gurobi$}& $f$                & 24.04       & {\bf 17.33} & 24.62       & {\bf 26.36} &  28.88      & 25.89        & 0.98  \\%14962
+&                                                & {\it run-time (s)} &  14         &   34        &  62         &  236        &   609       & 3431         & 1.0  \\%4386
 
 \cmidrule{2-10}		                       
-&\multirow{2}{*}{ $Shims$}                       & $f$                & 18.41       &  13.37       &  15.90      &  16.17      &   17.08     & 15.96        & \\%
-&                                                & {\it run-time (s)} &  < 1        &  4          &    7        &   30         &   85        &  501         &\\%
+&\multirow{2}{*}{ $Shims$}                       & $f$                & 18.41       &  13.37       &  15.90      &  16.17      &   17.08     & 15.96        & 0.65 \\%
+&                                                & {\it run-time (s)} &  < 1        &  4          &    7        &   30         &   85        &  501         & 7.0 \\%628
 
 \cmidrule{2-10}		                       
-&\multirow{2}{*}{ $mpShims$}                     & $f$                & {\bf 24.28} & 16.54       & {\bf 25.53} & 25.87        & {\bf 29.10} & {\bf 27.02}  &   \\%
-&                                                & {\it run-time (s)} &  < 1        &  2          &    3        &   12         &   32        &   188        &   \\%
+&\multirow{2}{*}{ $mpShims$}                     & $f$                & {\bf 24.28} & 16.54       & {\bf 25.53} & 25.87        & {\bf 29.10} & {\bf 27.02}  & {\bf 0.99} \\%
+&                                                & {\it run-time (s)} &  < 1        &  2          &    3        &   12         &   32        &   188        & {\bf 18.4}  \\%238
 
 \bottomrule	
 
@@ -1176,8 +1176,11 @@ In each $scenario$, we indicate in bold the best value of $f$\/ found. In each t
 \normalsize
 \end{table}
 
-For {\it Gurobi} in some scenarios, less than 50\% of the results were optimal, and the remaining were suboptimal due to the time limit. This explains that {\it mpShims} surpassed {\it Gurobi} results. 
+For the MIP solver in some scenarios, less than 50\% of the results were optimal, and the remaining were suboptimal due to the time limit. This explains that {\it mpShims} surpassed the MIP solver results. 
 
+In \cite{MesquitaSanches2023}, {\it Shims} surpassed the MIP solver, on average, because the time limit they used (0.7s) was sufficient to guarantee a worst-case solution in less than 30min. This decision caused most of the MIP solver results to be poor. In this work, we used as a time limit the worst {\it Shims} run-time, which was 1.8s. This made the MIP solver yield optimal or near-optimal solutions. This is good for the reader to have an idea of the real performance differences among the methods.
+
+{\it mpShims} presented the best performance, as it was slightly better in terms of quality than the MIP solver, and 15 times faster on average.
 
 \section{Conclusions}
 \label{sec7}
