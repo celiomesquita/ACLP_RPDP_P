@@ -33,6 +33,7 @@ def OptCGCons(kept, pallets, maxTorque, k):
     torque = 0
     for i, _ in enumerate(pallets):
         pallets[i].Dest[k] = -1 # reset pallets destinations from this node
+        torque += 140.0 * pallets[i].D
         for j in KeptRange:
             if X[i][j].x >= 0.99:
                 torque += float(kept[j].W) * pallets[i].D
@@ -56,8 +57,8 @@ def OptCG(pallets, k, nodeTorque):
 
     X = [ [ mod.addVar(name=f"X[{i}],[{j}]", vtype=GRB.BINARY) for j in ConsRange ] for i in PalletsRange ]      
 
-    torque1 = sum( X[i][j] * (cons[j].W *    pallets[i].D) for i in PalletsRange for j in ConsRange ) 
-    torque2 = sum( X[i][j] * (cons[j].W * -1*pallets[i].D) for i in PalletsRange for j in ConsRange ) 
+    torque1 = sum( X[i][j] * ((140+cons[j].W) *    pallets[i].D) for i in PalletsRange for j in ConsRange ) 
+    torque2 = sum( X[i][j] * ((140+cons[j].W) * -1*pallets[i].D) for i in PalletsRange for j in ConsRange ) 
     mod.setObjective(torque1 + torque2)
 
     mod.ModelSense = GRB.MINIMIZE
@@ -84,7 +85,7 @@ def OptCG(pallets, k, nodeTorque):
 
 
 # After solved, minimize the sum of ramp door distances for the next node pallets
-def OptRampDist(pallets, k, tour, rampDistCG, cfg):
+def OptRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque):
 
     palletWeights = [0 for _ in pallets]
 
@@ -95,6 +96,9 @@ def OptRampDist(pallets, k, tour, rampDistCG, cfg):
 
     ConsRange    = range(len(cons))
     PalletsRange = range(len(pallets))
+
+    for j in ConsRange:
+        palletWeights[j] = 140 + cons[j].W 
 
     mod = gp.Model()
     mod.setParam('OutputFlag', 0)
@@ -111,7 +115,6 @@ def OptRampDist(pallets, k, tour, rampDistCG, cfg):
         mod.addConstr(
             sum(X[i][j] for i in PalletsRange) == 1
         )
-        palletWeights[j] = 140 + cons[j].W   
     for i in PalletsRange:                
         mod.addConstr(
             sum(X[i][j] for j in ConsRange) == 1
@@ -132,13 +135,14 @@ def OptRampDist(pallets, k, tour, rampDistCG, cfg):
     else:
         print(f"mod.objVal: {mod.objVal}")
 
-    if mod.SolCount > 0: 
+    if mod.SolCount > 0:
+        nodeTorque.value = 0
         for i in PalletsRange:
             for j in ConsRange:
                 if X[i][j].x >= 0.99:
                     pallets[i].Dest[k] = cons[j].To
-                    cons[j].P = i                       
-
+                    cons[j].P = i
+                    nodeTorque.value += (140 + cons[j].W) * pallets[i].D                 
 
 if __name__ == "__main__":
 

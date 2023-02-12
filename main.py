@@ -10,7 +10,7 @@ import mpACO
 import optcgcons
 import mipGRB
 
-def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus, tipo, numOptDict, rampDistCG, distRampDict):
+def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus, tipo, numOptDict, rampDistCG, afterDict, beforeDict):
     """
     Solves one tour
     """
@@ -28,10 +28,13 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
                 for _ in pallets # tour consolidated for each pallet
             ]
 
-    base = len(tour.nodes)-1
+    k0 = len(tour.nodes)-1 # the base index on return
 
     for k, node in enumerate(tour.nodes):  # solve each node sequentialy
 
+        next = tour.nodes[k0]
+        if k < k0:
+            next = tour.nodes[k+1]
 
         for i, p in enumerate(pallets):
             pallets[i].reset(cfg.numNodes)
@@ -51,7 +54,7 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
         # load items parameters from this node and problem instance, that go to unnatended
         items = common.loadNodeItems(scenario, inst, node, unattended, surplus)
 
-        if k > 0 and k < base: # not in the base
+        if k > 0 and k < k0: # not in the base
 
             # load consolidated generated in the previous node
             # prevNode = tour.nodes[k-1]
@@ -101,7 +104,7 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
 
 
         # set pallets destinations with items and consolidated to be delivered
-        if k < base: # except when the current node is the base on returning
+        if k < k0: # except when the current node is the base on returning
             common.setPalletsDestinations(items, pallets, tour.nodes, k, unattended)
         else:
             return # skip solving because it's the base on returning
@@ -138,7 +141,17 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
         if modStatus == 2: # 2: optimal
             numOptDict["numOpt"] += 1
 
-        # optcgcons.OptRampDist(pallets, k, tour, rampDistCG, cfg)
+
+        for p in pallets:
+            if p.Dest[k] == next.ID:
+                beforeDict['Before'] += rampDistCG - p.D # distance from the pallet to the ramp door
+
+        optcgcons.OptRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque)
+
+        for p in pallets:
+            if p.Dest[k] == next.ID:
+                afterDict['After'] += rampDistCG - p.D # distance from the pallet to the ramp door
+
 
         nodeElapsed = time.perf_counter() - startNodeTime
 
@@ -148,10 +161,6 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
        
         nodeScore = 0
         for i, row in enumerate(Y):
-            
-            if pallets[i].Dest[k] == tour.nodes[k+1]:
-                distRampDict['distRamp'] += rampDistCG - pallets[i].D # distance from the pallet to the ramp door
-
             for j, X_ij in enumerate(row):
                 if X_ij:
                     # mount this node "k" consolidated
@@ -181,8 +190,6 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
 
         print(f"----- node {node.ICAO},", end='')
         print(f" score {tour.score:.0f}, cost {tour.cost:.0f}, vol {nodeVol:.2f}, torque {epsilon:.2f} -----")
-        print(f"--- sum of dists from ramp: {distRampDict['distRamp']:.1f} in {node.ICAO}\n")
-
 
         if writeConsFile:
 
@@ -229,16 +236,16 @@ if __name__ == "__main__":
     volThreshold = 0.92 # 0.92 best for scenario 1
 
     scenarios = [1,2,3,4,5,6]
-    # scenarios = [1]
+    # scenarios = [2]
 
-    surplus   = "data20"
+    # surplus   = "data20"
     # surplus   = "data50"
-    # surplus   = "data100"
+    surplus   = "data100"
 
     # methods = ["Shims","mpShims","GRB"]
     
-    methods = ["Shims"]
-    # methods = ["mpShims"]
+    # methods = ["Shims"]
+    methods = ["mpShims"]
     # tipo = "KP"
     tipo = "FFD"
 
@@ -278,8 +285,9 @@ if __name__ == "__main__":
             instanceSC   = 0.
             worstTime    = 0
 
-            numOptDict   = {"numOpt":0}
-            distRampDict = {"distRamp":0}
+            numOptDict = {"numOpt":0}
+            afterDict  = {"After":0.}
+            beforeDict = {"Before":0.}
 
             for instance in instances:
 
@@ -298,7 +306,7 @@ if __name__ == "__main__":
                     tour.score   = 0.0
                     tour.AvgVol  = 0.0
 
-                    solveTour(scenario, instance, pi, tour, method, pallets, cfg, secBreak, surplus, tipo, numOptDict, rampDistCG, distRampDict)
+                    solveTour(scenario, instance, pi, tour, method, pallets, cfg, secBreak, surplus, tipo, numOptDict, rampDistCG, afterDict, beforeDict)
 
                     # the tour cost is increased by the average torque deviation, limited to 5%
                     tour.AvgTorque /= cfg.numNodes
@@ -325,16 +333,24 @@ if __name__ == "__main__":
             numInst = float(len(instances))
 
             numOptDict["numOpt"] /= numInst
-            numOptDict["numOpt"] /= cfg.numNodes
-            numOptDict["numOpt"] /= len(tours)
+            numOptDict["numOpt"] /= float(cfg.numNodes)
+            numOptDict["numOpt"] /= float(len(tours))
 
-            distRampDict["distRamp"] /= numInst
-            distRampDict["distRamp"] /= cfg.numNodes
-            distRampDict["distRamp"] /= len(tours)
+            afterDict["After"] /= numInst
+            afterDict["After"] /= float(cfg.numNodes)
+            afterDict["After"] /= float(len(tours))
+
+            beforeDict["Before"] /= numInst
+            beforeDict["Before"] /= float(cfg.numNodes)
+            beforeDict["Before"] /= float(len(tours))
+
+            percent = 0.0
+            if beforeDict["Before"] > 0:
+                percent = 100.0*(beforeDict["Before"] - afterDict["After"]) / beforeDict["Before"]   
 
             avgTime = math.ceil(instanceTime/numInst)
 
-            str = f"{instanceSC/numInst:.2f}\t {avgTime:.0f}\t {worstTime:.1f}\t {bestAV:.2f}\t {bestAT:.2f}\t {numOptDict['numOpt']:.1f}\t {distRampDict['distRamp']}\n"
+            str = f"{instanceSC/numInst:.2f}\t {avgTime:.0f}\t {worstTime:.1f}\t {bestAV:.2f}\t {bestAT:.2f}\t {numOptDict['numOpt']:.1f}\t {beforeDict['Before']:.1f} & {afterDict['After']:.1f} & {percent:.1f}\n"
             # instances average
             writeAvgResults(method, scenario, str, surplus)
             print(f"\n{str}")
@@ -342,5 +358,6 @@ if __name__ == "__main__":
             print(f"{len(tours)} tours")
             print(f"secBreak: {secBreak}")
             print(f"volThreshold: {volThreshold:.2f}")
-            print(f"distRamp: {distRampDict['distRamp']:.2f}") 
+            print(f"Before:\t{beforeDict['Before']:.1f}") 
+            print(f"After:\t{afterDict['After']:.1f}")
             print(f"% of optima: {numOptDict['numOpt']:.2f}")
