@@ -517,15 +517,15 @@ Let $L = \{ l_0, l_1, \ldots, l_K \}$ be the set of $K+1$ nodes (or destinations
 
 Let $C=\{c_{ij}\}$ be the cost matrix of flights, where $c_{ij} = c_d*d(l_i,l_j), 0 \leq i,j \leq K$.
 
-Let $S_K = \{s: \{1, \dots, K\} \rightarrow \{1, \dots, K\} \}$ be the set of $K!$ permutations, which correspond to all possible tours (or itineraries) that have $l_0$ as origin and end, passing through the other $K$ nodes.
+Let $S_K = \{s: \{1, \dots, K\} \rightarrow \{1, \dots, K\} \}$ be the set of $K!$ permutations, which correspond to all possible tours (or itineraries) that have $l_0$ as origin and end, passing through the other $K$ nodes. {\color{blue} $k$ is the node index and $\pi(k)$ is the node in position $k$ of tour $\pi$}.
 
-Let $M = \{p_1, p_2, \ldots, p_m \}$ the set of $m$ pallets. Each pallet $p_i$, $1 \leq i \leq m$, has weight capacity $p_i.w$, volume capacity $p_i.v$, pallet destinations $p_i.to[k]$, $0 \leq k \leq K$, and distance to the CG of aircraft $p_i.d$. $p_i.to[k]$ denotes that pallet $p_i$ may assume a different destination in each node $k$.
+Let $M = \{p_1, p_2, \ldots, p_m \}$ the set of $m$ pallets. Each pallet $p_i$, $1 \leq i \leq m$, has weight capacity $p_i.w$, volume capacity $p_i.v$, pallet destinations $p_i.to[{\pi(k)}]$, $0 \leq k \leq K$, and distance to the CG of aircraft $p_i.d$. $p_i.to[{\pi(k)}]$ denotes that pallet $p_i$ may assume a different destination in each node ${\pi(k)}$.
 
-Let $N_k = \{t^k_1, t^k_2, \ldots, t^k_{n_k} \}$ be the set of $n_k$ items to be loaded in node $l_k$, $0 \leq k \leq K$. Each item $t^k_j$, $1 \leq j \leq n_k$, has score $t^k_j.s$, weight $t^k_j.w$, volume $t^k_j.v$, and destination $t^k_j.to \in L_k$. Let $N = \bigcup_{0 \leq k \leq K} N_k$ be the set of items of all nodes along a tour.
+Let $N_{\pi(k)} = \{t^{\pi(k)}_1, t^{\pi(k)}_2, \ldots, t^{\pi(k)}_{n_{\pi(k)}} \}$ be the set of $n_{\pi(k)}$ items to be loaded in node $l_{\pi(k)}$, $0 \leq k \leq K$. Each item $t^{\pi(k)}_j$, $1 \leq j \leq n_{\pi(k)}$, has score $t^{\pi(k)}_j.s$, weight $t^{\pi(k)}_j.w$, volume $t^{\pi(k)}_j.v$, and destination $t^{\pi(k)}_j.to \in L_{\pi(k)}$. Let $N = \bigcup_{0 \leq k \leq K} N_{\pi(k)}$ be the set of items of all nodes along a tour.
 
-Let $Q_k = \{a^k_1, a^k_2, \ldots, a^k_{m_k} \}$ be the set of consolidated items loaded in $m_k \leq m$ pallets when the aircraft arrives at node $l_k$, with $0 \leq k \leq K$. $a^k_i$, $1 \leq i \leq m_k$, is the group of picked-up items that were allocated on pallet $p_i$ in some of the previous nodes. $a^k_i$ has total weight $a^k_i.w$, total volume $a^k_i.v$, and destination $a^k_i.to \in L_k \cup \{l_k\}$. If $a^k_i.to = l_k$, then $a^k_i$ is unloaded, and $p_i$ will be available for reloading; otherwise, $a^k_i$ remains on the aircraft, eventually in another pallet, and with items of $N_k$ having the same destination.
+Let $Q_{\pi(k)} = \{a^{\pi(k)}_1, a^{\pi(k)}_2, \ldots, a^{\pi(k)}_{m_{\pi(k)}} \}$ be the set of consolidated items loaded in $m_k \leq m$ pallets when the aircraft arrives at node $l_{\pi(k)}$, with $0 \leq k \leq K$. $a^{\pi(k)}_i$, $1 \leq i \leq m_{\pi(k)}$, is the group of picked-up items that were allocated on pallet $p_i$ in some of the previous nodes. $a^{\pi(k)}_i$ has total weight $a^{\pi(k)}_i.w$, total volume $a^{\pi(k)}_i.v$, and destination $a^{\pi(k)}_i.to \in L_{\pi(k)} \cup \{l_{\pi(k)}\}$. If $a^{\pi(k)}_i.to = l_{\pi(k)}$, then $a^{\pi(k)}_i$ is unloaded, and $p_i$ will be available for reloading; otherwise, $a^{\pi(k)}_i$ remains on the aircraft, eventually in another pallet, and with items of $N_{\pi(k)}$ having the same destination.
 
-Let $X_{ij}^k$ and $Y_{iq}^k$ be binary variables, where $0 \leq k \leq K$, $1 \leq j \leq n_k$, $1 \leq i \leq m$ and $1 \leq q \leq m_k$. $X_{ij}^k = 1$ if $t_j^k$ is assigned to $p_i$ in node $l_k$, and 0 otherwise. $Y_{iq}^k = 1$ if $a_q^k$ is assigned to $p_i$ in node $l_k$, and 0 otherwise. By definition, $Y_{iq}^0=0$. Allocations of items or consolidated items to pallets in node $l_k$ can be seen as a bipartite graph $G_k(V_k, E_k)$, where $V_k = M \cup N_k \cup Q_k$, $E_k = E^N_k \cup E^Q_k$, $(p_i, t_j^k) \in E^N_k$ if $X_{ij}^k = 1$, and $(p_i, a_q^k) \in E^Q_k$ if $Y_{iq}^k = 1$.
+Let $X_{ij}^{\pi(k)}$ and $Y_{iq}^{\pi(k)}$ be binary variables, where $0 \leq k \leq K$, $1 \leq j \leq n_{\pi(k)}$, $1 \leq i \leq m$ and $1 \leq q \leq m_{\pi(k)}$. $X_{ij}^{\pi(k)} = 1$ if $t_j^{\pi(k)}$ is assigned to $p_i$ in node $l_{\pi(k)}$, and 0 otherwise. $Y_{iq}^{\pi(k)} = 1$ if $a_q^{\pi(k)}$ is assigned to $p_i$ in node $l_{\pi(k)}$, and 0 otherwise. By definition, $Y_{iq}^0=0$. Allocations of items or consolidated items to pallets in node $l_{\pi(k)}$ can be seen as a bipartite graph $G_{\pi(k)}(V_{\pi(k)}, E_{\pi(k)})$, where $V_{\pi(k)} = M \cup N_{\pi(k)} \cup Q_{\pi(k)}$, $E_{\pi(k)} = E^N_{\pi(k)} \cup E^Q_{\pi(k)}$, $(p_i, t_j^{\pi(k)}) \in E^N_{\pi(k)}$ if $X_{ij}^{\pi(k)} = 1$, and $(p_i, a_q^{\pi(k)}) \in E^Q_{\pi(k)}$ if $Y_{iq}^{\pi(k)} = 1$.
 
 The mathematical modeling of this problem is described in the equations below.
 
@@ -535,11 +535,11 @@ The mathematical modeling of this problem is described in the equations below.
 \end{equation}
 
 \begin{equation} \label{eq:scores}
-	\tilde{s} = \sum_{k=0}^{K} \sum_{i=1}^{m} \sum_{j=1}^{n_k} X_{ij}^k \times t_j^k.s
+	\tilde{s} = \sum_{k=0}^{K} \sum_{i=1}^{m} \sum_{j=1}^{n_{\pi(k)}} X_{ij}^{\pi(k)} \times t_j^{\pi(k)}.s
 \end{equation}
 
 \begin{equation} \label{eq:costs}
-	\tilde{c} = c_{0,\pi(1)}\times(1+c_g\times|\epsilon_0|) + \sum_{k=1}^{K-1} [ c_{\pi(k), \pi(k+1)}\times(1+c_g\times|\epsilon_k|) ] + c_{\pi(K),0}\times(1+c_g\times|\epsilon_K|)
+	\tilde{c} = c_{0,\pi(1)}\times(1+c_g\times|\epsilon_0|) + \sum_{k=1}^{K-1} [ c_{\pi(k), \pi(k+1)}\times(1+c_g\times|\epsilon_{\pi(k)}|) ] + c_{\pi(K),0}\times(1+c_g\times|\epsilon_K|)
 \end{equation}
 
 \begin{equation} \label{eq:maxW}
@@ -547,15 +547,15 @@ The mathematical modeling of this problem is described in the equations below.
 \end{equation}
 
 \begin{equation} \label{eq:tau}
-\tau_k = \sum_{i=1}^{m}[ p_i.d \times (\sum_{j=1}^{n_k} X_{ij}^k \times t_j^k.w +  \sum_{q=1}^{m} Y_{iq}^k \times a_q^k.w)];\ k \in \{0, 1, \ldots, K\}
+\tau_{\pi(k)} = \sum_{i=1}^{m}[ p_i.d \times (\sum_{j=1}^{n_{\pi(k)}} X_{ij}^{\pi(k)} \times t_j^{\pi(k)}.w +  \sum_{q=1}^{m} Y_{iq}^{\pi(k)} \times a_q^{\pi(k)}.w)];\ k \in \{0, 1, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:eps}
-\epsilon_k = \frac{\tau_k}{maxW \times limit^{CG}_{long}};\ k \in \{0, 1, \ldots, K\}
+\epsilon_{\pi(k)} = \frac{\tau_{\pi(k)}}{maxW \times limit^{CG}_{long}};\ k \in \{0, 1, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:pdp11}
-	L_0 = L; L_{k} = L_{k-1} - \{l_{\pi(k)}\}; \ k \in \{1, 2, \ldots, K\}
+	L_0 = L; L_{\pi(k)} = L_{{\pi(k-1)}} - \{l_{\pi(k)}\}; \ k \in \{1, 2, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:pdp13}
@@ -563,67 +563,67 @@ The mathematical modeling of this problem is described in the equations below.
 \end{equation}
 
 \begin{equation} \label{eq:pdp12}
-	X_{ij}^k = 0 \ \mbox{if} \ t_j^k.to \notin L_k; \ i \in \{1, 2, \ldots, m\}; \ j \in \{1, 2, \ldots, n_k\}; \ k \in \{1,2, \ldots, K\}
+	X_{ij}^{\pi(k)} = 0 \ \mbox{if} \ t_j^{\pi(k)}.to \notin L_{\pi(k)}; \ i \in \{1, 2, \ldots, m\}; \ j \in \{1, 2, \ldots, n_{\pi(k)}\}; \ k \in \{1,2, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:pdp9}
-	Y_{iq}^k = 0 \ \mbox{if} \ a_i^k.to \notin L_k; \ i \in \{1, 2, \ldots, m\}; \ q \in \{1, 2, \ldots, m_k\}; \ k \in \{ 1, 2, \ldots, K\}
+	Y_{iq}^{\pi(k)} = 0 \ \mbox{if} \ a_i^{\pi(k)}.to \notin L_{\pi(k)}; \ i \in \{1, 2, \ldots, m\}; \ q \in \{1, 2, \ldots, m_{\pi(k)}\}; \ k \in \{ 1, 2, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:cons2}
-	a_i^{\pi(k+1)}.w = \sum_{j=1}^{n_k} X_{ij}^{\pi(k)} \times t_j^{\pi(k)}.w + \sum_{q=1}^{m_k} Y_{iq}^{\pi(k)} \times a_q^{\pi(k)}.w;  \ i \in \{1, 2, \ldots, m_k\}; k \in \{0, 1, \ldots, K-1\}
+	a_i^{\pi(k+1)}.w = \sum_{j=1}^{n_{\pi(k)}} X_{ij}^{\pi(k)} \times t_j^{\pi(k)}.w + \sum_{q=1}^{m_{\pi(k)}} Y_{iq}^{\pi(k)} \times a_q^{\pi(k)}.w;  \ i \in \{1, 2, \ldots, m_{\pi(k)}\}; k \in \{0, 1, \ldots, K-1\}
 \end{equation}
 
 \begin{equation} \label{eq:cons3}
-	a_i^{\pi(k+1)}.v = \sum_{j=1}^{n_k} X_{ij}^{\pi(k)} \times t_j^{\pi(k)}.v + \sum_{q=1}^{m_k} Y_{iq}^{\pi(k)} \times a_q^{\pi(k)}.v;  \ i \in \{1, 2, \ldots, m_k\}; k \in \{0, 1, \ldots, K-1\}
+	a_i^{\pi(k+1)}.v = \sum_{j=1}^{n_{\pi(k)}} X_{ij}^{\pi(k)} \times t_j^{\pi(k)}.v + \sum_{q=1}^{m_k} Y_{iq}^{\pi(k)} \times a_q^{\pi(k)}.v;  \ i \in \{1, 2, \ldots, m_{\pi(k)}\}; k \in \{0, 1, \ldots, K-1\}
 \end{equation}
 
 \begin{equation} \label{eq:cons5}
-	a_i^{\pi(k+1)}.to = t^{\pi(k)}_j.to  \ \mbox{if} \ X^{\pi(k)}_{ij} = 1  \ \mbox{and} \ t^{\pi(k)}_j.to \in L_{k+1};  \ i \in \{1, 2, \ldots, m_k\}; \ j \in \{1, 2, \ldots, n_k\}; \ k \in \{0,1, \ldots, K-1\}
+	a_i^{\pi(k+1)}.to = t^{\pi(k)}_j.to  \ \mbox{if} \ X^{\pi(k)}_{ij} = 1  \ \mbox{and} \ t^{\pi(k)}_j.to \in L_{\pi(k+1)};  \ i \in \{1, 2, \ldots, m_{\pi(k)}\}; \ j \in \{1, 2, \ldots, n_{\pi(k)}\}; \ k \in \{0,1, \ldots, K-1\}
 \end{equation}
 
 \begin{equation} \label{eq:LatIt}
-	LatIt_k = \sum_{i=1}^{m} \sum_{j=1}^{n_k} ( X_{ij}^k \times t_j^k.w \times (i\%2) - X_{ij}^k \times t_j^k.w \times (i+1)\%2 ); \ k \in \{0, 1, \ldots, K\}
+	LatIt_{\pi(k)} = \sum_{i=1}^{m} \sum_{j=1}^{n_{\pi(k)}} ( X_{ij}^{\pi(k)} \times t_j^{\pi(k)}.w \times (i\%2) - X_{ij}^{\pi(k)} \times t_j^{\pi(k)}.w \times (i+1)\%2 ); \ k \in \{0, 1, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:LatCons}
-	LatCons_k =  \sum_{i=1}^{m} \sum_{q=1}^{m_k}  ( Y_{iq}^k \times a_q^k.w \times (i\%2) - Y_{iq}^k \times a_q^k.w \times (i+1)\%2); \ k \in \{0, 1, \ldots, K\}
+	LatCons_{\pi(k)} =  \sum_{i=1}^{m} \sum_{q=1}^{m_{\pi(k)}}  ( Y_{iq}^{\pi(k)} \times a_q^{\pi(k)}.w \times (i\%2) - Y_{iq}^{\pi(k)} \times a_q^{\pi(k)}.w \times (i+1)\%2); \ k \in \{0, 1, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:torqlat}
-	s.t.: d^{CG}_{pallet} \times | LatIt_k + LatCons_k | \leq  \sum_{i=1}^{m}p_i.w \times limit^{CG}_{lat}; \ k \in \{0, 1, \ldots, K\}
+	s.t.: d^{CG}_{pallet} \times | LatIt_{\pi(k)} + LatCons_{\pi(k)} | \leq  \sum_{i=1}^{m}p_i.w \times limit^{CG}_{lat}; \ k \in \{0, 1, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:torqlong}
-	s.t.: |\tau_k| \leq maxW \times limit^{CG}_{long};\ k \in \{0, 1, \ldots, K\}
+	s.t.: |\tau_{\pi(k)}| \leq maxW \times limit^{CG}_{long};\ k \in \{0, 1, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:payload}
-	s.t.: \sum_{i=1}^{m} (\sum_{j=1}^{n_k} X_{ij}^k \times t_j^k.w + \sum_{q=1}^{m_k} Y_{iq}^k \times a_q^k.w ) \leq maxW; \ k \in \{0, 1, \ldots, K\}
+	s.t.: \sum_{i=1}^{m} (\sum_{j=1}^{n_{\pi(k)}} X_{ij}^{\pi(k)} \times t_j^{\pi(k)}.w + \sum_{q=1}^{m_k} Y_{iq}^{\pi(k)} \times a_q^k.w ) \leq maxW; \ k \in \{0, 1, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:app2}
-	s.t.: \sum_{j=1}^{n_k} X_{ij}^k \times t_j^k.w + \sum_{q=1}^{m_k} Y_{iq}^k \times a_q^k.w  \leq p_i.w; \ i \in \{1, 2, \ldots, m_k\}; \ k \in \{0, 1, \ldots, K\}
+	s.t.: \sum_{j=1}^{n_{\pi(k)}} X_{ij}^{\pi(k)} \times t_j^{\pi(k)}.w + \sum_{q=1}^{m_k} Y_{iq}^{\pi(k)} \times a_q^{\pi(k)}.w  \leq p_i.w; \ i \in \{1, 2, \ldots, m_{\pi(k)}\}; \ {\pi(k)} \in \{0, 1, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:app3}
-	s.t.: \sum_{j=1}^{n_k} X_{ij}^k \times t_j^k.v + \sum_{q=1}^{m_k} Y_{iq}^k \times a_q^k.v  \leq\ p_i.v; \ i \in \{1, 2, \ldots, m_k\}; \ k \in \{0, 1, \ldots, K\}
+	s.t.: \sum_{j=1}^{n_{\pi(k)}} X_{ij}^{\pi(k)} \times t_j^{\pi(k)}.v + \sum_{q=1}^{m_{\pi(k)}} Y_{iq}^{\pi(k)} \times a_q^{\pi(k)}.v  \leq\ p_i.v; \ i \in \{1, 2, \ldots, m_{\pi(k)}\}; \ k \in \{0, 1, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:app4}
-	s.t.: \sum_{i=1}^{m} X_{ij}^k \leq 1; \ j \in \{1, 2, \ldots, n_k\}; \ k \in \{0, 1, \ldots, K\}
+	s.t.: \sum_{i=1}^{m} X_{ij}^{\pi(k)} \leq 1; \ j \in \{1, 2, \ldots, n_{\pi(k)}\}; \ k \in \{0, 1, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:app5}
-	s.t.:  Y_{iq}^k = 1 \ \mbox{if} \ a^k_q.to \in L_k; \ q \in \{1, 2, \ldots, m_k\}; \ k \in \{0, 1, \ldots, K\}
+	s.t.:  Y_{iq}^{\pi(k)} = 1 \ \mbox{if} \ a^{\pi(k)}_q.to \in L_{\pi(k)}; \ q \in \{1, 2, \ldots, m_{\pi(k)}\}; \ k \in \{0, 1, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:pdp8}
-	s.t.: p_i.to[k] = t^k_j.to\ \mbox{if} \ X_{ij}^k = 1; \ i \in \{1, 2, \ldots, m\}; \ j \in \{1, 2, \ldots, n_k\}; \ k \in \{1, 2, \ldots, K\}
+	s.t.: p_i.to[{\pi(k)}] = t^{\pi(k)}_j.to\ \mbox{if} \ X_{ij}^{\pi(k)} = 1; \ i \in \{1, 2, \ldots, m\}; \ j \in \{1, 2, \ldots, n_{\pi(k)}\}; \ k \in \{1, 2, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:pdp2}
-	s.t.:  p_i.to[k] = a^k_q.to\ \mbox{if} \ Y_{iq}^k = 1; \ i \in \{1, 2, \ldots, m\};\ q \in \{1, 2, \ldots, m_k\}; \ k \in \{1, 2, \ldots, K\}
+	s.t.:  p_i.to[{\pi(k)}] = a^{\pi(k)}_q.to\ \mbox{if} \ Y_{iq}^{\pi(k)} = 1; \ i \in \{1, 2, \ldots, m\};\ q \in \{1, 2, \ldots, m_{\pi(k)}\}; \ k \in \{1, 2, \ldots, K\}
 \end{equation}
 
 
@@ -1238,14 +1238,14 @@ Columns {\bf Before} and {\bf After} on Table \ref{tab:distRampDoor} refer to th
 &                       5 & 125.0 & 124.2 & 0.7 \\
 &                       6 & 108.2 & 107.6 & 0.6\\
 \midrule
-\multirow{6}{*}{$2.0$}& 1 & 7.07 & 7.07 & \\
-&                       2 & 41.23 & 37.52 & \\
-&                       3 & 24.03 & 24.64 & \\
-&                       4 & 26.84 & After & \\
-&                       5 & Before & After & \\
-&                       6 & Before & After & \\
+\multirow{6}{*}{$2.0$}& 1 &  32.8 & 30.3 & 7.7 \\
+&                       2 & 198.6 & 198.6 & 0.0 \\
+&                       3 & 163.9 & 163.9 & 0.0 \\
+&                       4 & 143.5 & 143.5 & 0.0 \\
+&                       5 & 129.1 & 128.5 & 0.5 \\
+&                       6 & 112.6 & 111.2 & 1.3 \\
 \midrule
-&                         &        & {\bf Average} & 0.0\\
+&                         &        & {\bf Average} & {\bf 1.75}\\
 \bottomrule	
 \end{tabular}
 %\textsuperscript{asdf sd .}	
