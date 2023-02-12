@@ -60,21 +60,19 @@ surplus = "data20"
 # method = "ACO"
 # method = "mpACO"
 
-# method = "Shims"  
+method = "Shims"  
 # method = "mpShims"
 tipo = "FFD"
 
-method = "GRB"
+# method = "GRB"
 
 scenario = 1
 
 # instances = [1,2,3,4,5,6,7]
 instances = [1]
 
-# limit    = 0.95 # best
-limit    = 0.95
-secBreak = 0.7 # seconds
-# secBreak = 60
+limit    = 0.92
+secBreak = 1.8 # seconds
 
 
 # --- distances and costs matrix ---
@@ -88,7 +86,7 @@ for i, cols in enumerate(dists):
     for j, dist in enumerate(cols):
         costs[i][j] = cfg.kmCost*dist
 
-pallets = common.loadPallets(cfg)
+pallets, rampDistCG = common.loadPallets(cfg)
 lock = mp.Lock
 
 # pallets capacities
@@ -142,8 +140,8 @@ for inst in instances:
 
     # N = first cons ID
     # cons = common.loadNodeCons(surplus, scenario, inst, pi, prevNode, N )
-    # cons = testingGetCons(N, True) # for testing only
-    cons = testingGetCons(N, False) # False: no randomness in consolidated generation
+    cons = testingGetCons(N, True) # for testing only
+    # cons = testingGetCons(N, False) # False: no randomness in consolidated generation
 
     # --- from main
     # cons = []
@@ -253,6 +251,8 @@ for inst in instances:
     for p in pallets:
         print(f"{p.ID}\t{p.Dest[k]}\t{p.PCW:.0f}\t{p.PCV:.2f}\t{p.PCS:.0f}")
     print("Pallets filled-up.\n")
+
+    optcgcons.OptRampDist(pallets, k, tour, rampDistCG, cfg)
 
     # Validate the solution for this node
 

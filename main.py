@@ -10,7 +10,7 @@ import mpACO
 import optcgcons
 import mipGRB
 
-def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus, tipo, numOptDict, rampDistCG):
+def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus, tipo, numOptDict, rampDistCG, distRampDict):
     """
     Solves one tour
     """
@@ -138,19 +138,19 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
         if modStatus == 2: # 2: optimal
             numOptDict["numOpt"] += 1
 
+        optcgcons.OptRampDist(pallets, k, tour, rampDistCG, cfg)
+
         nodeElapsed = time.perf_counter() - startNodeTime
 
         tour.elapsed += nodeElapsed
 
         Y = np.reshape(solDict["solMatrix"], (-1, N)) # N number of items (columns)
-
-        nodeSumDistsFromRamp = 0
-        
+       
         nodeScore = 0
         for i, row in enumerate(Y):
             
             if pallets[i].Dest[k] == k+1:
-                nodeSumDistsFromRamp += rampDistCG - pallets[i].D # distance from the pallet to the ramp door
+                distRampDict['distRamp'] += rampDistCG - pallets[i].D # distance from the pallet to the ramp door
 
             for j, X_ij in enumerate(row):
                 if X_ij:
@@ -181,7 +181,8 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
 
         print(f"----- node {node.ICAO},", end='')
         print(f" score {tour.score:.0f}, cost {tour.cost:.0f}, vol {nodeVol:.2f}, torque {epsilon:.2f} -----")
-        print(f"nodeSumDistsFromRamp: {nodeSumDistsFromRamp}")
+        print(f"--- sum of dists from ramp: {distRampDict['distRamp']:.1f} in {node.ICAO}\n")
+
 
         if writeConsFile:
 
@@ -228,27 +229,27 @@ if __name__ == "__main__":
     volThreshold = 0.92 # 0.92 best for scenario 1
 
     # scenarios = [1,2,3,4,5,6]
-    scenarios = [6]
+    scenarios = [1]
 
-    # surplus   = "data20"
+    surplus   = "data20"
     # surplus   = "data50"
-    surplus   = "data100"
+    # surplus   = "data100"
 
     # methods = ["Shims","mpShims","GRB"]
     
-    # methods = ["Shims"]
+    methods = ["Shims"]
     # methods = ["mpShims"]
     # tipo = "KP"
     tipo = "FFD"
 
-    methods = ["GRB"]
+    # methods = ["GRB"]
 
     for method in methods:
 
         for scenario in scenarios:
 
-            instances = [1,2,3,4,5,6,7]
-            # instances = [1]
+            # instances = [1,2,3,4,5,6,7]
+            instances = [1]
 
             cfg = common.Config(scenario)
             
@@ -277,7 +278,8 @@ if __name__ == "__main__":
             instanceSC   = 0.
             worstTime    = 0
 
-            numOptDict = {"numOpt":0}
+            numOptDict   = {"numOpt":0}
+            distRampDict = {"distRamp":0}
 
             for instance in instances:
 
@@ -296,7 +298,7 @@ if __name__ == "__main__":
                     tour.score   = 0.0
                     tour.AvgVol  = 0.0
 
-                    solveTour(scenario, instance, pi, tour, method, pallets, cfg, secBreak, surplus, tipo, numOptDict, rampDistCG)
+                    solveTour(scenario, instance, pi, tour, method, pallets, cfg, secBreak, surplus, tipo, numOptDict, rampDistCG, distRampDict)
 
                     # the tour cost is increased by the average torque deviation, limited to 5%
                     tour.AvgTorque /= cfg.numNodes
@@ -326,7 +328,9 @@ if __name__ == "__main__":
             numOptDict["numOpt"] /= cfg.numNodes
             numOptDict["numOpt"] /= len(tours)
 
-            print(f"\n% of optima: {numOptDict['numOpt']:.1f}")
+            distRampDict["distRamp"] /= numInst
+            distRampDict["distRamp"] /= cfg.numNodes
+            distRampDict["distRamp"] /= len(tours)
 
             avgTime = math.ceil(instanceTime/numInst)
 
@@ -338,3 +342,5 @@ if __name__ == "__main__":
             print(f"{len(tours)} tours")
             print(f"secBreak: {secBreak}")
             print(f"volThreshold: {volThreshold:.2f}")
+            print(f"distRamp: {distRampDict['distRamp']:.2f}") 
+            print(f"% of optima: {numOptDict['numOpt']:.2f}")

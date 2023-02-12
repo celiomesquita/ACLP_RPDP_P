@@ -82,6 +82,64 @@ def OptCG(pallets, k, nodeTorque):
                 pallets[i].Dest[k] = cons[j].To
                 cons[j].P = i # put the consolidated in the best position to minimize torque                        
 
+
+# After solved, minimize the sum of ramp door distances for the next node pallets
+def OptRampDist(pallets, k, tour, rampDistCG, cfg):
+
+    palletWeights = [0 for _ in pallets]
+
+    node = tour.nodes[k]
+    next = tour.nodes[k+1]
+
+    cons = [common.Item(p.ID, -2, p.PCW, p.PCS, p.PCV, node, p.Dest[k]) for p in pallets]
+
+    ConsRange    = range(len(cons))
+    PalletsRange = range(len(pallets))
+
+    mod = gp.Model()
+    mod.setParam('OutputFlag', 0)
+
+    X = [ [ mod.addVar(name=f"X[{i}],[{j}]", vtype=GRB.BINARY) for j in ConsRange ] for i in PalletsRange ]      
+
+    rampDist = sum( X[i][j] * (rampDistCG - pallets[i].D) for i in PalletsRange for j in ConsRange if cons[j].To == next ) 
+    
+    mod.setObjective(rampDist)
+
+    mod.ModelSense = GRB.MINIMIZE
+
+    for j in ConsRange:
+        mod.addConstr(
+            sum(X[i][j] for i in PalletsRange) == 1
+        )
+        palletWeights[j] = 140 + cons[j].W   
+    for i in PalletsRange:                
+        mod.addConstr(
+            sum(X[i][j] for j in ConsRange) == 1
+        )
+
+    sumTorques = sum(pallets[i].D * palletWeights[i] for i in PalletsRange)
+    mod.addConstr(
+        sumTorques <=    cfg.maxTorque
+    )
+    mod.addConstr(
+        sumTorques >= -1*cfg.maxTorque
+    )  
+
+    mod.optimize()
+
+    if mod.status == 3: # not infeasible
+        print(f"Dist from ramp door model infeasible")
+    else:
+        print(f"mod.objVal: {mod.objVal}")
+
+    if mod.SolCount > 0: 
+        for i in PalletsRange:
+            for j in ConsRange:
+                if X[i][j].x >= 0.99:
+                    pallets[i].Dest[k] = cons[j].To
+                    cons[j].P = i                       
+
+
 if __name__ == "__main__":
 
     print("----- Please execute module main -----")
