@@ -138,7 +138,7 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
         if modStatus == 2: # 2: optimal
             numOptDict["numOpt"] += 1
 
-        optcgcons.OptRampDist(pallets, k, tour, rampDistCG, cfg)
+        # optcgcons.OptRampDist(pallets, k, tour, rampDistCG, cfg)
 
         nodeElapsed = time.perf_counter() - startNodeTime
 
@@ -149,7 +149,7 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
         nodeScore = 0
         for i, row in enumerate(Y):
             
-            if pallets[i].Dest[k] == k+1:
+            if pallets[i].Dest[k] == tour.nodes[k+1]:
                 distRampDict['distRamp'] += rampDistCG - pallets[i].D # distance from the pallet to the ramp door
 
             for j, X_ij in enumerate(row):
@@ -228,8 +228,8 @@ if __name__ == "__main__":
     secBreak     = 1.8 # second
     volThreshold = 0.92 # 0.92 best for scenario 1
 
-    # scenarios = [1,2,3,4,5,6]
-    scenarios = [1]
+    scenarios = [1,2,3,4,5,6]
+    # scenarios = [1]
 
     surplus   = "data20"
     # surplus   = "data50"
@@ -248,8 +248,8 @@ if __name__ == "__main__":
 
         for scenario in scenarios:
 
-            # instances = [1,2,3,4,5,6,7]
-            instances = [1]
+            instances = [1,2,3,4,5,6,7]
+            # instances = [1]
 
             cfg = common.Config(scenario)
             
@@ -334,7 +334,7 @@ if __name__ == "__main__":
 
             avgTime = math.ceil(instanceTime/numInst)
 
-            str = f"{instanceSC/numInst:.2f}\t {avgTime:.0f}\t {worstTime:.1f}\t {bestAV:.2f}\t {bestAT:.2f}\t {numOptDict['numOpt']:.1f}\n"
+            str = f"{instanceSC/numInst:.2f}\t {avgTime:.0f}\t {worstTime:.1f}\t {bestAV:.2f}\t {bestAT:.2f}\t {numOptDict['numOpt']:.1f}\t {distRampDict['distRamp']}\n"
             # instances average
             writeAvgResults(method, scenario, str, surplus)
             print(f"\n{str}")

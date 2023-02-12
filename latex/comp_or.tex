@@ -1187,6 +1187,83 @@ In \cite{MesquitaSanches2023}, {\it Shims} surpassed the MIP solver, on average,
 
 \cite{LurkinSchyns2015} considered an aircraft with two doors, and the minimization of loading and unloading costs at the intermediate node was modeled through a container sequencing problem. But, as both aircrafts dealt with in this work have only the ramp door, we tried to minimize the distance of travel of pallets inside the cargo bay, favoring unloading in the next node, by a post optimization of pallets positions to favor this distance minimization.
 
+Let $\pi$ be a tour in the set of permutations of nodes.
+
+Let $maxD$ be the distance from the last ramp pallet to the center of gravity.
+
+Let $Q  = \{ a^{\pi(k_1)}, a^{\pi(k_2)}, \ldots, a^{\pi(k_{m})} \}$ be the set of consolidated items assembled on the set of $m$ pallets in node $\pi(k)$.
+
+Let $Z^{\pi(k)}_{iq}$ be the set of decision variables that relates pallet $i$ to consolidated $q$ in node $\pi(k)$.
+
+\begin{equation} \label{eq:distobj}
+	\mbox{minimize} \sum_{i=1}^{m} \sum_{q=1}^{m} Z^{\pi(k)}_{iq} \times ( maxD - p_i.d) ,\ \mbox{{\bf if}}\ a^{\pi(k)}_q.to = \pi(k+1) \}
+\end{equation}
+
+\begin{equation} \label{eq:distcons}
+	s.t.: \sum_{i=1}^{m} Z^{\pi(k)}_{iq} = 1;\ q \in \{1,2,\ldots,m\}
+\end{equation}
+
+\begin{equation} \label{eq:distpallets}
+	s.t.: \sum_{q=1}^{m} Z^{\pi(k)}_{iq}=1;\ i \in \{1,2,\ldots,m\}
+\end{equation}
+
+\begin{equation} \label{eq:distpalletw}
+	p_i.w = 140 + a^{\pi(k)}_q.w ;\ i \in \{1,2,\ldots,m\};\ q \in \{1,2,\ldots,m\}
+\end{equation}
+
+\begin{equation} \label{eq:disttorque}
+	s.t.:\ | \sum\ p_i.d * p_i.w\ | \leq maxW \times limit^{CG}_{long} ;\ i \in \{1,2,\ldots,m\}
+\end{equation}
+
+Equation \ref{eq:distobj} minimizes the sum of distances of the consolidated in node $\pi(k)$ destined to the next node $\pi(k+1)$; Equation \ref{eq:distcons} states that each consolidated will be assigned to exactly one pallet; Equation \ref{eq:distpallets} states that each pallet will receive one consolidated; Equation \ref{eq:distpalletw} calculates the total weight of each pallet; and Equation \ref{eq:disttorque} guarantees that the torque limit will not be exceeded. 
+
+
+As the number of pallets was small for an integer program solver, the increased time was negligible.
+
+Columns {\bf Before} and {\bf After} on Table \ref{tab:distRampDoor} refer to the application of the integer programming solver according to equations \ref{eq:distobj} to \ref{eq:disttorque}.
+
+\vspace{2.0mm}
+
+\begin{table}[H]
+\centering
+\caption{Distance from ramp door minimization}  \label{tab:distRampDoor}
+\footnotesize
+%\scriptsize
+\begin{tabular}{cccc}
+\toprule
+
+{\bf Surplus} & {\bf Scenario} & {\bf Before (m)} & {\bf After (m)} \\
+\midrule
+\multirow{6}{*}{$1.2$}&1 & 7.07 & 7.07 \\
+&                     2 & 41.23 & 37.52 \\
+&                     3 & 24.03 & 24.64 \\
+&                     4 & 26.84 & After \\
+&                     5 & Before & After \\
+&                     6 & Before & After \\
+\midrule
+\multirow{6}{*}{$1.5$}&1 & 7.07 & 7.07 \\
+&                     2 & 41.23 & 37.52 \\
+&                     3 & 24.03 & 24.64 \\
+&                     4 & 26.84 & After \\
+&                     5 & Before & After \\
+&                     6 & Before & After \\
+\midrule
+\multirow{6}{*}{$2.0$}&1 & 7.07 & 7.07 \\
+&                     2 & 41.23 & 37.52 \\
+&                     3 & 24.03 & 24.64 \\
+&                     4 & 26.84 & After \\
+&                     5 & Before & After \\
+&                     6 & Before & After \\
+\midrule
+&                     {\bf Average} & Before & After \\
+\bottomrule	
+\end{tabular}
+%\textsuperscript{asdf sd .}	
+\normalsize
+\end{table}
+
+
+
 \section{Conclusions}
 \label{sec7}
 
