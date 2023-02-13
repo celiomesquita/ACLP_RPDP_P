@@ -104,6 +104,9 @@ if cfg.weiCap > cfg.payload:
 solElapsed = 0
 solScore   = 0
 
+afterDict  = {"After":0.}
+beforeDict = {"Before":0.}
+
 for inst in instances:    
 
     tours = common.getTours(cfg.numNodes-1, costs, 1.0)
@@ -252,7 +255,15 @@ for inst in instances:
         print(f"{p.ID}\t{p.Dest[k]}\t{p.PCW:.0f}\t{p.PCV:.2f}\t{p.PCS:.0f}")
     print("Pallets filled-up.\n")
 
-    optcgcons.OptRampDist(pallets, k, tour, rampDistCG, cfg)
+    for p in pallets:
+        if p.Dest[k] == next.ID:
+            beforeDict['Before'] += rampDistCG - p.D # distance from the pallet to the ramp door
+
+    optcgcons.minRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque)
+
+    for p in pallets:
+        if p.Dest[k] == next.ID:
+            afterDict['After'] += rampDistCG - p.D # distance from the pallet to the ramp door
 
     # Validate the solution for this node
 
@@ -290,6 +301,16 @@ for inst in instances:
     sol += f"Elapsed: {elapsed:.2f}\n"
 
     print(f"Testing solution ----- \n{sol}\n")
+
+    afterDict["After"] /= float(cfg.numNodes)
+    afterDict["After"] /= float(len(tours))
+
+    beforeDict["Before"] /= float(cfg.numNodes)
+    beforeDict["Before"] /= float(len(tours))
+
+    percent = 0.0
+    if beforeDict["Before"] > 0:
+        percent = 100.0*(beforeDict["Before"] - afterDict["After"]) / beforeDict["Before"]  
 
     # solElapsed += elapsed
     # solScore   += sNodeAccum

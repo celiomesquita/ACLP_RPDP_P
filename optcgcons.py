@@ -40,17 +40,20 @@ def OptCGCons(kept, pallets, maxTorque, k):
                 pallets[i].Dest[k] = kept[j].To
                 kept[j].P = i # put the consolidated in the best position to minimize torque                        
 
-    print(f"--- {common.CITIES[k]} CG deviation minimized {torque/maxTorque:.2f}")
+    # print(f"--- {common.CITIES[k]} CG deviation minimized {torque/maxTorque:.2f}")
 
     return torque
 
 # After solved, optimize consolidated positions to minimize CG deviation
-def OptCG(pallets, k, nodeTorque):
+def minCGdev(pallets, k, nodeTorque, cfg):
 
     cons = [common.Item(p.ID, -2, p.PCW, p.PCS, p.PCV, k, p.Dest[k]) for p in pallets]
 
     ConsRange    = range(len(cons))
     PalletsRange = range(len(pallets))
+
+    for i in PalletsRange:
+        pallets[i].reset(cfg.numNodes)
 
     mod = gp.Model()
     mod.setParam('OutputFlag', 0)
@@ -77,15 +80,16 @@ def OptCG(pallets, k, nodeTorque):
     nodeTorque.value = mod.objVal
 
     for i, _ in enumerate(pallets):
-
         for j in ConsRange:
             if X[i][j].x >= 0.99:
-                pallets[i].Dest[k] = cons[j].To
                 cons[j].P = i # put the consolidated in the best position to minimize torque                        
-
+                pallets[i].Dest[k] = cons[j].To                
+                pallets[i].PCW     = cons[j].W
+                pallets[i].PCV     = cons[j].V
+                pallets[i].PCS     = cons[j].S
 
 # After solved, minimize the sum of ramp door distances for the next node pallets
-def OptRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque):
+def minRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque):
 
     palletWeights = [0 for _ in pallets]
 
@@ -98,7 +102,8 @@ def OptRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque):
     PalletsRange = range(len(pallets))
 
     for j in ConsRange:
-        palletWeights[j] = 140 + cons[j].W 
+        palletWeights[j] = 140 + cons[j].W
+        pallets[j].reset(cfg.numNodes)
 
     mod = gp.Model()
     mod.setParam('OutputFlag', 0)
@@ -140,9 +145,12 @@ def OptRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque):
         for i in PalletsRange:
             for j in ConsRange:
                 if X[i][j].x >= 0.99:
-                    pallets[i].Dest[k] = cons[j].To
                     cons[j].P = i
-                    nodeTorque.value += (140 + cons[j].W) * pallets[i].D                 
+                    nodeTorque.value += (140 + cons[j].W) * pallets[i].D                     
+                    pallets[i].Dest[k] = cons[j].To                
+                    pallets[i].PCW     = cons[j].W
+                    pallets[i].PCV     = cons[j].V
+                    pallets[i].PCS     = cons[j].S
 
 if __name__ == "__main__":
 

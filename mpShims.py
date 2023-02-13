@@ -133,14 +133,14 @@ def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict
         # parallel greedy phase
         for i, _ in enumerate(pallets):
             procs[i] = mp.Process( target=common.fillPallet, args=( pallets[i], items, k,\
-                 nodeTorque, solDict, cfg, threshold, itemsDict, lock, 1.1) ) # 1.1 torque surplus
+                 nodeTorque, solDict, cfg, threshold, itemsDict, lock, 2.) ) # torque surplus
             time.sleep(0.001)
             procs[i].start()
         
         for proc in procs:
             proc.join()
 
-        optcgcons.OptCG(pallets, k, nodeTorque)
+        optcgcons.minCGdev(pallets, k, nodeTorque, cfg)
 
         # parallel shims phase
         for i, p in enumerate(pallets):
@@ -154,11 +154,11 @@ def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict
 
     else: # serial
         # sort ascendent by CG distance
-        pallets.sort(key=lambda x: abs(x.D), reverse=False) 
+        # pallets.sort(key=lambda x: abs(x.D)) # deactivated because of torque surplus
         counter = 0
-        for i, _ in enumerate(pallets):                                                 # torque surplus = 1.3
-            common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, threshold, itemsDict, lock, 1.3) 
-            optcgcons.OptCG(pallets, k, nodeTorque)
+        for i, _ in enumerate(pallets):                                                 #       torque surplus
+            common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, threshold, itemsDict, lock, 2.) 
+            optcgcons.minCGdev(pallets, k, nodeTorque, cfg)
             getBestShims(      pallets[i], items, k, nodeTorque, solDict, cfg, surplus,   itemsDict, lock, tipo)
             counter += common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, 1.0, itemsDict, lock) 
         print(f"---> {counter} items inserted by the local search.")

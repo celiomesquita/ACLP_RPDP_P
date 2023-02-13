@@ -146,7 +146,7 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
             if p.Dest[k] == next.ID:
                 beforeDict['Before'] += rampDistCG - p.D # distance from the pallet to the ramp door
 
-        optcgcons.OptRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque)
+        optcgcons.minRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque)
 
         for p in pallets:
             if p.Dest[k] == next.ID:
@@ -244,8 +244,8 @@ if __name__ == "__main__":
 
     # methods = ["Shims","mpShims","GRB"]
     
-    # methods = ["Shims"]
-    methods = ["mpShims"]
+    methods = ["Shims"]
+    # methods = ["mpShims"]
     # tipo = "KP"
     tipo = "FFD"
 
