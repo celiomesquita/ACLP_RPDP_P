@@ -853,18 +853,18 @@ Finally, we present a new heuristic designed specifically for ACLP+RPDP, which w
 	\end{minipage}
 \end{table}
 
+{\color{blue}
+Figure \ref{fig:whip} represents the $n_{\pi(k)}$\/ possible edges $e_{ij}^{\pi(k)}$\/ of $p_i$\/ sorted by $\theta_{ij}^{\pi(k)}$. \emph{Shims}\/ starts with a greedy solution, stopping at the edge with index in $\eta_1[i]$ close to the local optimum (first phase). Then, considering even the edge with the index $\eta_2[i]$, it elaborates different possible complements for this pallet and selects the best of these complements (second phase).
 
-Figure \ref{fig:whip} represents the $n_{\pi(k)}$\/ possible edges $e_{ij}^{\pi(k)}$\/ of $p_i$\/ sorted by $\theta_{ij}^{\pi(k)}$. \emph{Shims}\/ starts with a greedy solution, stopping at the edge with index in $\eta_1[i]$ close to the local optimum (first phase). Then, considering even the edge with the index $\eta_2[i]$, it elaborates different possible complements for this pallet (second phase) and selects the best of these complements (third phase).
+Although the second phase solves a knapsack problem, an algorithm for solving a bin packing problem was used (the First Fit Decreasing - FFD), and the most profitable bin (shims) was selected. This method was proved to be faster than a dynamic program solution for the knapsack problem.
+		
+	In this work, we included a new phase after the first: a minimization of the CG deviation. An integer programming procedure that helps improve the overall {\it mpShims} results.
 
-{\color{blue} In this work, we included a new phase between the first and the second: a minimization of the CG deviation. An integer programming procedure that helps improve the overall {\it mpShims} results.
-
-$1^{st}$ - Greedy phase
+$1^{st}$ - Greedy phase with torque surplus
 
 $2^{st}$ - Minimization of CG deviation
 
-$3^{st}$ - Shims construction
-
-$4^{st}$ - best Shims selection
+$3^{st}$ - Shims construction and best Shims selection
 
 All executed in a multi-process runtime, accessing concurrently, reading and writing, the list of items and the current value of the CG deviation.
 
@@ -876,13 +876,13 @@ As to the multi-process runtime, we considered each pallet as a process.
 
 
 \begin{algorithm}[H]
-	\caption{Mount a greedy solution until the volume limit for each pallet}  \label{alg:mpShims}
+	\caption{$mpShims$ main process}  \label{alg:mpShims}
 	
 	\begin{algorithmic}[1]
 		
 		\Procedure{$mpShims$}{${N_{\pi(k)}, \pi(k)}, limit, G$}
 		
-		\State Let $G(E^{Q_{\pi(k)}})$ \Comment{the solution comes with some consolidated on board}
+		\State Let $G(M,\ Q_{\pi(k)},\ E_{\pi(k)})$ \label{mpShims:g1} \Comment{the initial solution solution}
 		
 		\State $surplus \gets 1 + 3 \times (1 - limit)$
 		
@@ -890,42 +890,55 @@ As to the multi-process runtime, we considered each pallet as a process.
 		
 		\State $ts \gets 2.0$ \Comment{torque surplus} \label{mpShims:ts}
 		
-		\State $lock \gets$ multi-processing lock \Comment{for shared data among processes to avoid race condition}
+		\State $lock \gets$ multi-processing lock  \label{mpShims:lock} \Comment{avoid race condition}
 		
 		\State $proc \gets \{p_1,p_2,..., p_m\}$  \Comment{each pallet has its own process}
 		
 		\For{$i \gets 1$ to $m$}
-		\State $proc_i \gets Greedy(p_i,\ N_{\pi(k)},\ \pi(k),\ nodeTorque,\ G,\ limit,\ lock,\ ts )$
+		\State $proc_i \gets Greedy(p_i,\ N_{\pi(k)},\ \pi(k),\ nodeTorque,\ G,\ limit,\ lock,\ ts )$   \label{mpShims:greedy}
 		\State $proc_i.start$
 		\EndFor
 		
 		\For{$i \gets 1$ to $m$}
-		\State $proc_i.join$
+		\State $proc_i.join$ \label{mpShims:join1}
 		\EndFor
 		
 		\State $minCGdev(M,\ \pi(k),\ nodeTorque)$  \label{mpShims:minCGdev} \Comment{minimize the CG deviation.}
 		
 		\For{$i \gets 1$ to $m$}
-		\State $proc_i \gets getBestShims(p_i,\ N_{\pi(k)},\ \pi(k),\ nodeTorque,\ G,\ surplus,\ lock,\ ts )$
+		\State $proc_i \gets getBestShims(p_i,\ N_{\pi(k)},\ \pi(k),\ nodeTorque,\ G,\ surplus,\ lock,\ ts )$ \label{mpShims:getBestShims}
 		\State $proc_i.start$
 		\EndFor
 		
 		\For{$i \gets 1$ to $m$}
-		\State $proc_i.join$
+		\State $proc_i.join$ \label{mpShims:join2}
 
 		\EndFor
 		
-		\Return $G(E^{N_{\pi(k)}} \cup E^{Q_{\pi(k)}})$
+		\Return $G(M,\ N_{\pi(k)} \cup Q_{\pi(k)},\ E_{\pi(k)})$ \label{mpShims:return}
 		
 		\EndProcedure
 		
 	\end{algorithmic}
 \end{algorithm}
 
-Line \ref{mpShims:ts} defines the torque surplus ($ts$). For this phase, the solution may generate torque infeasible solutions with doubled torque, which will be repaired by the next phase, the minimization of the CG deviation.
+Line \ref{mpShims:g1} the initial solution comes with some consolidated on board, a bipartite graph between pallets and consolidated.
 
-Line \ref{mpShims:minCGdev} presents the procedure to minimize the CG deviation and repair the infeasible greedy solution.
+Line \ref{mpShims:ts} defines the torque surplus ($ts$). For the greedy phase, the solution may generate torque infeasible solutions with doubled torque ($2.0$), which will be repaired by the next phase, the minimization of the CG deviation.
 
+Line \ref{mpShims:lock} creates a lock feature for shared data among processes to avoid race condition.
+
+Line \ref{mpShims:greedy} calls the greedy method which updates $p_i$, $N_{\pi(k)}$, $nodeTorque$, and $G$.
+
+Line \ref{mpShims:join1} wait for all $Greedy$ processes to finish.
+
+Line \ref{mpShims:minCGdev} calls the $minCGdev$ method which updates the $nodeTorque$ and $G$. $minCGdev$ minimizes the CG deviation and repairs the greedy solution if it is infeasible.
+
+Line \ref{mpShims:getBestShims} calls the $getBestShims$ method which updates $p_i$, $N_{\pi(k)}$, $nodeTorque$, and $G$.
+
+Line \ref{mpShims:join2} wait for all $getBestShims$ processes to finish.
+
+Line \ref{mpShims:return} returns a complete solution, a bipartite graph between pallets and consolidated or items.
 
 \subsubsection{Shims first phase}
 
