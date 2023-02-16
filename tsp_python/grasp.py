@@ -1,9 +1,8 @@
 import math
 import random
-from tsp_instance import TSPInstance
-import greedy_tour as gt
 import numpy as np
 import common
+import copy
 
 RNG = np.random.default_rng()
 
@@ -13,10 +12,12 @@ class RCL(object):
         self.size = size
         self.list = []
         if len(nbhood) >= size:
+            i = 0
             for _ in range(size):
                 # greedilly assemble the RCL
-                node = nbhood[0]
-                nbhood.pop(0)                
+                node = nbhood[i]
+                i += 1
+                # nbhood.pop(0)                
                 self.list.append(node)
 
     def randomPick(self):
@@ -26,14 +27,15 @@ class RCL(object):
         return e
 
 class GRASP(object):
-    def __init__(self, instance_file, stopping_T=-1, stopping_iter=-1):
+    def __init__(self, instance_file, stopping_iter=1000, rcl_size=1):
 
         print(f"GRASP reading data from {instance_file}")
 
-        self.instance = TSPInstance(instance_file)
+        self.instance = common.Instance(instance_file)
 
-        self.N = self.instance.num_nodes
-        self.stopping_iter = 1000 if stopping_iter == -1 else stopping_iter
+        self.N = self.instance.TSP.num_nodes
+
+        self.stopping_iter = stopping_iter
         self.iteration = 1
 
         self.nodes = [i for i in range(self.N)]
@@ -41,57 +43,57 @@ class GRASP(object):
         self.best_tour = None
         self.best_cost = float("Inf")
         self.cost_list = []
+        self.rcl_size = rcl_size
 
+    def moveToSolution(self, rcl, not_visited, solution):
+        next_node = rcl.randomPick()
+        not_visited.remove(next_node)
+        solution.append(next_node)
 
     def grasp(self):
 
         # Initialize with the greedy tour.
-        initialTour, initialCost = common.initialTour(self.instance)
+        initialTour, initialCost = self.instance.initialTour()
 
         self.best_cost = initialCost
+        self.best_tour = copy.deepcopy(initialTour)
 
-        print("Running GRASP...")
+        print(f"Running GRASP for {self.stopping_iter} iterations | RCL size = {self.rcl_size}")
 
-        # rcl_size = math.floor( self.N / 4 )
-
-        rcl_size = 3
-
-        Ntemp  = []
 
         while self.iteration < self.stopping_iter:
 
-            rcl = RCL(rcl_size, initialTour) # edges are drawed from not visited nodes
+            not_visited = copy.deepcopy(self.best_tour) # select the not visited nodes
 
-            cur_node = random.choice(initialTour)  # start from a random node
+            rcl = RCL(self.rcl_size, not_visited)
 
-            not_visited = set(initialTour) # select the not visited nodes
-            not_visited.remove(cur_node)
-            growing_tour = [cur_node]
+            # always pick a node from the RCl and put in the solution
+            solution = []
 
             while not_visited:
                 
-                if len(rcl.list) == 0:
-                    break
+                # shrink the RCL
+                if len(not_visited) < self.rcl_size :
+                    self.rcl_size = len(not_visited)
 
-                next_node = rcl.randomPick()
-                growing_tour.append(next_node)
+                # complete the RCL
+                if len(rcl.list) < self.rcl_size:
+                    rcl.list.append(not_visited[0])
 
-                for node in rcl.list: # save in a temporary growing_tour the nodes remaining in the RCL.
-                    Ntemp.append(node)
+                rcl = RCL(self.rcl_size, not_visited)
 
-                rcl = RCL(rcl_size, initialTour) # mount a new RCL
-                
-                if len(rcl.list) < rcl_size:
-                    rcl = RCL(rcl_size, Ntemp)
+                # always pick a node from the RCl and put in the solution
+                self.moveToSolution(rcl, not_visited, solution)
 
-            cost = common.getCost(self.instance, growing_tour)
+            cost = self.instance.getCost(solution)
 
             if cost < self.best_cost:  # If best found so far, update best cost
                 self.best_cost = cost
-                self.best_tour = growing_tour
+                self.best_tour = solution
 
-        self.best_tour = common.twoOpt(self.instance, self.best_tour)
+            self.iteration += 1
 
-        self.best_cost = common.getCost(self.instance, self.best_tour)
+        self.best_tour = self.instance.twoOpt(self.best_tour)
+        self.best_cost = self.instance.getCost(self.best_tour)
 
         print(f"GRASP best cost: {self.best_cost}")

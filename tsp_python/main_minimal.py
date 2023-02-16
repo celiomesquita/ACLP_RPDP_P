@@ -136,23 +136,25 @@ if __name__ == "__main__":
     elapsed *= 1000
     print(f"Greedy runtime {elapsed:.1f}ms\n")  
 
-    start = time()
-    sa = SA(instance_file, stopping_iter=5000)
-    sa.anneal()
-    elapsed = time() - start
-    elapsed *= 1000
-    print(f"SA runtime {elapsed:.1f}ms")  
-    improvement = 100 * (greedy_val - sa.best_cost) / (greedy_val)
-    print(f"SA improvement over greedy heuristic: {improvement : .2f}%\n")  
-
     # start = time()
-    # gr = GRASP(instance_file, stopping_iter=5000)
-    # gr.grasp()
+    # sa = SA(instance_file, stopping_iter=5000)
+    # sa.anneal()
     # elapsed = time() - start
     # elapsed *= 1000
-    # print(f"GRASP runtime {elapsed:.1f}ms")  
-    # improvement = 100 * (greedy_val - gr.best_cost) / (greedy_val)
-    # print(f"GRASP improvement over greedy heuristic: {improvement : .2f}%\n")  
+    # print(f"SA runtime {elapsed:.1f}ms")  
+    # improvement = 100 * (greedy_val - sa.best_cost) / (greedy_val)
+    # print(f"SA improvement over greedy heuristic: {improvement : .2f}%\n")  
+
+    start = time()
+    gr = GRASP(instance_file, 5000, 4)
+    gr.grasp()
+    elapsed = time() - start
+    elapsed *= 1000
+    print(f"GRASP runtime {elapsed:.1f}ms")
+    if gr.best_cost == None:
+        gr.best_cost = 0 
+    improvement = 100 * (greedy_val - gr.best_cost) / (greedy_val)
+    print(f"GRASP improvement over greedy heuristic: {improvement : .2f}%\n")  
 
 
 

@@ -42,6 +42,8 @@ class Instance(object):
         return self.TSP.distance(node_0, node_1)
 
     def getCost(self, tour):
+        if tour == None:
+            return 0
         N = len(tour)
         cost = 0
         for i, _ in enumerate(tour):
@@ -49,6 +51,9 @@ class Instance(object):
         return cost
 
     def twoOpt(self, initialTour):
+
+        if initialTour == None:
+            return []
 
         tour         = copy.deepcopy(initialTour)
         testing_tour = copy.deepcopy(tour)
