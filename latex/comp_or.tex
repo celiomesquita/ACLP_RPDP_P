@@ -19,6 +19,7 @@
 \usepackage{mathtools}
 \usepackage{amssymb}
 \usepackage{amsthm}
+%\usepackage{amsmath}
 
 \usepackage{caption}
 \captionsetup{labelfont=bf}
@@ -111,17 +112,15 @@ S\~{a}o Jos\'{e} dos Campos - SP - 12.228-900 - Brazil}
 
 \begin{abstract}
 
-Transport aviation faces risks of cargo imbalance in the set of circumstances of aerial pickup and shipment of goods in a distribution system given the urgency required for loading for fast takeoff and mission accomplishment, notably in moments of crisis, public emergency, client contract short turnaround times, or any external forces for instant takeoff. Furthermore, there is no computer support available to aid load and trip programmers with the massive transportation demands in each location.
+Parallelism is crucial for mobile computers to be capable of doing complicated operations while conserving energy. By leveraging parallelism, handheld computers can divide tasks into numerous smaller sections and execute these parts simultaneously, so utilizing multiple cores of the processor and offering a substantial performance improvement. This enables for more complicated applications and speedier performance, making mobile computers more competent than ever before.
 
-Other dangers are made possible as a result, including poor delivery, excessive fuel consumption, and longer turnaround times than necessary.
-
-We developed an efficient solution by means of computer parallelism to the problem involving scheduling the loading and routing of an airplane in a tour of simultaneous pickup and delivery at intermediate hubs while taking into account a utility score, weight and balance rules, and fuel usage.
+In this work, we explore computer parallelism in solving the problem involving scheduling the loading and routing of an airplane in a tour of simultaneous pickup and delivery at intermediate hubs while taking into account a utility score, weight and balance rules, and fuel usage.
 
 This hard problem, named {\it Air Cargo Load Planning with Routing, Pickup, and Delivery Problem} considers using standardized pallets in fixed positions, obeying the center of gravity constraints, delivering each item to its destination, and minimizing fuel consumption costs.
 
-We also contributed by carrying out multiple experiments with the well-known Ant Colony Optimization on synthetic data based on real data from the {\it Brazilian Air Force}\/ transportation history and a new procedure to minimize the distance from the next node destined pallet to the ramp door.
+We also contributed by carrying out multiple experiments with the Shims heuristic on synthetic data based on real data from the {\it Brazilian Air Force} transportation history and a new procedure to minimize the distance from the next node destined pallet to the ramp door.
 
-We also created a process-based parallel computing heuristic that quickly finds good solutions for a wide range of problem sizes, an essential contribution as it surpassed all Shims results and some of the Gurobi results, all methods under a time limit.
+We converted Shims into a process-based parallel computing heuristic that quickly finds good solutions for a wide range of problem sizes, an essential contribution as it surpassed all Shims results and some of the integer programming results, all methods under a time limit to guarantee that a distribution plan is yielded in less than one hour.
 
 \end{abstract}
 
@@ -262,7 +261,7 @@ In this section, we briefly describe the characteristics of the main works relat
 
 \cite{Verstichel2011} solved WBP by selecting the most profitable subset of containers to be loaded onto an aircraft using mixed-integer programming. Experimental results on real-life data showed significant improvements compared to those obtained manually by an experienced planner.
 
-\cite{MesquitaCunha2011} presented a heuristic for a real problem of the {\it Brazilian Air Force}, which consists of defining transport routes with simultaneous collection and delivery from a central distribution terminal.
+\cite{MesquitaCunha2011} presented a heuristic for a real problem of the {\it Brazilian Air Force}, which consists of defining transport routes with simultaneous collection and delivery from a central distribution terminal. They used the {\it Scatter Search} metaheuristic as solution method.
 
 \cite{Limbourg2012} developed a mixed-integer program for optimally rearranging a set of pallets into a compartmentalized cargo aircraft, specifically the {\it Boeing 747}.
 
@@ -513,21 +512,21 @@ s.t.    & Along a tour, the set of unvisited nodes is updated. \\
 \section{The mathematical modelling}
 \label{sec4}
 
-Given the assumptions, scenarios and parameters described in the previous section, we are ready to present the mathematical modelling of ACLP+RPDP, which is one of the contributions of our work.
+Given the assumptions, scenarios and parameters described in the previous section, we are ready to present the mathematical modelling of ACLP+RPDP.
 
 Let $L = \{ l_0, l_1, \ldots, l_K \}$ be the set of $K+1$ nodes (or destinations), where $l_0$ is the origin and end of a flight plan. Let $d(l_i,l_j)$ be the distance from $l_i$ to $l_j$, where $0 \leq i,j \leq K$. By definition, $d(l_i,l_i)=0$. Let $L_k$ be the set of remaining nodes when the aircraft is in $l_k$, $0 \leq k \leq K$. Therefore, $L_0=L$ and $L_K = \{ l_0 \}$.
 
 Let $C=\{c_{ij}\}$ be the cost matrix of flights, where $c_{ij} = c_d*d(l_i,l_j), 0 \leq i,j \leq K$.
 
-Let $S_K = \{s: \{1, \dots, K\} \rightarrow \{1, \dots, K\} \}$ be the set of $K!$ permutations, which correspond to all possible tours (or itineraries) that have $l_0$ as origin and end, passing through the others $K$ nodes.
+Let $S_K = \{s: \{1, \dots, K\} \rightarrow \{1, \dots, K\} \}$ be the set of $K!$ permutations, which correspond to all possible tours (or itineraries) that have $l_0$ as origin and end, passing through the other $K$ nodes. {\color{blue} $k$ is the node index and $\pi(k)$ is the node in position $k$ of tour $\pi$}.
 
-Let $M = \{p_1, p_2, \ldots, p_m \}$ the set of $m$ pallets. Each pallet $p_i$, $1 \leq i \leq m$, has weight capacity $p_i.w$, volume capacity $p_i.v$, pallet destinations $p_i.to[k]$, $0 \leq k \leq K$, and distance to the CG of aircraft $p_i.d$. $p_i.to[k]$ denotes that pallet $p_i$ may assume a different destination in each node $k$.
+Let $M = \{p_1, p_2, \ldots, p_m \}$ the set of $m$ pallets. Each pallet $p_i$, $1 \leq i \leq m$, has weight capacity $p_i.w$, volume capacity $p_i.v$, pallet destinations $p_i.to[{\pi(k)}]$, $0 \leq k \leq K$, and distance to the CG of aircraft $p_i.d$. $p_i.to[{\pi(k)}]$ denotes that pallet $p_i$ may assume a different destination in each node ${\pi(k)}$.
 
-Let $N_k = \{t^k_1, t^k_2, \ldots, t^k_{n_k} \}$ be the set of $n_k$ items to be loaded in node $l_k$, $0 \leq k \leq K$. Each item $t^k_j$, $1 \leq j \leq n_k$, has score $t^k_j.s$, weight $t^k_j.w$, volume $t^k_j.v$, and destination $t^k_j.to \in L_k$. Let $N = \bigcup_{0 \leq k \leq K} N_k$ be the set of items of all nodes along a tour.
+Let $N_{\pi(k)} = \{t^{\pi(k)}_1, t^{\pi(k)}_2, \ldots, t^{\pi(k)}_{n_{\pi(k)}} \}$ be the set of $n_{\pi(k)}$ items to be loaded in node $l_{\pi(k)}$, $0 \leq k \leq K$. Each item $t^{\pi(k)}_j$, $1 \leq j \leq n_{\pi(k)}$, has score $t^{\pi(k)}_j.s$, weight $t^{\pi(k)}_j.w$, volume $t^{\pi(k)}_j.v$, and destination $t^{\pi(k)}_j.to \in L_{\pi(k)}$. Let $N = \bigcup_{0 \leq k \leq K} N_{\pi(k)}$ be the set of items of all nodes along a tour.
 
-Let $Q_k = \{a^k_1, a^k_2, \ldots, a^k_{m_k} \}$ be the set of consolidated items loaded in $m_k \leq m$ pallets when the aircraft arrives at node $l_k$, with $0 \leq k \leq K$. $a^k_i$, $1 \leq i \leq m_k$, is the group of picked-up items that were allocated on pallet $p_i$ in some of the previous nodes. $a^k_i$ has total weight $a^k_i.w$, total volume $a^k_i.v$, and destination $a^k_i.to \in L_k \cup \{l_k\}$. If $a^k_i.to = l_k$, then $a^k_i$ is unloaded, and $p_i$ will be available for reloading; otherwise, $a^k_i$ remains on the aircraft, eventually in another pallet, and with items of $N_k$ having the same destination.
+Let $Q_{\pi(k)} = \{a^{\pi(k)}_1, a^{\pi(k)}_2, \ldots, a^{\pi(k)}_{m_{\pi(k)}} \}$ be the set of consolidated items loaded in $m_k \leq m$ pallets when the aircraft arrives at node $l_{\pi(k)}$, with $0 \leq k \leq K$. $a^{\pi(k)}_i$, $1 \leq i \leq m_{\pi(k)}$, is the group of picked-up items that were allocated on pallet $p_i$ in some of the previous nodes. $a^{\pi(k)}_i$ has total weight $a^{\pi(k)}_i.w$, total volume $a^{\pi(k)}_i.v$, and destination $a^{\pi(k)}_i.to \in L_{\pi(k)} \cup \{l_{\pi(k)}\}$. If $a^{\pi(k)}_i.to = l_{\pi(k)}$, then $a^{\pi(k)}_i$ is unloaded, and $p_i$ will be available for reloading; otherwise, $a^{\pi(k)}_i$ remains on the aircraft, eventually in another pallet, and with items of $N_{\pi(k)}$ having the same destination.
 
-Let $X_{ij}^k$ and $Y_{iq}^k$ be binary variables, where $0 \leq k \leq K$, $1 \leq j \leq n_k$, $1 \leq i \leq m$ and $1 \leq q \leq m_k$. $X_{ij}^k = 1$ if $t_j^k$ is assigned to $p_i$ in node $l_k$, and 0 otherwise. $Y_{iq}^k = 1$ if $a_q^k$ is assigned to $p_i$ in node $l_k$, and 0 otherwise. By definition, $Y_{iq}^0=0$. Allocations of items or consolidated items to pallets in node $l_k$ can be seen as a bipartite graph $G_k(V_k, E_k)$, where $V_k = M \cup N_k \cup Q_k$, $E_k = E^N_k \cup E^Q_k$, $(p_i, t_j^k) \in E^N_k$ if $X_{ij}^k = 1$, and $(p_i, a_q^k) \in E^Q_k$ if $Y_{iq}^k = 1$.
+Let $X_{ij}^{\pi(k)}$ and $Y_{iq}^{\pi(k)}$ be binary variables, where $0 \leq k \leq K$, $1 \leq j \leq n_{\pi(k)}$, $1 \leq i \leq m$ and $1 \leq q \leq m_{\pi(k)}$. $X_{ij}^{\pi(k)} = 1$ if $t_j^{\pi(k)}$ is assigned to $p_i$ in node $l_{\pi(k)}$, and 0 otherwise. $Y_{iq}^{\pi(k)} = 1$ if $a_q^{\pi(k)}$ is assigned to $p_i$ in node $l_{\pi(k)}$, and 0 otherwise. By definition, $Y_{iq}^0=0$. Allocations of items or consolidated items to pallets in node $l_{\pi(k)}$ can be seen as a bipartite graph $G_{\pi(k)}(V_{\pi(k)}, E_{\pi(k)})$, where $V_{\pi(k)} = M \cup N_{\pi(k)} \cup Q_{\pi(k)}$, $E_{\pi(k)} = E^N_{\pi(k)} \cup E^Q_{\pi(k)}$, $(p_i, t_j^{\pi(k)}) \in E^N_{\pi(k)}$ if $X_{ij}^{\pi(k)} = 1$, and $(p_i, a_q^{\pi(k)}) \in E^Q_{\pi(k)}$ if $Y_{iq}^{\pi(k)} = 1$.
 
 The mathematical modeling of this problem is described in the equations below.
 
@@ -537,11 +536,11 @@ The mathematical modeling of this problem is described in the equations below.
 \end{equation}
 
 \begin{equation} \label{eq:scores}
-	\tilde{s} = \sum_{k=0}^{K} \sum_{i=1}^{m} \sum_{j=1}^{n_k} X_{ij}^k \times t_j^k.s
+	\tilde{s} = \sum_{k=0}^{K} \sum_{i=1}^{m} \sum_{j=1}^{n_{\pi(k)}} X_{ij}^{\pi(k)} \times t_j^{\pi(k)}.s
 \end{equation}
 
 \begin{equation} \label{eq:costs}
-	\tilde{c} = c_{0,\pi(1)}\times(1+c_g\times|\epsilon_0|) + \sum_{k=1}^{K-1} [ c_{\pi(k), \pi(k+1)}\times(1+c_g\times|\epsilon_k|) ] + c_{\pi(K),0}\times(1+c_g\times|\epsilon_K|)
+	\tilde{c} = c_{0,\pi(1)}\times(1+c_g\times|\epsilon_0|) + \sum_{k=1}^{K-1} [ c_{\pi(k), \pi(k+1)}\times(1+c_g\times|\epsilon_{\pi(k)}|) ] + c_{\pi(K),0}\times(1+c_g\times|\epsilon_K|)
 \end{equation}
 
 \begin{equation} \label{eq:maxW}
@@ -549,15 +548,15 @@ The mathematical modeling of this problem is described in the equations below.
 \end{equation}
 
 \begin{equation} \label{eq:tau}
-\tau_k = \sum_{i=1}^{m}[ p_i.d \times (\sum_{j=1}^{n_k} X_{ij}^k \times t_j^k.w +  \sum_{q=1}^{m} Y_{iq}^k \times a_q^k.w)];\ k \in \{0, 1, \ldots, K\}
+\tau_{\pi(k)} = \sum_{i=1}^{m}[ p_i.d \times (\sum_{j=1}^{n_{\pi(k)}} X_{ij}^{\pi(k)} \times t_j^{\pi(k)}.w +  \sum_{q=1}^{m} Y_{iq}^{\pi(k)} \times a_q^{\pi(k)}.w)];\ k \in \{0, 1, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:eps}
-\epsilon_k = \frac{\tau_k}{maxW \times limit^{CG}_{long}};\ k \in \{0, 1, \ldots, K\}
+\epsilon_{\pi(k)} = \frac{\tau_{\pi(k)}}{maxW \times limit^{CG}_{long}};\ k \in \{0, 1, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:pdp11}
-	L_0 = L; L_{k} = L_{k-1} - \{l_{\pi(k)}\}; \ k \in \{1, 2, \ldots, K\}
+	L_0 = L; L_{\pi(k)} = L_{{\pi(k-1)}} - \{l_{\pi(k)}\}; \ k \in \{1, 2, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:pdp13}
@@ -565,67 +564,67 @@ The mathematical modeling of this problem is described in the equations below.
 \end{equation}
 
 \begin{equation} \label{eq:pdp12}
-	X_{ij}^k = 0 \ \mbox{if} \ t_j^k.to \notin L_k; \ i \in \{1, 2, \ldots, m\}; \ j \in \{1, 2, \ldots, n_k\}; \ k \in \{1,2, \ldots, K\}
+	X_{ij}^{\pi(k)} = 0 \ \mbox{if} \ t_j^{\pi(k)}.to \notin L_{\pi(k)}; \ i \in \{1, 2, \ldots, m\}; \ j \in \{1, 2, \ldots, n_{\pi(k)}\}; \ k \in \{1,2, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:pdp9}
-	Y_{iq}^k = 0 \ \mbox{if} \ a_i^k.to \notin L_k; \ i \in \{1, 2, \ldots, m\}; \ q \in \{1, 2, \ldots, m_k\}; \ k \in \{ 1, 2, \ldots, K\}
+	Y_{iq}^{\pi(k)} = 0 \ \mbox{if} \ a_i^{\pi(k)}.to \notin L_{\pi(k)}; \ i \in \{1, 2, \ldots, m\}; \ q \in \{1, 2, \ldots, m_{\pi(k)}\}; \ k \in \{ 1, 2, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:cons2}
-	a_i^{\pi(k+1)}.w = \sum_{j=1}^{n_k} X_{ij}^{\pi(k)} \times t_j^{\pi(k)}.w + \sum_{q=1}^{m_k} Y_{iq}^{\pi(k)} \times a_q^{\pi(k)}.w;  \ i \in \{1, 2, \ldots, m_k\}; k \in \{0, 1, \ldots, K-1\}
+	a_i^{\pi(k+1)}.w = \sum_{j=1}^{n_{\pi(k)}} X_{ij}^{\pi(k)} \times t_j^{\pi(k)}.w + \sum_{q=1}^{m_{\pi(k)}} Y_{iq}^{\pi(k)} \times a_q^{\pi(k)}.w;  \ i \in \{1, 2, \ldots, m_{\pi(k)}\}; k \in \{0, 1, \ldots, K-1\}
 \end{equation}
 
 \begin{equation} \label{eq:cons3}
-	a_i^{\pi(k+1)}.v = \sum_{j=1}^{n_k} X_{ij}^{\pi(k)} \times t_j^{\pi(k)}.v + \sum_{q=1}^{m_k} Y_{iq}^{\pi(k)} \times a_q^{\pi(k)}.v;  \ i \in \{1, 2, \ldots, m_k\}; k \in \{0, 1, \ldots, K-1\}
+	a_i^{\pi(k+1)}.v = \sum_{j=1}^{n_{\pi(k)}} X_{ij}^{\pi(k)} \times t_j^{\pi(k)}.v + \sum_{q=1}^{m_k} Y_{iq}^{\pi(k)} \times a_q^{\pi(k)}.v;  \ i \in \{1, 2, \ldots, m_{\pi(k)}\}; k \in \{0, 1, \ldots, K-1\}
 \end{equation}
 
 \begin{equation} \label{eq:cons5}
-	a_i^{\pi(k+1)}.to = t^{\pi(k)}_j.to  \ \mbox{if} \ X^{\pi(k)}_{ij} = 1  \ \mbox{and} \ t^{\pi(k)}_j.to \in L_{k+1};  \ i \in \{1, 2, \ldots, m_k\}; \ j \in \{1, 2, \ldots, n_k\}; \ k \in \{0,1, \ldots, K-1\}
+	a_i^{\pi(k+1)}.to = t^{\pi(k)}_j.to  \ \mbox{if} \ X^{\pi(k)}_{ij} = 1  \ \mbox{and} \ t^{\pi(k)}_j.to \in L_{\pi(k+1)};  \ i \in \{1, 2, \ldots, m_{\pi(k)}\}; \ j \in \{1, 2, \ldots, n_{\pi(k)}\}; \ k \in \{0,1, \ldots, K-1\}
 \end{equation}
 
 \begin{equation} \label{eq:LatIt}
-	LatIt_k = \sum_{i=1}^{m} \sum_{j=1}^{n_k} ( X_{ij}^k \times t_j^k.w \times (i\%2) - X_{ij}^k \times t_j^k.w \times (i+1)\%2 ); \ k \in \{0, 1, \ldots, K\}
+	LatIt_{\pi(k)} = \sum_{i=1}^{m} \sum_{j=1}^{n_{\pi(k)}} ( X_{ij}^{\pi(k)} \times t_j^{\pi(k)}.w \times (i\%2) - X_{ij}^{\pi(k)} \times t_j^{\pi(k)}.w \times (i+1)\%2 ); \ k \in \{0, 1, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:LatCons}
-	LatCons_k =  \sum_{i=1}^{m} \sum_{q=1}^{m_k}  ( Y_{iq}^k \times a_q^k.w \times (i\%2) - Y_{iq}^k \times a_q^k.w \times (i+1)\%2); \ k \in \{0, 1, \ldots, K\}
+	LatCons_{\pi(k)} =  \sum_{i=1}^{m} \sum_{q=1}^{m_{\pi(k)}}  ( Y_{iq}^{\pi(k)} \times a_q^{\pi(k)}.w \times (i\%2) - Y_{iq}^{\pi(k)} \times a_q^{\pi(k)}.w \times (i+1)\%2); \ k \in \{0, 1, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:torqlat}
-	s.t.: d^{CG}_{pallet} \times | LatIt_k + LatCons_k | \leq  \sum_{i=1}^{m}p_i.w \times limit^{CG}_{lat}; \ k \in \{0, 1, \ldots, K\}
+	s.t.: d^{CG}_{pallet} \times | LatIt_{\pi(k)} + LatCons_{\pi(k)} | \leq  \sum_{i=1}^{m}p_i.w \times limit^{CG}_{lat}; \ k \in \{0, 1, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:torqlong}
-	s.t.: |\tau_k| \leq maxW \times limit^{CG}_{long};\ k \in \{0, 1, \ldots, K\}
+	s.t.: |\tau_{\pi(k)}| \leq maxW \times limit^{CG}_{long};\ k \in \{0, 1, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:payload}
-	s.t.: \sum_{i=1}^{m} (\sum_{j=1}^{n_k} X_{ij}^k \times t_j^k.w + \sum_{q=1}^{m_k} Y_{iq}^k \times a_q^k.w ) \leq maxW; \ k \in \{0, 1, \ldots, K\}
+	s.t.: \sum_{i=1}^{m} (\sum_{j=1}^{n_{\pi(k)}} X_{ij}^{\pi(k)} \times t_j^{\pi(k)}.w + \sum_{q=1}^{m_k} Y_{iq}^{\pi(k)} \times a_q^k.w ) \leq maxW; \ k \in \{0, 1, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:app2}
-	s.t.: \sum_{j=1}^{n_k} X_{ij}^k \times t_j^k.w + \sum_{q=1}^{m_k} Y_{iq}^k \times a_q^k.w  \leq p_i.w; \ i \in \{1, 2, \ldots, m_k\}; \ k \in \{0, 1, \ldots, K\}
+	s.t.: \sum_{j=1}^{n_{\pi(k)}} X_{ij}^{\pi(k)} \times t_j^{\pi(k)}.w + \sum_{q=1}^{m_k} Y_{iq}^{\pi(k)} \times a_q^{\pi(k)}.w  \leq p_i.w; \ i \in \{1, 2, \ldots, m_{\pi(k)}\}; \ {\pi(k)} \in \{0, 1, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:app3}
-	s.t.: \sum_{j=1}^{n_k} X_{ij}^k \times t_j^k.v + \sum_{q=1}^{m_k} Y_{iq}^k \times a_q^k.v  \leq\ p_i.v; \ i \in \{1, 2, \ldots, m_k\}; \ k \in \{0, 1, \ldots, K\}
+	s.t.: \sum_{j=1}^{n_{\pi(k)}} X_{ij}^{\pi(k)} \times t_j^{\pi(k)}.v + \sum_{q=1}^{m_{\pi(k)}} Y_{iq}^{\pi(k)} \times a_q^{\pi(k)}.v  \leq\ p_i.v; \ i \in \{1, 2, \ldots, m_{\pi(k)}\}; \ k \in \{0, 1, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:app4}
-	s.t.: \sum_{i=1}^{m} X_{ij}^k \leq 1; \ j \in \{1, 2, \ldots, n_k\}; \ k \in \{0, 1, \ldots, K\}
+	s.t.: \sum_{i=1}^{m} X_{ij}^{\pi(k)} \leq 1; \ j \in \{1, 2, \ldots, n_{\pi(k)}\}; \ k \in \{0, 1, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:app5}
-	s.t.:  Y_{iq}^k = 1 \ \mbox{if} \ a^k_q.to \in L_k; \ q \in \{1, 2, \ldots, m_k\}; \ k \in \{0, 1, \ldots, K\}
+	s.t.:  Y_{iq}^{\pi(k)} = 1 \ \mbox{if} \ a^{\pi(k)}_q.to \in L_{\pi(k)}; \ q \in \{1, 2, \ldots, m_{\pi(k)}\}; \ k \in \{0, 1, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:pdp8}
-	s.t.: p_i.to[k] = t^k_j.to\ \mbox{if} \ X_{ij}^k = 1; \ i \in \{1, 2, \ldots, m\}; \ j \in \{1, 2, \ldots, n_k\}; \ k \in \{1, 2, \ldots, K\}
+	s.t.: p_i.to[{\pi(k)}] = t^{\pi(k)}_j.to\ \mbox{if} \ X_{ij}^{\pi(k)} = 1; \ i \in \{1, 2, \ldots, m\}; \ j \in \{1, 2, \ldots, n_{\pi(k)}\}; \ k \in \{1, 2, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:pdp2}
-	s.t.:  p_i.to[k] = a^k_q.to\ \mbox{if} \ Y_{iq}^k = 1; \ i \in \{1, 2, \ldots, m\};\ q \in \{1, 2, \ldots, m_k\}; \ k \in \{1, 2, \ldots, K\}
+	s.t.:  p_i.to[{\pi(k)}] = a^{\pi(k)}_q.to\ \mbox{if} \ Y_{iq}^{\pi(k)} = 1; \ i \in \{1, 2, \ldots, m\};\ q \in \{1, 2, \ldots, m_{\pi(k)}\}; \ k \in \{1, 2, \ldots, K\}
 \end{equation}
 
 
@@ -647,11 +646,13 @@ Consolidated items remain on board \ref{eq:app5} until their destinations. At ea
 \section{Resolution strategy}
 \label{sec5}
 
-Once the assumptions of this work and the mathematical modelling of the problem are presented, it is easy to see that ACLP+RPDP is NP-hard. In a similar way to \cite[p. 6]{LurkinSchyns2015}, consider the simple case where $K=1$\/ (one leg), $m=2$ (two pallets around the aircraft CG), $2n$\/ sufficiently light items with same scores in $l_0$, and no items in $l_1$. Under these conditions, through polynomial reductions for the {\it Set-Partition Problem}, it is possible to demonstrate that the decision problem associated with ACLP+RPDP is NP-complete.
+Once the assumptions of this work and the mathematical modelling of the problem are presented, it is easy to see that ACLP+RPDP is NP-hard. In a similar way to \cite[p. 6]{LurkinSchyns2015}, consider the simple case where $K=1$\/ (one leg), $m=2$ (two pallets around the aircraft CG), $2n$\/ sufficiently light items with same scores in $l_0$, and no items in $l_1$. Under these conditions, through polynomial reductions for the {\it Set-Partition Problem}, it is possible to demonstrate that the decision problem associated with ACLP+RPDP is NP-hard.
 
-Real cases are more complex as they have hundreds of different items in each node and involve three intractable sub-problems: APP, WBP and SPDP. Through the mathematical modelling presented in the previous section, we verify that {\it Mixed-Integer Programming}\/ (MIP) is not able to solve these cases in feasible time. Thus, it is necessary to adopt some strategy to find a viable solution, not necessarily optimal, that seeks to maximize the objective function $f$.
+Real cases are more complex as they have hundreds of different items in each node and involve three intractable sub-problems: APP, WBP and SPDP. Through the mathematical modeling presented in the previous section, we verify that {\it Mixed-Integer Programming}\/ (MIP) is not able to solve these cases in feasible time. Thus, it is necessary to adopt some strategy to find a viable solution, not necessarily optimal, that seeks to maximize the objective function $f$.
 
 \cite{MesquitaSanches2023} strategy is based on the fact that, in real cases, $K$\/ is usually small. Specifically, they will consider $K \leq 6$\/ throughout their and our work, which is a higher value than usual in {\it Brazilian Air Force} missions. As a result, if we have fast node-by-node solutions that allow us to construct a complete tour, we will be able to test all possible $K!$\/ tours and thus select the one that provides the best value for the $f$\/ function.
+
+{\color{blue} Each node, except the base, inherits information from the previous nodes (pallets that must remain on board), and must solved taking into account the remaining not visited nodes. One more reason for a node-by-node approach.}
 
 The tactic will be, at each shipping node, to predefine the destinations of the pallets at that node. In this way, we will reserve a number of pallets proportional to the volume demanded by each destination at the shipping node. We could have used another criterion, but it was observed in the experiments that volume is more constrictive in airlift. Once the destinations of the pallets are defined, we will use serial and Multi-processing heuristics to find the best possible node-by-node solutions. This strategy is summarized in Algorithm \ref{alg:main}, retrieved from \cite{MesquitaSanches2023}.
 
@@ -660,14 +661,14 @@ The tactic will be, at each shipping node, to predefine the destinations of the 
 	\caption{Solves ACLP+RPDP for a scenario with certain volume surplus (1.2, 1.5, or 2.0)}  \label{alg:main}
 	\begin{algorithmic}[1]
 		
-		\Procedure{$ACLP+RPDP$}{$scenario,\ surplus,\ numProcs,\ timeLim$}
+		\Procedure{$ACLP+RPDP$}{$scenario,\ surplus,\ timeLim$}
 		
 		\State Let $L, M, C$ be according to $scenario$ \label{main:LMC}
 		\State $N \gets ItemsGeneration(scenario,\ surplus)$ \label{main:items}
 		\For {each $method$}
 				
 			\For {each $\pi \in S_K$} \label{main:loop1}
-				\State $f_{\pi} \gets SolveTour(\pi, L, M, C, N, method, numProcs,\ timeLim )$ \label{main:method}
+				\State $f_{\pi} \gets SolveTour(\pi, L, M, C, N, method, \ timeLim )$ \label{main:method}
 			\EndFor \label{main:loop2}
 			\State $answer[scenario,surplus,method] \gets \max f$ \label{main:f}
 		\EndFor
@@ -682,7 +683,7 @@ The tactic will be, at each shipping node, to predefine the destinations of the 
 In this algorithm, there are six values for the $scenario$\/ parameter, according to Table \ref{tab:scenarios}, which defines $K$, the sets of nodes, the aircraft, the pallets and the costs from Tables \ref{tab:smaller} or \ref{tab:larger} that will be used (line \ref{main:LMC}).
 
 
-The other parameter $volume$\/ is a value greater than 1, which corresponds, at each node $l_k$, to the ratio between the sum of the volumes of the items ($\sum_{j=1}^{n_k} t^k_j.v$) and the load capacity of the pallets ($\sum_{i=1}^{m} p_i.v$). This parameter is passed to $ItemsGeneration$ (line \ref{main:items}), responsible for creating the items to be shipped, which will be presented in the next section.
+The other parameter $volume$\/ is a value greater than 1, which corresponds, at each node $l_{\pi(k)}$, to the ratio between the sum of the volumes of the items ($\sum_{j=1}^{n_{\pi(k)}} t^{\pi(k)}_j.v$) and the load capacity of the pallets ($\sum_{i=1}^{m} p_i.v$). This parameter is passed to $ItemsGeneration$ (line \ref{main:items}), responsible for creating the items to be shipped, which will be presented in the next section.
 
 $method$\/ corresponds to one of the heuristics that we will present in subsection \ref{methods}. The loop of lines \ref{main:loop1}-\ref{main:loop2} goes through all permutations $\pi$, where the node-by-node resolutions are performed by $SolveTour$, whose result is stored in $f_{\pi}$. The best result among all $K!$\/ tours will be the answer for $scenario$, $volume$\/ and $method$\/ (line \ref{main:f}). 
 
@@ -713,18 +714,18 @@ Next, we will present two subsections: in the first we explain how $SolveTour$ i
 In addition to the set of nodes, pallets, costs and items, $SolveTour$, described in Algorithm \ref{alg:tour}, receives the parameter $method$, which corresponds to a heuristic for solving the node-by-node problems, and the parameter $\pi$, which is a permutation that defines the order of visits in this tour.
 
 As we mentioned in the previous section, all tours start and end at $l_0$\/ (lines \ref{tour:pi1}-\ref{tour:pi2}).
-After initializing the score and cost values (lines \ref{tour:score}-\ref{tour:cost}), there is a loop for the $K+1$\/ flights (lines \ref{tour:loop1}-\ref{tour:loop2}). Initially we set pallets destination as $-1$\/ (line \ref{tour:-1}). When the aircraft is at node $l_0$, the initial graph $G_1$\/ is empty because it has no consolidated items \ref{tour:g11}. Otherwise, the set $L_k$\/ of remaining nodes is updated (line \ref{tour:lk1}), and $UpdateConsolidated$\/ (line \ref{tour:dest}) returns the set of consolidated items that have not yet reached their destination and remain on board, rearranging them on the pallets to minimize CG deviation. This allocation is stored in graph $G_1$\/ (line \ref{tour:g12}).
+After initializing the score and cost values (lines \ref{tour:score}-\ref{tour:cost}), there is a loop for the $K+1$\/ flights (lines \ref{tour:loop1}-\ref{tour:loop2}). Initially we set pallets destination as $-1$\/ (line \ref{tour:-1}). When the aircraft is at node $l_0$, the initial graph $G_1$\/ is empty because it has no consolidated items \ref{tour:g11}. Otherwise, the set $L_k$\/ of remaining nodes when departing from $\pi(k)$ is updated (line \ref{tour:lk1}), and $UpdateConsolidated$\/ (line \ref{tour:dest}) returns the set of consolidated items that have not yet reached their destinations and remain on board, rearranging them on the pallets to minimize CG deviation. This allocation is stored in graph $G_1$\/ (line \ref{tour:g12}).
 
-In the context of this work, we know that $m>K$, once the aircraft has $7$\/ or $18$\/ pallets and $K\leq 6$, allowing there to be at least one pallet for each node to be visited. $SetPalletsDestination$\/ (line \ref{tour:dest2}) presets the destination of each pallet based on the volume demands of the current node, without changing the pallets destination with consolidated items.
+In the context of this work, we know that $m>K$, once the aircraft has $7$\/ or $18$\/ pallets and $K\leq 6$, allowing there to be at least one pallet for each node to be visited. $SetPalletsDestination$\/ (line \ref{tour:dest2}) presets the destination of each pallet based on the volume demands caused by the items to be embarked in the current node, without changing the pallets destination with consolidated items.
 
 Finally, $SolveNode$\/ includes the edges corresponding to the items shipped at the current node, returning the graph $G_2$\/ (line \ref{tour:node}). The score and the CG deviation of this graph are calculated (line \ref{tour:analyse}) and accumulated (lines \ref{tour:score2}-\ref{tour:cost2}), allowing the final result of this tour (line \ref{tour:f}).
 
 \begin{algorithm}[H]
-	\caption{ Solves the sequence of nodes in the tour indexed by $\pi$ }  \label{alg:tour}
+	\caption{ Solves the sequence of nodes of tour $\pi$ }  \label{alg:tour}
 	
 	\begin{algorithmic}[1]
 		
-		\Procedure{$SolveTour$}{$\pi, L, M, C, N, method, numProcs,\ timeLim$}
+		\Procedure{$SolveTour$}{$\pi, L, M, C, N, method, timeLim$}
 		
 		\State $\pi(0) \gets 0$ \label{tour:pi1}
 		\State $\pi(K+1) \gets 0$ \label{tour:pi2}
@@ -732,7 +733,7 @@ Finally, $SolveNode$\/ includes the edges corresponding to the items shipped at 
 		\State $cost \gets 0$ \label{tour:cost}
 		\For {$k\gets0$ to $K$} \label{tour:loop1}		
 			\For{$i \gets 1$ to $m$}
-				\State $p_i.to[k] \gets -1$ \label{tour:-1}
+				\State $p_i.to[k] \gets -1$ \label{tour:-1} \Comment{reset this pallet destination}
 			\EndFor	
 			\If {$k = 0$}
 				\State $L_0 \gets L$
@@ -743,7 +744,7 @@ Finally, $SolveNode$\/ includes the edges corresponding to the items shipped at 
 				\State Let $G_1(M \cup N_{\pi(k)} \cup Q_{\pi(k)}, E^Q_{\pi(k)})$ \label{tour:g12}
 			\EndIf  \label{tour:lk2}	
 			\State $M \gets SetPalletsDestination( \pi(k) )$ \label{tour:dest2}		
-			\State $G_2 \gets SolveNode(method, \pi(k), G_1, numProcs,\ timeLim)$ \label{tour:node}
+			\State $G_2 \gets SolveNode(method, \pi(k), G_1, timeLim)$ \label{tour:node}
 			\State $s, \epsilon \gets ScoreAndDeviation(\pi(k), G_2)$ \label{tour:analyse}
 			\State $score \gets score + s$ \label{tour:score2}
 			\State $cost \gets cost + c_{\pi(k),\pi(k+1)} * (1 + c_g * |\epsilon|)$ \label{tour:cost2} 
@@ -766,13 +767,11 @@ $ScoreAndDeviation$ evaluates the allocation graph generated by $SolveNode$, ret
 $UpdateConsolidated$, $MinCGDeviation$, $SetPalletsDestination$, and $ScoreAndDeviation$ are thoroughly described by \cite{MesquitaSanches2023}.
 
 
-\subsection{Node-by-node solutions}
+\subsection{Node-by-node resolution}
 \label{methods}
 
 
-In this subsection we present implementations of $SolveNode(...)$, where $method$\/ corresponds to a heuristic, $k$\/ is the index of the current node and $G$\/ is the allocation graph of the consolidated items that remain on board at node $l_k$.
-
-An important issue on meta-heuristics is that they are known for the hard work in tuning parameters. For this, when we use the word {\it empirically}\/ throughout the text, we want to say that we accomplished many tests with the hardest instances to fit these values. This does not guarantee best results for all instances, but, on average, overall results are acceptable. Another important observation is that our {\it ACO} implementations were designed based on traditional ideas from the literature \cite{Fidanova2006} and on the experiences learned during tests, plus the special features to process-based parallelism.
+In this subsection we present implementations of $SolveNode(...)$, where $method$\/ corresponds to a heuristic, $k$\/ is the index of the current node $l_{\pi(k)}$ and $G$\/ is the allocation graph of the consolidated items that remain on board at $l_{\pi(k)}$.
 
 To guarantee that performance comparisons are made correctly, our implementations use the same elements described below.
 
@@ -788,7 +787,7 @@ To guarantee that performance comparisons are made correctly, our implementation
 		
 		{\it Data structure:}     & Items, pallets and edges are arrays of \emph{Python} class objects, which are initialized with the same data loaded from text files. \\
 		
-		{\it Stopping criterion:} & All methods have the same time limit of $0.7$ seconds per node.\\
+		{\it Stopping criterion:} & All methods have the same time limit of $1.8$ seconds per node.\\
 		
 		{\it Common procedures:}  & All methods have the same procedures for: solution printing, pallets destinations and initial parameters setting, solution integrity checking, and the same procedures for selecting and inserting edges.\\
 
@@ -797,212 +796,22 @@ To guarantee that performance comparisons are made correctly, our implementation
 \end{table}
 \egroup
 
-The selection of edges for $E^N_k$\/ uses the {\it edge attractiveness}\/ $\theta^k_{ij}$, Equation \ref{eq:edge}, which can be understood as the tendency to allocate the item $t^k_j$\/ to the pallet $p_i$. It is directly proportional to the score, and inversely proportional to the volume and the torque of each item. The 3000 value was empirically set to keep the attractiveness in the range [0, 1], to be in the same order of magnitude of the Ant Colony Optimization pheromone range.
+The selection of edges for $E^N_{\pi(k)}$\/ uses the {\it edge attractiveness}\/ $\theta^{\pi(k)}_{ij}$, Equation \ref{eq:edge}, which can be understood as the tendency to allocate the item $t^{\pi(k)}_j$\/ to the pallet $p_i$. It is directly proportional to the score, and inversely proportional to the volume and the torque of each item. 
 
 \begin{equation} \label{eq:edge}
-	\theta^k_{ij}= \frac{t^k_j.s}{t^k_j.v \times 3000}\times(1-\frac{t^k_j.w\times|p_i.d|}{\max_s\{t^k_s.w\}\times\max_q\{|p_q.d|\}});\ i \in \{1,2,\ldots,m\},\ j \in \{1,2,\ldots,n_k\}
+	\theta^{\pi(k)}_{ij}= \frac{t^{\pi(k)}_j.s}{t^{\pi(k)}_j.v \times 3000}\times(1-\frac{t^{\pi(k)}_j.w\times|p_i.d|}{\max_s\{t^{\pi(k)}_s.w\}\times\max_q\{|p_q.d|\}});\ i \in \{1,2,\ldots,m\},\ j \in \{1,2,\ldots,n_k\}
 \end{equation} 
-
-
-We use four types of random selections:
-\begin{itemize}
-	\item $RandomReal(r_1,r_2)$: randomly selects a real number in $[r_1,r_2]$;
-	\item $RandomInt(i_1,i_2)$: randomly selects a integer number in $[i_1,i_2]$;
-	\item $Roulette(set)$ biased through $\phi$: selects an element from $set$, where the probability of each element is proportional to the value of a given function $\phi$\/ defined on $set$.
-\end{itemize}
-
 
 To compare allocation graphs generated by the heuristics, we choose the one that offer a higher associated score, since the CG deviation is limited by the constraints.
 
-In the pseudo-codes presented below, given an allocation graph $G$\/ for the node $l_k$, $f_s(G)$\/ is equivalent to the score $s$\/ returned by $ScoreAndDeviation(k,G) $, described in \cite{MesquitaSanches2023}.
+In the pseudo-codes presented below, given an allocation graph $G$\/ for the node $l_{\pi(k)}$, $f_s(G)$\/ is equivalent to the score $s$\/ returned by $ScoreAndDeviation({\pi(k)},G) $, described in \cite{MesquitaSanches2023}.
 
-Below, we present 2 implementations for $SolveNode$: {\it Multi-process Ant Colony Optimization}\/ ({\it mpACO})  and a new parallel heuristic that we propose called {\it Multi-process Shims (mpShims)}.
+Below, we present the implementation for $SolveNode$, the new parallel heuristic that we propose called {\it Multi-process Shims (mpShims)}.
 
 According to \cite[p.226]{manfrin2006}, there are five topologies for multi-process interchange of information: {\it fully-connected}, where the master process broadcasts to all remaining child processes; {\it replace-worst}, where the best-so-far solution process broadcasts only to the current worst solution process; {\it hypercube}, where processes are connected as a hypercube, and a vertex process broadcasts only to the connected vertices; {\it ring}, in which one process only sends a message to the next process connected to it; and {\it parallel independent runs (PIR)}, in which there are no communication costs and the best solution is chosen among all processes. They concluded that the PIR topology presented, in average, the smallest distance from the optimal solutions.
 
-It is important to say that the parallel ACO ({\it pACO}) is a different implementation where employs threads instead of processes to solve each ant solution in parallel (for a detailed information on parallel ACO see \cite{Pedemonte2011}). We chose {\it mpACO} for our approach because we employed the {\it Fully-Connected} topology which requires to share the pheromone array between the multi-process ants and the facility to handle the possibility of race condition.
 
-
-\subsubsection{Multi-process Ant Colony Optimization (mpACO)}
-
-In ACO \cite{Dorigo1992}, a population of $A$\/ ants performs independent search (sequential or in parallel), where each ant $a$\/ finds its own allocation graph $G^a$. Each edge $e^k_{ij}=(p_i,t^k_j)$\/ has a general attractiveness $ga^k_{ij} = (\tau^k_{ij})^\alpha + (\theta^k_{ij})^\beta$, where $\tau^k_{ij}$\/ is the pheromone of this edge, and $\alpha$\/ and $\beta$\/ are constants. If $e^k_{ij}$\/ is included in $G^a$, ant $a$\/ increases the pheromone $\tau^k_{ij}$.
-
-Algorithm \ref{alg:aco} presents this heuristic in its parallel multi-process version as we have implemented.
-
-$SolveNode(mpACO, ...)$ is the main process, while $AntSolve(...)$ is executed the child concurrent processes.
-
-\begin{algorithm}[H] 
-	
-	
-	\caption{ Solves a node with the {\it mpACO} method } \label{alg:aco}
-	\begin{algorithmic}[1]
-		
-		\Procedure{$SolveNode$}{$mpACO, k, G, numProcs,\ timeLim$}
-		
-		\State Let $G(V_k, E^Q_k)$ \Comment{This is a partial solution with only consolidated on board}
-		\State $G^*(V_k, E^{N*}_k \cup E^Q_k), \_ \gets Greedy(k, G, 0.9)$  \label{aco:greedy} \Comment{This partial solution is completed by a greedy algorithm}
-		\State $G^+(V_k, E^{N+}_k \cup E^Q_k) \gets G^*(V_k,E^{N*}_k \cup E^Q_k)$
-		\State $A \gets numProcs$ \label{aco:numProcs}
-		\State $ga^k_{ij}   \gets 0$, $1 \leq i \leq m$, $1 \leq j \leq n_k$  \label{aco:init1}
-		\State $\tau^k_{ij} \gets 1$, $1 \leq i \leq m$, $1 \leq j \leq n_k$   \label{aco:init2}
-		\State $\alpha    \gets 1.0$ \label{aco:alpha}
-		\State $\beta     \gets 4.0$ \label{aco:beta}
-		\State $\rho      \gets 0.2$ \label{aco:rho}
-		\State $stagnant \gets 0$
-		\While{ $stagnant < 3$ } \label{aco:while}
-					
-			\State $AntsQueue \gets \{\ \}$ \label{aco:AntsQueue}
-
-			\For{$1$ {\bf to} $A$} \label{aco:AntsSolve}	
-				\State $AntSolve(G^+,\ AntsQueue,\ ga^k_{ij})$
-			\EndFor
-			
-			\State $counter \gets A$
-						
-			\While{$counter > 0$} \label{aco:while2}
-			
-				\State $G^{a} \gets \varnothing$
-			
-				\While{$runtime < timeLim$} \Comment{Wait until there is a solution in the queue}
-			
-					\State $G^{a} \gets AntsQueue.Pop()$
-					
-					\If{$G^{a} \ne \varnothing$}				
-						\Break
-					\EndIf
-				
-				\EndWhile
-					
-				\If{$f_s(G^{a}) > f_s(G^{+})$}
-					\State $G^+(V_k, E^{N+}_k \cup E^Q_k) \gets G^a(V_k, E^{Na}_k \cup E^Q_k)$ 
-				\EndIf
-				
-				\State $counter \gets counter - 1$
-												
-			\EndWhile			
-									
-			\If{$f_s(G^+) > f_s(G^*)$} \label{aco:best1}
-				\State $stagnant \gets 0$
-				\State $G^*(V_k, E^{N*}_k \cup E^Q_k) \gets G^+(V_k, E^{N+}_k \cup E^Q_k)$		
-			\Else
-				\State $stagnant \gets stagnant + 1$ 
-			\EndIf
-			\For{all $\tau^k_{ij}$} 
-				\State $\tau^k_{ij} \gets (1-\rho)\tau^k_{ij}$ \label{aco:rho2}
-				\State $\tau^k_{ij} \gets \tau^k_{ij} + \Delta\tau$ \label{aco:phero2}
-				\State $ga^k_{ij} \gets (\tau^k_{ij})^\alpha + (\theta^k_{ij})^\beta$ \label{aco:ga2}				
-			\EndFor	
-		\EndWhile	
-		\Return $G^*(V_k,\ E^{N*}_k \cup E^Q_k)$
-		
-		\EndProcedure		
-	\end{algorithmic}
-\end{algorithm}
-	
-A greedy solution is obtained in line \ref{aco:greedy}, being initially stored in $G^*$\/ and $G^+$. The argument 0.9 generates an initial and poor solution for ACO to improve. The second return value denoted by underscore is not used by ACO.
-
-The number $A$\/ of ants was set to the number of parallel processes (line \ref{aco:numProcs}).
-
-The $m \times n_k$\/ matrices $\tau^k_{ij}$ and $ga^k_{ij}$\/ (lines \ref{aco:init1}-\ref{aco:init2}) are used and updated by all ants. For further explanation, see \cite{DorigoManiezzoColorni1996}. 
-
-The number of iterations depends on the time limit or stagnation in improving results (line \ref{aco:while}).
-At the beginning os each iteration (\ref{aco:AntsQueue}) a queue of ants ($AntsQueue$) is created to hold ants parallel solutions generated in the child processes.
-
-The local solution $G^+$ is sent to A child processes (\ref{aco:AntsSolve}) almost simultaneously.
-While there are any ant working on an solution or the run-time is still less then maximum (\ref{aco:while2}), it hangs in the $AntsQueue$ until there is a solution available.
-
-If there is a global improvement (\ref{aco:best1}) the best so far solution ($G^*(V_k, E^{N*}_k \cup E^Q_k)$) is updated.
-At the end of each iteration pheromone levels (\ref{aco:rho2}) are evaporated, than updated with the new calculated $\Delta\tau$ (line \ref{aco:phero2}), and according to Equation \ref{eq:delta_tau}, and the general attractiveness ( \ref{aco:ga2}) is also updated.
-
-\begin{equation} \label{eq:delta_tau}
-	\Delta\tau = \frac{f_s(G^{+}) - f_s(G^{*})}{A \times f_s(G^{*})}
-\end{equation}
-
-Many ACO applications update pheromone levels and the general attractiveness only when there is a solution improvement. Differently, this work updates in both cases, exploring also the negative learning approach proposed by \cite{math9040361}. We did not compare these performances because it is out of the scope of this work.
-
-
-We also developed Algorithm \ref{alg:greedy}, which generates a greedy allocation of the items available in node $l_k$, according to the non-ascending order of $\theta^k_{ij}$, and considering the consolidated items already shipped ($E^Q_k$). Edges are included in this allocation as long as they respect feasibility constraints. Furthermore, the volume of each pallet $p_i$\/ cannot exceed $p_i.v \times limit$, where $ 0 < limit \leq 1$\/ is a given parameter.
-
-\begin{algorithm}[H]
-	\caption{Mount a greedy solution until the volume limit for each pallet}  \label{alg:greedy}
-	
-	\begin{algorithmic}[1]
-		
-		\Procedure{$Greedy$}{$k, G, limit$}
-		
-		\State Let $G(V_k, E^Q_k)$
-		
-		\State $\eta_1 \gets \{0\} \times m$ \label{greedy:eta}
-		\State $volume \gets \{0\} \times m$
-		
-		\State $E^N_k \gets \varnothing$ 			
-		
-		\For{$q \gets 1$ to $m$}
-			\If{$(p_i, a_q^k) \in E^Q_k$} 
-				\State $volume[q] \gets volume[q] + a_q^k.v$ 
-			\EndIf		
-		\EndFor
-			
-		\For {each $e_{ij}^k$ in non-ascending order of $\theta^k_{ij}$}
-			\If{($E^N_k \cup \{e_{ij}^k\}$ is feasible) {\bf and} ($volume[i] \leq p_i.v \times limit$)} 
-				\State $E^N_k \gets E^N_k \cup \{e_{ij}^k\}$ 
-				\State $volume[i] \gets volume[i] + t_j^k.v$
-				\State $\eta_1[i] \gets \eta_1[i] + 1$ 	
-			\EndIf
-		\EndFor
-		
-		\Return $G(V_k, E^N_k \cup E^Q_k),\ \eta_1$ \Comment{return the solution and the last item indexes array }
-		
-		\EndProcedure
-		
-	\end{algorithmic}
-\end{algorithm}
-
-In Algorithm \ref{alg:greedy}, line \ref{greedy:eta} defines an array with the same size as pallets array to save the set of last edges inserted in the greedy solution. The set $\eta_1$ is returned together with the greedy solution.
-
-
-\begin{algorithm}[H] 
-	\caption{Each ant solves a node in parallel} \label{alg:AntSolve}
-	\begin{algorithmic}[1]
-		
-		\Procedure{$AntSolve$}{$G^+,\ AntsQueue,\ ga^k_{ij})$}
-		
-		\State $G^a(V_k, E^{Na}_k \cup E^Q_k) \gets G^+(V_k, E^{N+}_k \cup E^Q_k)$
-		\State $E \gets \{ (p_i,t^k_j) \mid (p_i,t^k_j) \not\in E^{Na}_k \}$ \label{AntSolve:neighborhood}
-		\While{$|E| > 0$} \label{AntSolve:not_empty}
-		
-			\State $e \gets Roulette(E)$ biased through $ga^k_{ij}$  \label{AntSolve:roulette}
-			\State $E \gets E - \{e\}$		
-			\If{$E^{Na}_k \cup \{e\}$ is feasible}
-				\State $ E^{Na}_k \gets E^{Na}_k \cup \{e\} $ \label{AntSolve:ant}
-			\EndIf
-			
-		\EndWhile
-		
-%\For{$\tau^k_{ij}, \theta^k_{ij} \in E^{Na}_k$}
-%\State $\tau^k_{ij} \gets (1-\rho)\tau^k_{ij}$ \label{AntSolve:rho}
-%\State $\tau^k_{ij} \gets \tau^k_{ij} + \Delta\tau$ \label{AntSolve:phero}  \Comment{$\Delta\tau \gets$ Equation \ref{eq:delta_tau}}
-%\State $ga^k_{ij} \gets (\tau^k_{ij})^\alpha + (\theta^k_{ij})^\beta$ \label{AntSolve:ga}		
-%\EndFor
-		
-		\State $AntsQueue \gets AntsQueue \cup G^a(V_k,\ E^{Na}_k \cup E^Q_k)$ \label{AntSolve:put_in_queue}
-		
-		\EndProcedure
-	\end{algorithmic}
-\end{algorithm}
-
-Algorithm \ref{alg:AntSolve}, which will be executed by a child parallel process, receives an initial and poor solution $G^+(V_k, E^{N+}_k \cup E^Q_k)$ generated greedily to be completed and improved by {\it mpACO}.
-
-Line \ref{AntSolve:neighborhood} expresses the creation of the neighborhood, the set of candidate edges.
-
-While the neighborhood is not empty (line \ref{AntSolve:not_empty}), choose an edge (line \ref{AntSolve:roulette}), delete it from the neighborhood and include it in the solution, if feasible (line \ref{AntSolve:ant}).
-
-Finally, put the solution in the queue (line \ref{AntSolve:put_in_queue}) to be retrieved by the main process.
-
-%Note that $ga^k_{ij}$ is updated by each parallel ant, which may influence the solution of the others during run-time. This fully connected topology may increase run-time due to the overhead in communications handled by {\it Python API Multiprocessing} but it is expected that this will yield better solutions.
-
-
-\subsubsection{Multi-process Shims - mpShims}
+\subsection{Multi-process Shims - mpShims}
 
 
 Finally, we present a new heuristic designed specifically for ACLP+RPDP, which we named \emph{mpShims}. Like in mechanics, shims are collections of spacers to fill gaps, which may be composed of parts with different thicknesses (see Figure \ref{fig:shims}). This strategy is based on a practical observation: usually, subsets of smaller and lighter items are saved for later adjustments to the remaining clearances.
@@ -1031,132 +840,179 @@ Finally, we present a new heuristic designed specifically for ACLP+RPDP, which w
 			\node at (6, 2.5) {shims};
 			\node at (7, 2.5) {|};
 			\node at (7, 0.3) {$\eta_2[i]$};
-			\node at (0.3, 5) {$\theta_{ij}^k$};
+			\node at (0.3, 5) {$\theta_{ij}^{\pi(k)}$};
 			\draw[->] (.6, .2) -- coordinate (y axis mid) (0.6, 5.3);
-			\node at (12, 0.3) {$e_{ij}^k$};
+			\node at (12, 0.3) {$e_{ij}^{\pi(k)}$};
 			\draw[smooth, domain = 0.09:2, color=black, thick] plot (.3+1/\x,{4.2+log2(\x)});
 			\draw[->, dashed] (5, 0.6)--(5, 2.0);
 			\draw[->, dashed] (7, 0.6)--(7, 1.5);
 		\end{tikzpicture}
 		
-		\captionof{figure}{$n_k$\/ edges $e_{ij}^k$\/ of $p_i$\/ sorted by $\theta_{ij}^k$\/ in non-ascending order}
+		\captionof{figure}{$n_{\pi(k)}$\/ edges $e_{ij}^{\pi(k)}$\/ of $p_i$\/ sorted by $\theta_{ij}^{\pi(k)}$\/ in non-ascending order}
 		\label{fig:whip}		
 	\end{minipage}
 \end{table}
 
+{\color{blue}
+Figure \ref{fig:whip} represents the $n_{\pi(k)}$\/ possible edges $e_{ij}^{\pi(k)}$\/ of $p_i$\/ sorted by $\theta_{ij}^{\pi(k)}$. \emph{Shims}\/ starts with a greedy solution, stopping at the edge with index in $\eta_1[i]$ close to the local optimum (first phase). Then, considering even the edge with the index $\eta_2[i]$, it elaborates different possible complements for this pallet and selects the best of these complements (second phase).
 
-Figure \ref{fig:whip} represents the $n_k$\/ possible edges $e_{ij}^k$\/ of $p_i$\/ sorted by $\theta_{ij}^k$. \emph{mpShims}\/ starts with a greedy solution, stopping at the edge with index in $\eta_1[i]$ close to the local optimum (first phase). Then, considering even the edge with the index $\eta_2[i]$, it elaborates different possible complements for this pallet (second phase) and selects the best of these complements (third phase).
+Although the second phase solves a knapsack problem, an algorithm for solving a bin packing problem was used (the First Fit Decreasing - FFD), and the most profitable bin (shims) was selected. This method was proved to be faster than a dynamic program solution for the knapsack problem.
+		
+	In this work, we included a new phase after the first: a minimization of the CG deviation. An integer programming procedure that helps improve the overall {\it mpShims} results.
+
+$1^{st}$ - Greedy phase with torque surplus
+
+$2^{st}$ - Minimization of CG deviation
+
+$3^{st}$ - Shims construction and best Shims selection
+
+All executed in a multi-process runtime, accessing concurrently, reading and writing, the list of items and the current value of the CG deviation.
+
+As to the multi-process runtime, we considered each pallet as a process.
+}
+
+
+\subsection{mpShims}
 
 
 \begin{algorithm}[H]
-	\caption{Solve a node with {\it mpShims}}  \label{alg:mpshims}
-	\begin{algorithmic}[1]
-		
-		\Procedure{$SolveNode$}{$mpShims, k, G, numProcs,\ timeLim$}
-		
-		\State $G^* \gets G(V_k, E^Q_k)$ \label{best_so_far}
-		
-		\State Sort $M$ by $|p_i.d|$ in non-descending order \label{mpshims:pallets}
-		
-		\State $E^N_k \gets \{\}$ \label{mpshims:items}
-		
-		\State Let $E[1..m][1..n_k]$, where $E[i]$ is an array with $n_k$ edges $(p_i,t^k_j)$ sorted by $\theta_{ij}^k$ in non-ascending order, $1 \leq i \leq m$ \label{mpshims:edges}
-		
-		\State $limits \gets getLimits(0.75,\ 0.98,\ numProcs)$ \label{mpshims:limits}
-		
-		\State $shimsQueue \gets \{\}$ \label{mpshims:queue}
+	\caption{$mpShims$ main process}  \label{alg:mpShims}
 	
-		\For{$lim \in limits$}
-			\State $shimsSolve(G(V_k, E^Q_k),\ M,\ shimsQueue,\ lim,\ E)$ \label{mpshims:send}
-		\EndFor
-		
-		\State $counter \gets |limits|$
-		
-		\While{$counter > 0$}
-			
-			\State $G \gets \varnothing$
-
-			\While{$runtime < timeLim$} \Comment{Wait until there is a solution in the queue}
-			
-			\State $G \gets shimsQueue.Pop()$
-				\If{$G \ne \varnothing$}
-					\Break
-				\EndIf
-			\EndWhile
-			
-			\If{$f_s(G) > f_s(G^*)$}
-				\State $G^* \gets G$ 
-			\EndIf
-			\State $counter \gets counter - 1$			
-		
-		\EndWhile		
-		
-		\Return $G^*(V_k, E^N_k \cup E^Q_k)$ \label{mpshims:return}
-		
-		\EndProcedure
-	\end{algorithmic}
-\end{algorithm}
-
-Algorithm \ref{alg:mpshims} describes the {\it SolveNode} method when it receives {\it mpShims} as argument.
-
-Line \ref{best_so_far} defines the best solution so far which is formed by a semi-loaded aircraft where pallets have been unloaded and some remain on board ($E^Q_k$) with consolidated items.
-
-The Shims solution starts with the set of pallets closer to the center of gravity (\ref{mpshims:pallets}).
-
-A new empty set of edges is created in line \ref{mpshims:items}.
-
-Edges with items in node "k" to be loaded into not full pallets are defined in line \ref{mpshims:edges}.
-
-Line \ref{mpshims:limits} creates a list of unique limits with values between 0.75 and 0.98, that will be sent to different parallel processes to generate diverse solutions.
-
-A queue of shims solutions to be used by the child processes to send solution to the main process is defined in line \ref{mpshims:queue}.
-
-The iteration in \ref{mpshims:send} publishes or triggers parallel processes to solve $G(V_k, E^Q_k)$.
-
-In line \ref{mpshims:wait} the program hangs until each child process put a solution into the queue. Each solution is collected by the main process and compared with the best so far.
-
-Finally, in line \ref{mpshims:return}, the best solution found is returned.
-
-
-\begin{algorithm}[H]
-	\caption{Shims solving method to be run in parallel}  \label{alg:shimsSolve}
 	\begin{algorithmic}[1]
 		
-		\Procedure{$shimsSolve$}{$G,\ M,\ shimsQueue,\ limit,\ E$}
+		\Procedure{$mpShims$}{${N_{\pi(k)}, \pi(k)}, limit, G$}
 		
-		\State $G(V_k,\ E^Q_k \cup E^N_k),\ \eta_1 \gets Greedy(k,\ G(V_k,\ E^Q_k),\ limit)$ \label{first_phase}
-				
+		\State Let $G(M,\ Q_{\pi(k)},\ E_{\pi(k)})$ \label{mpShims:g1} \Comment{the initial solution solution}
+		
+		\State $surplus \gets 1 + 3 \times (1 - limit)$
+		
+		\State $nodeTorque \gets 0$
+		
+		\State $ts \gets 2.0$ \Comment{torque surplus} \label{mpShims:ts}
+		
+		\State $lock \gets$ multi-processing lock  \label{mpShims:lock} \Comment{avoid race condition}
+		
+		\State $proc \gets \{p_1,p_2,..., p_m\}$  \Comment{each pallet has its own process}
+		
 		\For{$i \gets 1$ to $m$}
-	
-			\State $\eta_2[i] \gets \eta_1[i]$	
-			
-			\State $volume \gets 0$	
-
-			\Repeat \label{second_phase_begin}
-				\State $\eta_2[i] \gets \eta_2[i] + 1$ 
-				\State $e^k_{ij} \gets E[i][\eta_2[i]]$
-				\State $volume \gets volume + t^k_j.v$
-			\Until{($\eta_2[i] = n_k$) {\bf or} ($ volume \geq (2 - limit)*p_i.v)$)} \label{second_phase_end}
-			
-			\State $slack[i] \gets (1-limit) \times p_i.v$
-			
-			\State $E^N_k \gets E^N_k \cup getBestShims(i,\ \eta_1,\ \eta_2,\ E,\ k,\ slack[i])$ \label{third_phase}
-		
+		\State $proc_i \gets Greedy(p_i,\ N_{\pi(k)},\ \pi(k),\ nodeTorque,\ G,\ limit,\ lock,\ ts )$   \label{mpShims:greedy}
+		\State $proc_i.start$
 		\EndFor
 		
-		\State $shimsQueue \gets shimsQueue \cup \{G(V_k, E^N_k \cup E^Q_k)\}$ \label{enqueue}
+		\For{$i \gets 1$ to $m$}
+		\State $proc_i.join$ \label{mpShims:join1}
+		\EndFor
+		
+		\State $minCGdev(M,\ \pi(k),\ nodeTorque)$  \label{mpShims:minCGdev} \Comment{minimize the CG deviation.}
+		
+		\For{$i \gets 1$ to $m$}
+		\State $proc_i \gets getBestShims(p_i,\ N_{\pi(k)},\ \pi(k),\ nodeTorque,\ G,\ surplus,\ lock,\ ts )$ \label{mpShims:getBestShims}
+		\State $proc_i.start$
+		\EndFor
+		
+		\For{$i \gets 1$ to $m$}
+		\State $proc_i.join$ \label{mpShims:join2}
+
+		\EndFor
+		
+		\Return $G(M,\ N_{\pi(k)} \cup Q_{\pi(k)},\ E_{\pi(k)})$ \label{mpShims:return}
 		
 		\EndProcedure
 		
 	\end{algorithmic}
 \end{algorithm}
 
-Algorithm \ref{alg:shimsSolve}, line \ref{first_phase} corresponds to Shims' first phase. Lines  \ref{second_phase_begin}-\ref{second_phase_end} correspond to the Shims' second phase.
-Line \ref{third_phase} corresponds to Shims' third phase. In the last line, \ref{enqueue}, {\it mpShims} puts the solution into the queue to be retrieved by the main process.
+Line \ref{mpShims:g1} the initial solution comes with some consolidated on board, a bipartite graph between pallets and consolidated.
 
+Line \ref{mpShims:ts} defines the torque surplus ($ts$). For the greedy phase, the solution may generate torque infeasible solutions with doubled torque ($2.0$), which will be repaired by the next phase, the minimization of the CG deviation.
+
+Line \ref{mpShims:lock} creates a lock feature for shared data among processes to avoid race condition.
+
+Line \ref{mpShims:greedy} calls the greedy method which updates $p_i$, $N_{\pi(k)}$, $nodeTorque$, and $G$.
+
+Line \ref{mpShims:join1} wait for all $Greedy$ processes to finish.
+
+Line \ref{mpShims:minCGdev} calls the $minCGdev$ method which updates the $nodeTorque$ and $G$. $minCGdev$ minimizes the CG deviation and repairs the greedy solution if it is infeasible.
+
+Line \ref{mpShims:getBestShims} calls the $getBestShims$ method which updates $p_i$, $N_{\pi(k)}$, $nodeTorque$, and $G$.
+
+Line \ref{mpShims:join2} wait for all $getBestShims$ processes to finish.
+
+Line \ref{mpShims:return} returns a complete solution, a bipartite graph between pallets and consolidated or items.
+
+\subsubsection{Shims first phase}
+
+
+Algorithm \ref{alg:greedy} generates a greedy allocation of the items available in node $l_{\pi(k)}$, according to the non-ascending order of $\theta^{\pi(k)}_{ij}$, and considering the consolidated items already shipped ($E^Q_{\pi(k)}$). Edges are included in this allocation as long as they respect feasibility constraints. Furthermore, the volume of each pallet $p_i$\/ cannot exceed $p_i.v \times limit$, where $ 0 < limit \leq 1$\/ is a given parameter.
 
 \begin{algorithm}[H]
-	\caption{Get the best shims of edges that fills each pallet gap}  \label{alg:getBestShims}
+	\caption{Mount a greedy solution until the volume limit for each pallet}  \label{alg:greedy}
+	
+	\begin{algorithmic}[1]
+		
+		\Procedure{$Greedy$}{${\pi(k)}, G, limit$}
+		
+		\State Let $G(V_{\pi(k)}, E^Q_{\pi(k)})$
+		
+		\State $\eta_1 \gets \{0\} \times m$ \label{greedy:eta}
+		\State $volume \gets \{0\} \times m$
+		
+		\State $E^N_{\pi(k)} \gets \varnothing$ 			
+		
+		\For{$q \gets 1$ to $m$}
+		\If{$(p_i, a_q^{\pi(k)}) \in E^Q_{\pi(k)}$} 
+		\State $volume[q] \gets volume[q] + a_q^{\pi(k)}.v$ 
+		\EndIf		
+		\EndFor
+		
+		\For {each $e_{ij}^{\pi(k)}$ in non-ascending order of $\theta^{\pi(k)}_{ij}$}
+		\If{($E^N_{\pi(k)} \cup \{e_{ij}^{\pi(k)}\}$ is feasible) {\bf and} ($volume[i] \leq p_i.v \times limit$)} 
+		\State $E^N_{\pi(k)} \gets E^N_{\pi(k)} \cup \{e_{ij}^{\pi(k)}\}$ 
+		\State $volume[i] \gets volume[i] + t_j^{\pi(k)}.v$
+		\State $\eta_1[i] \gets \eta_1[i] + 1$ 	
+		\EndIf
+		\EndFor
+		
+		\Return $G(V_{\pi(k)}, E^N_{\pi(k)} \cup E^Q_{\pi(k)}),\ \eta_1$ \Comment{return the partial solution and the last item indexes array }
+		
+		\EndProcedure
+		
+	\end{algorithmic}
+\end{algorithm}
+
+In Algorithm \ref{alg:greedy}, line \ref{greedy:eta} defines an array with the same size as pallets array to save the set of last edges inserted in the greedy solution. The set $\eta_1$ is returned together with the greedy solution.
+
+
+
+\subsubsection{Shims second phase: improvement on minimizing CG deviation}
+
+Between the greedy and the {\it Shims} selection phases we inserted, in this work, a method to minimize the CG deviation, as stated by the model that follows.
+
+Let $\pi$ be a tour in the set of permutations of nodes.
+
+Let $Q^{\pi(k)}  = \{ a^{\pi(k)}_1, a^{\pi(k)}_2, \ldots, a^{\pi(k)}_m \}$ be the set of consolidated items assembled on the set of $m$ pallets in node $\pi(k)$. There is a bi-univocal relation between pallets and consolidated.
+
+Let $H^{\pi(k)}_{iq}$ be the set of decision variables that relates pallet $i$ to consolidated $q$ in node $\pi(k)$.
+
+\begin{equation} \label{eq:distobjshims}
+	\mbox{minimize}\ \Bigg |  \sum_{i=1}^{m} \sum_{q=1}^{m} H^{\pi(k)}_{iq} \times  (140 + a^{\pi(k)}_q.w) * p_i.d\ \Bigg | 
+\end{equation}
+
+\begin{equation} \label{eq:distconsshims}
+	s.t.: \sum_{i=1}^{m} H^{\pi(k)}_{iq} = 1;\ q \in \{1,2,\ldots,m\}
+\end{equation}
+
+\begin{equation} \label{eq:distpalletsshims}
+	s.t.: \sum_{q=1}^{m} H^{\pi(k)}_{iq}=1;\ i \in \{1,2,\ldots,m\}
+\end{equation}
+
+Equation \ref{eq:distobjshims} minimizes the aircraft absolute torque in node $\pi(k)$, where 140 is the weight of an empty pallet, $a^{\pi(k)}_q.w$ the weight of the consolidated, and $p_i.d$ the distance between the pallet centroid to the aircraft CG; Equation \ref{eq:distconsshims} states that each consolidated will be assigned to exactly one pallet; and Equation \ref{eq:distpalletsshims} states that each pallet will receive one consolidated.
+
+
+\subsubsection{Shims third and fourth phases}
+
+\begin{algorithm}[H]
+	\caption{Mount shims of edges that fills each pallet gap and return the best shims}  \label{alg:getBestShims}
 	\begin{algorithmic}[1]
 		
 		\Procedure{$getBestShims$}{$i,\ \eta_1,\ \eta_2,\ E,\ k,\ slack$}
@@ -1168,34 +1024,34 @@ Line \ref{third_phase} corresponds to Shims' third phase. In the last line, \ref
 		\State $Set \gets Set \cup \{shims[b]\}$ \label{empty_set}
 		
 		\For{$x \gets \eta_1[i]$ to $\eta_2[i]$} \label{edges_indexes}
-				
-
-			\State $NewShims \gets$ {\bf True} \label{new_shims}
-			\State $e_{ij}^k \gets E[i][x]$
-			
-			\For{$shims \in Set$} \label{shims_set}
-							
-				\If { $e_{ij}^k \not\in (E^N_k \cup shims)$ {\bf and} $e_{ij}^k$ is feasible  {\bf and}  $(t_j^k.v + volume) \leq slack[i]$}
-				
-					
-					\State $shims \gets shims \cup \{e_{ij}^k\}$
-					\State $volume \gets volume + t_j^k.v$
-					\State $NewShims \gets$ {\bf False} \label{new_shims_false}
 		
-					\State {\bf break}
 		
-				\EndIf
-			
-			\EndFor 
+		\State $NewShims \gets$ {\bf True} \label{new_shims}
+		\State $e_{ij}^k \gets E[i][x]$
 		
-			\If{$NewShims$} \label{new_shims2}
-				\State $volume \gets 0$
-				\State $b \gets b + 1$
-				\State $shims[b] \gets \{\}$
-				\State $shims[b] \gets shims[b] \cup \{e_{ij}^k\}$
-				\State $Set \gets Set \cup \{shims[b]\}$
-			\EndIf
-
+		\For{$shims \in Set$} \label{shims_set}
+		
+		\If { $e_{ij}^k \not\in (E^N_k \cup shims)$ {\bf and} $e_{ij}^k$ is feasible  {\bf and}  $(t_j^k.v + volume) \leq slack[i]$}
+		
+		
+		\State $shims \gets shims \cup \{e_{ij}^k\}$
+		\State $volume \gets volume + t_j^k.v$
+		\State $NewShims \gets$ {\bf False} \label{new_shims_false}
+		
+		\State {\bf break}
+		
+		\EndIf
+		
+		\EndFor 
+		
+		\If{$NewShims$} \label{new_shims2}
+		\State $volume \gets 0$
+		\State $b \gets b + 1$
+		\State $shims[b] \gets \{\}$
+		\State $shims[b] \gets shims[b] \cup \{e_{ij}^k\}$
+		\State $Set \gets Set \cup \{shims[b]\}$
+		\EndIf
+		
 		\EndFor 
 		
 		\State $sh_w \gets shims$, where $shims \in Set$ and $\sum_{e_{ab}^k \in shims} t_b^k.w$ is maximum  \label{best_weight}		
@@ -1223,6 +1079,8 @@ As the last edge was included, forbid a new shims creation (\ref{new_shims_false
 
 Finally, select the best weight shims (\ref{best_weight}), the best volume shims (\ref{best_volume}), and the best score shims (\ref{best_score}) between these 2. The best score shims edges will be returned.
 
+
+
 \section{Implementation and results}
 \label{sec6}
 
@@ -1248,48 +1106,19 @@ It is known that working concurrently opens up synchronization issues. But the 
 
 By Amdahl's law, there is an optimal number of parallel executions for each problem in each environment. While working at IBM in 1967, Gene Amdahl developed the foundation for what became known as Amdahl's Law or Amdahl's Argument. Essentially, the law states that while a process can be decomposed into steps that may then be run in parallel, the time taken for the whole process will be significantly limited by the steps that remain serialized.
 
+We ran Algorithm \ref{alg:main} in the 6 scenarios described in Table \ref{tab:scenarios}, considering 3 methods for node-by-node resolution: the {\it Gurobi} MIP solver, {\it Shims}, and {\it mpShims} (Algorithm \ref{alg:mpshims}).
 
-%
-%\begin{figure}[H]
-%	\begin{center}
-%		\begin{tikzpicture}[scale=0.8, samples=100]
-%			\begin{axis}[
-%				myplotstyle,
-%				xlabel={\bf mpShims computation times (s)},
-%				ylabel={\bf Score},
-%				]
-%				\addplot+[
-%				only marks,	
-%				nodes near coords = {\numProcs{}},
-%				visualization depends on = {value \thisrow{np} \as \numProcs},						
-%				]
-%				table[x=time, y=score, col sep=comma] {./csv/Shims_p1data20.csv};
-%			\end{axis}
-%			\fill [red] (canvas cs:x=0.1cm,y=5.6cm) circle (2pt);
-%		\end{tikzpicture}%
-%		~%
-%		%
-%		\begin{tikzpicture}[scale=0.8, samples=100]
-%		\begin{axis}[
-%			myplotstyle,
-%			xlabel={\bf mpACO computation times (s)},
-%			ylabel={\bf Score},
-%			]
-%			\addplot+[
-%			only marks,	
-%			nodes near coords = {\numProcs{}},
-%			visualization depends on = {value \thisrow{np} \as \numProcs},						
-%			]
-%			table[x=time, y=score, col sep=comma] {./csv/ACO_p1data20.csv};
-%		\end{axis}
-%		\fill [red] (canvas cs:x=0.1cm,y=5.6cm) circle (2pt);
-%	\end{tikzpicture}
-%		
-%	\end{center}
-%	\caption{ Scenario 1 performances with $1.2 \times volume$. }
-%	\label{fig:scenario1data20}
-%\end{figure}
+In generating the items in each node, we consider 3 values for the parameter ${\it surplus}$. The results obtained for the function $f$, with the corresponding runtime in seconds, are shown in Tables \ref{tab:results} (${\it surplus} = 1.2$, ${\it surplus} = 1.5$, and ${\it surplus} = 2.0$).
 
+For each $method$, $scenario$ and $surplus$, 7 different instances were generated. Therefore, 126 tests (6 scenarios $\times$ 3 volumes $\times$ 7 instances) were performed for each method. 
+
+The average tour values were presented for $f$ and, for the runtime, the worst result obtained. To facilitate the comparison between the methods, we added a last column in these tables, where two values are indicated:
+\begin{itemize}
+	\item {\bf Normalized}: value between 0 and 1, which corresponds to the ratio between the sum of $f$\/ values obtained by the method in all scenarios and the sum of the best values obtained among all methods in all scenarios. The higher the value of {\bf Normalized}, the closer the method approached the best solutions found.
+	\item {\bf Speed-up}: ratio of the sums of the worst runtimes of all scenarios and the sum of the method runtimes in all scenarios. The method with the highest {\bf Speed-up}\/ is the fastest.
+\end{itemize}
+
+In each $scenario$, we indicate in bold the best value of $f$\/ found. In each table, we also indicate in bold the best {\bf Normalized}\/ and {\bf Speed-up}\/ values.
 
 
 \vspace{2.0mm}
@@ -1301,25 +1130,47 @@ By Amdahl's law, there is an optimal number of parallel executions for each prob
 %\scriptsize
 \begin{tabular}{crcccccccc}
 \toprule
-                      &                          &                    &\multicolumn{6}{c}{\bf Scenarios}              &{\bf Normalized}\\
-                                                                      \cmidrule{4-9}		
-{\bf Surplus}         & {$method$}               & {\bf Results}      &{\bf 1}      &{\bf 2}     &{\bf 3}      &{\bf 4}      &{\bf 5}       &{\bf 6}      &{\bf Speed-up} \\
+&                          &                     &\multicolumn{6}{c}{\bf Scenarios}                                                                        &{\bf Normalized}\\
+                                                 \cmidrule{4-9}		
+{\it surplus}         & {$method$}               & {\bf Results}      &{\bf 1}      &{\bf 2}      &{\bf 3}      &{\bf 4}      &{\bf 5}       &{\bf 6}      &{\bf Speed-up} \\
 \toprule
 
 
-\multirow{7}{*}{$1.2$}&\multirow{2}{*}{ $Gurobi$}& $f$                & 12.00       & {\bf 8.38} & {\bf 12.19} & 13.38       &  14.42      &           &   \\%
-                      &                          & {\it run-time (s)} &  8          &   14       &  25         &  95         &    217      &  1719       &   \\%
+\multirow{7}{*}{$1.2$}&\multirow{2}{*}{ $Gurobi$}& $f$                & {\bf 12.00} & {\bf 8.38}  & {\bf 12.19} & {\bf 13.38} & {\bf 14.42} & 13.25        & {\bf 0.99} \\% 7412
+&                                                & {\it run-time (s)} &  8          &   14        &  25         &  95         &    217      &  1719        &  1.0       \\%2078
 
-                      \cmidrule{2-10}		                       
-                      &\multirow{2}{*}{ $Shims$} & $f$                & 8.37        &  6.40      &  7.68       &  8.05       &   7.72      & 6.74        & \\%
-                      &                          & {\it run-time (s)} &  < 1        &  < 1       &    3        &   11         &   27       &  342        &\\%
+\cmidrule{2-10}		                       
+&\multirow{2}{*}{ $Shims$}                       & $f$                & 9.66        &  6.37       &  9.58       &  10.87      &   12.24     & 11.94        &  0.82\\%
+&                                                & {\it run-time (s)} &  < 1        &  3          &    5        &   11        &   27        & 342          &  5.3\\%389
 
-                      \cmidrule{2-10}		                       
-                      &\multirow{2}{*}{ $mpShims$}& $f$               & {\bf 12.24} &  7.95      &  11.59      & {\bf 13.80} & {\bf 16.16} & {\bf 13.74} &   \\%
-                      &                           & {\it run-time (s)}&  < 1        &  < 1       &    2        &   6         &    15       &   165       &   \\%
+\cmidrule{2-10}		                       
+&\multirow{2}{*}{ $mpShims$}                     & $f$                & 11.90       &  7.61       &  10.86      & 13.13       & 13.75       & {\bf 13.75}  &  0.96\\%
+&                                                & {\it run-time (s)} &  < 1        &  < 1        &    3        &  9          &  26         & 156          &  {\bf 10.6}\\%
 
 \midrule
 
+\multirow{7}{*}{$1.5$}&\multirow{2}{*}{ $Gurobi$}& $f$                & 16.49       & {\bf 11.60} & {\bf 16.68} & {\bf 18.33} & {\bf 20.10} & 17.94        & {\bf 0.99}\\%10209
+&                                                & {\it run-time (s)} &  12         &   25        &  45         &  169        &   437       &  2377        & 1.0\\%3065
+
+\cmidrule{2-10}		                       
+&\multirow{2}{*}{ $Shims$}                       & $f$                & 13.71       &  9.06       &  13.54      &  15.21      &   17.09     &  17.15       & 0.84\\%
+&                                                & {\it run-time (s)} &  < 1        &  3          &    6        &   24        &   70        &  419         & 5.9\\%
+
+\cmidrule{2-10}		                       
+&\multirow{2}{*}{ $mpShims$}                     & $f$                & {\bf 16.85} & 10.65       & {\bf 16.68} & 17.05       & 19.72       & {\bf 18.53}  & 0.98\\%
+&                                                & {\it run-time (s)} &  < 1        &  2          &    3        &   10        &   28        &   173        & {\bf 14.1}\\%
+
+\midrule
+\multirow{7}{*}{$2.0$}&\multirow{2}{*}{ $Gurobi$}& $f$                & {\bf 24.04} & {\bf 17.33} & {\bf 24.62} & {\bf 26.36} & {\bf 28.88} & {\bf 25.89}  & {\bf 1.00}\\%14712
+&                                                & {\it run-time (s)} &  14         &   34        &  62         &  236        &  609        & 3431         & 1.0\\%4836
+
+\cmidrule{2-10}		                       
+&\multirow{2}{*}{ $Shims$}                       & $f$                & 20.42       &  13.89      &  20.36      &  22.71      &   25.13     & 24.69        & 0.86\\%
+&                                                & {\it run-time (s)} &  < 1        &  4          &    7        &   30        &   85        &  501         & 7.7\\%
+
+\cmidrule{2-10}		                       
+&\multirow{2}{*}{ $mpShims$}                     & $f$                & 23.12       & 14.89       & 22.08       & 23.96       & 26.98       & 25.29        &  0.93\\%
+&                                                & {\it run-time (s)} &  < 1        &  2          &    3        &   12        &   33        &  203         & {\bf 19.0}\\%
 
 \bottomrule	
 
@@ -1328,8 +1179,94 @@ By Amdahl's law, there is an optimal number of parallel executions for each prob
 \normalsize
 \end{table}
 
-For {\it Gurobi} in {\bf Scenario 1}, 50\% of the results were optimal, but the remaining were suboptimal due to the time limit. This explains that {\it mpShims} surpassed {\it Gurobi} results. The same applies to scenarios 4, 5 and 6, where {\it Gurobi} obtained less than 30\% optimal results.
+For the MIP solver in some scenarios, less than 50\% of the results were optimal, and the remaining were suboptimal due to the time limit. This explains that {\it mpShims} surpassed some of the MIP solver results. 
 
+In \cite{MesquitaSanches2023}, {\it Shims} surpassed the MIP solver, on average, because the time limit they used (0.7s) was sufficient to guarantee a worst-case solution in less than 30min. This decision caused most of the MIP solver results to be poor, making {\it Shims} outstanding as it was the unique method to perform well with all scenarios and instances.
+
+In this work, we used as a time limit the worst {\it Shims} run-time, which was 1.8s. This made the MIP solver yield optimal or near-optimal solutions. This is good for the reader to have an idea of the real performance differences among the methods.
+
+On average, {\it mpShims} is 14 times faster than the MIP solver, and it reached 96\% of {\it Gurobi} $f$ values, on average, which is good for a tool of operational use. The use of parallelism is another important contribution of this work. It has improved {\it Shims} results and also its speed.
+
+
+\subsection{Yet another improvement}
+
+\cite{LurkinSchyns2015} considered an aircraft with two doors, and the minimization of loading and unloading costs at the intermediate node was modeled through a container sequencing problem. But, as both aircrafts dealt with in this work have only the ramp door, we tried to minimize the distance of travel of pallets inside the cargo bay, favoring unloading in the next node, by a post optimization of pallets positions to favor this distance minimization.
+
+Let $\pi$ be a tour in the set of permutations of nodes.
+
+Let $maxD$ be the distance from the last ramp pallet to the center of gravity.
+
+Let $Q^{\pi(k)}  = \{ a^{\pi(k)}_1, a^{\pi(k)}_2, \ldots, a^{\pi(k)}_m \}$ be the set of consolidated items assembled on the set of $m$ pallets in node $\pi(k)$.
+
+Let $Z^{\pi(k)}_{iq}$ be the set of decision variables that relates pallet $i$ to consolidated $q$ in node $\pi(k)$.
+
+\begin{equation} \label{eq:distobj}
+	\mbox{minimize} \sum_{i=1}^{m} \sum_{q=1}^{m} Z^{\pi(k)}_{iq} \times ( maxD - p_i.d) ,\ \mbox{{\bf if}}\ a^{\pi(k)}_q.to = \pi(k+1) \}
+\end{equation}
+
+\begin{equation} \label{eq:distcons}
+	s.t.: \sum_{i=1}^{m} Z^{\pi(k)}_{iq} = 1;\ q \in \{1,2,\ldots,m\}
+\end{equation}
+
+\begin{equation} \label{eq:distpallets}
+	s.t.: \sum_{q=1}^{m} Z^{\pi(k)}_{iq}=1;\ i \in \{1,2,\ldots,m\}
+\end{equation}
+
+\begin{equation} \label{eq:distpalletw}
+	p_i.w = 140 + a^{\pi(k)}_q.w ;\ i \in \{1,2,\ldots,m\};\ q \in \{1,2,\ldots,m\}
+\end{equation}
+
+\begin{equation} \label{eq:disttorque}
+	s.t.:\ | \sum\ p_i.d * p_i.w\ | \leq maxW \times limit^{CG}_{long} ;\ i \in \{1,2,\ldots,m\}
+\end{equation}
+
+Equation \ref{eq:distobj} minimizes the sum of distances of the consolidated in node $\pi(k)$ destined to the next node $\pi(k+1)$; Equation \ref{eq:distcons} states that each consolidated will be assigned to exactly one pallet; Equation \ref{eq:distpallets} states that each pallet will receive one consolidated; Equation \ref{eq:distpalletw} calculates the total weight of each pallet; and Equation \ref{eq:disttorque} guarantees that the torque limit will not be exceeded. 
+
+As the number of pallets was small (7 or 18) for an integer program solver, the increased time was negligible (less than 1s).
+
+Columns {\bf Before} and {\bf After} on Table \ref{tab:distRampDoor} refer to the application of the integer programming solver according to equations \ref{eq:distobj} to \ref{eq:disttorque}. Column {\bf Improvement} is the percentage of improvements in distances minimization.
+
+\vspace{2.0mm}
+
+\begin{table}[H]
+\centering
+\caption{Minimization of pallets distances from the ramp door}  \label{tab:distRampDoor}
+\footnotesize
+%\scriptsize
+\begin{tabular}{ccccc}
+\toprule
+
+{\it surplus} & {\bf Scenario} & {\bf Before (m)} & {\bf After (m)}  & {\bf Improvement (\%)}  \\
+\midrule
+\multirow{6}{*}{$1.2$}& 1 &  33  &  16 & 52\\
+&                       2 & 194  & 154 & 21\\
+&                       3 & 149  & 119 & 20 \\
+&                       4 & 135  & 103 & 23 \\
+&                       5 & 121  &  84 & 31 \\
+&                       6 & 105  &  71 & 33 \\
+\midrule
+\multirow{6}{*}{$1.5$}& 1 &  32 &  18 & 44 \\
+&                       2 & 198 & 135 & 32 \\
+&                       3 & 156 & 128 & 18 \\
+&                       4 & 137 & 106 & 22\\
+&                       5 & 120 &  87 & 28 \\
+&                       6 & 106 &  77 & 27 \\
+\midrule
+\multirow{6}{*}{$2.0$}& 1 &  33 &  20 & 38 \\
+&                       2 & 199 & 142 & 28 \\
+&                       3 & 156 & 122 & 22 \\
+&                       4 & 138 & 106 & 23 \\
+&                       5 & 123 &  84 & 31 \\
+&                       6 & 109 &  75 & 31 \\
+\midrule
+&                         &        & {\bf Average} & {\bf 29}\\
+\bottomrule	
+\end{tabular}
+%\textsuperscript{asdf sd .}	
+\normalsize
+\end{table}
+
+This last procedure favored ground operations as it reduced in 29\% the distances pallets will be moved on disembarking operations. This last step is not part of {\it mpShims} and may be applied as a post improvement for any method. This is another important contribution of this work.
 
 \section{Conclusions}
 \label{sec7}

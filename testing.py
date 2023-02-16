@@ -60,21 +60,19 @@ surplus = "data20"
 # method = "ACO"
 # method = "mpACO"
 
-# method = "Shims"  
+method = "Shims"  
 # method = "mpShims"
 tipo = "FFD"
 
-method = "GRB"
+# method = "GRB"
 
 scenario = 1
 
 # instances = [1,2,3,4,5,6,7]
 instances = [1]
 
-# limit    = 0.95 # best
-limit    = 0.95
-secBreak = 0.7 # seconds
-# secBreak = 60
+limit    = 0.92
+secBreak = 1.8 # seconds
 
 
 # --- distances and costs matrix ---
@@ -88,7 +86,7 @@ for i, cols in enumerate(dists):
     for j, dist in enumerate(cols):
         costs[i][j] = cfg.kmCost*dist
 
-pallets = common.loadPallets(cfg)
+pallets, rampDistCG = common.loadPallets(cfg)
 lock = mp.Lock
 
 # pallets capacities
@@ -105,6 +103,9 @@ if cfg.weiCap > cfg.payload:
 # solution global parameters
 solElapsed = 0
 solScore   = 0
+
+afterDict  = {"After":0.}
+beforeDict = {"Before":0.}
 
 for inst in instances:    
 
@@ -142,8 +143,8 @@ for inst in instances:
 
     # N = first cons ID
     # cons = common.loadNodeCons(surplus, scenario, inst, pi, prevNode, N )
-    # cons = testingGetCons(N, True) # for testing only
-    cons = testingGetCons(N, False) # False: no randomness in consolidated generation
+    cons = testingGetCons(N, True) # for testing only
+    # cons = testingGetCons(N, False) # False: no randomness in consolidated generation
 
     # --- from main
     # cons = []
@@ -254,6 +255,16 @@ for inst in instances:
         print(f"{p.ID}\t{p.Dest[k]}\t{p.PCW:.0f}\t{p.PCV:.2f}\t{p.PCS:.0f}")
     print("Pallets filled-up.\n")
 
+    for p in pallets:
+        if p.Dest[k] == next.ID:
+            beforeDict['Before'] += rampDistCG - p.D # distance from the pallet to the ramp door
+
+    optcgcons.minRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque)
+
+    for p in pallets:
+        if p.Dest[k] == next.ID:
+            afterDict['After'] += rampDistCG - p.D # distance from the pallet to the ramp door
+
     # Validate the solution for this node
 
     Y = np.reshape(solDict["solMatrix"], (-1, N)) # N number of items (columns)
@@ -290,6 +301,16 @@ for inst in instances:
     sol += f"Elapsed: {elapsed:.2f}\n"
 
     print(f"Testing solution ----- \n{sol}\n")
+
+    afterDict["After"] /= float(cfg.numNodes)
+    afterDict["After"] /= float(len(tours))
+
+    beforeDict["Before"] /= float(cfg.numNodes)
+    beforeDict["Before"] /= float(len(tours))
+
+    percent = 0.0
+    if beforeDict["Before"] > 0:
+        percent = 100.0*(beforeDict["Before"] - afterDict["After"]) / beforeDict["Before"]  
 
     # solElapsed += elapsed
     # solScore   += sNodeAccum

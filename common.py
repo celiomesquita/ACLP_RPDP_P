@@ -41,7 +41,7 @@ class Config(object):
 class Node(object):
     def __init__(self, id, tau):
         self.ID      = id
-        self.next    = 0
+        # self.next    = 0
         self.tau     = tau # node sum of torques
         self.ICAO = CITIES[0]
         if id < len(CITIES):
@@ -57,8 +57,8 @@ class Item(object):
         self.W  = w  # weight
         self.S  = s  # score
         self.V  = v  # volume
-        self.Frm = frm  # from
-        self.To = to # destination
+        self.Frm = frm  # origin node ID
+        self.To = to # destination node ID
         self.Attr = 0.0
 
 class Pallet(object):
@@ -67,7 +67,7 @@ class Pallet(object):
         self.D  = d  # centroid distance to CG
         self.V  = v  # volume threshold
         self.W  = w  # weight threshold
-        self.Dest = np.full(numNodes, -1)
+        self.Dest = np.full(numNodes, -1) # nodes IDs indexed by "k"
         self.PCW = 0 # pallet current weight
         self.PCV = 0.
         self.PCS = 0.
@@ -132,7 +132,7 @@ def loadPallets(cfg):
     dists = [8.39,6.25,4.5,2.1,-0.3,-2.7,-5.1] # distances of pallets centroids to the center of gravity
 
     if cfg.size == "larger":
-        vol = 14.8
+        vol = 14.8 # ramp                                                                        forward
         dists = [14.89,14.89,11.47,11.47,8.77,8.77,4.40,4.40,0.00,0.00,-4.40,-4.40,-8.77,-8.77,-13.17,-13.17,-17.57,-17.57]
    
     pallets = []
@@ -142,7 +142,7 @@ def loadPallets(cfg):
         pallets.append( Pallet(id, d, vol, wei, cfg.numNodes) )
         id += 1
    
-    return pallets
+    return pallets, dists[0] # ramp door distance from CG
 
 def fillPallet(pallet, items, k, nodeTorque, solDict, cfg, threshold, itemsDict, lock, torqueSurplus=1.0):
     N = len(items)
@@ -346,7 +346,7 @@ def loadNodeItems(scenario, instance, node, unatended, surplus): # unatended, fu
 def setPalletsDestinations(items, pallets, nodes, k, L_k):
 
     vols  = [0]*len(nodes)
-    max   = 0
+    max   = 0 # node with maximum volume demand
     total = 0
 
     # all items from all nodes
