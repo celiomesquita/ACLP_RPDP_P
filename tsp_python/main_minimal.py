@@ -11,8 +11,11 @@ from tsp_decoder import TSPDecoder
 import greedy_tour as gt
 
 from anneal import SA
+from grasp import GRASP
+import common
 
-def brkga(instance_file) -> None:
+
+def brkga(instance_file):
     # if len(sys.argv) < 4:
     #     print("Usage: python main_minimal.py <seed> <config-file> "
     #           "<num-generations> <tsp-instance-file>")
@@ -59,10 +62,13 @@ def brkga(instance_file) -> None:
 
 def greedy(instance_file):
     
-    print(f"Greedy reading data from {instance_file}")
-    instance = TSPInstance(instance_file)
+    print(f"\nGreedy reading data from {instance_file}")
 
-    cost, _ = gt.greedy_tour(instance)
+    instance = common.Instance(instance_file)
+
+    print(f"Running the next neighbor heuristic.")
+
+    _, cost = instance.initialTour()
 
     print(f"Greedy best cost: {cost}")
 
@@ -75,6 +81,8 @@ def dpTSP(instance_file):
     instance = TSPInstance(instance_file)
 
     n = instance.num_nodes
+
+    print(f"Running the dynamic program for TSP.")
 
     # memoization for top down recursion
     memo = [[-1]*(1 << (n+1)) for _ in range(n+1)]
@@ -137,21 +145,34 @@ if __name__ == "__main__":
     improvement = 100 * (greedy_val - sa.best_cost) / (greedy_val)
     print(f"SA improvement over greedy heuristic: {improvement : .2f}%\n")  
 
-    if instance_file  == "instances/burma14.dat":
-        start = time()
-        opt_cost = dpTSP(instance_file)
-        elapsed = time() - start
-        elapsed *= 1000
-        print(f"DynProg runtime {elapsed:.1f}ms") 
-        improvement = 100 * (greedy_val - opt_cost) / (greedy_val)
-        print(f"DynProg improvement over greedy heuristic: {improvement : .2f}%\n")
+    # start = time()
+    # gr = GRASP(instance_file, stopping_iter=5000)
+    # gr.grasp()
+    # elapsed = time() - start
+    # elapsed *= 1000
+    # print(f"GRASP runtime {elapsed:.1f}ms")  
+    # improvement = 100 * (greedy_val - gr.best_cost) / (greedy_val)
+    # print(f"GRASP improvement over greedy heuristic: {improvement : .2f}%\n")  
 
-    start = time()
-    best_cost = brkga(instance_file)
-    elapsed = time() - start
-    elapsed *= 1000
-    print(f"BRKGA runtime {elapsed:.1f}ms")
-    improvement = 100 * (greedy_val - best_cost) / (greedy_val)
-    print(f"BRKGA improvement over greedy heuristic: {improvement : .2f}%\n")    
- 
-       
+
+
+    # if instance_file  == "instances/burma14.dat":
+    #     start = time()
+    #     opt_cost = dpTSP(instance_file)
+    #     elapsed = time() - start
+    #     elapsed *= 1000
+    #     print(f"DynProg runtime {elapsed:.1f}ms") 
+    #     improvement = 100 * (greedy_val - opt_cost) / (greedy_val)
+    #     print(f"DynProg improvement over greedy heuristic: {improvement : .2f}%\n")
+
+    # start = time()
+    # best_cost = brkga(instance_file)
+    # elapsed = time() - start
+    # elapsed *= 1000
+    # print(f"BRKGA runtime {elapsed:.1f}ms")
+    # improvement = 100 * (greedy_val - best_cost) / (greedy_val)
+    # print(f"BRKGA improvement over greedy heuristic: {improvement : .2f}%\n")
+
+    # if instance_file  == "instances/burma14.dat":   
+    #     improvement = 100 * (opt_cost - best_cost) / (opt_cost)
+    #     print(f"BRKGA distance from DynProg solution: {improvement : .2f}%\n")       
