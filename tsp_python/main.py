@@ -1,64 +1,64 @@
 
-# import sys
-from time import time
+import sys
+# from time import time
 
-from brkga_mp_ipr.enums import Sense
-from brkga_mp_ipr.types_io import load_configuration
-from brkga_mp_ipr.algorithm import BrkgaMpIpr
+# from brkga_mp_ipr.enums import Sense
+# from brkga_mp_ipr.types_io import load_configuration
+# from brkga_mp_ipr.algorithm import BrkgaMpIpr
 
 from tsp_instance import TSPInstance
-from tsp_decoder import TSPDecoder
-import greedy_tour as gt
+# from tsp_decoder import TSPDecoder
+# import greedy_tour as gt
 
 from anneal import SA
-from grasp import GRASP
+# from grasp import GRASP
 import common
 
 
-def brkga(instance_file):
-    # if len(sys.argv) < 4:
-    #     print("Usage: python main_minimal.py <seed> <config-file> "
-    #           "<num-generations> <tsp-instance-file>")
-    #     sys.exit(1)
+# def brkga(instance_file):
+#     # if len(sys.argv) < 4:
+#     #     print("Usage: python main_minimal.py <seed> <config-file> "
+#     #           "<num-generations> <tsp-instance-file>")
+#     #     sys.exit(1)
 
-    # seed = int(sys.argv[1])
-    # config_file = sys.argv[2]
-    # num_generations = int(sys.argv[3])
-    # instance_file = sys.argv[4]
+#     # seed = int(sys.argv[1])
+#     # config_file = sys.argv[2]
+#     # num_generations = int(sys.argv[3])
+#     # instance_file = sys.argv[4]
 
-    seed            = 1
-    config_file     = "config.conf"
-    num_generations = 50
-    # instance_file   = "instances/burma14.dat"    
+#     seed            = 1
+#     config_file     = "config.conf"
+#     num_generations = 50
+#     # instance_file   = "instances/burma14.dat"    
 
-    print(f"BRKGA reading data from {instance_file}")
-    instance = TSPInstance(instance_file)
+#     print(f"BRKGA reading data from {instance_file}")
+#     instance = TSPInstance(instance_file)
 
-    print(f"BRKGA  reading parameters from {config_file}")
-    brkga_params, _ = load_configuration(config_file)
+#     print(f"BRKGA  reading parameters from {config_file}")
+#     brkga_params, _ = load_configuration(config_file)
 
-    print("Building BRKGA data and initializing...")
+#     print("Building BRKGA data and initializing...")
 
-    decoder = TSPDecoder(instance)
+#     decoder = TSPDecoder(instance)
 
-    brkga = BrkgaMpIpr(
-        decoder=decoder,
-        sense=Sense.MINIMIZE,
-        seed=seed,
-        chromosome_size=instance.num_nodes,
-        params=brkga_params
-    )
+#     brkga = BrkgaMpIpr(
+#         decoder=decoder,
+#         sense=Sense.MINIMIZE,
+#         seed=seed,
+#         chromosome_size=instance.num_nodes,
+#         params=brkga_params
+#     )
 
-    brkga.initialize()
+#     brkga.initialize()
 
 
-    print(f"BRKGA evolving {num_generations} generations...")
-    brkga.evolve(num_generations)
+#     print(f"BRKGA evolving {num_generations} generations...")
+#     brkga.evolve(num_generations)
 
-    best_cost = brkga.get_best_fitness()
-    print(f"BRKGA best cost: {best_cost}")
+#     best_cost = brkga.get_best_fitness()
+#     print(f"BRKGA best cost: {best_cost}")
 
-    return best_cost
+#     return best_cost
 
 def greedy(instance_file):
     
@@ -125,16 +125,38 @@ def dpTSP(instance_file):
 
 if __name__ == "__main__":
 
-    instance_file   = "instances/burma14.dat"
+    # instance_file   = "instances/burma14.dat"
     # instance_file   = "instances/brazil58.dat"
     # instance_file   = "instances/rd400.dat" 
     # instance_file   = "instances/vm1084.dat" 
 
-    start = time()
-    greedy_val = greedy(instance_file)
-    elapsed = time() - start
-    elapsed *= 1000
-    print(f"Greedy runtime {elapsed:.1f}ms\n")  
+    # start = time()
+    # greedy_val = greedy(instance_file)
+    # elapsed = time() - start
+    # elapsed *= 1000
+    # print(f"Greedy runtime {elapsed:.1f}ms\n")  
+
+
+    # cd /home/celio/Projects/iRace_tunning/ && $IRACE_HOME/bin/irace
+
+    # python -m main instances/burma14.dat 6 1000
+    # python -m main instance_file         T stopping_iter
+    # python -m main instances/brazil58.dat 5 1000
+
+    #python main.py instances/burma14.dat 5 500
+
+    # print(sys.argv[0])
+
+    seed          = int(sys.argv[1])
+    instance_file = sys.argv[2]
+    T             = float(sys.argv[3])
+    stopping_iter = int(sys.argv[4])
+
+    stopping_T = 1e-8
+    alpha      = 1. - T / float(stopping_iter)
+
+    sa = SA(instance_file, T, alpha, stopping_T, stopping_iter, seed)
+    sa.anneal()
 
     # start = time()
     # sa = SA(instance_file, stopping_iter=5000)
@@ -145,16 +167,16 @@ if __name__ == "__main__":
     # improvement = 100 * (greedy_val - sa.best_cost) / (greedy_val)
     # print(f"SA improvement over greedy heuristic: {improvement : .2f}%\n")  
 
-    start = time()
-    gr = GRASP(instance_file, 5000, 4)
-    gr.grasp()
-    elapsed = time() - start
-    elapsed *= 1000
-    print(f"GRASP runtime {elapsed:.1f}ms")
-    if gr.best_cost == None:
-        gr.best_cost = 0 
-    improvement = 100 * (greedy_val - gr.best_cost) / (greedy_val)
-    print(f"GRASP improvement over greedy heuristic: {improvement : .2f}%\n")  
+    # start = time()
+    # gr = GRASP(instance_file, 2)
+    # gr.grasp()
+    # elapsed = time() - start
+    # elapsed *= 1000
+    # print(f"GRASP runtime {elapsed:.1f}ms")
+    # if gr.best_cost == None:
+    #     gr.best_cost = 0 
+    # improvement = 100 * (greedy_val - gr.best_cost) / (greedy_val)
+    # print(f"GRASP improvement over greedy heuristic: {improvement : .2f}%\n")  
 
 
 

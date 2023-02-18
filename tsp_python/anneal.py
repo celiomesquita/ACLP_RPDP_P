@@ -3,7 +3,9 @@ import random
 import common
 
 class SA(object):
-    def __init__(self, instance_file, T=-1, alpha=-1, stopping_T=-1, stopping_iter=-1):
+    def __init__(self, instance_file, T=-1, alpha=-1, stopping_T=-1, stopping_iter=-1, seed=-1):
+
+        random.seed(seed)
 
         print(f"SA reading data from {instance_file}")
 
@@ -70,3 +72,5 @@ class SA(object):
         self.best_cost = self.instance.getCost(self.best_tour)
 
         print(f"SA best cost: {self.best_cost}")
+
+        return self.best_cost
