@@ -1,4 +1,0 @@
-Traceback (most recent call last):
-  File "/home/celio/Projects/ACLP_RPDP_P/tsp_python/main.py", line 152, in <module>
-    T             = float(sys.argv[3])
-IndexError: list index out of range
