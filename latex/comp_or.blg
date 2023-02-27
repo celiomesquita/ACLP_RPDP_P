@@ -1,49 +1,49 @@
-This is BibTeX, Version 0.99d (TeX Live 2022/dev/Debian)
+This is BibTeX, Version 0.99d (TeX Live 2019/Debian)
 Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: comp_or.aux
 The style file: elsarticle-harv.bst
 Database file #1: references.bib
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Warning--empty pages in fok2004optimizing
-You've used 29 entries,
+You've used 30 entries,
             2990 wiz_defined-function locations,
-            848 strings with 10957 characters,
-and the built_in function-call counts, 18511 in all, are:
-= -- 1413
-> -- 642
+            855 strings with 11233 characters,
+and the built_in function-call counts, 19301 in all, are:
+= -- 1469
+> -- 684
 < -- 18
-+ -- 270
-- -- 219
-* -- 1970
-:= -- 2677
-add.period$ -- 89
-call.type$ -- 29
-change.case$ -- 215
-chr.to.int$ -- 29
-cite$ -- 30
-duplicate$ -- 1418
-empty$ -- 1425
-format.name$ -- 324
-if$ -- 3490
++ -- 288
+- -- 234
+* -- 2065
+:= -- 2792
+add.period$ -- 92
+call.type$ -- 30
+change.case$ -- 225
+chr.to.int$ -- 30
+cite$ -- 31
+duplicate$ -- 1473
+empty$ -- 1476
+format.name$ -- 342
+if$ -- 3631
 int.to.chr$ -- 1
 int.to.str$ -- 1
-missing$ -- 267
-newline$ -- 162
-num.names$ -- 116
-pop$ -- 518
+missing$ -- 279
+newline$ -- 167
+num.names$ -- 120
+pop$ -- 538
 preamble$ -- 1
-purify$ -- 189
+purify$ -- 198
 quote$ -- 0
-skip$ -- 411
+skip$ -- 424
 stack$ -- 0
-substring$ -- 823
-swap$ -- 977
+substring$ -- 855
+swap$ -- 1022
 text.length$ -- 1
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 252
+type$ -- 261
 warning$ -- 1
-while$ -- 112
+while$ -- 117
 width$ -- 0
-write$ -- 421
+write$ -- 435
 (There was 1 warning)

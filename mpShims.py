@@ -120,8 +120,6 @@ def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict
     else:
         mode = "Serial"
 
-    print(f"\n{mode} Shims for ACLP+RPDP")
-
     surplus = 1.0 + 3*(1.0-threshold)
 
     lock  = mp.Lock()
@@ -161,9 +159,135 @@ def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict
             optcgcons.minCGdev(pallets, k, nodeTorque, cfg)
             getBestShims(      pallets[i], items, k, nodeTorque, solDict, cfg, surplus,   itemsDict, lock, tipo)
             counter += common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, 1.0, itemsDict, lock) 
-        print(f"---> {counter} items inserted by the local search.")
 
 
 if __name__ == "__main__":
 
-    print("----- Please execute module main -----")
+    import sys
+    seed         = sys.argv[1]
+    instance     = sys.argv[2] # /home/celio/Projects/ACLP_RPDP_P/data20/scenario_2/instance_3/items.txt'
+    volThreshold = float(sys.argv[3])
+
+    values = instance.split('/')
+
+    lenv = len(values)
+
+    # /home/celio/Projects/ACLP_RPDP_P/data20/scenario_2/instance_3/items.txt'
+    #                                  data20/scenario_2/instance_3/items.txt'
+
+    if lenv == 4:
+        surplus   = values[0]
+        scenario = int(values[1][-1:])
+        instance = int(values[2][-1:]) 
+
+    if lenv == 9:
+        surplus   = values[5]
+        scenario = int(values[6][-1:])
+        instance = int(values[7][-1:])         
+
+    # method = "mpShims" # best volThreshold = 
+    method = "Shims"  # best volThreshold: data20 (0.8512, )
+
+    secBreak = 1.8
+
+    tipo = "FFD"
+
+    # --- distances and costs matrix ---
+    dists = common.loadDistances("params/distances.txt")
+
+    costs = [[0.0 for _ in dists] for _ in dists]
+
+    cfg = common.Config(scenario)                                      
+
+    for i, cols in enumerate(dists):
+        for j, dist in enumerate(cols):
+            costs[i][j] = cfg.kmCost*dist
+
+    pallets, rampDistCG = common.loadPallets(cfg)
+    lock = mp.Lock
+
+    # pallets capacities
+    cfg.weiCap = 0
+    cfg.volCap = 0
+    for p in pallets:
+        cfg.weiCap += p.W
+        cfg.volCap += p.V
+
+    # smaller aircrafts may have a payload lower than pallets capacity
+    if cfg.weiCap > cfg.payload:
+        cfg.weiCap = cfg.payload   
+
+    tours = common.getTours(cfg.numNodes-1, costs, 1.0)
+
+    pi = 0 # the first, not necessarily the best
+
+    tour = tours[pi]
+
+    # a matrix for all consolidated in the tour
+    consol = [
+                [ common.Item(-1, -2, 0, 0, 0., -1, -1)
+                for _ in tour.nodes ]
+                for _ in pallets # a consolidated for each pallet
+            ]
+
+    k = 0 # the base
+
+    for i, p in enumerate(pallets):
+        pallets[i].reset(cfg.numNodes)
+
+    node = tour.nodes[k]
+
+    # L_k destination nodes set
+    unattended = [n.ID for n in tour.nodes[k+1:]]
+
+    # load items parameters from this node and problem instance, that go to unnatended
+    items = common.loadNodeItems(scenario, instance, node, unattended, surplus)
+    N = len(items)
+
+
+    # solution global torque to be shared and changed by all pallets concurrently
+    nodeTorque = mp.Value('d', 0.0) # a multiprocessing double type variable
+
+    # initialize- the accumulated values
+    sNodeAccum = 0.
+    wNodeAccum = 0.
+    vNodeAccum = 0.
+
+    # set empty pallets (-1) destinations based on the items to embark
+    common.setPalletsDestinations(items, pallets, tour.nodes, k, unattended)
+
+    # to control solution items
+    M = len(pallets)
+    solMatrix = mp.Array('i', [0 for _ in np.arange(N*M)] )
+    mpItems   = mp.Array('i', [0 for _ in np.arange(N)] ) # to check items inclusions feasibility
+
+    solDict   = dict(solMatrix=solMatrix)
+    itemsDict = dict(mpItems=mpItems)
+
+    objValue = 0.0
+
+    if method == "mpShims":
+        Solve(pallets, items, cfg, k, volThreshold, secBreak, "p", nodeTorque, solDict, itemsDict, tipo)
+
+    if method == "Shims":            
+        Solve(pallets, items, cfg, k, volThreshold, secBreak, "s", nodeTorque, solDict, itemsDict, tipo)         
+
+    # Validate the solution for this node
+
+    Y = np.reshape(solDict["solMatrix"], (-1, N)) # N number of items (columns)
+
+    for i, row in enumerate(Y):
+        for j, X_ij in enumerate(row):
+            if X_ij:
+                consol[i][k].ID  = j+N
+                consol[i][k].Frm = node.ID
+                consol[i][k].To  = pallets[i].Dest[k]                   
+                consol[i][k].W += items[j].W
+                consol[i][k].V += items[j].V
+                consol[i][k].S += items[j].S
+
+                sNodeAccum += float(items[j].S)
+
+    print(sNodeAccum) # to be captured by iRace
+
+

@@ -8,49 +8,7 @@ import mpACO
 import optcgcons
 import mipGRB
 
-# for testing only
-def testingGetCons(N, rndm):
-    """
-    Testing consolidated from cons_0_0.txt
-    """
-    cons = []
 
-    lines = [
-        [ 2620,  406,  4.121, 0, 2],
-        [2595, 2436, 13.690, 0, 2],
-        [3282, 3081, 13.689, 0, 2],
-        [4217, 3856, 13.674, 0, 2],
-        [2558, 3180, 13.692, 0, 1],
-        [3526, 3630, 13.691, 0, 1],
-        [4348, 3509, 13.697, 0, 1]
-    ]
-    # lines = [
-    #     [1230, 80,  9.0, 0, 1], # from the base to the first node
-    #     [3560, 90, 10.0, 0, 2], # from the base to the second node
-    #     [2340, 70, 11.0, 0, 1],
-    #     [2360, 60, 12.0, 0, 2],
-    #     [1250, 50, 13.0, 0, 1],
-    #     [2540, 40,  8.0, 0, 2],
-    #     [3540, 30,  7.0, 0, 1]
-    # ]
-
-    id = N
-    for line in lines:
-        w   =   int(line[0])
-        s   =   int(line[1])
-        v   = float(line[2])
-        frm =   int(line[3])
-        to  =   int(line[4])         
-        cons.append( common.Item(id, -2, w, s, v, frm, to) )
-        id += 1
-
-    if rndm:
-        for i, _ in enumerate(cons):
-            cons[i].W = random.uniform(2000, 4000)
-            cons[i].V = random.uniform(7, 12) 
-            cons[i].S = random.uniform(30, 80) 
-
-    return cons
 
 surplus = "data20"
 # surplus = "data50"

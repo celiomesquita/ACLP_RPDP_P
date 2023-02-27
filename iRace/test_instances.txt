@@ -1,4 +1,6 @@
-ftv38.atsp
-ftv64.atsp
-ry48.astp
-atex3.astp
+data20/scenario_1/instance_1/items.txt
+data20/scenario_1/instance_3/items.txt
+data20/scenario_3/instance_1/items.txt
+data20/scenario_3/instance_3/items.txt
+data20/scenario_5/instance_1/items.txt
+data20/scenario_5/instance_3/items.txt

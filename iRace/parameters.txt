@@ -33,13 +33,5 @@
 #mutation        "--mutation="        o  ("none", "very low", "low", "medium", "high", "very high", "all")
 #unused          "-u "                c  (1, 2, 10, 20)
 
-## Simulated Annealing testing
-alpha    ""  r   (0.98, 1.00)
-
-## GRASP+PR testing
-##rclSize     ""  r   (0.03, 0.1)   
-##numStag     ""  c   (5,10,15)
-##eliteSize   ""  r   (0.03, 0.1)
-
-## VNS testing
-#stopping_iter    ""  c   (5000, 8000, 11000, 14000, 17000, 20000)
+# 1           2 3      4 
+volThreshold "" r (0.85,0.99)

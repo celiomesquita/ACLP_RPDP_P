@@ -35,9 +35,7 @@ CONFIG_PARAMS=$*
 # BINDIR=$(dirname "$(readlink -f "$(type -P $0 || echo $0)")")
 
 # EDIT THIS: Path to your executable
-EXE="python3 anneal.py"
-# EXE="python3 grasp.py"
-# EXE="python3 VNS.py"
+EXE="python3 ../mpShims.py"
 
 # $IRACE_HOME/bin/irace
 

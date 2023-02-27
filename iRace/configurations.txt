@@ -1,14 +1,2 @@
-## Simulated Annealing testing
-alpha
-0.99
-
-## instances
-## http://dimacs.rutgers.edu/archive/Challenges/TSP/atsp.html
-
-## GRASP+PR testing
-##rclSize numStag eliteSize
-##0.05    20  0.05
-
-## VNS testing
-#stopping_iter
-#5000
+volThreshold
+0.92

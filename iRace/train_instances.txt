@@ -1,6 +1,10 @@
-ftv44.atsp
-ft53.atsp
-ft70.atsp
-ftv70.atsp
-ftv110.atsp
-ftv170.atsp
+data20/scenario_2/instance_1/items.txt
+data20/scenario_2/instance_3/items.txt
+data20/scenario_2/instance_5/items.txt
+data20/scenario_4/instance_1/items.txt
+data20/scenario_4/instance_3/items.txt
+data20/scenario_4/instance_5/items.txt
+data20/scenario_6/instance_1/items.txt
+data20/scenario_6/instance_3/items.txt
+data20/scenario_6/instance_5/items.txt
+

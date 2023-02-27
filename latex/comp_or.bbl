@@ -1,4 +1,4 @@
-\begin{thebibliography}{29}
+\begin{thebibliography}{30}
 \expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
 \providecommand{\url}[1]{\texttt{#1}}
 \providecommand{\href}[2]{#2}
@@ -117,6 +117,16 @@
   delivery}.
 \newblock \bibinfo{journal}{{European Journal of Operational Research}}
   \bibinfo{volume}{244(3)}, \bibinfo{pages}{955--965}.
+%Type = Article
+\bibitem[{López-Ibáñez et~al.(2016)López-Ibáñez, Dubois-Lacoste,
+  Pérez~Cáceres, Birattari and Stützle}]{LopezIbanezManuel2016}
+\bibinfo{author}{López-Ibáñez, M.}, \bibinfo{author}{Dubois-Lacoste, J.},
+  \bibinfo{author}{Pérez~Cáceres, L.}, \bibinfo{author}{Birattari, M.},
+  \bibinfo{author}{Stützle, T.}, \bibinfo{year}{2016}.
+\newblock \bibinfo{title}{The irace package: Iterated racing for automatic
+  algorithm configuration}.
+\newblock \bibinfo{journal}{Operations Research Perspectives}
+  \bibinfo{volume}{3}, \bibinfo{pages}{43--58}.
 %Type = Book
 \bibitem[{Manfrin et~al.(2006)Manfrin, Birattari, Stützle and
   Dorigo}]{manfrin2006}
