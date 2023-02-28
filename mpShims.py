@@ -120,7 +120,7 @@ def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict
     else:
         mode = "Serial"
 
-    surplus = 1.0 + 3*(1.0-threshold)
+    surplus = 2.0-threshold
 
     lock  = mp.Lock()
 
