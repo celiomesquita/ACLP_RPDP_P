@@ -1,0 +1,179 @@
+% !TeX spellcheck = pt_BR
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+
+\title{Pesquisa Operacional em Suportabilidade}
+\author{Antonio Celio Pereira de Mesquita}
+\date{ Abril 2023}
+
+\begin{document}
+
+\maketitle
+\section{Introdução}
+
+
+\section{Organização científica da manutenção}
+
+
+\subsection{Decisões sobre internalizar ou não a manutenção de 3° nível}\
+
+O processo de tomada de decisão sobre internalizar ou não a manutenção de de 3º nível normalmente envolve a ponderação dos custos e benefícios associados a ambas as opções. Internalizar a manutenção pode ser uma opção mais econômica, pois elimina a necessidade de contratar e pagar pessoal de manutenção externo. Por outro lado, pode ser um processo mais demorado e complexo, pois requer treinamento e gerenciamento da equipe para garantir a qualidade do trabalho. Além disso, pode ser difícil obter peças e componentes com o mesmo custo de fornecedores de manutenção externos. Em última análise, a decisão deve ser baseada em uma modelagem e otimização dos custos, benefícios e riscos associados.
+Normalmente, esta análise é realizada pelo AeroLogLab por meio da plataforma OPUS 10.
+
+\subsection{Análise de dados para diagnóstico ou prognóstico}\
+
+A análise de dados para diagnóstico ou prognóstico para planejamento de manutenção de componentes de aeronaves normalmente envolve a coleta e análise de uma variedade de fontes de dados, como registros de voo e manutenção, previsões meteorológicas, aeronaves e sistemas e outras fontes de informações relacionadas à aeronave. Esses dados são usados para identificar possíveis problemas que podem afetar o desempenho e a segurança da aeronave, bem como para avaliar a condição de componentes e sistemas.
+Esse tipo de análise é frequentemente usado para antecipar e planejar futuras tarefas de manutenção, como manutenção preventiva, reparos e substituições. Além disso, a análise de dados pode ser usada para monitorar o desempenho de aeronaves e identificar possíveis tendências ou padrões na manutenção de aeronaves.
+Ainda não houve trabalho científico capitaneado pelo AeroLogLab sobre este assunto por falta de candidato ao programa de pós-graduação com experiência sobre este tema.
+
+\subsection{Avaliação do impacto de atrasos e cancelamentos em rotas operacionais}\
+
+Os atrasos e cancelamentos em rotas operacionais de aeronaves comerciais envolve a análise de diversos fatores, como o custo direto e indireto, o tempo perdido para os passageiros, a satisfação dos clientes, a segurança e a eficiência operacional.
+O custo direto inclui prejuízos financeiros como a perda de receita, custos de combustível, compensações aos passageiros, aumento de horas extras para os tripulantes e outras despesas. O custo indireto inclui os efeitos sobre a imagem da companhia aérea, a fidelidade dos passageiros e a reputação da companhia aérea. Além disso, a análise do impacto também pode incluir fatores como o número de atrasos e cancelamentos, a duração dos atrasos e o tipo de aeronave.
+Ainda não houve trabalho científico capitaneado pelo AeroLogLab sobre este assunto por falta de candidato ao programa de pós-graduação com experiência sobre este tema.
+
+
+\subsection{Plano de manutenção resiliente com otimização e aprendizado de máquina}
+
+Um plano de manutenção resiliente com otimização e aprendizado de máquina é uma abordagem proativa para o planejamento de manutenção que usa análise preditiva e ciência de dados para identificar possíveis problemas e otimizar os cronogramas de manutenção.
+Esse tipo de plano usa algoritmos de aprendizado de máquina para analisar leituras de sensores, dados históricos e outras informações para prever quando o equipamento provavelmente precisará de manutenção e otimizar o tempo das tarefas de manutenção.
+Essa abordagem pode melhorar a eficiência e a confiabilidade, além de reduzir o tempo de inatividade e os custos. Além disso, ajuda a identificar possíveis problemas antes que se tornem grandes, evitando assim reparos caros ou paradas não planejadas.
+
+a Equação \ref{eq:prev} estabelece o custo da manutenção preventiva.
+
+
+\begin{equation}\label{eq:prev}
+prev_j =  pmc_j + pmoc_j,\ for\ j \in \{1, 2, 3, \ldots, m\}
+\end{equation}
+
+
+A Equação \ref{eq:corr} estabelece o custo da manutenção corretiva.
+
+\begin{equation}\label{eq:corr}
+corr_j =  cmc_j + cmoc_j,\ for\ j \in \{1, 2, 3, \ldots, m\}
+\end{equation}
+
+
+A Equação  \ref{eq:dist} estabelece a distância em termos temporais entre o limite de horas de voo e o momento da parada da aeronave.
+
+\begin{equation}\label{eq:dist}
+dist_{ij} = \lceil{\frac{stop_i}{max_j}}\rceil{}-\frac{stop_i}{max_j} 
+\end{equation}
+
+
+A Equação  \ref{eq:prob} determina a probabilidade de falha.
+
+\begin{equation}\label{eq:prob}
+prob_{ij} = 1 - e^{(-\lambda{}_j * stop_i)}
+\end{equation}
+
+As tarefas de preparação não podem ser duplicadas. As tarefas executam preparações comuns comente uma vez, a fim de não desperdiçar recursos.
+$K_i$ é o conjunto de preparações do pacote "i". A restrição que as mantêm únicas é o tipo de dados "set" da linguagem {\it Python}, que não permite elementos duplicados.
+
+
+A Equação  \ref{eq:min} estabelece a Função Objetivo.
+
+\begin{equation} \label{eq:min}
+minimize\ =\ \sum_{i=1}^{m} \sum_{j=1}^{n} X_{ij} \times ( prev_j + dist_{ij}*prev_j + prob_{ij}*corr_j )
+\end{equation}
+
+
+\subsection{Problema de planejamento de voos e manutenção, do inglês flight maintenance planning problem (FMPP)}
+
+O Problema de Planejamento de Voos e Manutenção é um problema de otimização que visa encontrar a melhor rota para o voo de um avião e a manutenção necessária para mantê-lo em condições seguras. Ele envolve determinar a rota ótima para o voo, bem como o calendário de manutenção apropriado para a aeronave antes de cada voo.
+
+Está relacionado ao problema de programação de voos, mas tem um foco maior na manutenção e na segurança operacional. É importante para garantir que os voos sejam executados com segurança e eficiência, além de reduzir custos de manutenção. Este problema envolve as seguintes variáveis:
+
+1. Tempo de voo
+2. Custo de combustível
+3. Tempo de manutenção
+4. Custo de manutenção
+5. Restrições de segurança
+6. Restrições de custo
+7. Restrições de tempo
+8. Restrições de rota
+
+Ainda não houve trabalho científico capitaneado pelo AeroLogLab sobre este assunto por falta de candidato ao programa de pós-graduação com experiência sobre este tema.
+
+\subsection{Problema de roteamento e manutenção de aeronaves para frotas compartilhadas, incluindo informações de prognóstico de saúde das aeronaves}
+
+Os problemas de roteamento e manutenção de aeronaves são considerações críticas para frotas compartilhadas de aeronaves. Esses problemas afetam a segurança e a confiabilidade da aeronave e podem ter consequências financeiras significativas para a companhia aérea ou empresa que possui e opera a frota.
+
+O roteamento de aeronave refere-se ao processo de determinação da rota ideal para uma aeronave viajar, levando em consideração fatores como consumo de combustível, condições climáticas e congestionamento do tráfego aéreo. Esse processo envolve a análise de grandes quantidades de dados, incluindo dados históricos de voos, previsões meteorológicas e informações de tráfego aéreo em tempo real. O objetivo do roteamento de aeronaves é minimizar o tempo de voo, o consumo de combustível e os custos operacionais gerais, garantindo segurança e confiabilidade.
+
+Os problemas de manutenção, por outro lado, referem-se aos problemas que podem surgir durante a operação de uma aeronave, como falhas mecânicas, problemas no motor e outros problemas técnicos. A manutenção é fundamental para a segurança e confiabilidade da aeronave, e é essencial manter a frota em boas condições para evitar paradas inesperadas e reparos caros.
+
+Uma maneira de resolver problemas de roteamento e manutenção de aeronaves é por meio do uso de sistemas de prognóstico de integridade de aeronaves. Esses sistemas usam sensores e análise de dados para monitorar a integridade e o desempenho dos componentes da aeronave em tempo real, permitindo que as equipes de manutenção detectem e resolvam possíveis problemas antes que se tornem problemas sérios. Os sistemas de manutenção preditiva também podem usar algoritmos de aprendizado de máquina para analisar dados históricos e prever quando a manutenção é necessária, ajudando a minimizar o tempo de inatividade e reduzir os custos.
+
+Em resumo, os problemas de roteamento e manutenção de aeronaves são considerações críticas para frotas compartilhadas de aeronaves, e o gerenciamento eficaz dessas questões é essencial para garantir a segurança, confiabilidade e lucratividade da frota. O uso de sistemas de prognóstico de integridade de aeronaves pode ajudar a resolver esses problemas, fornecendo monitoramento em tempo real e recursos de manutenção preditiva.
+
+\subsection{Otimização combinatória das tarefas de manutenção de aeronaves}
+
+Conhecido como um problema de programação ou {\it scheduling}, tarefas são agrupadas em pacotes temporais, algumas tarefas eventualmente poderão ser colocadas como {\it out-of-phase} (fora dos pacotes) e, dentro de cada pacote, as tarefas são agrupadas por zona, por qualificação do mecânico e por precedência entre tarefas.
+O objetivo global é a eficiência traduzida como minimização de custos e do tempo de parada, bem como minimização dos custos de oportunidade.
+
+\subsection{O problema da otimização do leiaute de uma instalação para manutenção de aeronaves}
+
+A otimização do layout de uma instalação para manutenção de aeronaves é uma parte importante do processo geral de manutenção de aeronaves. Este processo envolve a otimização do espaço dentro da instalação para garantir que todos os equipamentos e pessoal necessários estejam localizados nas posições mais eficientes para maximizar a produtividade e minimizar os custos.
+Isso pode envolver reorganizar o layout da instalação, como mover estações de trabalho e equipamentos, adicionar ou remover paredes e reconfigurar o fluxo de pessoal e materiais. Além disso, as instalações devem ser projetadas para reduzir riscos, como perigos elétricos e de incêndio, além de permitir acesso fácil a ferramentas e peças. O layout ideal de uma instalação para manutenção de aeronaves também inclui levar em consideração a ergonomia e a segurança do pessoal, fornecendo espaço adequado para movimentação e equipamentos de segurança.
+Sob o ponto de vista da otimização, o objetivo seria minimizar os percursos de movimentação dos técnicos, conferindo agilidade e eficiência. As ferramentas mais utilizadas tenderiam a ficar mais acessíveis e as pouco utilizadas em posições mais recuadas.
+Ainda não houve trabalho científico capitaneado pelo AeroLogLab sobre este assunto por falta de candidato ao programa de pós-graduação com experiência sobre este tema.
+
+\subsection{Otimização da localização de instalações de manutenção}
+
+A otimização da localização de instalações de manutenção de aeronaves é a análise de fatores para determinar o melhor local para a instalação de uma instalação de manutenção de aeronaves. Estes fatores incluem fatores como a proximidade de outras instalações de manutenção, a quantidade de tráfego aéreo, as condições climáticas, a infraestrutura disponível, as qualificações de mecânicos disponíveis e outros fatores. Além disso, existem várias variáveis que devem ser consideradas, como custos, localização e segurança.
+O objetivo é maximizar a eficiência global da companhia aérea.
+Ainda não houve trabalho científico capitaneado pelo AeroLogLab sobre este assunto por falta de candidato ao programa de pós-graduação com experiência sobre este tema.
+
+
+\section{Organização científica do suprimento}
+
+
+\subsection{Otimização de estoques de peças sobressalentes}
+
+A otimização de peças de reposição é um processo utilizado para minimizar a quantidade de peças de reposição que uma empresa precisa ter em seu estoque a fim de atender à demanda dos clientes, especialmente, no nosso caso, as oficinas de manutenção. Envolve analisar os vários tipos de peças estocadas e determinar quais peças são realmente necessárias e quais possuem baixa taxa de consumo. Eventualmente, compensa ser reativo e adquirir somente quando surge a necessidade. A não ser quando é sabido que determinados fornecimentos são demorados e o componente precisa ser mantido em estoque a fim de evitar disrupção nas operações.
+
+A otimização do estoque de peças sobressalentes pode ajudar uma empresa a economizar dinheiro em custos de armazenamento, reduzir o desperdício e melhorar o atendimento ao cliente, tendo as peças necessárias prontamente disponíveis quando os clientes precisarem delas, seja oriunda do estoque ou de um fornecedor local.
+
+
+\subsection{Simulação dos processos internos de suprimento e otimização de leiaute}
+
+Os processos internos e a otimização de leiaute pode ser simulada e testada para determinar o melhor leiaute possível para um determinado espaço.
+A simulação de processos internos e otimização de leiaute podem ajudar a reduzir custos, melhorar o atendimento ao cliente do armazém e aumentar a eficiência da cadeia de suprimentos.
+
+\subsection{Otimização da localização de instalações de distribuição}
+
+\subsection{Análise multicritério na seleção de fornecedores}
+
+\subsection{Estimativas de abastecimento por meio de aprendizado de máquina}
+
+\subsection{problema de substituição de múltiplos equipamentos para modernização de meia vida}
+
+\subsection{problema de gerenciamento de LRU, To summarize, we discovered two problems. First, spare parts supply pays little attention to optimizing transportation routes. Second, the existing transportation route optimization methods are seldom considered from the standpoint of supportability}
+
+\subsection{problema de Suporte Logístico Integrado envolvendo frotas, spare parts supply}
+
+\subsection{problema da gestão de obsolescência}
+
+\section{Desenvolvimento da suportabilidade}
+
+\subsection{Análise multicritério dos elementos de suporte logístico}
+
+\subsection{Otimização e simulação da suportabilidade de um novo produto}
+
+\subsection{Análise e simulação da degradação por questões de suportabilidade}
+
+\subsection{problema de gerenciamento dos desempenhos de suportabilidade}
+
+\subsection{problema de alocação de aeronaves à luz do desempenho individualizado em termos de confiabilidade de cada aeronave}
+
+\subsection{problema de imaturidade nos fatores nos fatores RAMS}
+
+\subsection{optimizing reliability, maintainability and supportability under performance based logistics}
+
+\subsection{Predict key Performance and Cost metrics for new system}
+
+\subsection{Calculate Supportability for legacy and new systems}
+
+
+\end{document}
