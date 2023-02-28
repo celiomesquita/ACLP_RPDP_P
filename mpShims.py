@@ -185,8 +185,8 @@ if __name__ == "__main__":
         scenario = int(values[6][-1:])
         instance = int(values[7][-1:])         
 
-    # method = "mpShims" # best volThreshold = 
-    method = "Shims"  # best volThreshold: data20 (0.8512, )
+    # method = "mpShims" # best volThreshold =  data50(0.9781)
+    method = "Shims"  # best volThreshold: data20 (0.98)
 
     secBreak = 1.8
 
