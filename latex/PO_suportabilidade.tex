@@ -287,13 +287,34 @@ Por exemplo, considere um fornecedor de componentes eletronicos que oferece uma 
 
 A fórmula EOQ é a raiz quadrada de (2 x 1.000 fones x custo do pedido de \$2) / (custo de manutenção de \$5), ou 28,3 com arredondamento. O tamanho ideal do pedido para minimizar custos e atender a demanda dos clientes é de pouco mais de 28 fones.
 
-https://www.investopedia.com/ask/answers/052715/how-economic-order-quantity-model-used-inventory-management.asp
-
 
 \subsection{Simulação dos processos internos de suprimento e otimização de leiaute}
 
 Os processos internos e a otimização de leiaute pode ser simulada e testada para determinar o melhor leiaute possível para um determinado espaço.
+
 A simulação de processos internos e otimização de leiaute podem ajudar a reduzir custos, melhorar o atendimento ao cliente do armazém e aumentar a eficiência da cadeia de suprimentos.
+
+Sob o ponto de vista da otimização, o objetivo seria minimizar os percursos de movimentação dos suprimentistas, conferindo agilidade e eficiência. Os componentes mais fornecidos tenderiam a ficar mais acessíveis e os pouco fornecidos em armários mais recuados e prateleiras mais altas.
+
+O modelo matemático geralmente utilizado é o de uma árvore geradora mínima ({\it minimum spanning tree}).
+
+Dada um grafo (G, $\phi$), pode-se definir o peso de um subgráfo $H \subset G$ como:
+
+\begin{equation} \label{eq:fo1}
+	\phi(H) \gets \sum_{e \in E(H)} \phi (e)
+\end{equation}
+
+$E(H)$ é o subconjunto de arestas $e$ de $H$.
+
+Em um grafo conectado $G$, uma árvore geradora mínima $T$ é uma árvore com valor mínimo.
+
+\begin{equation} \label{eq:fo2}
+	min_T\ H(T) \gets \sum_{e \in E(H)} \phi (e) \times X_{ij}
+\end{equation}
+
+
+Considere $X_{ij}$ igual a 1 se a aresta (i,j) está na árvore, 0 caso contrário. As arestas são os percursos entre o ponto de entrega das mercadorias e os armários ou prateleiras.
+
 
 \subsection{Otimização da localização de instalações de distribuição}
 
@@ -305,10 +326,52 @@ Localizações não otimizadas pode acarretar ineficiência na suportabilidade d
 
 \subsection{Análise multicritério na seleção de fornecedores}
 
-%sudo apt-get install myspell-pt-br
+As análises multicritério geralmente utilizam os métodos {\it analytic network process} (ANP) e {\it analytic hierarchy process} (AHP).
 
+O ANP é uma forma mais geral do AHP usado na análise de decisão multicritério.
+
+O AHP estrutura um problema de decisão em uma hierarquia com um objetivo, critérios de decisão e alternativas, enquanto o ANP o estrutura como uma rede. Ambos então usam um sistema de comparações pareadas para medir os pesos dos componentes da estrutura e, finalmente, classificar as alternativas na decisão.
+
+Por exemplo:
+
+A fim de se contratar um engenheiro, pode-se elencar duas expertises: experiência e habilidades em gestão.
+
+A experência pode ser técnica ou de vendas, e as habilidades de gestão podem ser: da produção, de equipes, de finanças e de manutenção.
+
+Supondo-se que haja três candidatos, compara-se pares de competências, pontuando-se de 0 a 9 para um candidato ou para o outro, sendo que, no final, uma operação entre matrizes define graus de acordo com todas as avaliações par-a-par realizadas por um ou por mais de um avaliador.
+
+Um exemplo prático pode ser encontrado em:
+
+\begin{itemize}
+\item tool.aerologlab.ita.br/mcdm2
+\end{itemize}
+
+No caso de uma seleção de fornecedores, será preciso definir o objetivo, os critérios e subcritérios de avaliação, bem como os fornecedores candidatos.
+
+Detalhes do funcionamento podem ser encontrados em:
+
+\begin{itemize}
+\item Saaty, Thomas L. (1996). Decision Making with Dependence and Feedback: The Analytic Network Process. Pittsburgh, Pennsylvania: RWS Publications. ISBN 0-9620317-9-8.
+
+\item Saaty, Thomas L. (2005). Theory and Applications of the Analytic Network Process: Decision Making with Benefits, Opportunities, Costs and Risks. Pittsburgh, Pennsylvania: RWS Publications. ISBN 1-888603-06-2.
+\end{itemize}
 
 \subsection{Estimativas de abastecimento por meio de aprendizado de máquina}
+
+{\it Machine Learning} (ML) – ou aprendizado da máquina – está ligado às máquinas que possuem capacidade de aprendizagem própria para realizar ações ou tomar decisões para atividades através de técnicas específicas, {\it Big Data} e inteligência artificial ({\it IA}). {\it Mitchell, Tom (1997). Machine Learning. New York: McGraw Hill. ISBN 0-07-042807-7. OCLC 36417892}  
+
+O aprendizado pode ocorrer pela supervisão de um programador que faz a inserção de parâmetros no sistema, ou de forma interativa, no qual os algoritmos adaptam-se aos dados, permitindo cruzar informações que façam previsões baseadas na análise de dados, sem que tenham sido programadas especificamente para isso.
+
+{\bf Importância}: A importância do ML no controle de estoque é projetar a demanda com maior segurança e precisão, prevendo fornecimentos futuros sem grandes riscos e viabilizando pedidos de compras automaticamente. Além disso, o ML pode prever perdas e solucionar problemas que comprometem os resultados, como rupturas, custos elevados com carregamentos e baixo giro dos produtos em suas respectivas curvas.
+
+{\bf Vantagens}: A aprendizagem de máquina influencia as atividades mais complexas da logística e dos armazéns, proporcionando maior precisão e transparência nos dados.
+
+{\bf Desempenho da entrega}: A eficiência na gestão de entregas e os custos de frete podem ser aperfeiçoados com a utilização do ML. Com parâmetros e uma extensa base de dados, a escolha dos métodos de transporte é mais precisa, diminuindo os riscos para toda a cadeia de suprimentos.
+
+{\bf Previsão da demanda}: Com o aprendizado de máquina, a previsão da demanda se torna mais definida, auxiliando no planejamento estratégico de vendas e logística e permitindo que as operações trabalhem com baixos níveis de estoque.
+
+{\bf Visibilidade de toda a cadeia de suprimento}: O ML, juntamente à telemática (Internet das Coisas - loT), permite que toda a logística seja monitorada em tempo real, aumentando os resultados das entregas e a comunicação entre setores.
+
 
 \subsection{problema de substituição de múltiplos equipamentos para modernização de meia vida}
 
