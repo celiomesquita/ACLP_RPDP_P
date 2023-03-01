@@ -1,35 +1,53 @@
 % !TeX spellcheck = pt_BR
-\documentclass{article}
-\usepackage[utf8]{inputenc}
-\usepackage[left]{lineno}
-\usepackage[T1]{fontenc}
-\usepackage{lmodern}
-\usepackage{multirow}
-\usepackage{lineno,hyperref}
-\modulolinenumbers[5]
-\usepackage[none]{hyphenat}
-\usepackage{url}
-\usepackage{booktabs}
+\documentclass{amsart}
+
 \usepackage{graphicx}
-\usepackage{mathtools}
-\usepackage{amssymb}
-\usepackage{amsthm}
-\usepackage{caption}
+\graphicspath{ {.} }
+
+\setkeys{Gin}{width=0.8\linewidth,keepaspectratio=true}
+\usepackage{natbib}
+
+\usepackage{color}
+\usepackage{url}
+\usepackage{epsfig}
+
+\usepackage{algorithm,algpseudocode}
+
+\newcommand{\specialcell}[2][c]{%
+	\begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+
+\newcommand{\Comentar}[1]{\State {\cmmt{#1}}}
+\newcommand{\Break}{\State \textbf{break}}
+\renewcommand{\Return}{\State \textbf{return}~}
+\renewcommand{\algorithmicensure}{\textbf{Parameters:}}
+
+\usepackage{longtable}
+\newcommand{\elite}{\mathcal{E}}
+\usepackage{rotating}
 \usepackage{subfigure}
+\usepackage{lscape}
+\usepackage{multirow}
+\usepackage{adjustbox}
+\usepackage{comment}
+\usepackage{setspace}
+\usepackage{caption}
+\captionsetup{labelfont=bf}
+\captionsetup{skip=0pt} % vertical distance from the table or figure
+\usepackage[margin=0.9in]{geometry}
+\usepackage[table]{xcolor}
+\usepackage{booktabs}
+
 
 \begin{document}
-	
-
-	
+		
 	\title{Pesquisa Operacional em Suportabilidade}
 	\author{Antonio Celio Pereira de Mesquita}
-	\date{ Abril 2023}
+	\date{ Abril 2023 \\ celio.mesquita@gp.ita.br}
 	
 
 \maketitle
 
 
-	
 	Este capítulo aborda os problemas inerentes à suportabilidade de sistemas, esboça modelos matemáticos e as possibilidades do uso das ferramentas de Pesquisa Operacional na sua solução.
 	
 
@@ -82,7 +100,7 @@ Esse tipo de análise é frequentemente usado para antecipar e planejar futuras 
 
 \begin{figure}[h]
 	\centering
-	\includegraphics[width=0.5\textwidth]{Images/analise_dados.jpg}
+	\includegraphics[width=0.5\textwidth]{Images/analise_dados.jpg}\\
 	\small\textsuperscript{Origem: livre de direitos autorais em www.pexels.com}
 \end{figure}
 
@@ -96,7 +114,7 @@ O custo direto inclui prejuízos financeiros como a perda de receita, custos de 
 
 \begin{figure}[h]
 	\centering
-	\includegraphics[width=0.5\textwidth]{Images/flight_delay.jpg}
+	\includegraphics[width=0.5\textwidth]{Images/flight_delay.jpg}\\
 	\small\textsuperscript{Origem: livre de direitos autorais em www.pixabay.com}
 \end{figure}
 
@@ -118,7 +136,6 @@ Conhecido como um problema de programação ou {\it scheduling}, tarefas são ag
 O objetivo global é a eficiência traduzida como minimização de custos e do tempo de parada, bem como minimização dos custos de oportunidade.
 
 a Equação \ref{eq:prev} estabelece o custo da manutenção preventiva.
-
 
 \begin{equation}\label{eq:prev}
 prev_j =  pmc_j + pmoc_j,\ for\ j \in \{1, 2, 3, \ldots, m\}
@@ -165,10 +182,11 @@ O Problema de Planejamento de Voos e Manutenção é uma abordagem integrada de 
 
 Está relacionado ao problema de programação de voos, mas tem um foco maior na manutenção e na segurança operacional. É importante para garantir que os voos sejam executados com segurança e eficiência, além de reduzir custos de manutenção. Este problema envolve as seguintes variáveis:
 
+\vspace{0.5cm}
 
 \begin{minipage}[h]{.98\linewidth}
-	\begin{minipage}[t]{0.33\linewidth}
-		\begin{tabular}{l}\hline
+	\begin{minipage}[t]{0.25\linewidth}
+		\begin{tabular}{l}
 		Tempo de voo\\
 		Custo de combustível\\
 		Consumo por hora de voo\\
@@ -182,9 +200,9 @@ Está relacionado ao problema de programação de voos, mas tem um foco maior na
 		\end{tabular}
 	\end{minipage}
 	\hfill
-	\begin{minipage}[t]{0.53\linewidth}
+	\begin{minipage}[t]{0.72\linewidth}
 		\vspace{-2ex}
-		\includegraphics[width=1.0\linewidth]{Images/programacao_voo.jpg}
+		\includegraphics[width=0.8\linewidth]{Images/programacao_voo.jpg}\\
 		\small\textsuperscript{Origem: livre de direitos autorais em www.pexels.com}
 	\end{minipage}
 \end{minipage}
