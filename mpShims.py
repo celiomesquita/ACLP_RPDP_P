@@ -167,6 +167,7 @@ if __name__ == "__main__":
     seed         = sys.argv[1]
     instance     = sys.argv[2] # /home/celio/Projects/ACLP_RPDP_P/data20/scenario_2/instance_3/items.txt'
     volThreshold = float(sys.argv[3])
+    tipo         = float(sys.argv[4])
 
     values = instance.split('/')
 
@@ -190,7 +191,7 @@ if __name__ == "__main__":
 
     secBreak = 1.8
 
-    tipo = "FFD"
+    # tipo = "FFD"
 
     # --- distances and costs matrix ---
     dists = common.loadDistances("params/distances.txt")

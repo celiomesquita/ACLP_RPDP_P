@@ -1,2 +1,2 @@
-volThreshold
-0.92
+volThreshold tipo
+0.92         FFD
