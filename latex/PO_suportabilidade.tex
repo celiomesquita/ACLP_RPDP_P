@@ -1,10 +1,15 @@
 % !TeX spellcheck = pt_BR
-\documentclass{amsart}
+
+\documentclass{abntex2}
+\usepackage{abntex2cite}
+
+\usepackage[brazil]{babel}
+%sudo apt-get install texlive-lang-portuguese
 
 \usepackage{graphicx}
 \graphicspath{ {.} }
 
-\setkeys{Gin}{width=0.8\linewidth,keepaspectratio=true}
+%\setkeys{Gin}{width=0.8\linewidth,keepaspectratio=true}
 \usepackage{natbib}
 
 \usepackage{color}
@@ -24,7 +29,7 @@
 \usepackage{longtable}
 \newcommand{\elite}{\mathcal{E}}
 \usepackage{rotating}
-\usepackage{subfigure}
+%\usepackage{subfigure}
 \usepackage{lscape}
 \usepackage{multirow}
 \usepackage{adjustbox}
@@ -37,23 +42,24 @@
 \usepackage[table]{xcolor}
 \usepackage{booktabs}
 
+%\usepackage{hyperref}
 
 \begin{document}
 		
 	\title{Pesquisa Operacional em Suportabilidade}
-	\author{Antonio Celio Pereira de Mesquita}
-	\date{ Abril 2023 \\ celio.mesquita@gp.ita.br}
-	
+	\author{Antonio Celio Pereira de Mesquita\\ AeroLogLab-ITA\\  \small{celio.mesquita@gp.ita.br} }
+	\date{} % deixado vazio de propósito a fim de excluir a data
 
 \maketitle
 
+\begin{sloppypar}
 
 	Este capítulo aborda os problemas inerentes à suportabilidade de sistemas, esboça modelos matemáticos e as possibilidades do uso das ferramentas de Pesquisa Operacional na sua solução.
 	
 
 \section{Introdução}
 
-A capacidade de suporte de sistemas complexos refere-se à capacidade de um sistema tecnológico ou uma organização, de ser efetivamente mantido, atualizado, reparado e aprimorado temporalmente. Um sistema complexo é aquele sendo composto por muitas partes interconectadas que interagem de forma não linear, dificultando prever como o sistema se comportará em diferentes condições. Porém, um sistema complexo pode ser subdividido, para fins de análise, em subsistemas modeláveis e otimizáveis.
+A capacidade de suporte de sistemas complexos refere-se à aptidão de um sistema tecnológico ou uma organização, de ser efetivamente mantido, atualizado, reparado e aprimorado temporalmente. Um sistema complexo é aquele sendo composto por muitas partes interconectadas que interagem de forma não linear, dificultando prever como o sistema se comportará em diferentes condições. Porém, um sistema complexo pode ser subdividido, para fins de análise, em subsistemas modeláveis e otimizáveis.
 
 A capacidade de suporte envolve vários aspectos, incluindo a aptidão de diagnosticar problemas, a disponibilidade dos recursos necessários (como pessoal, ferramentas e peças de reposição), a eficiência dos processos de manutenção e reparo, a propriedade de fazer alterações no sistema sem causar interrupções e também de se adaptar a requisitos e ambientes em mudança.
 
@@ -61,7 +67,22 @@ Também é importante destacar que cada subsistema está exposto a riscos que pr
 
 Um sistema complexo e seus subsistemas devem ser projetados com a capacidade de suporte em mente desde a concepção. Isso pode envolver o projeto do sistema com componentes modulares que podem ser facilmente substituídos ou atualizados, utilizando-se de ferramentas de diagnóstico eficazes, garantindo que os recursos necessários estejam disponíveis e projetando processos de manutenção e reparo que sejam eficientes. Além disso, o sistema deve ser continuamente monitorado e avaliado para identificar possíveis problemas, riscos e possibilidades de melhoria.
 
-Melhores detalhes poderão ser encontrados em {\it Marques, Henrique Costa; Fernando Teixeira Mendes Abrahão; Guilherme Conceição Rocha. Mapping Challenges Through the ILS Approach. DOI: 10.4018/978-1-7998-3904-0.ch012}
+Melhores detalhes poderão ser encontrados em \cite{MarquesAbrahaoGuilherme:2020}.
+
+
+\subsection{O problema da programação da manutenção preventiva}
+
+O problema de programação da manutenção preventiva (PPMP) pode ser definido como o problema relacionado com a programação da manutenção vivenciado por um sistema que possua uma frota de veículos (aviões, caminhões, maquinas, tratores, trens, etc.) sujeita a múltiplas restrições. O PPMP envolve dois tipos básicos de programação de atividades:
+
+\begin{itemize}
+
+\item[I] Programação das tarefas de manutenção nas oficinas, onde os problemas são similares aos problemas de sequenciamento de tarefas (do inglês \textit{scheduling}), que envolvem, tipicamente, a alocação de recursos limitados a tarefas ao longo do tempo. Neste caso, a solução do problema está em encontrar uma sequência para todas as fases necessárias a uma revisão (testes, inspeções, delineamento das atividades, desmontagem, limpeza, reparos, substituições, montagem, pintura, testes, etc.), dadas limitações de recursos das oficinas.
+
+\item[II] Programação dos recolhimentos das aeronaves para as atividades de manutenção preventiva necessárias, segundo as restrições verificadas no sistema.
+
+\end{itemize}
+
+A solução, neste segundo caso, pouco ou nada tem a ver com a programação do que acontece nas oficinas, mas sim, com a ordenação dos recolhimentos para as atividades de manutenção preventiva necessários a uma frota de aeronaves ao longo de um período previsto de seu ciclo de vida. Este foi o foco do trabalho de  \cite{Abrahao:2006}.
 
 \subsection{Aplicações da Pesquisa Operacional no desenho da suportabilidade}\
 
@@ -90,7 +111,7 @@ No geral, a PO fornece um poderoso conjunto de ferramentas e técnicas para miti
 \subsection{Decisões sobre internalizar ou não a manutenção de 3° nível}\
 
 O processo de tomada de decisão sobre internalizar ou não a manutenção de 3º nível normalmente envolve a ponderação dos custos e benefícios associados a ambas as opções. Internalizar a manutenção pode ser uma opção mais econômica, pois elimina a necessidade de contratar e pagar pessoal de manutenção externo. Por outro lado, pode ser um processo mais demorado e complexo, pois requer treinamento e gerenciamento da equipe para garantir a qualidade do trabalho. Além disso, pode ser difícil obter peças e componentes com o mesmo custo de fornecedores de manutenção externos. No final das contas, a decisão deve ser baseada em uma modelagem e otimização dos custos, benefícios e riscos associados.
-Normalmente, esta análise é realizada pelo AeroLogLab por meio da plataforma OPUS 10 (www.systecongroup.com).
+Normalmente, esta análise é realizada pelo AeroLogLab (\url{www.aerologlab.ita.br}) por meio da plataforma OPUS 10 (\url{www.systecongroup.com}).
 
 \subsection{Análise de dados para diagnóstico ou prognóstico}\
 
@@ -104,7 +125,7 @@ Essa análise é frequentemente usada para antecipar e planejar futuras tarefas 
 	\small\textsuperscript{Origem: livre de direitos autorais em www.pexels.com}
 \end{figure}
 
-Informações relacionadas poderão ser encontradas em {\it Imbassahy, Dennys Wallace Duncan; Henrique Costa Marques, Guilherme Conceição Rocha, and Alberto Martinetti. Empowering Predictive Maintenance: A Hybrid Method to Diagnose Abnormal Situations. Applied Sciences 10.19 DOI: 10.4018/978-1-7998-3904-0.ch012 1-27}
+Informações relacionadas poderão ser encontradas em \cite{DuncanMarquesGuilhermeMartinetti:2005}.
 
 \subsection{Avaliação do impacto de atrasos e cancelamentos em rotas operacionais}\
 
@@ -122,7 +143,7 @@ Um modelo matemático e uma ferramenta de PO pertinente podem auxiliar no planej
 
 \subsection{Plano de manutenção resiliente com otimização e aprendizado de máquina}\
 
-{\it Machine Learning} (ML) – ou aprendizado da máquina – está ligado às máquinas que possuem capacidade de aprendizagem própria para realizar ações ou tomar decisões para atividades através de técnicas específicas, {\it Big Data} e inteligência artificial ({\it IA}). {\it Mitchell, Tom (1997). Machine Learning. New York: McGraw Hill. ISBN 0-07-042807-7. OCLC 36417892}  
+\textit{Machine Learning} (ML) – ou aprendizado da máquina – está ligado às máquinas que possuem capacidade de aprendizagem própria para realizar ações ou tomar decisões para atividades através de técnicas específicas, \textit{Big Data} e inteligência artificial (\textit{IA}), \cite{Mitchell:1997}.  
 
 O aprendizado pode ocorrer pela supervisão de um programador que faz a inserção de parâmetros no sistema, ou de forma interativa, onde os algoritmos adaptam-se aos dados, permitindo cruzar informações que façam previsões baseadas na análise de dados, sem terem sido programadas especificamente para isso.
 
@@ -132,7 +153,7 @@ Essa categoria de plano usa algoritmos de aprendizado de máquina para analisar 
 
 Essa abordagem pode melhorar a eficiência e a confiabilidade, além de reduzir o tempo de inatividade e os custos. Além disso, ajuda a identificar possíveis problemas antes que se tornem grandes, evitando assim reparos caros ou paradas não planejadas.
 
-Conhecido como um problema de programação ou {\it scheduling}, tarefas são agrupadas em pacotes temporais, algumas tarefas eventualmente poderão ser colocadas como {\it out-of-phase} (fora dos pacotes) e, dentro de cada pacote, as tarefas são agrupadas por zona, por qualificação do mecânico e por precedência entre tarefas.
+Conhecido como um problema de programação ou \textit{scheduling}, tarefas são agrupadas em pacotes temporais, algumas tarefas eventualmente poderão ser colocadas como \textit{out-of-phase} (fora dos pacotes) e, dentro de cada pacote, as tarefas são agrupadas por zona, por qualificação do mecânico e por precedência entre tarefas.
 O objetivo global é a eficiência traduzida como minimização de custos e do tempo de parada, bem como minimização dos custos de oportunidade.
 
 a Equação \ref{eq:prev} estabelece o custo da manutenção preventiva.
@@ -174,7 +195,7 @@ A Equação \ref{eq:min} estabelece a Função Objetivo, que visa minimizar cust
 
 \subsection{Problema de planejamento de voos e manutenção}\
 
-Do inglês {\it flight maintenance planning problem} (FMPP), podem planejados pelas companhias aéreas por meio da divisão em grupos de problemas elementares: desenvolvimento das rotas, desenho do cronograma, designação de frota, rotas de manutenção e Pareamento de tripulação. 
+Do inglês \textit{flight maintenance planning problem} (FMPP), podem planejados pelas companhias aéreas por meio da divisão em grupos de problemas elementares: desenvolvimento das rotas, desenho do cronograma, designação de frota, rotas de manutenção e Pareamento de tripulação. 
 
 As abordagens usadas para resolver esses sub-problemas podem ser divididas em dois grupos básicos: abordagens usadas apenas para resolver um dos problemas mencionados (abordagens de propósito único) e procedimentos que resolvem mais de um problema básicos em simultâneo (abordagens integradas).
 
@@ -202,7 +223,7 @@ Está relacionado ao problema de programação de voos, mas tem um foco maior na
 	\hfill
 	\begin{minipage}[t]{0.72\linewidth}
 		\vspace{-2ex}
-		\includegraphics[width=0.8\linewidth]{Images/programacao_voo.jpg}\\
+		\includegraphics[width=0.7\linewidth]{Images/programacao_voo.jpg}\\
 		\small\textsuperscript{Origem: livre de direitos autorais em www.pexels.com}
 	\end{minipage}
 \end{minipage}
@@ -219,7 +240,7 @@ Uma maneira de resolver problemas de roteamento e manutenção de aeronaves é p
 
 Em resumo, os problemas de roteamento e manutenção de aeronaves são considerações críticas para frotas compartilhadas de aeronaves, e o gerenciamento eficaz dessas questões é essencial para garantir a segurança, confiabilidade e lucratividade da frota. O uso de sistemas de prognóstico de integridade de aeronaves pode ajudar a resolver esses problemas, fornecendo monitoramento em tempo real e recursos de manutenção preditiva.
 
-Para detalhes sobre este assunto consulte {\it Pereira Barreto, Eduardo Afonso. Modelling the aircraft maintenance routing problem for fractional fleets with the inclusion of prognostics and health monitoring information. São José dos Campos. Instituto Tecnológico de Aeronáutica (Aeronautical Institute of Technology).}
+Para detalhes sobre este assunto consulte \cite{Eduardo:2022a}.
 
 
 
@@ -231,9 +252,9 @@ Isso pode envolver reorganizar o leiaute da instalação, como mover estações 
 
 O leiaute ideal de uma instalação para manutenção de aeronaves também inclui considerar a ergonomia e a segurança do pessoal, fornecendo espaço adequado para movimentação e equipamentos de segurança.
 
-Do ponto de vista da otimização, o objetivo seria minimizar os percursos de movimentação dos técnicos, conferindo agilidade e eficiência. As ferramentas mais utilizadas tenderiam a ficar mais acessíveis e as pouco utilizadas em posições mais recuadas.
+Do ponto de vista da otimização, o objetivo seria minimizar os percursos de movimentação dos técnicos, conferindo agilidade e eficiência. As ferramentas mais utilizadas tenderiam a ficar mais acessíveis e as pouco empregadas em posições mais recuadas.
 
-O modelo matemático geralmente utilizado é o de uma árvore geradora mínima ({\it minimum spanning tree}).
+O modelo matemático geralmente utilizado é o de uma árvore geradora mínima (\textit{ minimum spanning tree}).
 
 Dada um grafo (G, $\phi$), pode-se definir o peso de um subgráfo $H \subset G$ como:
 
@@ -261,7 +282,7 @@ Estes fatores incluem a proximidade de outras instalações de manutenção, a q
 
 O objetivo é maximizar a eficiência global da companhia aérea, minimizando custos.
 
-Um modelo simplicado pode ser semelhante a este:
+Um modelo simplificado pode ser semelhante a este:
 
 
 \begin{equation} \label{eq:fo3}
@@ -272,9 +293,9 @@ onde:
 
 $X_{ij}$ é a fração da demanda do cliente $j$ fornecida pela instalação $i$
 
-$z_i$ = 1 se a instalaçãoo estiver aberta, 0 caso contrário
+$z_i$ = 1 se a instalação estiver aberta, 0 caso contrário
 
-$c_{ij}$ é o custo do serviço e distribuiçãoo para fornecer aos clientes a partir da instalação $i$
+$c_{ij}$ é o custo do serviço e distribuição para fornecer aos clientes a partir da instalação $i$
 
 $f_i$ é o custo fixo de construir a instalação $i$
 
@@ -292,7 +313,7 @@ A otimização do estoque de peças sobressalentes pode ajudar uma empresa a eco
 
 Assumindo que a demanda é conhecida a partir dos dados do ano anterior e que seria constante para uma temporada inteira, mas diferente para diferentes temporadas.
 
-Um modelo simples que representa essa situação é o da quantidade de pedido econômico ({\it economic order quantity} - EOQ), às vezes também é chamado de modelo econômico de tamanho de lote.
+Um modelo simples que representa essa situação é o da quantidade de pedido econômico (\textit{ economic order quantity} - EOQ), às vezes também é chamado de modelo econômico de tamanho de lote.
 
 O modelo EOQ é a quantidade do pedido que minimiza os custos totais de manutenção e os custos de pedido.
 
@@ -312,19 +333,19 @@ A fórmula EOQ é a raiz quadrada de (2 x 1.000 fones x custo do pedido de \$2) 
 
 \subsection{Estimativas de abastecimento por meio de aprendizado de máquina}\
 
-{\it Machine Learning} (ML) – ou aprendizado da máquina – está ligado às máquinas que possuem capacidade de aprendizagem própria para realizar ações ou tomar decisões para atividades através de técnicas específicas, {\it Big Data} e inteligência artificial ({\it IA}). {\it Mitchell, Tom (1997). Machine Learning. New York: McGraw Hill. ISBN 0-07-042807-7. OCLC 36417892}  
+\textit{Machine Learning} (ML) – ou aprendizado da máquina – está ligado às máquinas que possuem capacidade de aprendizagem própria para realizar ações ou tomar decisões para atividades através de técnicas específicas, \textit{Big Data} e inteligência artificial (\textit{IA}), \cite{Mitchell:1997}.
 
 O aprendizado pode ocorrer pela supervisão de um programador que faz a inserção de parâmetros no sistema, ou interativamente, no qual os algoritmos adaptam-se aos dados, permitindo cruzar informações que façam previsões baseadas na análise de dados, sem que tenham sido programadas especificamente para isso.
 
-{\bf Importância}: A importância do ML no controle de estoque é projetar a demanda com maior segurança e precisão, prevendo fornecimentos futuros sem grandes riscos e viabilizando pedidos de compras automaticamente. Além disso, o ML pode prever perdas e solucionar problemas que comprometem os resultados, como rupturas, custos elevados com carregamentos e baixo giro dos produtos em suas respectivas curvas.
+\textbf{Importância}: A importância do ML no controle de estoque é projetar a demanda com maior segurança e precisão, prevendo fornecimentos futuros sem grandes riscos e viabilizando pedidos de compras automaticamente. Além disso, o ML pode prever perdas e solucionar problemas que comprometem os resultados, como rupturas, custos elevados com carregamentos e baixo giro dos produtos em suas respectivas curvas.
 
-{\bf Vantagens}: A aprendizagem de máquina influencia as atividades mais complexas da logística e dos armazéns, proporcionando maior precisão e transparência nos dados.
+\textbf{Vantagens}: A aprendizagem de máquina influencia as atividades mais complexas da logística e dos armazéns, proporcionando maior precisão e transparência nos dados.
 
-{\bf Desempenho da entrega}: A eficiência na gestão de entregas e os custos de frete podem ser aperfeiçoados com a utilização do ML. Com parâmetros e uma extensa base de dados, a escolha dos métodos de transporte é mais precisa, diminuindo os riscos para toda a cadeia de suprimentos.
+\textbf{Desempenho da entrega}: A eficiência na gestão de entregas e os custos de frete podem ser aperfeiçoados com a utilização do ML. Com parâmetros e uma extensa base de dados, a escolha dos métodos de transporte é mais precisa, diminuindo os riscos para toda a cadeia de suprimentos.
 
-{\bf Previsão da demanda}: Com o aprendizado de máquina, a previsão da demanda se torna mais definida, auxiliando no planejamento estratégico de vendas e logística e permitindo que as operações trabalhem com baixos níveis de estoque.
+\textbf{Previsão da demanda}: Com o aprendizado de máquina, a previsão da demanda se torna mais definida, auxiliando no planejamento estratégico de vendas e logística e permitindo que as operações trabalhem com baixos níveis de estoque.
 
-{\bf Visibilidade de toda a cadeia de suprimento}: O ML, juntamente à telemática (Internet das Coisas - loT), permite que toda a logística seja monitorada em tempo real, aumentando os resultados das entregas e a comunicação entre setores.
+\textbf{Visibilidade de toda a cadeia de suprimento}: O ML, juntamente à telemática (Internet das Coisas - loT), permite que toda a logística seja monitorada em tempo real, aumentando os resultados das entregas e a comunicação entre setores.
 
 \subsection{Simulação dos processos internos de suprimento e otimização de leiaute}\
 
@@ -334,19 +355,19 @@ A simulação de processos internos e otimização de leiaute podem ajudar a red
 
 Do ponto de vista da otimização, o objetivo seria minimizar os percursos de movimentação dos suprimentistas, conferindo agilidade e eficiência. Os componentes mais fornecidos tenderiam a ficar mais acessíveis e os pouco fornecidos em armários mais recuados e prateleiras mais altas.
 
-O modelo matemático geralmente utilizado é o de uma árvore geradora mínima ({\it minimum spanning tree}).
+O modelo matemático geralmente utilizado é o de uma árvore geradora mínima (\textit{minimum spanning tree}).
 
-Dada um grafo (G, $\phi$), pode-se definir o peso de um subgráfo $H \subset G$ como:
+Dada um grafo (G, $\phi$), pode-se definir o peso de um subgrafo $H \subset G$ como:
 
-\begin{equation} \label{eq:fo1}
+\begin{equation} \label{eq:fo4}
 	\phi(H) \gets \sum_{e \in E(H)} \phi (e)
 \end{equation}
 
 $E(H)$ é o subconjunto de arestas $e$ de $H$.
 
-Em um grafo conectado $G$, uma árvore geradora mínima $T$ é uma árvore com valor mínimo.
+Em um grafo conectado $G$, uma árvore geradora mínima $T$ é um grafo com valor mínimo.
 
-\begin{equation} \label{eq:fo2}
+\begin{equation} \label{eq:fo5}
 	min_T\ H(T) \gets \sum_{e \in E(H)} \phi (e) \times X_{ij}
 \end{equation}
 
@@ -357,15 +378,15 @@ Considere $X_{ij}$ igual a 1 se a aresta (i,j) está na árvore, 0 caso contrár
 
 \subsection{Otimização da localização de instalações de distribuição}\
 
-A otimização da localização das instalações de distribuição é um aspecto importante do gerenciamento da cadeia de suprimentos. Ao localizar estrategicamente os centros de distribuição próximos ao ponto de demanda, as empresas podem reduzir os custos de transporte, reduzir os prazos de entrega e melhorar o atendimento ao cliente.
+A otimização da localização das instalações de distribuição é um aspecto importante do gerenciamento da cadeia de suprimentos. Ao localizar estrategicamente os centros de distribuição próximos ao ponto de demanda, as empresas podem reduzir os custos de transporte, minimizar os prazos de entrega e melhorar o atendimento ao cliente.
 
-A otimização da localização das instalações de distribuição geralmente é feita usando uma combinação de modelos analíticos, como sistemas de informações geográficas (GIS), para identificar os locais mais adequados e, em seguida, usar algoritmos de otimização para escolher a localização ideal. Esse processo pode ajudar a garantir que o centro de distribuição esteja localizado no local mais eficiente e econômico.
+A otimização da localização das instalações de distribuição geralmente é feita usando uma combinação de modelos analíticos, como sistemas de informações geográficas, para identificar os locais mais adequados e, em seguida, usar algoritmos de otimização para escolher a localização ideal. Esse processo pode ajudar a garantir que o centro de distribuição esteja localizado no local mais eficiente e econômico.
 
 Localizações não otimizadas pode acarretar ineficiência na suportabilidade de sistemas complexos.
 
 \subsection{Análise multicritério na seleção de fornecedores}\
 
-As análises multicritério geralmente utilizam os métodos {\it analytic network process} (ANP) e {\it analytic hierarchy process} (AHP).
+As análises multicritério geralmente utilizam os métodos \textit{analytic network process} (ANP) e \textit{analytic hierarchy process} (AHP).
 
 O ANP é uma forma mais geral do AHP usado na análise de decisão multicritério.
 
@@ -379,22 +400,10 @@ A experiência pode ser técnica ou de vendas, e as habilidades de gestão podem
 
 Supondo-se que haja três candidatos, compara-se pares de competências, pontuando-se de 0 a 9 para um candidato ou para o outro, sendo que, no final, uma operação entre matrizes define graus de acordo com todas as avaliações par-a-par realizadas por um ou por mais de um avaliador.
 
-Um exemplo prático pode ser encontrado em:
-
-\begin{itemize}
-\item tool.aerologlab.ita.br/mcdm2
-\end{itemize}
+Um exemplo prático pode ser encontrado em \url{tool.aerologlab.ita.br/mcdm2}.
 
 No caso de uma seleção de fornecedores, será preciso definir o objetivo, os critérios e subcritérios de avaliação, bem como os fornecedores candidatos.
-
-Detalhes do funcionamento podem ser encontrados em:
-
-\begin{itemize}
-\item Saaty, Thomas L. (1996). Decision Making with Dependence and Feedback: The Analytic Network Process. Pittsburgh, Pennsylvania: RWS Publications. ISBN 0-9620317-9-8.
-
-\item Saaty, Thomas L. (2005). Theory and Applications of the Analytic Network Process: Decision Making with Benefits, Opportunities, Costs and Risks. Pittsburgh, Pennsylvania: RWS Publications. ISBN 1-888603-06-2.
-\end{itemize}
-
+Detalhes do funcionamento podem ser encontrados em \cite{Saaty:1996} e \cite{Saaty:2005}.
 
 
 \subsection{Problema de roteirização como fator impactante da suportabilidade}\
@@ -435,5 +444,11 @@ Destaca-se, ainda, que as organizações devam considerar o desenvolvimento de r
 
 \subsection{Previsão das principais métricas de desempenho e custo para um novo sistema}\
 
+
+%\bibliographystyle{elsarticle-harv}
+
+\bibliography{livro}
+
+\end{sloppypar}
 
 \end{document}

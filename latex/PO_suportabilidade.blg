@@ -1,0 +1,55 @@
+This is BibTeX, Version 0.99d (TeX Live 2019/Debian)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: PO_suportabilidade.aux
+The style file: elsarticle-harv.bst
+Illegal, another \bibstyle command---line 112 of file PO_suportabilidade.aux
+ : \bibstyle
+ :          {abntex2-num}
+I'm skipping whatever remains of this command
+Database file #1: abntex2-options.bib
+Warning--entry type for "abnt-url-package=url" isn't style-file defined
+--line 199 of file abntex2-options.bib
+Database file #2: livro.bib
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+You've used 8 entries,
+            2990 wiz_defined-function locations,
+            677 strings with 6795 characters,
+and the built_in function-call counts, 3980 in all, are:
+= -- 285
+> -- 110
+< -- 7
++ -- 44
+- -- 36
+* -- 352
+:= -- 589
+add.period$ -- 22
+call.type$ -- 8
+change.case$ -- 48
+chr.to.int$ -- 8
+cite$ -- 8
+duplicate$ -- 342
+empty$ -- 347
+format.name$ -- 47
+if$ -- 758
+int.to.chr$ -- 1
+int.to.str$ -- 1
+missing$ -- 61
+newline$ -- 53
+num.names$ -- 28
+pop$ -- 161
+preamble$ -- 1
+purify$ -- 45
+quote$ -- 0
+skip$ -- 117
+stack$ -- 0
+substring$ -- 104
+swap$ -- 191
+text.length$ -- 2
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 60
+warning$ -- 0
+while$ -- 24
+width$ -- 0
+write$ -- 120
+(There was 1 error message)
