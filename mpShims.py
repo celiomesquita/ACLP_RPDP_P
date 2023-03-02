@@ -120,7 +120,7 @@ def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict
     else:
         mode = "Serial"
 
-    surplus = 2.0-threshold
+    surplus = 1. + 3. *(1. - threshold)
 
     lock  = mp.Lock()
 
@@ -288,6 +288,6 @@ if __name__ == "__main__":
 
                 sNodeAccum += float(items[j].S)
 
-    print(sNodeAccum) # to be captured by iRace
+    print(-1 * sNodeAccum) # to be captured by iRace. -1 because its maximization
 
 
