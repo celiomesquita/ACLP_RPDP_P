@@ -229,23 +229,23 @@ if __name__ == "__main__":
     # method  =  f"{sys.argv[1]}"
     # surplus =  f"{sys.argv[2]}"
 
-    dists = common.loadDistances()
+    dists = common.loadDistances("params/distances.txt")
     costs = [[0.0 for _ in dists] for _ in dists]
 
     secBreak     = 1.8 # second
-    volThreshold = 0.92 # 0.92 best for scenario 1
+    volThreshold = 0.98 # 0.92 best for scenario 1
 
     scenarios = [1,2,3,4,5,6]
     # scenarios = [2]
 
-    surplus   = "data20"
-    # surplus   = "data50"
+    # surplus   = "data20"
+    surplus   = "data50"
     # surplus   = "data100"
 
     # methods = ["Shims","mpShims","GRB"]
     
-    # methods = ["Shims"]
-    methods = ["mpShims"]
+    methods = ["Shims"]
+    # methods = ["mpShims"]
     # tipo = "KP"
     tipo = "FFD"
 

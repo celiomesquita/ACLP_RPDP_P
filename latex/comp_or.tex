@@ -1094,7 +1094,7 @@ We test our methods with 126 different instances: six operational scenarios with
 
 The final experiments are performed on a 64-bit, 16GiB, 3.6GHz, 8-core AMD® Fx-8320e processor, 2 threads per core, with {\it Linux Ubuntu 20} as the operational system and {\it Python 3.8.2} as the programming language.
 
-A relevant problem with meta-heuristics is the parameter's adjustment to extract the best possible efficiency in the optimization. The bulk of the tools to fine-tune these parameters utilize a statistical backdrop that enables them to make accurate predictions regarding the differences in candidate configurations' performance. Inadequacies in the design of the statistical experiment may therefore lead to erroneous results from the statistical tests and, subsequently, cause the approach to produce inaccurate comparisons of candidate configurations. That is why all parameters were set using the $iRace$ package \citep{LopezIbanezManuel2016}. Supplying $iRace$ with a range for $volThreshold$ as [0.80 to 0.99], {\it iRace} yielded 0.8542 for volume surplus 20\%, by training on the uneven instances numbers.
+A relevant problem with meta-heuristics is the parameter's adjustment to extract the best possible efficiency in the optimization. The bulk of the tools to fine-tune these parameters utilize a statistical backdrop that enables them to make accurate predictions regarding the differences in candidate configurations' performance. Inadequacies in the design of the statistical experiment may therefore lead to erroneous results from the statistical tests and, subsequently, cause the approach to produce inaccurate comparisons of candidate configurations. That is why all parameters were set using the $iRace$ package \citep{LopezIbanezManuel2016}. Supplying $iRace$ with a range for $volThreshold$ as [0.80 to 0.99], {\it iRace} yielded 0.92, by training on the uneven instances numbers. The values tested for 20\%, 50\%, and 100\% volume surpluses were very close, considering the confidence level offered by {\it iRace}.
 
 For parallelization, we used the {\it Python Multi-processing} package, which implements {\it process-based parallelism} or {\it parallel shared memory algorithm}. According to \cite{multiprocessing}, {\it Multi-processing} is a package that supports spawning processes using an API similar to the {\it Python Threading} package.
 
@@ -1138,7 +1138,7 @@ In each $scenario$, we indicate in bold the best value of $f$\/ found. In each t
 &                                                & {\it run-time (s)} &  8          &   14        &  25         &  95         &    217      &  1719        &  1.0       \\%2078
 
 \cmidrule{2-10}		                       
-&\multirow{2}{*}{ $Shims$}                       & $f$                & 9.66        &  6.37       &  9.58       &  10.87      &   12.24     & 11.94        &  0.82\\%
+&\multirow{2}{*}{ $Shims$}                       & $f$                & 9.69        &  6.37       &  9.58       &  11.07      &   12.24     & 11.94        &  0.82\\%
 &                                                & {\it run-time (s)} &  < 1        &  3          &    5        &   11        &   27        & 342          &  5.3\\%389
 
 \cmidrule{2-10}		                       
