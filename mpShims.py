@@ -80,7 +80,7 @@ def getBestShims(pallet, items, k, nodeTorque, solDict, cfg, surplus, itemsDict,
             indexes = kp.Solve(capacity, volumes, scores)
 
             for w, item in enumerate(whip):
-                if indexes[w] == 1 and pallet.isFeasible(item, 1.0, k, nodeTorque, cfg, itemsDict, lock):
+                if indexes[w] == 1 and pallet.isFeasible(item, 1.0, k, nodeTorque,  cfg, itemsDict, lock):
                     pallet.putItem(item, nodeTorque, solDict, N, itemsDict, lock)
 
     if tipo == "FFD":
@@ -167,7 +167,7 @@ if __name__ == "__main__":
     seed         = sys.argv[1]
     instance     = sys.argv[2] # /home/celio/Projects/ACLP_RPDP_P/data20/scenario_2/instance_3/items.txt'
     volThreshold = float(sys.argv[3])
-    tipo         = float(sys.argv[4])
+    tipo         = sys.argv[4]
 
     values = instance.split('/')
 

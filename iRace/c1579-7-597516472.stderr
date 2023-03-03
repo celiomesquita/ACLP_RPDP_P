@@ -1,8 +1,0 @@
-Traceback (most recent call last):
-  File "/home/celio/Projects/ACLP_RPDP_P/iRace/../mpShims.py", line 249, in <module>
-    nodeTorque = mp.Value('d', 0.0) # a multiprocessing double type variable
-  File "/usr/lib/python3.10/multiprocessing/context.py", line 136, in Value
-    ctx=self.get_context())
-  File "/usr/lib/python3.10/multiprocessing/context.py", line 237, in get_context
-    def get_context(self, method=None):
-KeyboardInterrupt
