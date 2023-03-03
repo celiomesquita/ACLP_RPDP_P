@@ -145,43 +145,45 @@ Considering air cargo transport, Table \ref{tab:sa} lists the main works in the 
 	\caption{Air cargo transport: literature, problems and features}  \label{tab:sa}
 	\scriptsize
 	\renewcommand{\arraystretch}{1.1} % alturas das linhas \specialcell{{\bf Parallel}\\{\bf heuristics}}
-	\begin{tabular}{r|cc|cc|cc|ccc|c}
+	\begin{tabular}{r|ccc|cc|cc|ccc|c}
 		\toprule
-		                            & {\bf APP}  & {\bf WBP}  &  {\bf SPDP}   &{\bf TSP}   & {\bf 2D}  & {\bf 3D}  & {\bf Heu}  & {\bf Int}  & {\bf Lin} & \specialcell{{\bf Parallel}\\{\bf heuristics}}\\
+		                            & {\bf APP}  & {\bf WBP}   & {\bf MLU} &{\bf SPDP}&{\bf TSP} & {\bf 2D} & {\bf 3D} & {\bf Heu} & {\bf Int}  & {\bf Lin} & \specialcell{{\bf Parallel}\\{\bf heuristics}}\\
 		\midrule
-		\cite{LarsenMikkelsen1979}  & $.$        & $\bigstar$ & $.$          & $.$        & $.$       & $.$       & $\bigstar$ & $.$        &  $.$&  $.$ \\
-		\cite{Brosh1981}  & $.$ & $\bigstar$  & $.$   & $.$ & $.$ & $.$   & $.$  & $.$  &  $\bigstar$&  $.$ \\
-		\cite{Kevin1992}  & $.$ & $\bigstar$  & $.$ & $.$ & $.$ &$.$   & $.$  & $\bigstar$  &  $.$ &  $.$\\
-		\cite{Heidelberg1998}  & $.$ & $\bigstar$  & $.$ & $.$ & $\bigstar$ &$.$   & $\bigstar$  & $.$  &  $.$&  $.$ \\
-		\cite{MongeauBes2003}    & $\bigstar$ & $\bigstar$   & $.$ & $.$ & $.$ & $.$   & $.$  & $\bigstar$  &  $.$ &  $.$\\
-		\cite{fok2004optimizing} & $.$ & $\bigstar$   & $.$ & $.$ & $.$ & $.$   & $.$  & $\bigstar$  &  $.$&  $.$ \\	
-		\cite{Chan2006}  & $\bigstar$ & $.$    & $.$ & $.$ & $.$ & $\bigstar$  & $\bigstar$  & $.$  &  $.$&  $.$ \\
-		\cite{KaluznyBohdanL2009Oalb}  & $.$ & $\bigstar$  & $.$  & $.$ & $\bigstar$ &$.$  & $.$  & $\bigstar$  &  $.$&  $.$ \\
-		\cite{Verstichel2011}   & $.$ & $\bigstar$    & $.$ & $.$ & $.$ & $.$   & $.$  & $\bigstar$  &  $.$&  $.$ \\
-		\cite{MesquitaCunha2011}   & $.$ & $.$    & $\bigstar$ & $.$ & $.$ & $.$   & $\bigstar$  & $.$  &  $.$ &  $.$\\		
-		\cite{Limbourg2012} & $.$ & $\bigstar$  & $.$ & $.$ & $.$ & $.$   & $.$  & $\bigstar$  &  $.$&  $.$ \\
+		\cite{LarsenMikkelsen1979}  & $.$        & $\bigstar$  & $.$       & $.$      & $.$      & $.$      & $.$      & $\bigstar$& $.$        &  $.$       &  $.$ \\
+		\cite{Brosh1981}            & $.$        & $\bigstar$  & $.$       & $.$      & $.$      & $.$      & $.$      & $.$       & $.$        &  $\bigstar$&  $.$ \\
+		\cite{Kevin1992}            & $.$        & $\bigstar$  & $.$       & $.$      & $.$      & $.$      & $.$      & $.$       & $\bigstar$ &  $.$       &  $.$\\
+		\cite{Heidelberg1998}       & $.$        & $\bigstar$  & $.$       & $.$      & $.$      &$\bigstar$& $.$      & $\bigstar$& $.$        &  $.$       &  $.$ \\
+		\cite{MongeauBes2003}       & $\bigstar$ & $\bigstar$  & $.$       & $.$      & $.$      & $.$      & $.$      & $.$       & $\bigstar$ &  $.$       &  $.$\\
+		\cite{fok2004optimizing}    & $.$        & $\bigstar$  & $.$       & $.$      & $.$      & $.$      & $.$      & $.$       & $\bigstar$ &  $.$       &  $.$ \\	
+		\cite{Chan2006}             & $\bigstar$ & $.$         & $.$       & $.$      & $.$      & $.$      &$\bigstar$& $\bigstar$& $.$        &  $.$       &  $.$ \\
+		\cite{KaluznyBohdanL2009Oalb}& $.$       & $\bigstar$  & $.$       & $.$      & $.$      &$\bigstar$& $.$      & $.$       & $\bigstar$ &  $.$       &  $.$ \\
+		\cite{Verstichel2011}       & $.$        & $\bigstar$  & $.$       & $.$      & $.$      & $.$      & $.$      & $.$       & $\bigstar$ &  $.$       &  $.$ \\
+		\cite{MesquitaCunha2011}    & $.$        & $.$         & $.$       &$\bigstar$& $.$      & $.$      & $.$      & $\bigstar$& $.$        &  $.$       &  $.$ \\		
+		\cite{Limbourg2012}         & $.$        & $\bigstar$  & $.$       & $.$      & $.$      & $.$      & $.$      & $.$       & $\bigstar$ &  $.$       &  $.$ \\
 		
-		\cite{kaspi2019} & $.$ & $.$  & $.$ & $\bigstar$ & $.$ & $.$   & $\bigstar$  & $.$  &  $.$&  $.$ \\
+		\cite{kaspi2019}            & $.$        & $.$         & $.$       & $.$      &$\bigstar$& $.$      & $.$      &$\bigstar$ & $.$        &  $.$       &  $.$ \\
 		
-		\cite{RoesenerHall2014}  & $\bigstar$ & $\bigstar$  & $.$  & $.$ & $.$ & $\bigstar$   & $.$  & $\bigstar$  &  $.$&  $.$ \\
-		\cite{Vancroonemburg2014}  & $\bigstar$ & $\bigstar$   & $.$ & $.$ & $.$ & $.$   & $.$  & $\bigstar$  &  $.$&  $.$ \\
-		\cite{LurkinSchyns2015} & $.$ & $\bigstar$  & $\bigstar$ & $.$  & $.$ & $.$   & $.$  & $\bigstar$  &  $.$&  $.$ \\
-		\cite{RoesenerBarnes2016}  & $.$ & $\bigstar$   & $.$ & $.$ & $.$ & $.$   & $\bigstar$  & $.$  &  $.$&  $.$ \\
-		\cite{PaquaySchynsLimbourg2016,PaquayLimbourgSchynsOliveira2018}  & $\bigstar$ & $\bigstar$ & $.$ & $.$ & $.$ & $\bigstar$ & $\bigstar$  & $\bigstar$ & $.$&  $.$ \\
-		\cite{YangLiuGao2018} & $.$ & $\bigstar$  & $.$  & $.$ & $\bigstar$  & $.$ & $\bigstar$ & $.$  & $.$&  $.$ \\
-		\cite{wong2020} & $\bigstar$  & $\bigstar$  & $.$  & $.$   & $.$  & $.$ & $.$ & $\bigstar$  & $.$&  $.$  \\
-		\cite{eugene2021} & $\bigstar$ & $\bigstar$ & $.$  & $.$   & $.$ & $.$ & $.$ & $\bigstar$  & $.$&  $.$  \\
-		\cite{zhao2021} & $.$ & $\bigstar$ & $.$  & $.$  & $.$ & $.$ & $.$  & $\bigstar$ &  $.$&  $.$ \\
+		\cite{RoesenerHall2014}     & $\bigstar$ & $\bigstar$  & $.$       & $.$      & $.$      & $.$      &$\bigstar$& $.$       & $\bigstar$ &  $.$       &  $.$ \\
+		\cite{Vancroonemburg2014}   & $\bigstar$ & $\bigstar$  & $.$       & $.$      & $.$      & $.$      & $.$      & $.$       & $\bigstar$ &  $.$       &  $.$ \\
+		\cite{LurkinSchyns2015}     & $.$        & $\bigstar$  & $\bigstar$&$\bigstar$& $.$      & $.$      & $.$      & $.$       & $\bigstar$ &  $.$       &  $.$ \\
+		\cite{RoesenerBarnes2016}   & $.$        & $\bigstar$  & $.$       & $.$      & $.$      & $.$      & $.$      & $\bigstar$& $.$        &  $.$       &  $.$ \\
 		
-		\cite{MesquitaSanches2023}   & $\bigstar$ & $\bigstar$  & $\bigstar$& $\bigstar$ & $.$ & $.$ & $\bigstar$ & $\bigstar$   &  $.$&  $.$  \\
+		\cite{PaquaySchynsLimbourg2016,PaquayLimbourgSchynsOliveira2018}&$\bigstar$&$.$&$.$&$.$&$.$&$.$     &$\bigstar$&$\bigstar$ & $\bigstar$&$\bigstar$  &  $.$ \\
 		
-		{\bf This work}   & $\bigstar$ & $\bigstar$  & $\bigstar$& $\bigstar$ & $.$ & $.$ & $\bigstar$ & $\bigstar$   &  $.$&  $\bigstar$  \\
+		\cite{YangLiuGao2018}       & $.$        & $\bigstar$  & $.$       & $.$      & $.$      &$\bigstar$& $.$      & $\bigstar$ & $.$       & $.$        &  $.$ \\
+		\cite{wong2020}             & $\bigstar$ & $\bigstar$  & $.$       & $.$      & $.$      & $.$      & $.$      & $.$        & $\bigstar$& $.$        &  $.$  \\
+		\cite{eugene2021}           & $\bigstar$ & $\bigstar$  & $.$       & $.$      & $.$      & $.$      & $.$      & $.$        & $\bigstar$& $.$        &  $.$  \\
+		\cite{zhao2021}             & $.$        & $\bigstar$  & $.$       & $.$      & $.$      & $.$      & $.$      & $.$        & $\bigstar$&  $.$       &  $.$ \\
+		
+		\cite{MesquitaSanches2023}  & $\bigstar$ & $\bigstar$  & $.$       &$\bigstar$&$\bigstar$& $.$      & $.$      & $\bigstar$ & $\bigstar$&  $.$       &  $.$  \\
+		
+		{\bf This work}             & $\bigstar$ & $\bigstar$  &$\bigstar$ &$\bigstar$&$\bigstar$& $.$      & $.$      & $\bigstar$ & $\bigstar$&  $.$       &  $\bigstar$  \\
 		\bottomrule 
 	\end{tabular}
 	\normalsize 
 \end{table}
 
-As can be seen, so far \cite{LurkinSchyns2015} is the only work that simultaneously addresses an air cargo (WBP) and a flight itinerary (PDP) sub-problem. Although it is innovative, strong simplifications were imposed by the authors: in relation to loading, APP was ignored; with regard to routing, it is assumed a pre-defined flight plan restricted to two legs. It is important to note that these authors consider an aircraft with two doors, and the minimization of loading and unloading costs at the intermediate node was modelled through a container sequencing problem. Referring directly to this work, \cite[p. 409]{BrandtStefan2019} comment: {\it However, not even these sub-problems are acceptably solved for real-world problem sizes or the models omit some practically relevant constraints}. 
+As can be seen, so far \cite{LurkinSchyns2015} is the only work that simultaneously addresses an air cargo (WBP) and a flight itinerary (PDP) sub-problem. Although it is innovative, strong simplifications were imposed by the authors: in relation to loading, APP was ignored; with regard to routing, it is assumed a pre-defined flight plan restricted to two legs. It is important to note that these authors consider an aircraft with two doors, and the minimization of loading and unloading (MLU) costs at the intermediate node was modelled through a container sequencing problem. Referring directly to this work, \cite[p. 409]{BrandtStefan2019} comment: {\it However, not even these sub-problems are acceptably solved for real-world problem sizes or the models omit some practically relevant constraints}. 
 
 There are real situations that are much more complex. In this work, we consider a practical case in Brazil, which is the largest economy in Latin America. Due to its dimensions, this country has the largest air market on the continent with $2,499$\/ registered airports, of which $1,911$\/ are private and $588$\/ are public. Although it is an immense distribution network, airlift missions consider 3 to 5 nodes per flight plan. Throughout this work, we address routes with up to 7 nodes, as can be seen in Table \ref{tab:costs} and Figure \ref{fig:nodes}.
 
