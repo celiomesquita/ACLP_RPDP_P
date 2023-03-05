@@ -79,8 +79,9 @@ def getBestShims(pallet, items, k, nodeTorque, solDict, cfg, surplus, itemsDict,
                     
             indexes = kp.Solve(capacity, volumes, scores)
 
-            for w, item in enumerate(whip):
-                if indexes[w] == 1 and pallet.isFeasible(item, 1.0, k, nodeTorque,  cfg, itemsDict, lock):
+            for i in indexes:
+                item = whip[i]
+                if pallet.isFeasible(item, 1.0, k, nodeTorque,  cfg, itemsDict, lock):
                     pallet.putItem(item, nodeTorque, solDict, N, itemsDict, lock)
 
     if tipo == "FFD":
@@ -112,6 +113,35 @@ def getBestShims(pallet, items, k, nodeTorque, solDict, cfg, surplus, itemsDict,
             if item != None and pallet.isFeasible(item, 1.0, k, nodeTorque,  cfg, itemsDict, lock):
                 pallet.putItem(item, nodeTorque, solDict, N, itemsDict, lock)
 
+
+def path_relinking(pallets, items, solDict_fr, solDict_to):
+
+    N = len(items)
+    # i = pallet.ID
+    # j = item.ID 
+    # x = N*i+j
+
+    solDict_best = solDict_fr["solMatrix"][:]
+    solDict_cur = solDict_fr["solMatrix"][:]
+
+    for pos, val in (solDict_to["solMatrix"]):
+
+        # i = (x-j)/N
+        # j = x - N*i
+        
+        cur_pos = solDict_cur["solMatrix"].index(val)
+
+        solDict_cur["solMatrix"][cur_pos] = solDict_cur["solMatrix"][pos]
+
+        solDict_cur["solMatrix"][pos] = val
+
+        
+
+
+        # solDict_best = solDict_fr["solMatrix"][x]
+            
+    
+    return solDict_best
 
 def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict, itemsDict, tipo):
 

@@ -5,7 +5,7 @@
 import gurobipy as gp
 from gurobipy import GRB
 
-from time import time
+# from time import time
 # import multiprocessing as mp
 # import numpy as np
 
@@ -27,9 +27,11 @@ def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
 
     # initialize a model
     mod = gp.Model()
+    mod = mod.relax()
     
     # decision matrix for which items will be put in which pallet in node "k"         
-    X = [ [ mod.addVar(name=f"X[{i}],[{j}]", vtype=GRB.BINARY) for j in set_N ] for i in set_M ]      
+    # X = [ [ mod.addVar(name=f"X[{i}],[{j}]", vtype=GRB.BINARY) for j in set_N ] for i in set_M ]  
+    X = [ [ mod.addVar(name=f"X[{i}],[{j}]", vtype=GRB.CONTINUOUS) for j in set_N ] for i in set_M ]   
 
     mod.setObjective(sum( X[i][j] * items[j].S for i in set_M for j in set_N ))
 
@@ -83,18 +85,24 @@ def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
     )  
     # lateral torque was never significant. So, we did not include lateral torque constraints
 
-    msgdict = {2:'Optimal', 3:'Infeasible', 13:"Suboptimal", 9:"Time limited"}
+    # msgdict = {2:'Optimal', 3:'Infeasible', 13:"Suboptimal", 9:"Time limited"}
 
     mod.setParam('OutputFlag', 0)
     mod.Params.TimeLimit = secBreak
     mod.Params.Threads = 1
 
+    # mod.setParam(GRB.Param.LogToConsole, 0)
+
     mod.optimize()
 
-    print(f"{mod.objVal} {msgdict[mod.status]} UB: {mod.ObjBound}")
+    bound = 0
+    for i in set_M:
+        bound += pallets[i].PCS
 
     # checking if a solution was found
-    if mod.SolCount > 0:  
+    if mod.SolCount > 0:
+
+        bound = mod.ObjBound
 
         # reset empty pallets torque
         nodeTorque.value = 0.0
@@ -118,7 +126,7 @@ def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
                     pallets[i].PCS += items[j].S
                     pallets[i].PCV += items[j].V
 
-    return mod.status
+    return mod.status, bound
 
 if __name__ == "__main__":
 

@@ -9,6 +9,7 @@ import mpShims
 import mpACO
 import optcgcons
 import mipGRB
+from plots import TTT
 
 def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus, tipo, numOptDict, rampDistCG, afterDict, beforeDict):
     """
@@ -136,11 +137,10 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
             mpACO.Solve(  pallets, items, cfg, k, volThreshold, secBreak, "s", nodeTorque, solDict, itemsDict) 
 
         if method == "GRB":
-            modStatus = mipGRB.Solve( pallets, items, cfg, k,               secBreak,      nodeTorque, solDict, itemsDict) 
+            modStatus, ObjBound = mipGRB.Solve( pallets, items, cfg, k,   secBreak,      nodeTorque, solDict, itemsDict) 
 
         if modStatus == 2: # 2: optimal
             numOptDict["numOpt"] += 1
-
 
         for p in pallets:
             if p.Dest[k] == next.ID:
@@ -183,7 +183,13 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
 
         epsilon = nodeTorque.value/cfg.maxTorque
 
-        tour.score += nodeScore
+        # tour.score += nodeScore
+
+        if method == "GRB":
+            tour.score += ObjBound # Gurobi linear relaxation
+        else:
+            tour.score += nodeScore
+
 
         tour.AvgVol    += nodeVol
         tour.AvgTorque += epsilon
@@ -223,141 +229,190 @@ def writeAvgResults(method, scenario, line, surplus):
     finally:
         writer.close()  
 
+def writeResults(method, scenario, surplus, fvalue, elapsed):
+
+    dirname = f"./results/{surplus}/"
+    try:
+        os.makedirs(dirname)
+    except FileExistsError:
+        pass  
+
+    fname = f"{dirname}/{method}_{scenario}.res"    
+        
+    line = f"{elapsed},{fvalue}\n"
+
+    writer = open(fname, "a+") 
+    try:
+        writer.write(line)
+    finally:
+        writer.close() 
+
+
 if __name__ == "__main__":
 
     # import sys
-    # method  =  f"{sys.argv[1]}"
-    # surplus =  f"{sys.argv[2]}"
+    # plot = sys.argv[1]
 
-    dists = common.loadDistances("params/distances.txt")
-    costs = [[0.0 for _ in dists] for _ in dists]
-
-    secBreak     = 1.8 # second
-    volThreshold = 0.98 # 0.92 best for scenario 1
+    # plot = True
+    plot = False
 
     scenarios = [1,2,3,4,5,6]
-    # scenarios = [2]
+    # scenarios = [6]
 
     # surplus   = "data20"
     surplus   = "data50"
     # surplus   = "data100"
 
-    # methods = ["Shims","mpShims","GRB"]
+    # methods = ["Shims","mpShims","GRB"]  
     
-    methods = ["Shims"]
+    # methods = ["Shims", "mpShims"]
+    methods = ["GRB"]
+    # methods = ["Shims"]
     # methods = ["mpShims"]
-    # tipo = "KP"
-    tipo = "FFD"
 
-    # methods = ["GRB"]
+    tipo = "KP"    # data50 13.70    13      4.3     1.01    -0.62   0.0     154.1 & 96.3 & 37.5
+    # tipo = "FFD" # data50 13.54    5       1.6     1.01    -0.63   0.0     153.7 & 102.7 & 33.2
 
-    for method in methods:
+    if plot:
 
-        for scenario in scenarios:
+        name_list = []
+        for method in methods:
+            for s in scenarios:
+                name_list.append(f"{method}_{s}")
 
-            instances = [1,2,3,4,5,6,7]
-            # instances = [1]
+        path_list = [None for _ in name_list]
 
-            cfg = common.Config(scenario)
-            
-            for i, cols in enumerate(dists):
-                for j, dist in enumerate(cols):
-                    costs[i][j] = cfg.kmCost*dist
+        for i, name in enumerate(name_list):
+            path_list[i] = f"./results/{surplus}/{name_list[i]}.res" 
 
-            pallets, rampDistCG = common.loadPallets(cfg)
+        ttt = TTT(name_list, path_list)
+        ttt.Plot()
 
-            # pallets capacity
-            cfg.weiCap = 0
-            cfg.volCap = 0
-            for p in pallets:
-                cfg.weiCap += p.W
-                cfg.volCap += p.V
+    else:    
 
-            # smaller aircrafts may have a payload lower than pallets capacity
-            if cfg.weiCap > cfg.payload:
-                cfg.weiCap = cfg.payload
+        # import sys
+        # method  =  f"{sys.argv[1]}"
+        # surplus =  f"{sys.argv[2]}"
 
-            perc = 1.0
-            if cfg.numNodes > 3:
-                perc = 0.25
+        dists = common.loadDistances("params/distances.txt")
+        costs = [[0.0 for _ in dists] for _ in dists]
 
-            instanceTime = 0.
-            instanceSC   = 0.
-            worstTime    = 0
+        secBreak     = 60.0 # second - limit for Gurobi
+        volThreshold = 0.92 # 0.92 best for scenario 1
 
-            numOptDict = {"numOpt":0}
-            afterDict  = {"After":0.}
-            beforeDict = {"Before":0.}
 
-            for instance in instances:
+        for method in methods:
 
-                bestSC = 0. # maximum score/cost relation
-                bestAV = 0.
-                bestAT = 0.
-                tours = common.getTours(cfg.numNodes-1, costs, perc)
+            for scenario in scenarios:
 
-                # selects the best tour
-                searchTime = 0
-                for pi, tour in enumerate(tours):
+                instances = [1,2,3,4,5,6,7]
+                # instances = [1]
 
-                    # if pi == 1:
-
-                    tour.elapsed = 0
-                    tour.score   = 0.0
-                    tour.AvgVol  = 0.0
-
-                    solveTour(scenario, instance, pi, tour, method, pallets, cfg, secBreak, surplus, tipo, numOptDict, rampDistCG, afterDict, beforeDict)
-
-                    # the tour cost is increased by the average torque deviation, limited to 5%
-                    tour.AvgTorque /= cfg.numNodes
-                    tour.cost *= ( 1.0 + abs(tour.AvgTorque)/20.0 )
-
-                    searchTime += tour.elapsed
-
-                    tourSC = tour.score / tour.cost
-
-                    tour.AvgVol /= cfg.numNodes
-
-                    # best tour parameters
-                    if tourSC > bestSC:
-                        bestSC = tourSC
-                        bestAV = tour.AvgVol
-                        bestAT = tour.AvgTorque
-
-                    if tour.elapsed > worstTime:
-                        worstTime = tour.elapsed
+                cfg = common.Config(scenario)
                 
-                instanceTime += searchTime
-                instanceSC   += bestSC
+                for i, cols in enumerate(dists):
+                    for j, dist in enumerate(cols):
+                        costs[i][j] = cfg.kmCost*dist
 
-            numInst = float(len(instances))
+                pallets, rampDistCG = common.loadPallets(cfg)
 
-            numOptDict["numOpt"] /= numInst
-            numOptDict["numOpt"] /= float(cfg.numNodes)
-            numOptDict["numOpt"] /= float(len(tours))
+                # pallets capacity
+                cfg.weiCap = 0
+                cfg.volCap = 0
+                for p in pallets:
+                    cfg.weiCap += p.W
+                    cfg.volCap += p.V
 
-            afterDict["After"] /= numInst
-            afterDict["After"] /= float(cfg.numNodes)
-            afterDict["After"] /= float(len(tours))
+                # smaller aircrafts may have a payload lower than pallets capacity
+                if cfg.weiCap > cfg.payload:
+                    cfg.weiCap = cfg.payload
 
-            beforeDict["Before"] /= numInst
-            beforeDict["Before"] /= float(cfg.numNodes)
-            beforeDict["Before"] /= float(len(tours))
+                perc = 1.0
+                if cfg.numNodes > 3:
+                    perc = 0.25
 
-            percent = 0.0
-            if beforeDict["Before"] > 0:
-                percent = 100.0*(beforeDict["Before"] - afterDict["After"]) / beforeDict["Before"]   
+                instanceTime = 0.
+                instanceSC   = 0.
+                worstTime    = 0
 
-            avgTime = math.ceil(instanceTime/numInst)
+                numOptDict = {"numOpt":0}
+                afterDict  = {"After":0.}
+                beforeDict = {"Before":0.}
 
-            str = f"{instanceSC/numInst:.2f}\t {avgTime:.0f}\t {worstTime:.1f}\t {bestAV:.2f}\t {bestAT:.2f}\t {numOptDict['numOpt']:.1f}\t {beforeDict['Before']:.1f} & {afterDict['After']:.1f} & {percent:.1f}\n"
-            # instances average
-            writeAvgResults(method, scenario, str, surplus)
-            print(f"\n{str}")
-            print(f"{surplus}")
-            print(f"{len(tours)} tours")
-            print(f"secBreak: {secBreak}")
-            print(f"volThreshold: {volThreshold:.2f}")
-            print(f"Before:\t{beforeDict['Before']:.1f}") 
-            print(f"After:\t{afterDict['After']:.1f}")
-            print(f"% of optima: {numOptDict['numOpt']:.2f}")
+                for instance in instances:
+
+                    bestSC = 0. # maximum score/cost relation
+                    bestAV = 0.
+                    bestAT = 0.
+                    tours = common.getTours(cfg.numNodes-1, costs, perc)
+
+                    # selects the best tour
+                    searchTime = 0
+                    for pi, tour in enumerate(tours):
+
+                        # if pi == 1:
+
+                        tour.elapsed = 0
+                        tour.score   = 0.0
+                        tour.AvgVol  = 0.0
+
+                        solveTour(scenario, instance, pi, tour, method, pallets, cfg, secBreak, surplus, tipo, numOptDict, rampDistCG, afterDict, beforeDict)
+
+                        # the tour cost is increased by the average torque deviation, limited to 5%
+                        tour.AvgTorque /= cfg.numNodes
+                        tour.cost *= ( 1.0 + abs(tour.AvgTorque)/20.0 )
+
+                        searchTime += tour.elapsed
+
+                        tourSC = tour.score / tour.cost
+
+                        tour.AvgVol /= cfg.numNodes
+
+                        # best tour parameters
+                        if tourSC > bestSC:
+                            bestSC = tourSC
+                            bestAV = tour.AvgVol
+                            bestAT = tour.AvgTorque
+
+                        if tour.elapsed > worstTime:
+                            worstTime = tour.elapsed
+                    
+                    instanceTime += searchTime
+                    instanceSC   += bestSC
+
+                    # for plotting
+                    # writeResults(method, scenario, surplus, f"{instanceSC:.2f}", f"{tour.elapsed:.2f}")
+
+
+                numInst = float(len(instances))
+
+                numOptDict["numOpt"] /= numInst
+                numOptDict["numOpt"] /= float(cfg.numNodes)
+                numOptDict["numOpt"] /= float(len(tours))
+
+                afterDict["After"] /= numInst
+                afterDict["After"] /= float(cfg.numNodes)
+                afterDict["After"] /= float(len(tours))
+
+                beforeDict["Before"] /= numInst
+                beforeDict["Before"] /= float(cfg.numNodes)
+                beforeDict["Before"] /= float(len(tours))
+
+                percent = 0.0
+                if beforeDict["Before"] > 0:
+                    percent = 100.0*(beforeDict["Before"] - afterDict["After"]) / beforeDict["Before"]   
+
+                avgTime = math.ceil(instanceTime/numInst)
+
+                str = f"{instanceSC/numInst:.2f}\t {avgTime:.0f}\t {worstTime:.1f}\t {bestAV:.2f}\t {bestAT:.2f}\t {numOptDict['numOpt']:.1f}\t {beforeDict['Before']:.1f} & {afterDict['After']:.1f} & {percent:.1f}\n"
+                # instances average
+                writeAvgResults(method, scenario, str, surplus)
+                print(f"\n{str}")
+                print(f"{surplus}")
+                print(f"{len(tours)} tours")
+                print(f"secBreak: {secBreak}")
+                print(f"volThreshold: {volThreshold:.2f}")
+                print(f"Before:\t{beforeDict['Before']:.1f}") 
+                print(f"After:\t{afterDict['After']:.1f}")
+                print(f"% of optima: {numOptDict['numOpt']:.2f}")
+
