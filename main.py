@@ -260,8 +260,8 @@ if __name__ == "__main__":
     # scenarios = [6]
 
     # surplus   = "data20"
-    surplus   = "data50"
-    # surplus   = "data100"
+    # surplus   = "data50"
+    surplus   = "data100"
 
     # methods = ["Shims","mpShims","GRB"]  
     
