@@ -101,10 +101,6 @@ def minRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque):
     ConsRange    = range(len(cons))
     PalletsRange = range(len(pallets))
 
-    for j in ConsRange:
-        palletWeights[j] = 140 + cons[j].W
-        pallets[j].reset(cfg.numNodes)
-
     mod = gp.Model()
     mod.setParam('OutputFlag', 0)
 
@@ -120,12 +116,20 @@ def minRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque):
         mod.addConstr(
             sum(X[i][j] for i in PalletsRange) == 1
         )
+
+    for i in PalletsRange:
+        palletWeights[i] = 140 + cons[i].W
+        pallets[i].reset(cfg.numNodes)
+
+    sumTorques = 0.
+
     for i in PalletsRange:                
         mod.addConstr(
             sum(X[i][j] for j in ConsRange) == 1
         )
 
-    sumTorques = sum(pallets[i].D * palletWeights[i] for i in PalletsRange)
+        sumTorques += pallets[i].D * palletWeights[i]
+
     mod.addConstr(
         sumTorques <=    cfg.maxTorque
     )
@@ -135,10 +139,10 @@ def minRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque):
 
     mod.optimize()
 
-    if mod.status == 3: # not infeasible
-        print(f"Dist from ramp door model infeasible")
-    else:
-        print(f"mod.objVal: {mod.objVal}")
+    # if mod.status == 3: # infeasible
+    #     print(f"Dist from ramp door model infeasible")
+    # else:
+    #     print(f"mod.ObjVal: {mod.ObjVal}")
 
     if mod.SolCount > 0:
         nodeTorque.value = 0
@@ -151,6 +155,7 @@ def minRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque):
                     pallets[i].PCW     = cons[j].W
                     pallets[i].PCV     = cons[j].V
                     pallets[i].PCS     = cons[j].S
+
 
 if __name__ == "__main__":
 

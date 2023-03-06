@@ -21,7 +21,7 @@ surplus = "data20"
 method = "Shims"  
 # method = "mpShims"
 tipo = "FFD"
-
+# 
 # method = "GRB"
 
 scenario = 1
@@ -34,7 +34,7 @@ secBreak = 1.8 # seconds
 
 
 # --- distances and costs matrix ---
-dists = common.loadDistances()
+dists = common.loadDistances("params/distances.txt")
 
 costs = [[0.0 for _ in dists] for _ in dists]
 
@@ -101,8 +101,8 @@ for inst in instances:
 
     # N = first cons ID
     # cons = common.loadNodeCons(surplus, scenario, inst, pi, prevNode, N )
-    cons = testingGetCons(N, True) # for testing only
-    # cons = testingGetCons(N, False) # False: no randomness in consolidated generation
+    # cons = common.testingGetCons(N, True) # for testing only
+    cons = common.testingGetCons(N, False) # False: no randomness in consolidated generation
 
     # --- from main
     # cons = []
@@ -213,15 +213,19 @@ for inst in instances:
         print(f"{p.ID}\t{p.Dest[k]}\t{p.PCW:.0f}\t{p.PCV:.2f}\t{p.PCS:.0f}")
     print("Pallets filled-up.\n")
 
-    for p in pallets:
-        if p.Dest[k] == next.ID:
-            beforeDict['Before'] += rampDistCG - p.D # distance from the pallet to the ramp door
+    if method != "GRB":
 
-    optcgcons.minRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque)
+        next = tour.nodes[k+1]
 
-    for p in pallets:
-        if p.Dest[k] == next.ID:
-            afterDict['After'] += rampDistCG - p.D # distance from the pallet to the ramp door
+        for p in pallets:
+            if p.Dest[k] == next.ID:
+                beforeDict['Before'] += rampDistCG - p.D # distance from the pallet to the ramp door
+
+        optcgcons.minRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque)
+
+        for p in pallets:
+            if p.Dest[k] == next.ID:
+                afterDict['After'] += rampDistCG - p.D # distance from the pallet to the ramp door
 
     # Validate the solution for this node
 
