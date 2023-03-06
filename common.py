@@ -597,7 +597,7 @@ def testingGetCons(N, rndm):
         v   = float(line[2])
         frm =   int(line[3])
         to  =   int(line[4])         
-        cons.append( common.Item(id, -2, w, s, v, frm, to) )
+        cons.append( Item(id, -2, w, s, v, frm, to) )
         id += 1
 
     if rndm:

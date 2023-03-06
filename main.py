@@ -142,16 +142,15 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
         if modStatus == 2: # 2: optimal
             numOptDict["numOpt"] += 1
 
-        for p in pallets:
-            if p.Dest[k] == next.ID:
-                beforeDict['Before'] += rampDistCG - p.D # distance from the pallet to the ramp door
 
-        optcgcons.minRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque)
-
-        for p in pallets:
-            if p.Dest[k] == next.ID:
-                afterDict['After'] += rampDistCG - p.D # distance from the pallet to the ramp door
-
+        if method != "GRB":
+            for p in pallets:
+                if p.Dest[k] == next.ID:
+                    beforeDict['Before'] += rampDistCG - p.D # distance from the pallet to the ramp door
+            optcgcons.minRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque)
+            for p in pallets:
+                if p.Dest[k] == next.ID:
+                    afterDict['After'] += rampDistCG - p.D # distance from the pallet to the ramp door
 
         nodeElapsed = time.perf_counter() - startNodeTime
 
@@ -260,15 +259,15 @@ if __name__ == "__main__":
     # scenarios = [6]
 
     # surplus   = "data20"
-    # surplus   = "data50"
-    surplus   = "data100"
+    surplus   = "data50"
+    # surplus   = "data100"
 
     # methods = ["Shims","mpShims","GRB"]  
     
     # methods = ["Shims", "mpShims"]
-    methods = ["GRB"]
+    # methods = ["GRB"]
     # methods = ["Shims"]
-    # methods = ["mpShims"]
+    methods = ["mpShims"]
 
     tipo = "KP"    # data50 13.70    13      4.3     1.01    -0.62   0.0     154.1 & 96.3 & 37.5
     # tipo = "FFD" # data50 13.54    5       1.6     1.01    -0.63   0.0     153.7 & 102.7 & 33.2
