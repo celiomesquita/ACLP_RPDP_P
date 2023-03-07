@@ -1144,12 +1144,12 @@ In each $scenario$, we indicate in bold the best value of $f$\/ found. In each t
 
 \cmidrule{2-10}		                       
 &\multirow{2}{*}{ $Shims$}                       & $f$                & 9.66         &  6.38       &  9.55       &  11.12      &  12.37      &   12.03      & 0.89 \\% 6111
-&                                                & {\it run-time (s)} &  < 1         &  5          &    11       &   43        &  128        &  835         &  1.0 \\% 1023
+&                                                & {\it run time (s)} &  < 1         &  5          &    11       &   43        &  128        &  835         &  1.0 \\% 1023
 
 \cmidrule{2-10}		                       
 &\multirow{2}{*}{ $mpShims$}                     & $f$                & 11.03        & 7.43        & 10.05       & 13.08       & 14.02       &  12.66       & 0.99\\% 6827
 
-&                                                & {\it run-time (s)} &  < 1         &  2          &    4        &  15         &  47         & 295          &  {\bf 2.8}\\% 364
+&                                                & {\it run time (s)} &  < 1         &  2          &    4        &  15         &  47         & 295          &  {\bf 2.8}\\% 364
 
 \midrule
 
@@ -1157,22 +1157,22 @@ In each $scenario$, we indicate in bold the best value of $f$\/ found. In each t
 
 \cmidrule{2-10}		                       
 &\multirow{2}{*}{ $Shims$}                       & $f$                & 13.70        &  9.07       &  13.70      &  15.43      &   17.19     &  17.24       & 0.87 \\%8633
-&                                                & {\it run-time (s)} &  < 1         &  4          &    7        &   26        &   81        &  520         & 1.0\\% 639
+&                                                & {\it run time (s)} &  < 1         &  4          &    7        &   26        &   81        &  520         & 1.0\\% 639
 
 \cmidrule{2-10}		                       
 &\multirow{2}{*}{ $mpShims$}                     & $f$                & 14.82        & 10.45       & 17.45       &{\bf 16.92}  & 19.27       & 18.30        & 0.98\\%9721
-&                                                & {\it run-time (s)} &  < 1         &  2          &    3        &    12       &   38        &   236        & {\bf 2.2}\\% 292
+&                                                & {\it run time (s)} &  < 1         &  2          &    3        &    12       &   38        &   236        & {\bf 2.2}\\% 292
 
 \midrule
 \multirow{6}{*}{$2.0$}&\specialcell{$Relaxed$\\$Gurobi$}& $f$         &{\it 23.11}   &{\it 16.74}  &{\it 23.63}  &{\it 24.33}  &{\it 26.22}  &{\it 25.80}   & {\it 1.00} \\% 13983
 
 \cmidrule{2-10}		                       
 &\multirow{2}{*}{ $Shims$}                       & $f$                &   20.42      &   13.90     &  20.30      &  22.96      &   25.28     &   24.81      & 0.91\\% 12767
-&                                                & {\it run-time (s)} &  2           &  9          &    17       &   68        &   206       &  1216        & 1.0\\% 1518
+&                                                & {\it run time (s)} &  2           &  9          &    17       &   68        &   206       &  1216        & 1.0\\% 1518
 
 \cmidrule{2-10}		                       
 &\multirow{2}{*}{ $mpShims$}                     & $f$                &  22.66       &  15.41      &  23.17      &  23.37      &  23,91      &  25.25       &  0.96\\% 13377
-&                                                & {\it run-time (s)} &  2           &  3          &    5        &   20        &   64        &  398         & {\bf 2.8}\\% 544
+&                                                & {\it run time (s)} &  2           &  3          &    5        &   20        &   64        &  398         & {\bf 2.8}\\% 544
 
 \bottomrule	
 
@@ -1187,7 +1187,7 @@ We solved all scenarios and instances with Gurobi in a relaxed linear model, {\i
 
 We were lucky that {\it mpShims} touched the edge of the polyhedron that bounds the feasible region, it found the optimal solution in volume $surplus = 1.5$, scenario {\bf 4}.
 
-{\it mpShims} had a quality performance very close to the {\it Relaxed Gurobi} upper bound solution, and, as to the {\bf Speedup}, on average, mpShims was 2.6 times faster than {\it Shims}. Theoretically, it could be more, but due to the burden of sharing the CG deviation and the list of items among the processes (pallets) for reading and writing, the runtime {\it race condition} management limited {\it mpShims} performance.
+{\it mpShims} had a quality performance very close to the {\it Relaxed Gurobi} upper bound solution, and, as to the {\bf Speedup}, on average, mpShims was 2.6 times faster than {\it Shims}. Theoretically, it could be more, but due to the burden of sharing the CG deviation and the list of items among the processes (pallets) for reading and writing, the run-time {\it race condition} management limited {\it mpShims} performance.
 
 {\it When threads or processes attempt to simultaneously access a shared resource, and the accesses can result in an error, we often say the program has a race condition, because the threads or processes are in a "race" to carry out an operation.} \cite[p. 53]{Pacheco:2020}.
 
@@ -1285,7 +1285,7 @@ We also carryed out 126 experiments with each method on synthetic data based on 
 
 We added another important contribution by favoring ground operations reducing in 29\%, in average, the distances pallets will be moved on disembarking operations, our second contribution.
 
-Another important contribution is that we employed the {\it iRace} package \citep{LopezIbanezManuel2016} to fine tune the meta-heuristics parameters, guaranteeing the best possible performance for the instances under training and testing.
+Another important contribution is that we employed the {\it iRace} package \citep{LopezIbanezManuel2016} to fine tune the {\it mpShims} parameters, guaranteeing the best possible performance for the instances under training and testing.
 
 \section*{Acknowledgments}
 

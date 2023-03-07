@@ -66,7 +66,7 @@
 \bibitem[{Houghton and Carpenter(2003)}]{HoughtonCarpenter2003}
 \bibinfo{author}{Houghton, E.L.}, \bibinfo{author}{Carpenter, P.W.},
   \bibinfo{year}{2003}.
-\newblock \bibinfo{title}{Aerodynamics for Engineering Students (5th ed.)}.
+\newblock \bibinfo{title}{{Aerodynamics for Engineering Students (5th ed.).}}
 \newblock \bibinfo{publisher}{Butterworth Heinmann}.
 %Type = Article
 \bibitem[{Johnson and Garey(1985)}]{JohnsonGarey1985}
@@ -166,10 +166,13 @@
 \newblock \bibinfo{journal}{Operations Research} \bibinfo{volume}{40},
   \bibinfo{pages}{1200--1205}.
 %Type = Book
-\bibitem[{Pacheco and Malensek(2020)}]{Pacheco:2020}
+\bibitem[{Pacheco and Malensek(2021)}]{Pacheco:2020}
 \bibinfo{author}{Pacheco, P.}, \bibinfo{author}{Malensek, M.},
-  \bibinfo{year}{2020}.
+  \bibinfo{year}{2021}.
+\newblock \bibinfo{title}{{An Introduction to Parallel Programming 2nd
+  Edition}}.
 \newblock \bibinfo{publisher}{{Morgan Kaufmann}}.
+\newblock \DOIprefix\doi{https://doi.org/10.1016/C2015-0-01650-1}.
 %Type = Article
 \bibitem[{Paquay et~al.(2018)Paquay, Limbourg, Schyns and
   Oliveira}]{PaquayLimbourgSchynsOliveira2018}
