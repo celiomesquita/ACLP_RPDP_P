@@ -1,4 +1,4 @@
-\begin{thebibliography}{30}
+\begin{thebibliography}{31}
 \expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
 \providecommand{\url}[1]{\texttt{#1}}
 \providecommand{\href}[2]{#2}
@@ -165,6 +165,11 @@
   loading}.
 \newblock \bibinfo{journal}{Operations Research} \bibinfo{volume}{40},
   \bibinfo{pages}{1200--1205}.
+%Type = Book
+\bibitem[{Pacheco and Malensek(2020)}]{Pacheco:2020}
+\bibinfo{author}{Pacheco, P.}, \bibinfo{author}{Malensek, M.},
+  \bibinfo{year}{2020}.
+\newblock \bibinfo{publisher}{{Morgan Kaufmann}}.
 %Type = Article
 \bibitem[{Paquay et~al.(2018)Paquay, Limbourg, Schyns and
   Oliveira}]{PaquayLimbourgSchynsOliveira2018}

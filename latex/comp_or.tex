@@ -118,14 +118,14 @@ In this work, we explore computer parallelism in solving the problem involving s
 
 This hard problem, named {\it Air Cargo Load Planning with Routing, Pickup, and Delivery Problem} considers using standardized pallets in fixed positions, obeying the center of gravity constraints, delivering each item to its destination, and minimizing fuel consumption costs.
 
-We also contributed by carrying out multiple experiments with the Shims heuristic on synthetic data based on real data from the {\it Brazilian Air Force} transportation history and a new procedure to minimize the distance from the next node destined pallet to the ramp door.
+We also contributed by carrying out multiple experiments with the {\it Shims} heuristic on synthetic data based on real data from the {\it Brazilian Air Force} transportation history and a new procedure to minimize the distance from the next node destined pallet to the ramp door.
 
-We converted Shims into a process-based parallel computing heuristic that quickly finds good solutions for a wide range of problem sizes, an essential contribution as it surpassed all Shims results.
+We converted {\it Shims} into a process-based parallel computing heuristic that quickly finds good solutions for a wide range of problem sizes, an essential contribution as it surpassed all {\it Shims} results.
 
 \end{abstract}
 
 \begin{keyword}
-Air Cargo \sep Air Palletization \sep Weight and Balance \sep Pickup and Delivery \sep Vehicle Routing \sep Parallel computing
+Air Cargo \sep Air Palletization \sep Weight and Balance \sep Pickup and Delivery \sep Parallel computing \sep iRace
 \end{keyword}
 
 \end{frontmatter}
@@ -183,7 +183,7 @@ Considering air cargo transport, Table \ref{tab:sa} lists the main works in the 
 	\normalsize 
 \end{table}
 
-As can be seen, so far \cite{LurkinSchyns2015} is the only work that simultaneously addresses an air cargo (WBP) and a flight itinerary (PDP) sub-problem. Although it is innovative, strong simplifications were imposed by the authors: in relation to loading, APP was ignored; with regard to routing, it is assumed a pre-defined flight plan restricted to two legs. It is important to note that these authors consider an aircraft with two doors, and the minimization of loading and unloading (MLU) costs at the intermediate node was modelled through a container sequencing problem. Referring directly to this work, \cite[p. 409]{BrandtStefan2019} comment: {\it However, not even these sub-problems are acceptably solved for real-world problem sizes or the models omit some practically relevant constraints}. 
+As can be seen, so far \cite{LurkinSchyns2015} is the only work that simultaneously addresses an air cargo (WBP) and a flight itinerary (PDP) sub-problem. Although it is innovative, strong simplifications were imposed by the authors: in relation to loading, APP was ignored; with regard to routing, it is assumed a pre-defined flight plan restricted to two legs. It is important to note that these authors consider an aircraft with two doors, and the minimization of loading and unloading costs ({\bf MLU}) at the intermediate node was modelled through a container sequencing problem. Referring directly to this work, \cite[p. 409]{BrandtStefan2019} comment: {\it However, not even these sub-problems are acceptably solved for real-world problem sizes or the models omit some practically relevant constraints}. 
 
 There are real situations that are much more complex. In this work, we consider a practical case in Brazil, which is the largest economy in Latin America. Due to its dimensions, this country has the largest air market on the continent with $2,499$\/ registered airports, of which $1,911$\/ are private and $588$\/ are public. Although it is an immense distribution network, airlift missions consider 3 to 5 nodes per flight plan. Throughout this work, we address routes with up to 7 nodes, as can be seen in Table \ref{tab:costs} and Figure \ref{fig:nodes}.
 
@@ -830,7 +830,7 @@ Finally, we present a new heuristic designed specifically for ACLP+RPDP, which w
 	\begin{minipage}{0.34\linewidth}
 		
 		\includegraphics[scale=0.25]{Images/shims.png}
-		\captionof{figure}{Shims of various thicknesses}
+		\captionof{figure}{{\it Shims} of various thicknesses}
 		\small\textsuperscript{Source: www.mscdirect.com/product/details/70475967}
 		\label{fig:shims}
 		
@@ -869,7 +869,7 @@ $1^{st}$ - Greedy phase with torque surplus
 
 $2^{st}$ - Minimization of CG deviation
 
-$3^{st}$ - Shims construction and best Shims selection
+$3^{st}$ - {\it Shims} construction and best {\it Shims} selection
 
 All executed in a multi-process runtime, accessing concurrently, reading and writing, the list of items and the current value of the CG deviation.
 
@@ -945,7 +945,7 @@ Line \ref{mpShims:join2} wait for all $getBestShims$ processes to finish.
 
 Line \ref{mpShims:return} returns a complete solution, a bipartite graph between pallets and consolidated or items.
 
-\subsubsection{Shims first phase}
+\subsubsection{{\it Shims} first phase}
 
 
 Algorithm \ref{alg:greedy} generates a greedy allocation of the items available in node $l_{\pi(k)}$, according to the non-ascending order of $\theta^{\pi(k)}_{ij}$, and considering the consolidated items already shipped ($E^Q_{\pi(k)}$). Edges are included in this allocation as long as they respect feasibility constraints. Furthermore, the volume of each pallet $p_i$\/ cannot exceed $p_i.v \times limit$, where $ 0 < limit \leq 1$\/ is a given parameter.
@@ -989,7 +989,7 @@ In Algorithm \ref{alg:greedy}, line \ref{greedy:eta} defines an array with the s
 
 
 
-\subsubsection{Shims second phase: improvement on minimizing CG deviation}
+\subsubsection{{\it Shims} second phase: improvement on minimizing CG deviation}
 
 Between the greedy and the {\it Shims} selection phases we inserted, in this work, a method to minimize the CG deviation, as stated by the model that follows.
 
@@ -1014,7 +1014,7 @@ Let $H^{\pi(k)}_{iq}$ be the set of decision variables that relates pallet $i$ t
 Equation \ref{eq:distobjshims} minimizes the aircraft absolute torque in node $\pi(k)$, where 140 is the weight of an empty pallet, $a^{\pi(k)}_q.w$ the weight of the consolidated, and $p_i.d$ the distance between the pallet centroid to the aircraft CG; Equation \ref{eq:distconsshims} states that each consolidated will be assigned to exactly one pallet; and Equation \ref{eq:distpalletsshims} states that each pallet will receive one consolidated.
 
 
-\subsubsection{Shims third and fourth phases}
+\subsubsection{{\it Shims} third and fourth phases}
 
 \begin{algorithm}[H]
 	\caption{Mount shims of edges that fills each pallet gap and return the best shims}  \label{alg:getBestShims}
@@ -1070,7 +1070,7 @@ Equation \ref{eq:distobjshims} minimizes the aircraft absolute torque in node $\
 	\end{algorithmic}
 \end{algorithm}
 
-Algorithm \ref{alg:getBestShims} describes the procedure do get the best Shims, the best subset of edges to fill each pallet gap. This algorithm follows the logic of the {\it First-Fit Decreasing} algorithm as described by \cite{JohnsonGarey1985}.
+Algorithm \ref{alg:getBestShims} describes the procedure do get the best {\it Shims}, the best subset of edges to fill each pallet gap. This algorithm follows the logic of the {\it First-Fit Decreasing} algorithm as described by \cite{JohnsonGarey1985}.
 
 Line \ref{empty_shims} creates the first empty shims.
 Line \ref{empty_set} creates the first set of shims from where the best shims will be chosen.
@@ -1118,7 +1118,7 @@ For each $method$, $scenario$ and $surplus$, 7 different instances were generate
 The average tour values were presented for $f$ and, for the runtime, the worst result obtained. To facilitate the comparison between the methods, we added a last column in these tables, where two values are indicated:
 \begin{itemize}
 	\item {\bf Normalized}: value between 0 and 1, which corresponds to the ratio between the sum of $f$\/ values obtained by the method in all scenarios and the sum of the best values obtained among all methods in all scenarios. The higher the value of {\bf Normalized}, the closer the method approached the best solutions found.
-	\item {\bf Speed-up}: ratio of the sums of the worst runtimes of all scenarios and the sum of the method runtimes in all scenarios. The method with the highest {\bf Speed-up}\/ is the fastest.
+	\item {\bf Speedup}: ratio of the sums of the worst runtimes of all scenarios and the sum of the method runtimes in all scenarios. The method with the highest {\bf Speed-up}\/ is the fastest.
 \end{itemize}
 
 In each $scenario$, we indicate in bold the best value of $f$\/ found. In each table, we also indicate in bold the best {\bf Normalized}\/ and {\bf Speed-up}\/ values.
@@ -1133,46 +1133,46 @@ In each $scenario$, we indicate in bold the best value of $f$\/ found. In each t
 %\scriptsize
 \begin{tabular}{crcccccccc}
 \toprule
-&                          &                     &\multicolumn{6}{c}{\bf Scenarios}                                                                        &{\bf Normalized}\\
-                                                 \cmidrule{4-9}		
-{\it surplus}         & {$method$}               & {\bf Results}      &{\bf 1}      &{\bf 2}      &{\bf 3}      &{\bf 4}      &{\bf 5}       &{\bf 6}      &{\bf Speed-up} \\
+{\bf Volume}     &  {\bf Resolution}   &                              &\multicolumn{6}{c}{\bf Scenarios}                                                   &{\bf Normalized}\\
+                                                \cmidrule{4-9}		
+{\it surplus}    & {\it method}        & {\bf Results}                &{\bf 1}      &{\bf 2}      &{\bf 3}      &{\bf 4}      &{\bf 5}       &{\bf 6}      &{\bf Speedup} \\
 \toprule
 
+%\specialcell{$Volume$\\$surplus$}
 
-
-\multirow{6}{*}{$1.2$}&\multirow{1}{*}{ $Gurobi$}& $f$                &{\it 11.22}   &{\it 7.88}   &{\it 10.25} &{\it 13.34}  &{\it 14.30}   &{\it 12.92}       & 1.00 \\% 6845
+\multirow{6}{*}{$1.2$}&\specialcell{$Relaxed$\\$Gurobi$}& $f$         &{\it 11.22}   &{\it 7.88}   &{\it 10.25} &{\it 13.34}  &{\it 14.30}   &{\it 12.92}       & 1.00 \\% 6845
 
 \cmidrule{2-10}		                       
 &\multirow{2}{*}{ $Shims$}                       & $f$                & 9.66         &  6.38       &  9.55       &  11.12      &  12.37      &   12.03      & 0.89 \\% 6111
-&                                                & {\it run-time (s)} &  < 1         &  5          &    11       &   43        &  128        &  835         &  1.0 \\%
+&                                                & {\it run-time (s)} &  < 1         &  5          &    11       &   43        &  128        &  835         &  1.0 \\% 1023
 
 \cmidrule{2-10}		                       
 &\multirow{2}{*}{ $mpShims$}                     & $f$                & 11.03        & 7.43        & 10.05       & 13.08       & 14.02       &  12.66       & 0.99\\% 6827
 
-&                                                & {\it run-time (s)} &  < 1         &  2          &    4        &  15         &  47         & 295          &  {\bf 2.8}\\%
+&                                                & {\it run-time (s)} &  < 1         &  2          &    4        &  15         &  47         & 295          &  {\bf 2.8}\\% 364
 
 \midrule
 
-\multirow{6}{*}{$1.5$}&\multirow{1}{*}{ $Gurobi$}& $f$                &{\it 14.45}   &{\it 10.98}   &{\it 15.59}  &{\it 16.92}  &{\it 18.63}   &{\it 17.62}  & {\it 1.00} \\% 6607
+\multirow{6}{*}{$1.5$}&\specialcell{$Relaxed$\\$Gurobi$}& $f$         &{\it 15.17}   &{\it 10.98}  &{\it 17.80}  &{\it 16.92}  &{\it 19.63}   &{\it 18.62}  & {\it 1.00} \\% 9912
 
 \cmidrule{2-10}		                       
-&\multirow{2}{*}{ $Shims$}                       & $f$                & 13.70       &  9.07       &  13.70      &  15.43      &   17.19     &  17.24       & 0. \\%
-&                                                & {\it run-time (s)} &  < 1        &  3          &    6        &   24        &   70        &  419         & 5.9\\%
+&\multirow{2}{*}{ $Shims$}                       & $f$                & 13.70        &  9.07       &  13.70      &  15.43      &   17.19     &  17.24       & 0.87 \\%8633
+&                                                & {\it run-time (s)} &  < 1         &  4          &    7        &   26        &   81        &  520         & 1.0\\% 639
 
 \cmidrule{2-10}		                       
-&\multirow{2}{*}{ $mpShims$}                     & $f$                & 14.82 & 10.45       & 17.45 & 16.92       & 19.27       & 18.30  & 0.98\\%
-&                                                & {\it run-time (s)} &  < 1        &  2          &    3        &   10        &   28        &   173        & {\bf 14.1}\\%
+&\multirow{2}{*}{ $mpShims$}                     & $f$                & 14.82        & 10.45       & 17.45       &{\bf 16.92}  & 19.27       & 18.30        & 0.98\\%9721
+&                                                & {\it run-time (s)} &  < 1         &  2          &    3        &    12       &   38        &   236        & {\bf 2.2}\\% 292
 
 \midrule
-\multirow{6}{*}{$2.0$}&\multirow{1}{*}{ $Gurobi$}& $f$                &{\it 21.47}   &{\it 16.74}   &{\it 22.81}  &{\it 24.33}  &{\it 26.22}   &{\it 25.08}  & {\it 1.00} \\% 6607
+\multirow{6}{*}{$2.0$}&\specialcell{$Relaxed$\\$Gurobi$}& $f$         &{\it 23.11}   &{\it 16.74}  &{\it 23.63}  &{\it 24.33}  &{\it 26.22}  &{\it 25.80}   & {\it 1.00} \\% 13983
 
 \cmidrule{2-10}		                       
-&\multirow{2}{*}{ $Shims$}                       & $f$                &   20.42     &   13.90     &  20.30      &  22.96      &   25.28     &   0      & 0.86\\%
-&                                                & {\it run-time (s)} &  < 1        &  4          &    7        &   30        &   85        &  501         & 7.7\\%
+&\multirow{2}{*}{ $Shims$}                       & $f$                &   20.42      &   13.90     &  20.30      &  22.96      &   25.28     &   24.81      & 0.91\\% 12767
+&                                                & {\it run-time (s)} &  2           &  9          &    17       &   68        &   206       &  1216        & 1.0\\% 1518
 
 \cmidrule{2-10}		                       
-&\multirow{2}{*}{ $mpShims$}                     & $f$                &        &        &        &        &        &         &  0.93\\%
-&                                                & {\it run-time (s)} &  < 1        &  2          &    3        &   12        &   33        &  203         & {\bf 19.0}\\%
+&\multirow{2}{*}{ $mpShims$}                     & $f$                &  22.66       &  15.41      &  23.17      &  23.37      &  23,91      &  25.25       &  0.96\\% 13377
+&                                                & {\it run-time (s)} &  2           &  3          &    5        &   20        &   64        &  398         & {\bf 2.8}\\% 544
 
 \bottomrule	
 
@@ -1181,13 +1181,15 @@ In each $scenario$, we indicate in bold the best value of $f$\/ found. In each t
 \normalsize
 \end{table}
 
-The upper bound is the objective function value of an LP relaxation of the problem, proving that no integer feasible solution of larger objective value than this value can exist.
+The upper bound is the objective function value of a linear programming relaxation of the problem, demonstrating that no integer viable solution can have an objective value greater than this.
 
-In an attempt to find the upper bound for $f$, we solved all scenarios and instances with {\it Gurobi} in a linear relaxed model. We applied a time limit of 60s in the expectation that it would be enough for {\it Gurobi} to determine the upper bounds. This is good for the reader to have an idea of the real performance differences between serial and parallel {\it Shims}.
+We solved all scenarios and instances with Gurobi in a relaxed linear model, {\it Relaxed Gurobi}. This is good for the reader to have an idea of the real performance differences between serial and parallel {\it Shims}.
 
-Most of the {\it mpShims} $f$ results are superior to the upper bound found because they are not really the upper bound. As {\it Gurobi} runtime was limited, it did not have enough time to update the upper bound. But it is a good reference to compare {\it Shims} and {\it mpShims} performances.
+We were lucky that {\it mpShims} touched the edge of the polyhedron that bounds the feasible region, it found the optimal solution in volume $surplus = 1.5$, scenario {\bf 4}.
 
-As to the speedup, on average, {\it mpShims} was 2.8 times faster than {\it Shims}. Theoretically, it could be more, but due to the burden of sharing the CG deviation and the list of items among the processes for reading and writing, the runtime management to hinder race condition limited {\it mpShims} performance.
+{\it mpShims} had a quality performance very close to the {\it Relaxed Gurobi} upper bound solution, and, as to the {\bf Speedup}, on average, mpShims was 2.6 times faster than {\it Shims}. Theoretically, it could be more, but due to the burden of sharing the CG deviation and the list of items among the processes (pallets) for reading and writing, the runtime {\it race condition} management limited {\it mpShims} performance.
+
+{\it When threads or processes attempt to simultaneously access a shared resource, and the accesses can result in an error, we often say the program has a race condition, because the threads or processes are in a "race" to carry out an operation.} \cite[p. 53]{Pacheco:2020}.
 
 \subsection{Yet another improvement}
 \label{improvement}
@@ -1275,11 +1277,15 @@ This last procedure favored ground operations as it reduced in 29\% the distance
 \section{Conclusions}
 \label{sec7}
 
-xxxxx
+In this work we dealt with a hard problem, named {\it Air Cargo Load Planning with Routing, Pickup, and Delivery Problem} considering standardized pallets in fixed positions, obeying the center of gravity constraints, delivering each item to its destination, and minimizing fuel consumption costs.
 
-We added an important contribution by favoring ground operations reducing in 29\%, in average, the distances pallets will be moved on disembarking operations.
+We converted \cite{MesquitaSanches2023} {\it Shims} into a process-based parallel computing heuristic, which we called {\it Multiprocessing Shims} or {\it mpShims}, that quickly finds good solutions for a wide range of problem sizes, an essential addition as it surpassed all {\it Shims} results, our first contribution.
 
-Another important contribution is that we employed the {\it iRace} package to fine tune the meta-heuristics parameters, guaranteeing the best possible performance for the instances under training and testing.
+We also carryed out 126 experiments with each method on synthetic data based on real data from the {\it Brazilian Air Force} transportation history.
+
+We added another important contribution by favoring ground operations reducing in 29\%, in average, the distances pallets will be moved on disembarking operations, our second contribution.
+
+Another important contribution is that we employed the {\it iRace} package \citep{LopezIbanezManuel2016} to fine tune the meta-heuristics parameters, guaranteeing the best possible performance for the instances under training and testing.
 
 \section*{Acknowledgments}
 
