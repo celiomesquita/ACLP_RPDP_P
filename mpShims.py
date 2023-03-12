@@ -40,9 +40,8 @@ class Shims(object):
         ret = True
         with lock:
             newTorque = abs(nodeTorque.value + self.SCT + deltaTau)
-
             if newTorque > abs(nodeTorque.value + self.SCT) and newTorque > cfg.maxTorque:
-                    ret = False
+                ret = False
         return ret
 
 # create a set of shims for this pallet and selects the best shims
@@ -114,35 +113,6 @@ def getBestShims(pallet, items, k, nodeTorque, solDict, cfg, surplus, itemsDict,
                 pallet.putItem(item, nodeTorque, solDict, N, itemsDict, lock)
 
 
-def path_relinking(pallets, items, solDict_fr, solDict_to):
-
-    N = len(items)
-    # i = pallet.ID
-    # j = item.ID 
-    # x = N*i+j
-
-    solDict_best = solDict_fr["solMatrix"][:]
-    solDict_cur = solDict_fr["solMatrix"][:]
-
-    for pos, val in (solDict_to["solMatrix"]):
-
-        # i = (x-j)/N
-        # j = x - N*i
-        
-        cur_pos = solDict_cur["solMatrix"].index(val)
-
-        solDict_cur["solMatrix"][cur_pos] = solDict_cur["solMatrix"][pos]
-
-        solDict_cur["solMatrix"][pos] = val
-
-        
-
-
-        # solDict_best = solDict_fr["solMatrix"][x]
-            
-    
-    return solDict_best
-
 def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict, itemsDict, tipo):
 
     if mode == "p":
@@ -184,12 +154,17 @@ def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict
         # sort ascendent by CG distance
         # pallets.sort(key=lambda x: abs(x.D)) # deactivated because of torque surplus
         counter = 0
-        for i, _ in enumerate(pallets):                                                 #       torque surplus
+        for i, _ in enumerate(pallets):
+            # fill until the threshold                                             #       torque surplus
             common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, threshold, itemsDict, lock, 2.) 
+            # minimize the Cg deviation
             optcgcons.minCGdev(pallets, k, nodeTorque, cfg)
+            # get the best Shims for the pallet
             getBestShims(      pallets[i], items, k, nodeTorque, solDict, cfg, surplus,   itemsDict, lock, tipo)
+            # try to complete the pallet
             counter += common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, 1.0, itemsDict, lock) 
 
+        print(f"{counter} items included in post local search.")
 
 if __name__ == "__main__":
 

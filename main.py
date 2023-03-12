@@ -255,22 +255,22 @@ if __name__ == "__main__":
     # plot = True
     plot = False
 
-    scenarios = [1,2,3,4,5,6]
-    # scenarios = [6] # infeasible solutions with Shims............
+    # scenarios = [1,2,3,4,5,6]
+    scenarios = [2] # infeasible solutions with Shims............
 
     # surplus   = "data20"
-    # surplus   = "data50"
-    surplus   = "data100"
+    surplus   = "data50"
+    # surplus   = "data100"
 
     # methods = ["Shims","mpShims","GRB"]  
     
     # methods = ["Shims", "mpShims"]
     # methods = ["GRB"]
-    # methods = ["Shims"]
-    methods = ["mpShims"]
+    methods = ["Shims"]
+    # methods = ["mpShims"]
 
-    tipo = "KP"    # data50 13.70    13      4.3     1.01    -0.62   0.0     154.1 & 96.3 & 37.5
-    # tipo = "FFD" # data50 13.54    5       1.6     1.01    -0.63   0.0     153.7 & 102.7 & 33.2
+    # tipo = "KP"    # data50 13.70    13      4.3     1.01    -0.62   0.0     154.1 & 96.3 & 37.5
+    tipo = "FFD" # data50 13.54    5       1.6     1.01    -0.63   0.0     153.7 & 102.7 & 33.2
 
     if plot:
 
@@ -304,8 +304,8 @@ if __name__ == "__main__":
 
             for scenario in scenarios:
 
-                instances = [1,2,3,4,5,6,7]
-                # instances = [1]
+                # instances = [1,2,3,4,5,6,7]
+                instances = [1]
 
                 cfg = common.Config(scenario)
                 

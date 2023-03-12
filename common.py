@@ -85,14 +85,14 @@ class Pallet(object):
         self.PCV += item.V
         self.PCS += item.S
 
-        with lock:
+        with lock: # manage race condition
             nodeTorque.value += float(item.W) * float(self.D)
             i = self.ID
             j = item.ID 
-            solDict["solMatrix"][N*i+j] = 1
-            itemsDict["mpItems"][j]     = 1
+            solDict["solMatrix"][N*i+j] = 1 # solution array
+            itemsDict["mpItems"][j]     = 1 # to control items inclusion
 
-    def putConsol(self, consol): # put an item in this pallet
+    def putConsol(self, consol): # put a consolidated in this pallet
         self.PCW += consol.W
         self.PCV += consol.V
         self.PCS += consol.S
@@ -107,13 +107,13 @@ class Pallet(object):
         if feasible and self.PCV + item.V > self.V * threshold:
             feasible = False
 
-        if feasible and self.PCW + item.W > self.W * threshold:
+        if feasible and self.PCW + item.W > self.W:
             feasible = False
 
         if feasible:
-            with lock:
+            with lock: # ask for a lock to control race condition
                 j = item.ID
-                if itemsDict["mpItems"][j] > 0:
+                if itemsDict["mpItems"][j] > 0: # returns False if the item is already included in any pallet
                     feasible = False
 
                 if feasible:
