@@ -131,14 +131,12 @@ def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict
         # parallel greedy phase
         for i, _ in enumerate(pallets):
             procs[i] = mp.Process( target=common.fillPallet, args=( pallets[i], items, k,\
-                 nodeTorque, solDict, cfg, threshold, itemsDict, lock, 2.) ) # torque surplus
+                 nodeTorque, solDict, cfg, threshold, itemsDict, lock, 1.) ) # torque surplus
             time.sleep(0.001)
             procs[i].start()
         
         for proc in procs:
             proc.join()
-
-        optcgcons.minCGdev(pallets, k, nodeTorque, cfg)
 
         # parallel shims phase
         for i, p in enumerate(pallets):
@@ -156,15 +154,13 @@ def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict
         counter = 0
         for i, _ in enumerate(pallets):
             # fill until the threshold                                             #       torque surplus
-            common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, threshold, itemsDict, lock, 1.) 
-            # minimize the Cg deviation
-            # optcgcons.minCGdev(pallets, k, nodeTorque, cfg)
+            common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, threshold, itemsDict, lock, 2.) 
+           
             # get the best Shims for the pallet
-            # getBestShims(      pallets[i], items, k, nodeTorque, solDict, cfg, surplus,   itemsDict, lock, tipo)
+            getBestShims( pallets[i], items, k, nodeTorque, solDict, cfg, surplus,   itemsDict, lock, tipo)
             # try to complete the pallet
-            # counter += common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, 1.0, itemsDict, lock) 
+            counter += common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, 1.0, itemsDict, lock) 
 
-        print(f"{counter} items included in post local search.")
 
 if __name__ == "__main__":
 
@@ -294,6 +290,6 @@ if __name__ == "__main__":
 
                 sNodeAccum += float(items[j].S)
 
-    print(-1 * sNodeAccum) # to be captured by iRace. -1 because its maximization
+    # print(-1 * sNodeAccum) # to be captured by iRace. -1 because its maximization
 
 

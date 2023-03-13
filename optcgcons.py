@@ -3,7 +3,7 @@ from gurobipy import GRB
 import common
 
 # optimize consolidated positions to minimize CG deviation
-def OptCGCons(kept, pallets, maxTorque, k):
+def OptCGCons(kept, pallets, k, nodeTorque):
 
     KeptRange    = range(len(kept))
     PalletsRange = range(len(pallets))
@@ -13,9 +13,10 @@ def OptCGCons(kept, pallets, maxTorque, k):
 
     X = [ [ mod.addVar(name=f"X[{i}],[{j}]", vtype=GRB.BINARY) for j in KeptRange ] for i in PalletsRange ]      
 
-    torque1 = sum( X[i][j] * (kept[j].W *    pallets[i].D) for i in PalletsRange for j in KeptRange ) 
-    torque2 = sum( X[i][j] * (kept[j].W * -1*pallets[i].D) for i in PalletsRange for j in KeptRange ) 
-    mod.setObjective(torque1 + torque2)
+    torque1 = sum( X[i][j] * ((140+kept[j].W) * pallets[i].D) for i in PalletsRange for j in KeptRange if pallets[i].D > 0 ) 
+    torque2 = sum( X[i][j] * ((140+kept[j].W) * pallets[i].D) for i in PalletsRange for j in KeptRange if pallets[i].D < 0 )
+
+    mod.setObjective((torque1-torque2)/2)
 
     mod.ModelSense = GRB.MINIMIZE
 
@@ -30,19 +31,16 @@ def OptCGCons(kept, pallets, maxTorque, k):
 
     mod.optimize() 
 
-    torque = 0
+    nodeTorque.value = 0
     for i, _ in enumerate(pallets):
         pallets[i].Dest[k] = -1 # reset pallets destinations from this node
-        torque += 140.0 * pallets[i].D
+        nodeTorque.value += 140.0 * pallets[i].D
         for j in KeptRange:
             if X[i][j].x >= 0.99:
-                torque += float(kept[j].W) * pallets[i].D
+                nodeTorque.value += float(kept[j].W) * pallets[i].D
                 pallets[i].Dest[k] = kept[j].To
                 kept[j].P = i # put the consolidated in the best position to minimize torque                        
 
-    # print(f"--- {common.CITIES[k]} CG deviation minimized {torque/maxTorque:.2f}")
-
-    return torque
 
 # After solved, optimize consolidated positions to minimize CG deviation
 def minCGdev(pallets, k, nodeTorque, cfg):
@@ -58,11 +56,12 @@ def minCGdev(pallets, k, nodeTorque, cfg):
     mod = gp.Model()
     mod.setParam('OutputFlag', 0)
 
-    X = [ [ mod.addVar(name=f"X[{i}],[{j}]", vtype=GRB.BINARY) for j in ConsRange ] for i in PalletsRange ]      
+    X = [ [ mod.addVar(name=f"X[{i}],[{j}]", vtype=GRB.BINARY) for j in ConsRange ] for i in PalletsRange ] 
 
-    torque1 = sum( X[i][j] * ((140+cons[j].W) *    pallets[i].D) for i in PalletsRange for j in ConsRange ) 
-    torque2 = sum( X[i][j] * ((140+cons[j].W) * -1*pallets[i].D) for i in PalletsRange for j in ConsRange ) 
-    mod.setObjective(torque1 + torque2)
+    torque1 = sum( X[i][j] * ((140+cons[j].W) * pallets[i].D) for i in PalletsRange for j in ConsRange if pallets[i].D > 0 ) 
+    torque2 = sum( X[i][j] * ((140+cons[j].W) * pallets[i].D) for i in PalletsRange for j in ConsRange if pallets[i].D < 0 )
+
+    mod.setObjective((torque1-torque2)/2)
 
     mod.ModelSense = GRB.MINIMIZE
 
@@ -73,13 +72,14 @@ def minCGdev(pallets, k, nodeTorque, cfg):
     for i in PalletsRange:                
         mod.addConstr(
             sum(X[i][j] for j in ConsRange) == 1
-        ) 
+        )
 
     mod.optimize() 
 
-    nodeTorque.value = mod.objVal
+    nodeTorque.value = 0
 
     for i, _ in enumerate(pallets):
+
         for j in ConsRange:
             if X[i][j].x >= 0.99:
                 cons[j].P = i # put the consolidated in the best position to minimize torque                        
@@ -88,10 +88,12 @@ def minCGdev(pallets, k, nodeTorque, cfg):
                 pallets[i].PCV     = cons[j].V
                 pallets[i].PCS     = cons[j].S
 
+                nodeTorque.value += (140 + cons[j].W) * pallets[i].D
+
+
 # After solved, minimize the sum of ramp door distances for the next node pallets
 def minRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque):
 
-    palletWeights = [0 for _ in pallets]
 
     node = tour.nodes[k]
     next = tour.nodes[k+1]
@@ -117,18 +119,12 @@ def minRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque):
             sum(X[i][j] for i in PalletsRange) == 1
         )
 
-    for i in PalletsRange:
-        palletWeights[i] = 140 + cons[i].W
-        pallets[i].reset(cfg.numNodes)
-
-    sumTorques = 0.
-
     for i in PalletsRange:                
         mod.addConstr(
             sum(X[i][j] for j in ConsRange) == 1
         )
 
-        sumTorques += pallets[i].D * palletWeights[i]
+    sumTorques = sum(pallets[i].D * ( 140 + cons[j].W ) for i in PalletsRange for j in ConsRange)
 
     mod.addConstr(
         sumTorques <=    cfg.maxTorque
@@ -149,17 +145,20 @@ def minRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque):
         nodeTorque.value = 0
 
         for i in PalletsRange:
+
+            nodeTorque.value += 140 * pallets[i].D 
+
             for j in ConsRange:
+
                 if X[i][j].x >= 0.99:
 
-                    # if abs( nodeTorque.value + (140 + cons[j].W) * pallets[i].D ) < cfg.maxTorque:
-
                     cons[j].P = i
-                    nodeTorque.value += (140 + cons[j].W) * pallets[i].D                     
                     pallets[i].Dest[k] = cons[j].To                
                     pallets[i].PCW     = cons[j].W
                     pallets[i].PCV     = cons[j].V
                     pallets[i].PCS     = cons[j].S
+
+                    nodeTorque.value += cons[j].W * pallets[i].D                     
 
 
 if __name__ == "__main__":

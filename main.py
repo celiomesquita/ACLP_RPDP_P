@@ -80,7 +80,7 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
             # Kept P is not -2 anymore, but the pallet ID.
             if len(kept) > 0:
 
-                nodeTorque.value += optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, k)
+                optcgcons.OptCGCons(kept, pallets, k, nodeTorque)
 
                 # N: number of items to embark
                 for c in kept:
@@ -146,21 +146,19 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
 
         if method != "GRB":
 
-            print(f"Torque before: {nodeTorque.value/cfg.maxTorque:.2f}", end='')
+            print(f"Torque before minRampDist: {nodeTorque.value/cfg.maxTorque:.2f}")
 
             for p in pallets:
                 if p.Dest[k] == next.ID:
                     beforeDict['Before'] += rampDistCG - p.D # distance from the pallet to the ramp door
 
-            # optcgcons.minRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque)
+            optcgcons.minRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque)
 
             for p in pallets:
                 if p.Dest[k] == next.ID:
                     afterDict['After'] += rampDistCG - p.D # distance from the pallet to the ramp door
 
-            print(f" after: {nodeTorque.value/cfg.maxTorque:.2f}\n")
-
-          
+            print(f"Torque after minRampDist: {nodeTorque.value/cfg.maxTorque:.2f}\n")
 
         nodeElapsed = time.perf_counter() - startNodeTime
 
@@ -169,7 +167,11 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
         Y = np.reshape(solDict["solMatrix"], (-1, N)) # N number of items (columns)
        
         nodeScore = 0
+        torque    = 0.0
         for i, row in enumerate(Y):
+
+            torque += 140 * pallets[i].D
+
             for j, X_ij in enumerate(row):
                 if X_ij:
                     # mount this node "k" consolidated
@@ -184,27 +186,25 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
                         wNodeAccum += float(items[j].W)
                         vNodeAccum += float(items[j].V)
 
-                    # tour.score += items[j].S
                     nodeScore  += items[j].S
                     nodeVol    += items[j].V
 
+                    torque += float(items[j].W) * pallets[i].D
+
         nodeVol /= cfg.volCap
 
-        epsilon = nodeTorque.value/cfg.maxTorque
-
-        # tour.score += nodeScore
+        epsilon = torque/cfg.maxTorque
 
         if method == "GRB":
             tour.score += ObjBound # Gurobi linear relaxation
         else:
             tour.score += nodeScore
 
-
         tour.AvgVol    += nodeVol
         tour.AvgTorque += epsilon
 
         print(f"----- node {node.ICAO},", end='')
-        print(f" score {tour.score:.0f}, cost {tour.cost:.0f}, vol {nodeVol:.2f}, torque {epsilon:.2f} -----")
+        print(f" score {tour.score:.0f}, cost {tour.cost:.0f}, vol {nodeVol:.2f}, epsilon {epsilon:.2f} -----")
 
         if writeConsFile:
 

@@ -101,8 +101,8 @@ for inst in instances:
 
     # N = first cons ID
     # cons = common.loadNodeCons(surplus, scenario, inst, pi, prevNode, N )
-    # cons = common.testingGetCons(N, True) # for testing only
-    cons = common.testingGetCons(N, False) # False: no randomness in consolidated generation
+    cons = common.testingGetCons(N, True) # for testing only
+    # cons = common.testingGetCons(N, False) # False: no randomness in consolidated generation
 
     # --- from main
     # cons = []
@@ -143,7 +143,10 @@ for inst in instances:
     # Pallets destinations are also set, according to kept on board in new positions
     # Kept P is not -2 anymore, but the pallet ID.
     if len(kept) > 0:
+
         nodeTorque.value += optcgcons.OptCGCons(kept, pallets, cfg.maxTorque, k)
+
+        # print(f"Torque after OptCGCons: {nodeTorque.value/cfg.maxTorque:.2f}\n")
 
         # N: number of items to embark
         # put the consolidated on their assgined pallets (OptCGCons)
@@ -191,6 +194,10 @@ for inst in instances:
 
     objValue = 0.0
  
+
+    print(f"{method} before {nodeTorque.value/cfg.maxTorque:.2f}")
+
+
     if method == "mpShims":
         mpShims.Solve(pallets, items, cfg, k, limit, secBreak, "p", nodeTorque, solDict, itemsDict, tipo)
 
@@ -206,6 +213,10 @@ for inst in instances:
     if method == "GRB":       
         mipGRB.Solve(pallets,  items, cfg, k,        secBreak,      nodeTorque, solDict, itemsDict) 
     
+
+    print(f"{method} after {nodeTorque.value/cfg.maxTorque:.2f}")
+
+
     elapsed = time.perf_counter() - startNodeTime
 
     print("ID\tDest\tPCW\tPCV\tPCS")
@@ -217,8 +228,6 @@ for inst in instances:
 
         next = tour.nodes[k+1]
 
-        print(f"Torque before: {nodeTorque.value/cfg.maxTorque:.2f}", end='')
-
         for p in pallets:
             if p.Dest[k] == next.ID:
                 beforeDict['Before'] += rampDistCG - p.D # distance from the pallet to the ramp door
@@ -229,17 +238,15 @@ for inst in instances:
             if p.Dest[k] == next.ID:
                 afterDict['After'] += rampDistCG - p.D # distance from the pallet to the ramp door
 
-        print(f" after: {nodeTorque.value/cfg.maxTorque:.2f}\n")
-
-        for p in pallets:
-            print(f"Node index {k}\t {p.PCW}\t {p.PCV:.2f}") 
-
-
     # Validate the solution for this node
 
     Y = np.reshape(solDict["solMatrix"], (-1, N)) # N number of items (columns)
 
+    torque2 = 0.0
     for i, row in enumerate(Y):
+
+        torque2 += 140 * pallets[i].D
+
         for j, X_ij in enumerate(row):
             if X_ij:
                 consol[i][k].ID  = j+N
@@ -253,13 +260,16 @@ for inst in instances:
                 wNodeAccum += float(items[j].W)
                 vNodeAccum += float(items[j].V)
 
+                torque2 += float(items[j].W) * pallets[i].D
+
     feasible = "Feasible"                
     for n in itemsDict["mpItems"]:
         if n > 1:
             feasible = "Unfeasible!!!"
             break    
 
-    epsilom = nodeTorque.value/cfg.maxTorque
+    epsilom = torque2/cfg.maxTorque
+
     vol     = vNodeAccum/cfg.volCap
     wei     = wNodeAccum/cfg.weiCap
 
@@ -281,6 +291,8 @@ for inst in instances:
     percent = 0.0
     if beforeDict["Before"] > 0:
         percent = 100.0*(beforeDict["Before"] - afterDict["After"]) / beforeDict["Before"]  
+
+    print(f"{percent} improvement in ramp distance")
 
     # solElapsed += elapsed
     # solScore   += sNodeAccum
