@@ -16,6 +16,7 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
     Solves one tour
     """
     writeConsFile = False
+    writeConsFile = True
 
     print(f"----- Tour {pi},", end='')
     for node in tour.nodes:
@@ -137,20 +138,29 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
             mpACO.Solve(  pallets, items, cfg, k, volThreshold, secBreak, "s", nodeTorque, solDict, itemsDict) 
 
         if method == "GRB":
-            modStatus, ObjBound = mipGRB.Solve( pallets, items, cfg, k,   secBreak,      nodeTorque, solDict, itemsDict) 
+            modStatus, ObjBound = mipGRB.Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict) 
 
         if modStatus == 2: # 2: optimal
             numOptDict["numOpt"] += 1
 
 
         if method != "GRB":
+
+            print(f"Torque before: {nodeTorque.value/cfg.maxTorque:.2f}", end='')
+
             for p in pallets:
                 if p.Dest[k] == next.ID:
                     beforeDict['Before'] += rampDistCG - p.D # distance from the pallet to the ramp door
-            optcgcons.minRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque)
+
+            # optcgcons.minRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque)
+
             for p in pallets:
                 if p.Dest[k] == next.ID:
                     afterDict['After'] += rampDistCG - p.D # distance from the pallet to the ramp door
+
+            print(f" after: {nodeTorque.value/cfg.maxTorque:.2f}\n")
+
+          
 
         nodeElapsed = time.perf_counter() - startNodeTime
 
@@ -256,7 +266,7 @@ if __name__ == "__main__":
     plot = False
 
     # scenarios = [1,2,3,4,5,6]
-    scenarios = [2] # infeasible solutions with Shims............
+    scenarios = [1] # infeasible solutions with Shims............
 
     # surplus   = "data20"
     surplus   = "data50"

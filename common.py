@@ -257,7 +257,7 @@ def writeNodeCons(scenario, instance, cons, pi, node, surplus, epsilom, wei, vol
 
     lines = ""
     for c in cons:
-        line = f"{c.W} {c.S} {c.V:.3f} {c.Frm} {c.To}\n"
+        line = f"{c.S} {c.W} {c.V:.3f} {c.Frm} {c.To}\n"
         lines += line
 
     lines += f"{epsilom:.2f}\n"

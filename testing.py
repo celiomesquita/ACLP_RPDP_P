@@ -217,6 +217,8 @@ for inst in instances:
 
         next = tour.nodes[k+1]
 
+        print(f"Torque before: {nodeTorque.value/cfg.maxTorque:.2f}", end='')
+
         for p in pallets:
             if p.Dest[k] == next.ID:
                 beforeDict['Before'] += rampDistCG - p.D # distance from the pallet to the ramp door
@@ -226,6 +228,12 @@ for inst in instances:
         for p in pallets:
             if p.Dest[k] == next.ID:
                 afterDict['After'] += rampDistCG - p.D # distance from the pallet to the ramp door
+
+        print(f" after: {nodeTorque.value/cfg.maxTorque:.2f}\n")
+
+        for p in pallets:
+            print(f"Node index {k}\t {p.PCW}\t {p.PCV:.2f}") 
+
 
     # Validate the solution for this node
 

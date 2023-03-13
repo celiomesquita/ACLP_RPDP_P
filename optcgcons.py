@@ -145,10 +145,15 @@ def minRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque):
     #     print(f"mod.ObjVal: {mod.ObjVal}")
 
     if mod.SolCount > 0:
+
         nodeTorque.value = 0
+
         for i in PalletsRange:
             for j in ConsRange:
                 if X[i][j].x >= 0.99:
+
+                    # if abs( nodeTorque.value + (140 + cons[j].W) * pallets[i].D ) < cfg.maxTorque:
+
                     cons[j].P = i
                     nodeTorque.value += (140 + cons[j].W) * pallets[i].D                     
                     pallets[i].Dest[k] = cons[j].To                
