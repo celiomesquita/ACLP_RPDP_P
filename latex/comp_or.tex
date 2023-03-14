@@ -858,23 +858,22 @@ Finally, we present a new heuristic designed specifically for ACLP+RPDP, which w
 	\end{minipage}
 \end{table}
 
-{\color{blue}
+
 Figure \ref{fig:whip} represents the $n_{\pi(k)}$\/ possible edges $e_{ij}^{\pi(k)}$\/ of $p_i$\/ sorted by $\theta_{ij}^{\pi(k)}$. \emph{Shims}\/ starts with a greedy solution, stopping at the edge with index in $\eta_1[i]$ close to the local optimum (first phase). Then, considering even the edge with the index $\eta_2[i]$, it elaborates different possible complements for this pallet and selects the best of these complements (second phase).
 
-Although the second phase solves a knapsack problem, an algorithm for solving a bin packing problem was used (the First Fit Decreasing - FFD), and the most profitable bin (shims) was selected. This method was proved to be faster than a dynamic program solution for the knapsack problem.
+Although the second phase solves a knapsack problem, an algorithm for solving a Bin Packing Problem was used (the First Fit Decreasing - FFD), and the most profitable bin (Shims) was selected. This method was proved to be faster than a Dynamic Program solution for the Knapsack Problem.
 		
 	In this work, we included a new phase after the first: a minimization of the CG deviation. An integer programming procedure that helps improve the overall {\it mpShims} results.
 
-$1^{st}$ - Greedy phase with torque surplus
+$1^{st}$ - A Greedy phase to partially build pallets.
 
-$2^{st}$ - Minimization of CG deviation
+$2^{st}$ - Minimization of CG deviation.
 
-$3^{st}$ - {\it Shims} construction and best {\it Shims} selection
+$3^{st}$ - {\it Shims} set construction and best {\it Shims} selection
 
-All executed in a multi-process runtime, accessing concurrently, reading and writing, the list of items and the current value of the CG deviation.
+All executed in a multi-process execution, accessing concurrently, reading and writing, the list of items and the current value of the CG deviation.
+As to the multi-process execution, we considered each pallet as a process.
 
-As to the multi-process runtime, we considered each pallet as a process.
-}
 
 
 \subsection{mpShims}
@@ -937,7 +936,7 @@ Line \ref{mpShims:greedy} calls the greedy method which updates $p_i$, $N_{\pi(k
 
 Line \ref{mpShims:join1} wait for all $Greedy$ processes to finish.
 
-Line \ref{mpShims:minCGdev} calls the $minCGdev$ method which updates the $nodeTorque$ and $G$. $minCGdev$ minimizes the CG deviation and repairs the greedy solution if it is infeasible.
+Line \ref{mpShims:minCGdev} calls the $minCGdev$ integer programming method (Subsection \ref{subsection:second_phase}) which updates the $nodeTorque$ and $G$. $minCGdev$ minimizes the CG deviation. We raise the hypothesis that, in sequential mode, where one pallet is built at a time, torque constraints may be more restrictive than volume or weight constraints, which could stop the palletization process earlier, fostering a solution that may be not as good as it could be. So, we decided to balance cargo before the next {\it Shims} phase to allow more room for pallet fulfillment. This will be confirmed (or not) in Section \ref{sec6}.
 
 Line \ref{mpShims:getBestShims} calls the $getBestShims$ method which updates $p_i$, $N_{\pi(k)}$, $nodeTorque$, and $G$.
 
@@ -990,8 +989,9 @@ In Algorithm \ref{alg:greedy}, line \ref{greedy:eta} defines an array with the s
 
 
 \subsubsection{{\it Shims} second phase: improvement on minimizing CG deviation}
+\label{subsection:second_phase}
 
-Between the greedy and the {\it Shims} selection phases we inserted, in this work, a method to minimize the CG deviation, as stated by the model that follows.
+Between the greedy and the {\it Shims} selection phases we inserted, in this work, an integer programming method to minimize the CG deviation, as stated by the model that follows.
 
 Let $\pi$ be a tour in the set of permutations of nodes.
 
@@ -1247,9 +1247,11 @@ We solved all scenarios and instances with Gurobi in a relaxed linear model, {\i
 
 We were lucky that {\it mpShims} touched the edge of the polyhedron that bounds the feasible region, it found the optimal solution in volume $surplus = 1.5$, scenario {\bf 4}.
 
-{\it mpShims} had a quality performance very close to the {\it Relaxed Gurobi} upper bound solution, and, as to the {\bf Speedup}, on average, mpShims was 2.6 times faster than {\it Shims}. Theoretically, it could be more, but due to the burden of sharing the CG deviation and the list of items among the processes (pallets) for reading and writing, the run-time {\it race condition} management limited {\it mpShims} performance.
+{\it mpShims} had a quality performance very close to the {\it Relaxed Gurobi} upper bound solution, and, as to the {\bf Speedup}, on average, mpShims was 2.6 times faster than {\it Shims}. Theoretically, it could be more, but due to the burden of sharing the CG deviation and the list of items among the processes (pallets) for reading and writing, the execution {\it race condition} management limited {\it mpShims} performance.
 
 {\it When threads or processes attempt to simultaneously access a shared resource, and the accesses can result in an error, we often say the program has a race condition, because the threads or processes are in a "race" to carry out an operation.} \cite[p. 53]{Pacheco:2020}.
+
+We confirmed the hypothesis raised in line \ref{mpShims:minCGdev} of Algorithm \ref{alg:mpShims} that, in sequential mode, where one pallet is built at a time, torque constraints could be more restrictive than volume or weight constraints, which could stop the palletization process earlier, fostering a solution that may be not as good as it could be. This integer programming procedure inclusion really improved {\it Shims} results.
 
 \subsection{Yet another improvement}
 \label{improvement}
