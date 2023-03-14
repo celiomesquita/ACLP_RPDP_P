@@ -123,6 +123,7 @@ def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict
     surplus = 1. + 3. *(1. - threshold)
 
     lock  = mp.Lock()
+    counter = 0
 
     if mode == "Parallel":
     
@@ -138,6 +139,8 @@ def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict
         for proc in procs:
             proc.join()
 
+        # optcgcons.minCGdev(pallets, k, nodeTorque, cfg) # made no significant difference
+
         # parallel shims phase
         for i, p in enumerate(pallets):
             procs[i] = mp.Process( target=getBestShims, args=( pallets[i], items, k,\
@@ -151,9 +154,8 @@ def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict
     else: # serial
         # sort ascendent by CG distance
         # pallets.sort(key=lambda x: abs(x.D)) # deactivated because of torque surplus
-        counter = 0
         for i, _ in enumerate(pallets):
-            # fill until the threshold                                             #       torque surplus
+            # fill until the threshold                                                               torque surplus
             common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, threshold, itemsDict, lock, 2.)
 
             optcgcons.minCGdev(pallets, k, nodeTorque, cfg)
@@ -163,7 +165,7 @@ def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict
             # try to complete the pallet
             counter += common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, 1.0, itemsDict, lock)
 
-            # print(f"{counter} items inserted in post local search.")
+    print(f"{mode}: {counter} items inserted in post local search.")
 
 
 if __name__ == "__main__":

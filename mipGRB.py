@@ -9,6 +9,12 @@ from gurobipy import GRB
 # import multiprocessing as mp
 # import numpy as np
 
+def mycallback(model, where):
+    if where == GRB.Callback.MIPNODE:
+        status = model.cbGet(GRB.Callback.MIPNODE_STATUS)
+        if status == GRB.OPTIMAL:
+            print(model.cbGetNodeRel(model._vars))
+
 def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
 
     # itemsDict to control items inclusion feasibility
@@ -20,18 +26,17 @@ def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
     N = len(items)
     M = len(pallets)
 
-    palletWeights = [0 for _ in pallets]
 
     set_M = range( M ) # i, pallets
     set_N = range( N ) # j, items
 
     # initialize a model
     mod = gp.Model()
-    # mod = mod.relax()
+    mod = mod.relax()
     
     # decision matrix for which items will be put in which pallet in node "k"         
-    X = [ [ mod.addVar(name=f"X[{i}],[{j}]", vtype=GRB.BINARY) for j in set_N ] for i in set_M ]  
-    # X = [ [ mod.addVar(name=f"X[{i}],[{j}]", vtype=GRB.CONTINUOUS) for j in set_N ] for i in set_M ]   
+    # X = [ [ mod.addVar(name=f"X[{i}],[{j}]", vtype=GRB.BINARY) for j in set_N ] for i in set_M ]  
+    X = [ [ mod.addVar(name=f"X[{i}],[{j}]", vtype=GRB.CONTINUOUS) for j in set_N ] for i in set_M ]   
 
     mod.setObjective(sum( X[i][j] * items[j].S for i in set_M for j in set_N ))
 
@@ -45,6 +50,10 @@ def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
             sum(X[i][j] for i in set_M ) <= 1
         )
 
+    palletWeights = [0 for _ in pallets]
+    itemsWeights  = [0 for _ in pallets]
+    itemsVolumes  = [0 for _ in pallets]
+
     for i in set_M:
 
         # items must be grouped in a pallet with the same destination
@@ -57,17 +66,19 @@ def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
             )
 
         # Pallet weight constraint                      PCW: pallet current weight
-        mod.addConstr(
-            sum(X[i][j] * items[j].W for j in set_N) + pallets[i].PCW <= pallets[i].W
-        )
+        itemsWeights[i] = sum(X[i][j] * items[j].W  for j in set_N)
+        # mod.addConstr(
+        #     itemsWeights[i] + pallets[i].PCW <= pallets[i].W
+        # )
 
         # Pallet volume constraint
+        itemsVolumes[i] = sum(X[i][j] * items[j].V  for j in set_N)
         mod.addConstr(
-            sum(X[i][j] * items[j].V for j in set_N) + pallets[i].PCV <= pallets[i].V
+            itemsVolumes[i] + pallets[i].PCV <= pallets[i].V
         )
 
         # for torque calculation
-        palletWeights[i] = 140 + sum(X[i][j] * items[j].W  for j in set_N) + pallets[i].PCW
+        palletWeights[i] = pallets[i].PCW + 140 + itemsWeights[i]
 
     # the final torque must be between minus maxTorque and maxTorqu
 
@@ -80,20 +91,24 @@ def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
     )    
 
     # the aircraft payload (or maximum pallets capacities) must not be exceeded 
-    mod.addConstr(
-        sum(palletWeights[i] for i in set_M) <= cfg.weiCap
-    )  
+    # mod.addConstr(
+    #     sum(palletWeights[i] for i in set_M) <= cfg.weiCap
+    # )
+
     # lateral torque was never significant. So, we did not include lateral torque constraints
 
     # msgdict = {2:'Optimal', 3:'Infeasible', 13:"Suboptimal", 9:"Time limited"}
 
     mod.setParam('OutputFlag', 0)
-    mod.Params.TimeLimit = secBreak
-    mod.Params.Threads = 1
+    # mod.Params.TimeLimit = secBreak
+    # mod.Params.Threads = 1
 
     # mod.setParam(GRB.Param.LogToConsole, 0)
 
-    mod.optimize()
+    mod._vars = mod.getVars()
+    mod.optimize(mycallback)
+
+    # mod.optimize()
 
     bound = 0
     for i in set_M:

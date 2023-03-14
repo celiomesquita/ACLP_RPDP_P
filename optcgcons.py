@@ -90,6 +90,7 @@ def minCGdev(pallets, k, nodeTorque, cfg):
 
                 nodeTorque.value += (140 + cons[j].W) * pallets[i].D
 
+                cons[j].P = i # put the consolidated in the best position to minimize torque                 
 
 # After solved, minimize the sum of ramp door distances for the next node pallets
 def minRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque):

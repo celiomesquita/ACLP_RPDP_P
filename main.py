@@ -102,7 +102,6 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
                                 vNodeAccum += c.V
 
                             tour.score += c.S
-                            nodeVol    += c.V
 
         # set pallets destinations with items and consolidated to be delivered
         if k < k0: # except when the current node is the base on returning
@@ -195,7 +194,7 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
         epsilon = torque/cfg.maxTorque
 
         if method == "GRB":
-            tour.score += ObjBound # Gurobi linear relaxation
+            tour.score += max(ObjBound, nodeScore) # Gurobi linear relaxation
         else:
             tour.score += nodeScore
 
@@ -265,17 +264,17 @@ if __name__ == "__main__":
     plot = False
 
     scenarios = [1,2,3,4,5,6]
-    # scenarios = [2] # infeasible solutions with Shims............
+    # scenarios = [6] # infeasible solutions with Shims............
 
-    surplus   = "data20"
-    # surplus   = "data50"
+    # surplus   = "data20"
+    surplus   = "data50"
     # surplus   = "data100"
 
-    # methods = ["Shims","mpShims","GRB"]  
+    methods = ["Shims","mpShims","GRB"]  
     
     # methods = ["Shims", "mpShims"]
     # methods = ["GRB"]
-    methods = ["Shims"]
+    # methods = ["Shims"]
     # methods = ["mpShims"]
 
     # tipo = "KP"
@@ -423,4 +422,5 @@ if __name__ == "__main__":
                 print(f"Before:\t{beforeDict['Before']:.1f}") 
                 print(f"After:\t{afterDict['After']:.1f}")
                 print(f"% of optima: {numOptDict['numOpt']:.2f}")
+                print(f"{method}")
 
