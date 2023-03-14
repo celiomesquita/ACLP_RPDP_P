@@ -1181,6 +1181,66 @@ In each $scenario$, we indicate in bold the best value of $f$\/ found. In each t
 \normalsize
 \end{table}
 
+
+
+
+\vspace{2.0mm}
+
+\begin{table}[H]
+	\centering
+	\caption{Volume surpluses, methods and scenarios results}  \label{tab:results2}
+	\footnotesize
+	%\scriptsize
+	\begin{tabular}{crcccccccc}
+		\toprule
+		{\bf Volume}     &  {\bf Resolution}   &                              &\multicolumn{6}{c}{\bf Scenarios}                                                   &{\bf Normalized}\\
+		\cmidrule{4-9}		
+		{\it surplus}    & {\it method}        & {\bf Results}                &{\bf 1}      &{\bf 2}      &{\bf 3}      &{\bf 4}      &{\bf 5}       &{\bf 6}      &{\bf Speedup} \\
+		\toprule
+		
+		%\specialcell{$Volume$\\$surplus$}
+		
+		\multirow{6}{*}{$1.2$}&\specialcell{$Relaxed$\\$Gurobi$}& $f$         &{\it 12.02}   &{\it 8.74}   &{\it 12.56} &{\it 14.34}  &{\it 14.79}   &{\it 13.49}       & 1.00 \\% 
+		
+		\cmidrule{2-10}		                       
+		&\multirow{2}{*}{ $Shims$}                       & $f$                &  10.34       & 8.50        & 12.42      &  15.06      &  15.97       &  15.88       &   \\% 
+		&                                                & {\it run time (s)} &  < 1         &  3          &  5         &   20        &  58          &  352         &  1.0 \\% 
+		
+		\cmidrule{2-10}		                       
+		&\multirow{2}{*}{ $mpShims$}                     & $f$                &  11.76       &  8.57       & 12.28      &  14.02      &  14.50       & 13.23        & \\% 
+		
+		&                                                & {\it run time (s)} &  < 1         &  2          &  3         &   47        &  33          & 193         &  {\bf 2.8}\\% 
+		
+		\midrule
+		
+		\multirow{6}{*}{$1.5$}&\specialcell{$Relaxed$\\$Gurobi$}& $f$         &{\it 15.17}   &{\it 10.98}  &{\it 17.80}  &{\it 16.92}  &{\it 19.63}   &{\it 18.62}  & {\it 1.00} \\% 9912
+		
+		\cmidrule{2-10}		                       
+		&\multirow{2}{*}{ $Shims$}                       & $f$                &         &         &       &        &        &         &  \\%8633
+		&                                                & {\it run time (s)} &  < 1         &  4          &    7        &   26        &   81        &  520         & 1.0\\% 639
+		
+		\cmidrule{2-10}		                       
+		&\multirow{2}{*}{ $mpShims$}                     & $f$                &         &        &        &  &        &         & \\%9721
+		&                                                & {\it run time (s)} &  < 1         &  2          &    3        &    12       &   38        &   236        & {\bf 2.2}\\% 292
+		
+		\midrule
+		\multirow{6}{*}{$2.0$}&\specialcell{$Relaxed$\\$Gurobi$}& $f$         &{\it 23.11}   &{\it 16.74}  &{\it 23.63}  &{\it 24.33}  &{\it 26.22}  &{\it 25.80}   & {\it 1.00} \\% 13983
+		
+		\cmidrule{2-10}		                       
+		&\multirow{2}{*}{ $Shims$}                       & $f$                &         &        &        &        &        &         & \\% 12767
+		&                                                & {\it run time (s)} &  2           &  9          &    17       &   68        &   206       &  1216        & 1.0\\% 1518
+		
+		\cmidrule{2-10}		                       
+		&\multirow{2}{*}{ $mpShims$}                     & $f$                &         &        &        &        &        &         &  \\% 13377
+		&                                                & {\it run time (s)} &  2           &  3          &    5        &   20        &   64        &  398         & {\bf 2.8}\\% 544
+		
+		\bottomrule	
+		
+	\end{tabular}
+	%\textsuperscript{asdf sd .}	
+	\normalsize
+\end{table}
+
 The upper bound is the objective function value of a linear programming relaxation of the problem, demonstrating that no integer viable solution can have an objective value greater than this.
 
 We solved all scenarios and instances with Gurobi in a relaxed linear model, {\it Relaxed Gurobi}. This is good for the reader to have an idea of the real performance differences between serial and parallel {\it Shims}.
@@ -1244,26 +1304,26 @@ Columns {\bf Before} and {\bf After} on Table \ref{tab:distRampDoor} refer to th
 
 {\it surplus} & {\bf Scenario} & {\bf Before (m)} & {\bf After (m)}  & {\bf Improvement (\%)}  \\
 \midrule
-\multirow{6}{*}{$1.2$}& 1 &  33  &  16 & 52\\
-&                       2 & 194  & 154 & 21\\
-&                       3 & 149  & 119 & 20 \\
-&                       4 & 135  & 103 & 23 \\
-&                       5 & 121  &  84 & 31 \\
-&                       6 & 105  &  71 & 33 \\
+\multirow{6}{*}{$1.2$}& 1 &  32 &  32 & 0.0 \\
+&                       2 & 181 & 181 & 0.0 \\
+&                       3 & 149 & 149 & 0.0\\
+&                       4 & 131 & 131 & 0.0  \\
+&                       5 & 113 & 113 & 0.0  \\
+&                       6 & 105 & 105 & 0.0 \\
 \midrule
-\multirow{6}{*}{$1.5$}& 1 &  32 &  18 & 44 \\
-&                       2 & 198 & 135 & 32 \\
-&                       3 & 156 & 128 & 18 \\
-&                       4 & 137 & 106 & 22\\
-&                       5 & 120 &  87 & 28 \\
-&                       6 & 106 &  77 & 27 \\
+\multirow{6}{*}{$1.5$}& 1 &  &  &  \\
+&                       2 &  &  &  \\
+&                       3 &  &  &  \\
+&                       4 & 123 & 92 & 25.3  \\
+&                       5 &  &  &  \\
+&                       6 &  &  &  \\
 \midrule
-\multirow{6}{*}{$2.0$}& 1 &  33 &  20 & 38 \\
-&                       2 & 199 & 142 & 28 \\
-&                       3 & 156 & 122 & 22 \\
-&                       4 & 138 & 106 & 23 \\
-&                       5 & 123 &  84 & 31 \\
-&                       6 & 109 &  75 & 31 \\
+\multirow{6}{*}{$2.0$}& 1 &  &  &  \\
+&                       2 &  &  &  \\
+&                       3 &  &  &  \\
+&                       4 &  &  &  \\
+&                       5 &  &  &  \\
+&                       6 &  &  &  \\
 \midrule
 &                         &        & {\bf Average} & {\bf 29}\\
 \bottomrule	

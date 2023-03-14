@@ -154,12 +154,16 @@ def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict
         counter = 0
         for i, _ in enumerate(pallets):
             # fill until the threshold                                             #       torque surplus
-            common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, threshold, itemsDict, lock, 2.) 
+            common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, threshold, itemsDict, lock, 2.)
+
+            optcgcons.minCGdev(pallets, k, nodeTorque, cfg)
            
             # get the best Shims for the pallet
             getBestShims( pallets[i], items, k, nodeTorque, solDict, cfg, surplus,   itemsDict, lock, tipo)
             # try to complete the pallet
-            counter += common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, 1.0, itemsDict, lock) 
+            counter += common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, 1.0, itemsDict, lock)
+
+            # print(f"{counter} items inserted in post local search.")
 
 
 if __name__ == "__main__":

@@ -146,8 +146,6 @@ def minRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque):
 
         for i in PalletsRange:
 
-            nodeTorque.value += 140 * pallets[i].D 
-
             for j in ConsRange:
 
                 if X[i][j].x >= 0.99:
@@ -158,7 +156,7 @@ def minRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque):
                     pallets[i].PCV     = cons[j].V
                     pallets[i].PCS     = cons[j].S
 
-                    nodeTorque.value += cons[j].W * pallets[i].D                     
+                    nodeTorque.value += (140 + cons[j].W) * pallets[i].D                     
 
 
 if __name__ == "__main__":

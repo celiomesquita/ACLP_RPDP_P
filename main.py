@@ -16,7 +16,7 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
     Solves one tour
     """
     writeConsFile = False
-    writeConsFile = True
+    # writeConsFile = True
 
     print(f"----- Tour {pi},", end='')
     for node in tour.nodes:
@@ -104,7 +104,6 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
                             tour.score += c.S
                             nodeVol    += c.V
 
-
         # set pallets destinations with items and consolidated to be delivered
         if k < k0: # except when the current node is the base on returning
             common.setPalletsDestinations(items, pallets, tour.nodes, k, unattended)
@@ -146,7 +145,7 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
 
         if method != "GRB":
 
-            print(f"Torque before minRampDist: {nodeTorque.value/cfg.maxTorque:.2f}")
+            # print(f"Torque before minRampDist: {nodeTorque.value/cfg.maxTorque:.2f}")
 
             for p in pallets:
                 if p.Dest[k] == next.ID:
@@ -158,7 +157,7 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
                 if p.Dest[k] == next.ID:
                     afterDict['After'] += rampDistCG - p.D # distance from the pallet to the ramp door
 
-            print(f"Torque after minRampDist: {nodeTorque.value/cfg.maxTorque:.2f}\n")
+            # print(f"Torque after minRampDist: {nodeTorque.value/cfg.maxTorque:.2f}\n")
 
         nodeElapsed = time.perf_counter() - startNodeTime
 
@@ -265,11 +264,11 @@ if __name__ == "__main__":
     # plot = True
     plot = False
 
-    # scenarios = [1,2,3,4,5,6]
-    scenarios = [1] # infeasible solutions with Shims............
+    scenarios = [1,2,3,4,5,6]
+    # scenarios = [2] # infeasible solutions with Shims............
 
-    # surplus   = "data20"
-    surplus   = "data50"
+    surplus   = "data20"
+    # surplus   = "data50"
     # surplus   = "data100"
 
     # methods = ["Shims","mpShims","GRB"]  
@@ -279,8 +278,8 @@ if __name__ == "__main__":
     methods = ["Shims"]
     # methods = ["mpShims"]
 
-    # tipo = "KP"    # data50 13.70    13      4.3     1.01    -0.62   0.0     154.1 & 96.3 & 37.5
-    tipo = "FFD" # data50 13.54    5       1.6     1.01    -0.63   0.0     153.7 & 102.7 & 33.2
+    # tipo = "KP"
+    tipo = "FFD"
 
     if plot:
 
@@ -314,8 +313,8 @@ if __name__ == "__main__":
 
             for scenario in scenarios:
 
-                # instances = [1,2,3,4,5,6,7]
-                instances = [1]
+                instances = [1,2,3,4,5,6,7]
+                # instances = [1]
 
                 cfg = common.Config(scenario)
                 
@@ -413,7 +412,7 @@ if __name__ == "__main__":
 
                 avgTime = math.ceil(instanceTime/numInst)
 
-                str = f"{instanceSC/numInst:.2f}\t {avgTime:.0f}\t {worstTime:.1f}\t {bestAV:.2f}\t {bestAT:.2f}\t {numOptDict['numOpt']:.1f}\t {beforeDict['Before']:.1f} & {afterDict['After']:.1f} & {percent:.1f}\n"
+                str = f"{instanceSC/numInst:.2f}\t {avgTime:.0f}\t {worstTime:.1f}\t {bestAV:.2f}\t {bestAT:.2f}\t {numOptDict['numOpt']:.1f}\t {beforeDict['Before']:.0f} & {afterDict['After']:.0f} & {percent:.1f}\n"
                 # instances average
                 writeAvgResults(method, scenario, str, surplus)
                 print(f"\n{str}")
