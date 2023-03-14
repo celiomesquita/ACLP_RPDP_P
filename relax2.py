@@ -64,8 +64,7 @@ for k in range(1, 101):
     )
     model.optimize()
 
-    print 'iteration', k, 'obj =', model.objVal, \
-        'u =', u, 'penalties =', [p.x for p in penalties]
+    print (f'iteration {k} obj={model.objVal:.1f} u={u} penalties={[p.x for p in penalties]}') 
 
     # Test for complementary slackness
     stop = True
@@ -76,7 +75,7 @@ for k in range(1, 101):
             break
 
     if stop:
-        print 'primal feasible & optimal'
+        print ('primal feasible & optimal')
         break
 
     else:
@@ -85,8 +84,9 @@ for k in range(1, 101):
             u[i] = max(u[i] - s*(penalties[i].x), 0.0)
 
 # Pull objective and variable values out of model
-print 'objective =', model.objVal
-print 'x = ['
+print (f'objective = {model.objVal}')
+print (f'bound     = {model.objBound}') 
+print ('x = [')
 for x_i in x:
-    print '   ', [1 if x_ij.x >= 0.5 else 0 for x_ij in x_i]
-print ']'
+    print (f'   {[1 if x_ij.x >= 0.5 else 0 for x_ij in x_i]}')
+print (']')
