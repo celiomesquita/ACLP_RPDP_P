@@ -8,7 +8,7 @@ model = Model('GAP per Wolsey')
 model.modelSense = GRB.MAXIMIZE
 model.setParam('OutputFlag', False) # turns off solver chatter
 
-b = [15, 15, 15]
+b = [15, 15, 15] # RHS
 c = [
     [ 6, 10,  1],
     [12, 12,  5],
@@ -30,6 +30,7 @@ for i in range(len(c)):
     x_i = []
     for j in c[i]:
         x_i.append(model.addVar(vtype=GRB.BINARY))
+        # x_i.append(model.addVar(vtype=GRB.CONTINUOUS))
     x.append(x_i)
 
 # We have to update the model so it knows about new variables
@@ -37,7 +38,7 @@ model.update()
 
 # sum j: x_ij <= 1 for all i
 for x_i in x:
-    model.addConstr(sum(x_i) <= 1)
+    model.addConstr(sum(x_i) <= 1) # at most 1 per row
 
 # sum i: a_ij * x_ij <= b[j] for all j
 for j in range(len(b)):
@@ -53,8 +54,9 @@ model.setObjective(
 model.optimize()
 
 # Pull objective and variable values out of model
-print 'objective =', model.objVal
-print 'x = ['
+print (f'objective = {model.objVal}') 
+print (f'bound     = {model.objBound}') 
+print ('x = [')
 for x_i in x:
-    print '   ', [1 if x_ij.x >= 0.5 else 0 for x_ij in x_i]
-print ']'
+    print (f'   {[1 if x_ij.x >= 0.5 else 0 for x_ij in x_i]}')
+print (']')
