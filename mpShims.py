@@ -132,7 +132,7 @@ def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict
         # parallel greedy phase
         for i, _ in enumerate(pallets):
             procs[i] = mp.Process( target=common.fillPallet, args=( pallets[i], items, k,\
-                 nodeTorque, solDict, cfg, threshold, itemsDict, lock, 1.) ) # torque surplus
+                 nodeTorque, solDict, cfg, threshold, itemsDict, lock, 1.0) ) # torque surplus
             time.sleep(0.001)
             procs[i].start()
         
@@ -162,8 +162,9 @@ def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict
            
             # get the best Shims for the pallet
             getBestShims( pallets[i], items, k, nodeTorque, solDict, cfg, surplus,   itemsDict, lock, tipo)
-            # try to complete the pallet
-            counter += common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, 1.0, itemsDict, lock)
+
+    # try to complete the pallet
+    counter += common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, 1.0, itemsDict, lock)
 
     print(f"{mode}: {counter} items inserted in post local search.")
 

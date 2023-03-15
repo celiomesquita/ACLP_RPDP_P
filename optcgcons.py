@@ -16,7 +16,7 @@ def OptCGCons(kept, pallets, k, nodeTorque):
     torque1 = sum( X[i][j] * ((140+kept[j].W) * pallets[i].D) for i in PalletsRange for j in KeptRange if pallets[i].D > 0 ) 
     torque2 = sum( X[i][j] * ((140+kept[j].W) * pallets[i].D) for i in PalletsRange for j in KeptRange if pallets[i].D < 0 )
 
-    mod.setObjective((torque1-torque2)/2)
+    mod.setObjective(torque1-torque2)
 
     mod.ModelSense = GRB.MINIMIZE
 
@@ -61,7 +61,7 @@ def minCGdev(pallets, k, nodeTorque, cfg):
     torque1 = sum( X[i][j] * ((140+cons[j].W) * pallets[i].D) for i in PalletsRange for j in ConsRange if pallets[i].D > 0 ) 
     torque2 = sum( X[i][j] * ((140+cons[j].W) * pallets[i].D) for i in PalletsRange for j in ConsRange if pallets[i].D < 0 )
 
-    mod.setObjective((torque1-torque2)/2)
+    mod.setObjective(torque1-torque2)
 
     mod.ModelSense = GRB.MINIMIZE
 
