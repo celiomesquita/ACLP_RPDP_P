@@ -267,15 +267,15 @@ if __name__ == "__main__":
     # scenarios = [2] # infeasible solutions with Shims............
 
     # surplus   = "data20"
-    surplus   = "data50"
-    # surplus   = "data100"
+    # surplus   = "data50"
+    surplus   = "data100"
 
-    # methods = ["Shims","mpShims","GRB"]  
+    methods = ["Shims","mpShims","GRB"]  
     
     # methods = ["Shims", "mpShims"]
     # methods = ["GRB"]
     # methods = ["Shims"]
-    methods = ["mpShims"]
+    # methods = ["mpShims"]
 
     # tipo = "KP"
     tipo = "FFD"

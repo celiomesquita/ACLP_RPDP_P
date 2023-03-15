@@ -654,7 +654,7 @@ Real cases are more complex as they have hundreds of different items in each nod
 
 \cite{MesquitaSanches2023} strategy is based on the fact that, in real cases, $K$\/ is usually small. Specifically, they will consider $K \leq 6$\/ throughout their and our work, which is a higher value than usual in {\it Brazilian Air Force} missions. As a result, if we have fast node-by-node solutions that allow us to construct a complete tour, we will be able to test all possible $K!$\/ tours and thus select the one that provides the best value for the $f$\/ function.
 
-{\color{blue} Each node, except the base, inherits information from the previous nodes (pallets that must remain on board), and must solved taking into account the remaining not visited nodes. One more reason for a node-by-node approach.}
+Each node, except the base, inherits information from the previous nodes (pallets that must remain on board), and must be solved taking into account the remaining not visited nodes. One more reason for a node-by-node approach.
 
 The tactic will be, at each shipping node, to predefine the destinations of the pallets at that node. In this way, we will reserve a number of pallets proportional to the volume demanded by each destination at the shipping node. We could have used another criterion, but it was observed in the experiments that volume is more constrictive in airlift. Once the destinations of the pallets are defined, we will use serial and Multi-processing heuristics to find the best possible node-by-node solutions. This strategy is summarized in Algorithm \ref{alg:main}, retrieved from \cite{MesquitaSanches2023}.
 
@@ -1014,7 +1014,7 @@ Let $H^{\pi(k)}_{iq}$ be the set of decision variables that relates pallet $i$ t
 Equation \ref{eq:distobjshims} minimizes the aircraft absolute torque in node $\pi(k)$, where 140 is the weight of an empty pallet, $a^{\pi(k)}_q.w$ the weight of the consolidated, and $p_i.d$ the distance between the pallet centroid to the aircraft CG; Equation \ref{eq:distconsshims} states that each consolidated will be assigned to exactly one pallet; and Equation \ref{eq:distpalletsshims} states that each pallet will receive one consolidated.
 
 
-\subsubsection{{\it Shims} third and fourth phases}
+\subsubsection{{\it Shims} third phase}
 
 \begin{algorithm}[H]
 	\caption{Mount shims of edges that fills each pallet gap and return the best shims}  \label{alg:getBestShims}
@@ -1070,10 +1070,10 @@ Equation \ref{eq:distobjshims} minimizes the aircraft absolute torque in node $\
 	\end{algorithmic}
 \end{algorithm}
 
-Algorithm \ref{alg:getBestShims} describes the procedure do get the best {\it Shims}, the best subset of edges to fill each pallet gap. This algorithm follows the logic of the {\it First-Fit Decreasing} algorithm as described by \cite{JohnsonGarey1985}.
+Algorithm \ref{alg:getBestShims} describes the procedure to get the top {\it Shims}, the best subset of edges to fill each pallet gap. This algorithm follows the logic of the {\it First-Fit Decreasing} method as described by \cite{JohnsonGarey1985}. Although it does not aim to minimize the number of bins, its mechanism helped build the set of {\it Shims} to allow the best to be chosen.
 
 Line \ref{empty_shims} creates the first empty shims.
-Line \ref{empty_set} creates the first set of shims from where the best shims will be chosen.
+Line \ref{empty_set} produce the first set of shims from where the best shims will be chosen.
 
 Line \ref{edges_indexes} iterate in the edges indexes range to find subsets of shims that fit into each pallet gap.
 
@@ -1160,8 +1160,17 @@ In each $scenario$, we indicate in bold the best value of $f$\/ found. In each t
         &\multirow{2}{*}{ $mpShims$}                     & $f$                &    16.12  &     11.81 &     17.48 &  17.66    &   19.81   &  17.61    &  0.87 \\% 9966
         &                                                & {\it run time (s)} &     < 1   &     1     &     2     &     7     &   20      &  120      &  {\bf 1.7}\\% 151
 
-\midrule
+		\midrule
+		\multirow{6}{*}{$2.0$}&\specialcell{$Relaxed$\\$Gurobi$}& $f$         &{\it 24.56}&{\it 17.47}&{\it 25.19}&{\it 27.94}&{\it  }&{\it  }&  \specialcell{{\bf 1.00}\\-} \\%11495  
 		
+		\cmidrule{2-10}		                       
+		&\multirow{2}{*}{ $Shims$}                       & $f$                &    21.31  &  17.35    &   24.24   &   27.39    &  29.31     &  27.06     &     \\%  11012
+		&                                                & {\it run time (s)} &     < 1   &     2     &     4     &     14     &     35     &   220     &  1.0 \\% 260
+		
+		\cmidrule{2-10}		                       
+		&\multirow{2}{*}{ $mpShims$}                     & $f$                &    24.33  &   17.26   &   24.70   &  24.81     &   27.71    &  24.93        &    \\% 9966
+		&                                                & {\it run time (s)} &     < 1   &     2     &     3     &     9      &   26       &  151      &  {\bf 1.7}\\% 151
+
 		\bottomrule	
 		
 	\end{tabular}
@@ -1171,13 +1180,13 @@ In each $scenario$, we indicate in bold the best value of $f$\/ found. In each t
 
 The upper bound is the objective function value of a linear programming relaxation of the problem, demonstrating that no integer viable solution can have an objective value greater than this.
 
-We solved all scenarios and instances with Gurobi in a relaxed linear model, {\it Relaxed Gurobi}. This is good for the reader to have an idea of the real performance differences between serial and parallel {\it Shims}.
+We solved all scenarios and instances with {\it Gurobi} in a relaxed linear model, {\it Relaxed Gurobi}. This is good for the reader to have an idea of the real performance differences between serial and parallel {\it Shims}.
 
-{\it Shims} had a quality performance very close to the {\it Relaxed Gurobi} upper bound solution, and, as to the {\bf Speedup}, on average, {\it mpShims} was 1.8 times faster than {\it Shims}. Theoretically, it could be more, but due to the burden of sharing the CG deviation and the list of items among the processes (pallets) for reading and writing, the execution {\it race condition} management limited {\it mpShims} performance.
+{\it Shims} had a quality performance very close to the {\it Relaxed Gurobi} upper bound solution, and, as to the {\bf Speedup}, on average, {\it mpShims} was .... times faster than {\it Shims}. Theoretically, it could be more, but due to the burden of sharing the CG deviation and the list of items among the processes (pallets) for reading and writing, the execution {\it race condition} management limited {\it mpShims} performance.
 
 {\it When threads or processes attempt to simultaneously access a shared resource, and the accesses can result in an error, we often say the program has a race condition, because the threads or processes are in a "race" to carry out an operation.} \cite[p. 53]{Pacheco:2020}.
 
-We confirmed the hypothesis raised in line \ref{mpShims:minCGdev} of Algorithm \ref{alg:mpShims} that, in sequential mode, where one pallet is built at a time, torque constraints could be more restrictive than volume or weight constraints, which could stop the palletization process earlier, fostering a solution that may be not as good as it could be. This integer programming procedure inclusion really improved {\it Shims} results.
+We confirmed the hypothesis raised in line \ref{mpShims:minCGdev} of Algorithm \ref{alg:mpShims} that, in sequential mode, where one pallet is built at a time, torque constraints could be more restrictive than volume or weight constraints, which could stop the palletization process earlier, fostering a solution that may be not as good as it could be. This integer programming procedure inclusion really improved all {\it Shims} results.
 
 After this inclusion {\it Shims} results surpassed that of {\it mpShims}. In multi-processing mode ({\it mpShims}) this inclusion (line \ref{mpShims:minCGdev}) made a negligible difference.
 
@@ -1218,7 +1227,9 @@ Equation \ref{eq:distobj} minimizes the sum of distances of the consolidated in 
 
 As the number of pallets was small (7 or 18) for an integer program solver, the increased time was negligible (less than 1s).
 
-There was some expectation on this post-improvement method as it could have minimized the distances of travel of the pallets to the ramp door, but unfortunately, there was no alteration to these distances.
+There was some expectation on this post-improvement method as it could have minimized the distances of travel of the pallets to the ramp door, but unfortunately, after running all scenarios and problem instances, there was no improvement in minimizing these distances.
+
+This proves that the solutions provided by {\it Shims} and {\it mpShims} are tight enough to hinder this intended improvement.
 
 \section{Conclusions}
 \label{sec7}
