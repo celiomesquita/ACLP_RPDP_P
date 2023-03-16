@@ -233,7 +233,14 @@ There are real situations that are much more complex. In this work, we consider 
 
 In the {\it Brazilian Air Force}\/ missions, hundreds of items can be carried at each node, where the objectives are to prioritize the transport of the most important items and minimize the cost of fuel along the route. As standardized pallets are used with predefined positions on the aircraft, it is possible to carry out loading and unloading at each node in around two hours. However, there is no technological assistance that guarantees the achievement of these objectives.
 
-\cite{MesquitaSanches2023} proposed a method that attends these objectives: a pallet building and arrangement plan with a routing option that maximizes the benefit-cost ratio for the smooth execution of pickup and delivery transport missions. They develop a heuristic that can be executed on a simple handheld computer (like a laptop or a tablet) and that provides a solution quickly enough to keep this cargo handling time under an hour. This work seeks to improve their results in terms of quality and performance by the use of computer parallelism and by minimizing the distance between the next node destined pallets and the cargo door.
+\cite{MesquitaSanches2023} proposed a method that attends these objectives: a pallet building and arrangement plan with a routing option that maximizes the benefit-cost ratio for the smooth execution of pickup and delivery transport missions. They develop a heuristic that can be executed on a simple handheld computer (like a laptop or a tablet) and that provides a solution quickly enough to keep this cargo handling time under an hour.
+
+In this work, we raise three hypotheses for improvements to the work of \cite{MesquitaSanches2023}:
+(1) Computer parallelism could improve {\it Shims}'s performance.
+(2) The {\it Shims}' results may have been inferior to that; it could be that a sequential approach to pallet building may lead to a premature stop due to the torque constraints.
+(3) The distances to move pallets on unloading in the next node could be minimized to benefit unloading costs.
+
+So, this work seeks to improve their results in terms of quality and performance by using computer parallelism, CG balancing between {\it Shims}' phases, and minimizing the distance between the next node-destined pallets and the cargo door.
 
 These improvements in their heuristics are meant to reduce the stress that transport planners are subjected to, because they have to deal with a lot of information in planning the aircraft route, assembling the pallets, and picking up and delivering at each node. To the best of our knowledge, that is the first time that an air cargo transport problem that simultaneously involves APP, WBP, PDP and TSP has been addressed, and the first time ACLP+RPDP is solved with computer parallelism.
 
@@ -1161,14 +1168,14 @@ In each $scenario$, we indicate in bold the best value of $f$\/ found. In each t
         &                                                & {\it run time (s)} &     < 1   &     1     &     2     &     7     &   20      &  120      &  {\bf 1.7}\\% 151
 
 		\midrule
-		\multirow{6}{*}{$2.0$}&\specialcell{$Relaxed$\\$Gurobi$}& $f$         &{\it 24.56}&{\it 17.47}&{\it 25.19}&{\it 27.94}&{\it  }&{\it  }&  \specialcell{{\bf 1.00}\\-} \\%11495  
+		\multirow{6}{*}{$2.0$}&\specialcell{$Relaxed$\\$Gurobi$}& $f$         &{\it 24.56}&{\it 17.47}&{\it 25.19}&{\it 27.94}&{\it 29.90}&{\it 27.60 }&  \specialcell{{\bf 1.00}\\-} \\%15266  
 		
 		\cmidrule{2-10}		                       
-		&\multirow{2}{*}{ $Shims$}                       & $f$                &    21.31  &  17.35    &   24.24   &   27.39    &  29.31     &  27.06     &     \\%  11012
+		&\multirow{2}{*}{ $Shims$}                       & $f$                &    21.31  &  17.35    &   24.24   &   27.39    &  29.31     &  27.06     &   0.96  \\%  14666
 		&                                                & {\it run time (s)} &     < 1   &     2     &     4     &     14     &     35     &   220     &  1.0 \\% 260
 		
 		\cmidrule{2-10}		                       
-		&\multirow{2}{*}{ $mpShims$}                     & $f$                &    24.33  &   17.26   &   24.70   &  24.81     &   27.71    &  24.93        &    \\% 9966
+		&\multirow{2}{*}{ $mpShims$}                     & $f$                &    24.33  &   17.26   &   24.70   &  24.81     &   27.71    &  24.93        &  0.94  \\% 14374
 		&                                                & {\it run time (s)} &     < 1   &     2     &     3     &     9      &   26       &  151      &  {\bf 1.7}\\% 151
 
 		\bottomrule	
@@ -1178,11 +1185,11 @@ In each $scenario$, we indicate in bold the best value of $f$\/ found. In each t
 	\normalsize
 \end{table}
 
-The upper bound is the objective function value of a linear programming relaxation of the problem, demonstrating that no integer viable solution can have an objective value greater than this.
+The upper bound is the objective function value of a linear programming relaxation of the problem, demonstrating that no integer viable solution can have an objective value greater (in maximization) than this.
 
 We solved all scenarios and instances with {\it Gurobi} in a relaxed linear model, {\it Relaxed Gurobi}. This is good for the reader to have an idea of the real performance differences between serial and parallel {\it Shims}.
 
-{\it Shims} had a quality performance very close to the {\it Relaxed Gurobi} upper bound solution, and, as to the {\bf Speedup}, on average, {\it mpShims} was .... times faster than {\it Shims}. Theoretically, it could be more, but due to the burden of sharing the CG deviation and the list of items among the processes (pallets) for reading and writing, the execution {\it race condition} management limited {\it mpShims} performance.
+{\it Shims} had a quality performance very close to the {\it Relaxed Gurobi} upper bound solution, and, as to the {\bf Speedup}, on average, {\it mpShims} was 2 times faster than {\it Shims}. Theoretically, it could be more, but due to the burden of sharing, for reading and writing, the CG deviation and the list of items among the processes (pallets), the {\it race condition} management limited {\it mpShims} performance.
 
 {\it When threads or processes attempt to simultaneously access a shared resource, and the accesses can result in an error, we often say the program has a race condition, because the threads or processes are in a "race" to carry out an operation.} \cite[p. 53]{Pacheco:2020}.
 
@@ -1195,7 +1202,7 @@ After this inclusion {\it Shims} results surpassed that of {\it mpShims}. In mul
 
 \cite{LurkinSchyns2015} considered an aircraft with two doors, and the minimization of loading and unloading costs at the intermediate node was modeled through a container sequencing problem. But, as both aircrafts dealt with in this work have only the ramp door, we tried to minimize the distance of travel of pallets inside the cargo bay, favoring unloading in the next node, by a post optimization of pallets positions to favor this distance minimization.
 
-Let $\pi$ be a tour in the set of permutations of nodes.
+So, to confirm or not Hypothesis (3), that the distances to move pallets on unloading in the next node could be minimized to benefit unloading costs. We modeled this improvement as follows.
 
 Let $maxD$ be the distance from the last ramp pallet to the center of gravity.
 
@@ -1227,20 +1234,34 @@ Equation \ref{eq:distobj} minimizes the sum of distances of the consolidated in 
 
 As the number of pallets was small (7 or 18) for an integer program solver, the increased time was negligible (less than 1s).
 
-There was some expectation on this post-improvement method as it could have minimized the distances of travel of the pallets to the ramp door, but unfortunately, after running all scenarios and problem instances, there was no improvement in minimizing these distances.
+There was some expectation on this post-improvement method as it could have minimized the distances of travel of the pallets through the ramp door, but unfortunately, after running all scenarios and problem instances, there was no improvement in minimizing these distances.
 
 This proves that the solutions provided by {\it Shims} and {\it mpShims} are tight enough to hinder this intended improvement.
+
+\subsection{Discussion summary}
+
+In this work, we raised three hypotheses for improvements to the work of \cite{MesquitaSanches2023}:
+
+(1) Computer parallelism could improve {\it Shims}'s performance: {\it mpShims} was twice as faster as {\it Shims}. This hypothesis was confirmed.
+
+(2) The {\it Shims}' results may have been inferior in that of \cite{MesquitaSanches2023}; it could be that a sequential approach to pallet building may have lead to a premature stop due to the torque constraints. This hypothesis was confirmed as the results were improved by 5\% on average with the inclusion of a CG balancing integer programming procedure.
+
+(3) The distances to move pallets on unloading in the next node could be minimized to benefit unloading costs. This hypothesis was not confirmed. We implemented an integer programming procedure to minimize these distances, but the results proved that any change in {\it Shims} or {\it mpShims} outcomes could turn the solutions unfeasible due to the CG balance constraints.
+
+A new question is raised about whether it is worth using parallelism as, although {\it mpShims} was twice as fast as {\it Shims}, the results of {\it Shims} were still better than those of {\it mpShims}. May this question be solved through the real-world application of these methods.
 
 \section{Conclusions}
 \label{sec7}
 
 In this work we dealt with a hard problem, named {\it Air Cargo Load Planning with Routing, Pickup, and Delivery Problem} considering standardized pallets in fixed positions, obeying the center of gravity constraints, delivering each item to its destination, and minimizing fuel consumption costs.
 
-We converted \cite{MesquitaSanches2023} {\it Shims} into a process-based parallel computing heuristic, which we called {\it Multiprocessing Shims} or {\it mpShims}, that quickly finds good solutions for a wide range of problem sizes, an essential addition as it surpassed all {\it Shims} results, our first contribution.
+We converted \cite{MesquitaSanches2023} {\it Shims} into a process-based parallel computing heuristic, which we called {\it Multiprocessing Shims} or {\it mpShims}, that quickly finds good solutions for a wide range of problem sizes, our first contribution.
 
-We also carryed out 126 experiments with each method on synthetic data based on real data from the {\it Brazilian Air Force} transportation history.
+We also carried out 126 experiments with each method on synthetic data based on real data from the {\it Brazilian Air Force} transportation history.
 
-Another important contribution is that we employed the {\it iRace} package \citep{LopezIbanezManuel2016} to fine tune the {\it mpShims} parameters, guaranteeing the best possible performance for the instances under training and testing.
+Other important contributions are that we checked three hypotheses: Computer parallelism improved {\it Shims} performance; the intermediate integer programming procedure added to {\it Shims} algorithm enhanced it's results; but the integer programming procedure to minimize pallets' travel in the cargo bay did not improve the results. 
+
+And another important contribution is that we employed the {\it iRace} package \citep{LopezIbanezManuel2016} to fine tune the {\it mpShims} volume threshold parameter, guaranteeing the best possible performance for the instances under training and testing.
 
 \section*{Acknowledgments}
 
