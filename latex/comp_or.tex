@@ -120,12 +120,12 @@ This hard problem, named {\it Air Cargo Load Planning with Routing, Pickup, and 
 
 We also contributed by carrying out multiple experiments with the {\it Shims} heuristic on synthetic data based on real data from the {\it Brazilian Air Force} transportation history and a new procedure to minimize the distance from the next node destined pallet to the ramp door.
 
-We converted {\it Shims} into a process-based parallel computing heuristic that quickly finds good solutions for a wide range of problem sizes, an essential contribution as it surpassed all {\it Shims} results.
+We converted {\it Shims} into a process-based parallel computing heuristic that quickly finds good solutions for a wide range of problem sizes, an essential contribution as it surpassed all {\it Shims} results. We also solved a three-dimensional packing problem in the item-pallet allocations yielded by {\it Shims}.
 
 \end{abstract}
 
 \begin{keyword}
-Air Cargo \sep Air Palletization \sep Weight and Balance \sep Pickup and Delivery \sep Parallel computing \sep iRace
+Air Cargo \sep Air Palletization \sep Weight and Balance \sep Pickup and Delivery \sep Parallel computing \sep 3D packing
 \end{keyword}
 
 \end{frontmatter}
@@ -235,7 +235,7 @@ In the {\it Brazilian Air Force}\/ missions, hundreds of items can be carried at
 
 \cite{MesquitaSanches2023} proposed a method that attends these objectives: a pallet building and arrangement plan with a routing option that maximizes the benefit-cost ratio for the smooth execution of pickup and delivery transport missions. They develop a heuristic that can be executed on a simple handheld computer (like a laptop or a tablet) and that provides a solution quickly enough to keep this cargo handling time under an hour.
 
-In this work, we raise four hypotheses for improvements to the work of \cite{MesquitaSanches2023}:
+In this work, we raise four hypotheses for improvements to the work of \cite{MesquitaSanches2023}: \label{hypotheses}
 (1) Computer parallelism could improve {\it Shims}'s performance.
 (2) The {\it Shims}' results may have been inferior to that; it could be that a sequential approach to pallet building may lead to a premature stop due to the torque constraints.
 (3) The distances to move pallets on unloading in the next node could be minimized to benefit ground handling costs.
@@ -1140,20 +1140,20 @@ As we are dealing with a new problem, which has been modeled by \cite{MesquitaSa
  
 We test our methods with 126 different instances: six operational scenarios with 2 aircraft sizes and 3 to 7 nodes; and seven randomly generated item sets for three volume surpluses (1.2, 1.5, and 2.0 times aircraft volume capacities).
 
+The final experiments are performed on a 64-bit, 16GiB, 3.4GHz, 8-core Intel® i7-3770 CPU, 2 threads per core, with {\it Linux Ubuntu 22.04 LTS} as the operational system and {\it Python 3.10.6} as the programming language.
 
 \subsection{Results obtained}
 
-The final experiments are performed on a 64-bit, 16GiB, 3.6GHz, 8-core AMD® Fx-8320e processor, 2 threads per core, with {\it Linux Ubuntu 20} as the operational system and {\it Python 3.8.2} as the programming language.
 
-A relevant problem with meta-heuristics is the parameter's adjustment to extract the best possible efficiency in the optimization. The bulk of the tools to fine-tune these parameters utilize a statistical backdrop that enables them to make accurate predictions regarding the differences in candidate configurations' performance. Inadequacies in the design of the statistical experiment may therefore lead to erroneous results from the statistical tests and, subsequently, cause the approach to produce inaccurate comparisons of candidate configurations. That is why all parameters were set using the $iRace$ package \citep{LopezIbanezManuel2016}. Supplying $iRace$ with a range for $volThreshold$ as [0.80 to 0.99], {\it iRace} yielded 0.92, by training on the uneven instances numbers. The values tested for 20\%, 50\%, and 100\% volume surpluses were very close, considering the confidence level offered by {\it iRace}.
+A relevant problem with meta-heuristics is the parameter's adjustment to extract the best possible efficiency in the optimization. The bulk of the tools to fine-tune these parameters utilize a statistical backdrop that enables them to make accurate predictions regarding the differences in candidate configurations' performance. Inadequacies in the design of the statistical experiment may therefore lead to erroneous results from the statistical tests and, subsequently, cause the approach to produce inaccurate comparisons of candidate configurations. That is why all parameters were set using the $iRace$ package \cite{LopezIbanezManuel2016}. Supplying $iRace$ with a range for $volThreshold$ as [0.80 to 0.99], {\it iRace} yielded 0.92, by training on the uneven instances numbers. The values tested for 20\%, 50\%, and 100\% volume surpluses were very close, considering the confidence level offered by {\it iRace}.
 
 For parallelization, we used the {\it Python Multi-processing} package, which implements {\it process-based parallelism} or {\it parallel shared memory algorithm}. According to \cite{multiprocessing}, {\it Multi-processing} is a package that supports spawning processes using an API similar to the {\it Python Threading} package.
 
-According to \cite[p.271]{Breshears2009}, a {\it Process} is the operating system’s spawned and controlled entity that encapsulates an executing application. A process has two main jobs: the first is to hold the application's resources, and the second is to carry out the application's instructions. 
+According to \citet[p.271]{Breshears2009}, a {\it Process} is the operating system’s spawned and controlled entity that encapsulates an executing application. A process has two main jobs: the first is to hold the application's resources, and the second is to carry out the application's instructions. 
 
-It is known that working concurrently opens up synchronization issues. But the {\it Multi-processing} package (mp) offers both local and remote concurrency, effectively side-stepping the global interpreter lock by using sub-processes instead of threads. Because of this, the {\it Multi-processing} module lets the programmer take full advantage of the fact that a machine has more than one processor, normally capable of 2 threads each.
+It is known that working concurrently opens up synchronization issues. But the {\it Multi-processing} package ({\it mp}) offers both local and remote concurrency, effectively side-stepping the global interpreter lock by using sub-processes instead of threads. Because of this, the {\it Multi-processing} module lets the programmer take full advantage of the fact that a machine has more than one processor, normally capable of 2 threads each.
 
-By Amdahl's law, there is an optimal number of parallel executions for each problem in each environment. While working at IBM in 1967, Gene Amdahl developed the foundation for what became known as Amdahl's Law or Amdahl's Argument. Essentially, the law states that while a process can be decomposed into steps that may then be run in parallel, the time taken for the whole process will be significantly limited by the steps that remain serialized.
+By Amdahl's law, there is an optimal number of parallel executions for each problem in each environment. While working at IBM in 1967, Gene Amdahl developed the foundation for what became known as Amdahl's Law or Amdahl's Argument. Essentially, the law states that while a process can be decomposed into steps that may then be run in parallel, the time taken for the whole process will be significantly limited by the steps that remain serialized. In our case, the reading and writing process on the shared torque variable and the list of items to be embarked.
 
 We ran Algorithm \ref{alg:main} in the 6 scenarios described in Table \ref{tab:scenarios}, considering 3 methods for node-by-node resolution: the {\it Gurobi} MIP solver, {\it Shims}, and {\it mpShims} (Algorithm \ref{alg:mpShims}).
 
@@ -1232,11 +1232,11 @@ We solved all scenarios and instances with {\it Gurobi} in a relaxed linear mode
 
 {\it When threads or processes attempt to simultaneously access a shared resource, and the accesses can result in an error, we often say the program has a race condition, because the threads or processes are in a "race" to carry out an operation.} \cite[p. 53]{Pacheco:2020}.
 
-We confirmed the hypothesis raised in line \ref{mpShims:minCGdev} of Algorithm \ref{alg:mpShims} that, in sequential mode, where one pallet is built at a time, torque constraints could be more restrictive than volume or weight constraints, which could stop the palletization process earlier, fostering a solution that may be not as good as it could be. This integer programming procedure inclusion really improved all {\it Shims} results.
+We confirmed the hypothesis raised in \ref{hypotheses} and in line \ref{mpShims:minCGdev} of Algorithm \ref{alg:mpShims} that, in sequential mode, where one pallet is built at a time, torque constraints could be more restrictive than volume or weight constraints, which could stop the palletization process earlier, yielding a solution that may be not as good as it could be. This integer programming procedure inclusion really improved all {\it Shims} results.
 
 After this inclusion {\it Shims} results surpassed that of {\it mpShims}. In multi-processing mode ({\it mpShims}) this inclusion (line \ref{mpShims:minCGdev}) made a negligible difference.
 
-\subsection{Another possible improvement}
+\subsection{An attempt to minimize ground handling time}
 \label{improvement}
 
 \cite{LurkinSchyns2015} considered an aircraft with two doors, and the minimization of loading and unloading costs at the intermediate node was modeled through a container sequencing problem. But, as both aircrafts dealt with in this work have only the ramp door, we tried to minimize the distance of travel of pallets inside the cargo bay, favoring unloading in the next node, by a post optimization of pallets positions to favor this distance minimization.
@@ -1279,7 +1279,7 @@ This proves that the solutions provided by {\it Shims} and {\it mpShims} are tig
 
 \subsection{Discussion summary}
 
-In this work, we raised four hypotheses for improvements to the work of \cite{MesquitaSanches2023}:
+In this work, we raised four hypotheses for improvements to the work of \cite{MesquitaSanches2023}: \label{hypotheses}
 
 (1) Computer parallelism could improve {\it Shims}'s performance: {\it mpShims} was twice as faster as {\it Shims}. This hypothesis was confirmed.
 

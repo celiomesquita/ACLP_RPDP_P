@@ -64,9 +64,9 @@ class Item(object):
             # generate dimensions randomly
             w = random.uniform(0.5, 1.5) * v ** 1/3 # width
             l = random.uniform(0.5, 1.5) * math.sqrt(v/w) # length
-            self.w = w  # width
-            self.l = l # length
-            self.h = v /(w * l) # height
+            self.w = 0.95*w  # width
+            self.l = 0.95*l # length
+            self.h = 0.95*v /(w * l) # height
 
         self.ID = id
         self.P  = p  # -1 if an item, -2 if a consollidated, or pallet ID.
@@ -90,7 +90,7 @@ class Pallet(object):
         self.PCS = 0.
         self.w = 2.15 # width 84"
         self.l = 2.65 # length 104"
-        self.h = 1.7 * self.V /(self.w * self.l) # height
+        self.h = 1.5 * self.V /(self.w * self.l) # height
 
     def reset(self, numNodes):
         self.Dest = np.full(numNodes, -1)
