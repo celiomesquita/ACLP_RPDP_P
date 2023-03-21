@@ -1,4 +1,4 @@
-\begin{thebibliography}{31}
+\begin{thebibliography}{33}
 \expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
 \providecommand{\url}[1]{\texttt{#1}}
 \providecommand{\href}[2]{#2}
@@ -49,6 +49,14 @@
   genetic algorithm}.
 \newblock \bibinfo{journal}{MATEC Web of Conferences} \bibinfo{volume}{179},
   \bibinfo{pages}{1--6}.
+%Type = Inproceedings
+\bibitem[{Dube and Kanavathy(2006)}]{DubeKanavathy2006}
+\bibinfo{author}{Dube, E.}, \bibinfo{author}{Kanavathy, L.R.},
+  \bibinfo{year}{2006}.
+\newblock \bibinfo{title}{Optimizing three-dimensional bin packing through
+  simulation}, in: \bibinfo{booktitle}{Modelling, simulation, and
+  optimization}, \bibinfo{address}{Durban, South Africa}. pp.
+  \bibinfo{pages}{507--034}.
 %Type = Inproceedings
 \bibitem[{Fok and Chun(2004)}]{fok2004optimizing}
 \bibinfo{author}{Fok, K.}, \bibinfo{author}{Chun, A.}, \bibinfo{year}{2004}.
@@ -215,6 +223,12 @@
   airlift loading problem with insufficient aircraft}.
 \newblock \bibinfo{journal}{Journal of Nonlinear Analysis and Optimization:
   Theory and Applications} \bibinfo{volume}{5}, \bibinfo{pages}{125--141}.
+%Type = Misc
+\bibitem[{Ruiz and Ribeiro(2020)}]{RuizRibeiro}
+\bibinfo{author}{Ruiz, E.}, \bibinfo{author}{Ribeiro, T.B.},
+  \bibinfo{year}{2020}.
+\newblock \bibinfo{title}{{3D Bin Packing v1.1.2}}.
+\newblock \URLprefix \url{https://github.com/enzoruiz/3dbinpacking}.
 %Type = Article
 \bibitem[{Vancroonenburg et~al.(2014)Vancroonenburg, Verstichel, Tavernier and
   Vanden~Berghe}]{Vancroonemburg2014}

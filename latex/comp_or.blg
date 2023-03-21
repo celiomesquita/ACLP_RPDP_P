@@ -5,47 +5,49 @@ The style file: elsarticle-harv.bst
 Database file #1: references.bib
 Warning--I'm ignoring HoughtonCarpenter2003's extra "title" field
 --line 30 of file references.bib
+Warning--entry type for "RuizRibeiro" isn't style-file defined
+--line 74 of file references.bib
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Warning--empty pages in fok2004optimizing
-You've used 31 entries,
+You've used 33 entries,
             2990 wiz_defined-function locations,
-            862 strings with 11403 characters,
-and the built_in function-call counts, 19842 in all, are:
-= -- 1509
-> -- 702
-< -- 19
-+ -- 295
-- -- 240
-* -- 2118
-:= -- 2871
-add.period$ -- 96
-call.type$ -- 31
-change.case$ -- 231
-chr.to.int$ -- 31
-cite$ -- 32
-duplicate$ -- 1516
-empty$ -- 1522
-format.name$ -- 353
-if$ -- 3735
+            874 strings with 11716 characters,
+and the built_in function-call counts, 21103 in all, are:
+= -- 1619
+> -- 738
+< -- 22
++ -- 309
+- -- 252
+* -- 2240
+:= -- 3046
+add.period$ -- 101
+call.type$ -- 33
+change.case$ -- 245
+chr.to.int$ -- 33
+cite$ -- 34
+duplicate$ -- 1616
+empty$ -- 1616
+format.name$ -- 375
+if$ -- 3985
 int.to.chr$ -- 1
 int.to.str$ -- 1
-missing$ -- 287
-newline$ -- 173
-num.names$ -- 124
-pop$ -- 558
+missing$ -- 303
+newline$ -- 182
+num.names$ -- 132
+pop$ -- 596
 preamble$ -- 1
-purify$ -- 204
+purify$ -- 216
 quote$ -- 0
-skip$ -- 440
+skip$ -- 480
 stack$ -- 0
-substring$ -- 866
-swap$ -- 1047
-text.length$ -- 1
+substring$ -- 920
+swap$ -- 1113
+text.length$ -- 2
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 267
+type$ -- 285
 warning$ -- 1
-while$ -- 120
+while$ -- 129
 width$ -- 0
-write$ -- 450
-(There were 2 warnings)
+write$ -- 477
+(There were 3 warnings)

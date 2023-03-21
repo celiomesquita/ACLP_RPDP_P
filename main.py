@@ -11,6 +11,10 @@ import optcgcons
 import mipGRB
 from plots import TTT
 
+from py3dbp import Packer, Bin, Item
+
+
+
 def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus, tipo, numOptDict, rampDistCG, afterDict, beforeDict):
     """
     Solves one tour
@@ -160,12 +164,43 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
 
         nodeElapsed = time.perf_counter() - startNodeTime
 
-        tour.elapsed += nodeElapsed
 
         Y = np.reshape(solDict["solMatrix"], (-1, N)) # N number of items (columns)
        
+        # begin ---- parallel solving the 3D packing for each pallet  
+
+        procs   = [None for _ in pallets]
+        packers = [None for _ in pallets]
+        counter1 = 0
+        for i, row in enumerate(Y):
+
+            packers[i] = Packer()
+            packers[i].add_bin( Bin(f'pallet{i}', pallets[i].w, pallets[i].h, pallets[i].l, pallets[i].W, i) )
+            
+            for j, X_ij in enumerate(row):
+                if X_ij:
+                    packers[i].add_item(Item(f'item{j}', items[j].w, items[j].h, items[j].l, items[j].W, j))
+                    counter1 += 1
+            
+            procs[i] = mp.Process( target=packers[i].pack() )
+            procs[i].start()
+
+        counter2 = 0
+        for i, proc in enumerate(procs):
+            proc.join()
+            for bin in packers[i].bins:
+                i = bin.ID
+                for item in bin.unfitted_items:
+                    j = item.ID
+                    Y[i][j] = 0
+                    counter2 += 1
+
+        print(f"{100*counter2/counter1:.1f}% unfit items excluded from solution!")
+        # end ---- parallel solving the 3D packing for each pallet         
+
         nodeScore = 0
         torque    = 0.0
+
         for i, row in enumerate(Y):
 
             torque += 140 * pallets[i].D
@@ -188,6 +223,9 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
                     nodeVol    += items[j].V
 
                     torque += float(items[j].W) * pallets[i].D
+
+        tour.elapsed += nodeElapsed
+
 
         nodeVol /= cfg.volCap
 
@@ -263,18 +301,18 @@ if __name__ == "__main__":
     # plot = True
     plot = False
 
-    scenarios = [1,2,3,4,5,6]
-    # scenarios = [2] # infeasible solutions with Shims............
+    # scenarios = [1,2,3,4,5,6]
+    scenarios = [1] # infeasible solutions with Shims............
 
-    # surplus   = "data20"
+    surplus   = "data20"
     # surplus   = "data50"
-    surplus   = "data100"
+    # surplus   = "data100"
 
-    methods = ["Shims","mpShims","GRB"]  
+    # methods = ["Shims","mpShims","GRB"]  
     
     # methods = ["Shims", "mpShims"]
     # methods = ["GRB"]
-    # methods = ["Shims"]
+    methods = ["Shims"]
     # methods = ["mpShims"]
 
     # tipo = "KP"
@@ -312,8 +350,8 @@ if __name__ == "__main__":
 
             for scenario in scenarios:
 
-                instances = [1,2,3,4,5,6,7]
-                # instances = [1]
+                # instances = [1,2,3,4,5,6,7]
+                instances = [1]
 
                 cfg = common.Config(scenario)
                 

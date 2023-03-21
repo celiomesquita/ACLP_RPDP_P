@@ -53,7 +53,21 @@ class Item(object):
     """
     A candidate item "j" to be loaded on a pallet "i" if X_ij == 1
     """
+    # consol           -1, -2, 0, 0, 0., -1, -1
     def __init__(self, id, p, w, s, v, frm, to):
+
+        self.w = 0.  # width
+        self.l = 0. # length
+        self.h = 0. # height
+
+        if v > 0:
+            # generate dimensions randomly
+            w = random.uniform(0.5, 1.5) * v ** 1/3 # width
+            l = random.uniform(0.5, 1.5) * math.sqrt(v/w) # length
+            self.w = w  # width
+            self.l = l # length
+            self.h = v /(w * l) # height
+
         self.ID = id
         self.P  = p  # -1 if an item, -2 if a consollidated, or pallet ID.
         self.W  = w  # weight
@@ -62,6 +76,7 @@ class Item(object):
         self.Frm = frm  # origin node ID
         self.To = to # destination node ID
         self.Attr = 0.0
+
 
 class Pallet(object):
     def __init__(self, id, d, v, w, numNodes):
@@ -73,6 +88,9 @@ class Pallet(object):
         self.PCW = 0 # pallet current weight
         self.PCV = 0.
         self.PCS = 0.
+        self.w = 2.15 # width 84"
+        self.l = 2.65 # length 104"
+        self.h = 1.7 * self.V /(self.w * self.l) # height
 
     def reset(self, numNodes):
         self.Dest = np.full(numNodes, -1)
