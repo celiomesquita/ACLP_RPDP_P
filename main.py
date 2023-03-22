@@ -175,12 +175,14 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
         for i, row in enumerate(Y):
 
             packers[i] = Packer()
-            packers[i].add_bin( Bin(f'pallet{i}', pallets[i].w, pallets[i].h, pallets[i].l, pallets[i].W, i) )
+            packers[i].add_bin( Bin(f'pallet{i}', pallets[i].w, pallets[i].h, pallets[i].d, pallets[i].W, i) )
             
+            pos = 0
             for j, X_ij in enumerate(row):
-                if X_ij:
-                    packers[i].add_item(Item(f'item{j}', items[j].w, items[j].h, items[j].l, items[j].W, j))
+                if X_ij == 1:
+                    packers[i].add_item(Item(f'item{j}', items[j].w, items[j].h, items[j].d, items[j].W, j))
                     counter1 += 1
+                    pos += 1
             
             procs[i] = mp.Process( target=packers[i].pack() )
             procs[i].start()
@@ -189,7 +191,6 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
         for i, proc in enumerate(procs):
             proc.join()
             for bin in packers[i].bins:
-                i = bin.ID
                 for item in bin.unfitted_items:
                     j = item.ID
                     Y[i][j] = 0
@@ -304,8 +305,8 @@ if __name__ == "__main__":
     # scenarios = [1,2,3,4,5,6]
     scenarios = [1] # infeasible solutions with Shims............
 
-    surplus   = "data20"
-    # surplus   = "data50"
+    # surplus   = "data20"
+    surplus   = "data50"
     # surplus   = "data100"
 
     # methods = ["Shims","mpShims","GRB"]  

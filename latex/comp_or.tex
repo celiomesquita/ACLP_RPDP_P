@@ -1102,10 +1102,10 @@ Finally, select the best weight shims (\ref{best_weight}), the best volume shims
 
 We implemented a post-optimization procedure for three-dimensional (3D) packing according to the instructions on \cite{DubeKanavathy2006} and on \cite{PaquayLimbourgSchynsOliveira2018}, to pack the items selected for each pallet.
 
-Let $p_i.H$ be the maximum height for each pallet to be built, which depends on the size of the aircraft and the pallet position along the cargo bay; each {\it 463l} pallet has a width $p_i.W = 2.15m$ and a length of $p_i.L = 2.65m$.
+Let $p_i.H$ be the maximum height for each pallet to be built, which depends on the size of the aircraft and the pallet position along the cargo bay; each {\it 463l} pallet has a width $p_i.W = 2.15m$ and a depth of $p_i.D = 2.65m$.
 
 \begin{equation} \label{eq:3dof}
-	\mbox{minimize}\ \Bigg [ p_i.W \times p_i.H \times p_i.L - \sum_{j \in p_i} t_j.w \times t_j.h \times t_j.l \ \Bigg ]
+	\mbox{minimize}\ \Bigg [ p_i.W \times p_i.H \times p_i.D - \sum_{j \in p_i} t_j.w \times t_j.h \times t_j.d \ \Bigg ]
 \end{equation}
 
 \begin{equation} \label{eq:3dh}
@@ -1117,7 +1117,7 @@ Let $p_i.H$ be the maximum height for each pallet to be built, which depends on 
 \end{equation}
 
 \begin{equation} \label{eq:3dl}
-	s.t.: \sum_{j \in p_i} t_j.l \leq p_i.L 
+	s.t.: \sum_{j \in p_i} t_j.d \leq p_i.D 
 \end{equation}
 
 Our implementation was also based on \cite{RuizRibeiro} (who implemented the algorithm described in \cite{DubeKanavathy2006}), taking advantage of the already implemented Python classes and auxiliary procedures, but making the necessary adjustments for parallel processing.

@@ -57,16 +57,16 @@ class Item(object):
     def __init__(self, id, p, w, s, v, frm, to):
 
         self.w = 0.  # width
-        self.l = 0. # length
+        self.d = 0. # length
         self.h = 0. # height
 
         if v > 0:
             # generate dimensions randomly
             w = random.uniform(0.5, 1.5) * v ** 1/3 # width
-            l = random.uniform(0.5, 1.5) * math.sqrt(v/w) # length
+            d = random.uniform(0.5, 1.5) * math.sqrt(v/w) # length
             self.w = 0.95*w  # width
-            self.l = 0.95*l # length
-            self.h = 0.95*v /(w * l) # height
+            self.d = 0.95*d  # depth
+            self.h = 0.95*v /(w * d) # height
 
         self.ID = id
         self.P  = p  # -1 if an item, -2 if a consollidated, or pallet ID.
@@ -89,8 +89,8 @@ class Pallet(object):
         self.PCV = 0.
         self.PCS = 0.
         self.w = 2.15 # width 84"
-        self.l = 2.65 # length 104"
-        self.h = 1.5 * self.V /(self.w * self.l) # height
+        self.d = 2.65 # depth 104"
+        self.h = 1.5 * self.V /(self.w * self.d) # height
 
     def reset(self, numNodes):
         self.Dest = np.full(numNodes, -1)
@@ -152,7 +152,7 @@ def loadPallets(cfg):
     dists = [8.39,6.25,4.5,2.1,-0.3,-2.7,-5.1] # distances of pallets centroids to the center of gravity
 
     if cfg.size == "larger":
-        vol = 14.8 # ramp                                                                        forward
+        vol = 14.8
         dists = [14.89,14.89,11.47,11.47,8.77,8.77,4.40,4.40,0.00,0.00,-4.40,-4.40,-8.77,-8.77,-13.17,-13.17,-17.57,-17.57]
    
     pallets = []
