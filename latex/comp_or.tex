@@ -120,12 +120,12 @@ This hard problem, named {\it Air Cargo Load Planning with Routing, Pickup, and 
 
 We also contributed by carrying out multiple experiments with the {\it Shims} heuristic on synthetic data based on real data from the {\it Brazilian Air Force} transportation history and a new procedure to minimize the distance from the next node destined pallet to the ramp door.
 
-We converted {\it Shims} into a process-based parallel computing heuristic that quickly finds good solutions for a wide range of problem sizes, an essential contribution as it surpassed all {\it Shims} results.
+We converted {\it Shims} into a process-based parallel computing heuristic that quickly finds good solutions for a wide range of problem sizes. In addition, we applied a 3D packing procedure to guarantee that only the items that fit on each pallet are present in the solution.
 
 \end{abstract}
 
 \begin{keyword}
-Air Cargo \sep Air Palletization \sep Weight and Balance \sep Pickup and Delivery \sep Parallel computing \sep iRace
+Air Cargo \sep Air Palletization \sep Weight and Balance \sep Pickup and Delivery \sep Parallel computing \sep 3D packing
 \end{keyword}
 
 \end{frontmatter}
@@ -239,7 +239,7 @@ In this work, we raise four hypotheses for improvements to the work of \cite{Mes
 (1) Computer parallelism could improve {\it Shims}'s performance.
 (2) The {\it Shims}' results may have been inferior to that; it could be that a sequential approach to pallet building may lead to a premature stop due to the torque constraints.
 (3) The distances to move pallets on unloading in the next node could be minimized to benefit ground handling costs.
-(4) A post-optimization procedure for 3D packing running in parallel mode would keep the run time adequate for operational use.
+(4) A post-optimization procedure for 3D packing running in parallel mode would keep the running time adequate for operational use.
 
 So, this work seeks to improve their results in terms of quality and performance by using computer parallelism, CG balancing between {\it Shims}' phases, minimizing the distance between the next node-destined pallets and the cargo door, and performing a 3D packing procedure on each pallet.
 
@@ -295,7 +295,7 @@ As already mentioned, \cite{LurkinSchyns2015} was the first work that simultaneo
 
 \cite{MesquitaSanches2023} contributed with a complex model and elaborate heuristics for the ACLP-RPDP that simultaneously solve 4 intractable sub-problems: APP, WBP, SPDP and TSP. They also compare the performances of four well known heuristics: {\it Ant Colony Optimization}, the {\it Noising Method Optimization}, the {\it Greedy Randomized Adaptive Search Procedure}, and {\it Tabu Search}. They also create a new heuristic called {\it Shims} which is fast and may be run in a handheld computer. They did not use computer parallelism to improve performance, nor tryed to minimize the distances from the next nodes destined pallets to the cargo ramp door.
 
-As can be seen, except for \cite{MesquitaSanches2023}, the remaining works do not address air cargo palletization and load balancing with route optimization in a multi-leg flight plan, and none of them employ parallelization in their algorithms. This is the objective of our work: to reshape \cite{MesquitaSanches2023} solution process and algorithms to accommodate parallel features that can improve solution quality and performance, and also include a new feature that is to minimize the distances between the next node's destined pallets and the cargo ramp door.
+As can be seen, except for \cite{MesquitaSanches2023}, the remaining works do not address air cargo palletization and load balancing with route optimization in a multi-leg flight plan, and none of them employ parallelization in their algorithms. This is the objective of our work: to reshape \cite{MesquitaSanches2023} solution process and algorithms to accommodate parallel features that can improve solution quality and performance and also include a new feature that is to minimize the distances between the next node's destined pallets and the cargo ramp door. We also intend to apply a 3D packing procedure to each pallet to guarantee that only the items that fit on each pallet are present in the solution.
 
 
 \section{Problem context and assumptions}
@@ -775,7 +775,13 @@ Then $MinCGDeviation$ is run through a MIP solver to relocate the consolidated i
 
 $SetPalletsDestination$ sets pallets destination not yet defined. The total volume of items and the number of pallets with consolidated items destined for each node. The destinations of each pallet are defined proportionally to the volume of items, regarding the pallets with consolidated items.
 
-In line \ref{tour:minRampDist}, $minRampDist$ minimizes the distance of the next node destined pallets, keeping the CG in its operational range. This precedure is implemented in integer programming as presented in Subsection \ref{improvement}, according to equations \ref{eq:distobj} to \ref{eq:disttorque}.
+{\color{blue}
+In line \ref{tour:minRampDist}, $minRampDist$ minimizes the distance of the next node destined pallets, keeping the CG in its operational range. This procedure is implemented in integer programming as presented in Subsection \ref{improvement}, according to equations \ref{eq:distobj} to \ref{eq:disttorque}.
+}
+
+{\color{purple}
+In line \ref{tour:3dpacking}, we reshape the solution by selecting the items that actually fit into the pallet, as the previous result ($G_3$) is an upper bound. i.e., although the sum of volumes is less than the volumetric capacity of the pallet, it is not guaranteed that all items will fit on the pallet.
+}
 
 $ScoreAndDeviation$ evaluates the allocation graph generated by $SolveNode$, returning the corresponding score and CG deviation. It consists of a loop that goes through all the pallets, accumulating the scores and the torques of the shipped items, allowing the final calculation of the CG deviation.
 
@@ -983,9 +989,9 @@ Algorithm \ref{alg:greedy} generates a greedy allocation of the items available 
 		\State $volume[i] \gets volume[i] + t_j^{\pi(k)}.v$
 		\State $\eta_1[i] \gets \eta_1[i] + 1$ 	
 		\EndIf
-		\EndFor
+		\EndFor \Comment{return the partial solution and the last item indexes array }
 		
-		\Return $G(V_{\pi(k)}, E^N_{\pi(k)} \cup E^Q_{\pi(k)}),\ \eta_1$ \Comment{return the partial solution and the last item indexes array }
+		\Return $G(V_{\pi(k)}, E^N_{\pi(k)} \cup E^Q_{\pi(k)}),\ \eta_1$ 
 		
 		\EndProcedure
 		
@@ -1096,12 +1102,37 @@ Finally, select the best weight shims (\ref{best_weight}), the best volume shims
 
 We implemented a post-optimization procedure for three-dimensional (3D) packing according to the instructions on \cite{DubeKanavathy2006} and on \cite{PaquayLimbourgSchynsOliveira2018}, to pack the items selected for each pallet.
 
-Our implementation was also based on \cite{RuizRibeiro}, taking advantage of the already implemented Python classes and auxiliary procedures.
+Let $p_i.H$ be the maximum height for each pallet to be built, which depends on the size of the aircraft and the pallet position along the cargo bay; each {\it 463l} pallet has a width $p_i.W = 2.15m$ and a length of $p_i.L = 2.65m$.
+
+\begin{equation} \label{eq:3dof}
+	\mbox{minimize}\ \Bigg [ p_i.W \times p_i.H \times p_i.L - \sum_{j \in p_i} t_j.w \times t_j.h \times t_j.l \ \Bigg ]
+\end{equation}
+
+\begin{equation} \label{eq:3dh}
+	s.t.: \sum_{j \in p_i} t_j.h \leq p_i.H 
+\end{equation}
+
+\begin{equation} \label{eq:3dw}
+	s.t.: \sum_{j \in p_i} t_j.w \leq p_i.W 
+\end{equation}
+
+\begin{equation} \label{eq:3dl}
+	s.t.: \sum_{j \in p_i} t_j.l \leq p_i.L 
+\end{equation}
+
+Our implementation was also based on \cite{RuizRibeiro} (who implemented the algorithm described in \cite{DubeKanavathy2006}), taking advantage of the already implemented Python classes and auxiliary procedures, but making the necessary adjustments for parallel processing.
 
 The heuristic solutions consider that, theoretically, all items selected for the pallets would fit on that pallet. But, due to the variability in item dimensions, an actual fit is not possible, causing some unfit items to be excluded from the previous heuristic's solutions (line \ref{3dpacking:unfit}).
 
 Another important contribution is that we implemented parallel 3D packing with each pallet as a process.
 
+Bin packing being an NP-Hard problem suggests that an exhaustive search for the optimal solution is in general computationally intractable and that there is thus no known computationally feasible optimal solution method for the problem. So other means to obtain a solution must be found. Normally, heuristic solution methods are used.
+
+The two primary bin packing approximate algorithms that we used were the {\it First Fit Decreasing - FFD} and the {\it Best Fit - BF}. They were chosen over other approximate algorithms because they have a faster running time and produce solutions that are much closer to the optimal solution than most other heuristic algorithms.
+
+The running time for BF and FFD are $O(n\ Log\ n)$, excluding the running time for sorting.
+
+The $3Dpacker$ function specification referred in Algorithm \ref{alg:3dpacking} is well described in \citet{DubeKanavathy2006}. This method returns the list of packed items, as well the list of unfit items to be excluded from solution.
 
 \begin{algorithm}[H]
 	\caption{Parallel 3D packing procedure}  \label{alg:3dpacking}
@@ -1121,7 +1152,7 @@ Another important contribution is that we implemented parallel 3D packing with e
 		
 		\For{$i \gets 1$ to $m$}
 		\State $proc_i.join$   \Comment{wait for the packing process to finish.}
-		\State $E_{\pi(k)} \gets E_{\pi(k)} \setminus proc_i.unfit$  \label{3dpacking:unfit} \Comment{exclude the unfit item from solution}
+		\State $E_{\pi(k)} \gets E_{\pi(k)} \setminus proc_i.unfit$  \label{3dpacking:unfit} \Comment{exclude the unfit items from solution}
 		\EndFor
 			
 		\Return $G(M,\ N_{\pi(k)} \cup Q_{\pi(k)},\ E_{\pi(k)})$ \label{3dpacking:return}
@@ -1157,11 +1188,11 @@ By Amdahl's law, there is an optimal number of parallel executions for each prob
 
 We ran Algorithm \ref{alg:main} in the 6 scenarios described in Table \ref{tab:scenarios}, considering 3 methods for node-by-node resolution: the {\it Gurobi} MIP solver, {\it Shims}, and {\it mpShims} (Algorithm \ref{alg:mpShims}).
 
-In generating the items in each node, we consider 3 values for the parameter ${\it surplus}$. The results obtained for the function $f$, with the corresponding run time in seconds, are shown in Tables \ref{tab:results} (${\it surplus} = 1.2$, ${\it surplus} = 1.5$, and ${\it surplus} = 2.0$).
+In generating the items in each node, we consider 3 values for the parameter ${\it surplus}$. The results obtained for the function $f$, with the corresponding running time in seconds, are shown in Tables \ref{tab:results} (${\it surplus} = 1.2$, ${\it surplus} = 1.5$, and ${\it surplus} = 2.0$).
 
 For each $method$, $scenario$ and $surplus$, 7 different instances were generated. Therefore, 126 tests (6 scenarios $\times$ 3 volumes $\times$ 7 instances) were performed for each method. 
 
-The average tour values were presented for $f$ and, for the run time, the worst result obtained. To facilitate the comparison between the methods, we added a last column in these tables, where two values are indicated:
+The average tour values were presented for $f$ and, for the running time, the worst result obtained. To facilitate the comparison between the methods, we added a last column in these tables, where two values are indicated:
 \begin{itemize}
 	\item {\bf Normalized}: value between 0 and 1, which corresponds to the ratio between the sum of $f$\/ values obtained by the method in all scenarios and the sum of the best values obtained among all methods in all scenarios. The higher the value of {\bf Normalized}, the closer the method approached the best solutions found.
 	\item {\bf Speedup}: ratio of the sums of the worst runtimes of all scenarios and the sum of the method runtimes in all scenarios. The method with the highest {\bf Speed-up}\/ is the fastest.
@@ -1289,7 +1320,7 @@ In this work, we raised four hypotheses for improvements to the work of \cite{Me
 
 A new question is raised about whether it is worth using parallelism as, although {\it mpShims} was twice as fast as {\it Shims}, the results of {\it Shims} were still better than those of {\it mpShims}. May this question be solved through the real-world application of these methods.
 
-(4) The post-optimization procedure for 3-D packing generated an unfit item percentage of approximately 20\%. This solution phase was a parallel 3-D packing with each pallet as a process, which decreased this phase's run time by an $n$ factor where $n$ is the number of pallets. This was possible because each packing process is completely independent; there is no multiprocessing shared memory. It is also important to highlight that, after the items were excluded, the CG deviation was kept within its operational and feasible range.
+(4) The post-optimization procedure for 3-D packing generated an unfit item percentage of approximately 20\%. This solution phase was a parallel 3-D packing with each pallet as a process, which decreased this phase's running time by approximately an $n-1$ factor where $n$ is the number of pallets. This was possible because each packing process is completely independent; there is no multiprocessing shared memory. It is also important to highlight that, after the items were excluded, the CG deviation was kept within its operational and feasible range.
 
 
 \section{Conclusions}
@@ -1301,7 +1332,7 @@ We converted {\it Shims} into a process-based parallel computing heuristic, whic
 
 We also carried out 126 experiments with each method on synthetic data based on real data from the {\it Brazilian Air Force} transportation history.
 
-Other important contributions are that we checked four hypotheses: Computer parallelism improved {\it Shims} performance; the intermediate integer programming procedure added to {\it Shims} algorithm enhanced it's results; but the integer programming procedure to minimize pallets' travel in the cargo bay did not improve the results; and a post-optimization procedure for 3-D packing was turned possible for operational use due to a process-based parallel computing heuristic.
+Other important contributions are that we checked four hypotheses: Computer parallelism improved {\it Shims} performance; the intermediate integer programming procedure for CG deviation minimization added to {\it Shims} algorithm enhanced it's results; but the integer programming procedure to minimize pallets' travel in the cargo bay did not improve the results; and the post-optimization procedure for 3-D packing was turned possible for operational use due to the approximation algorithms chosen and a process-based parallel computing, having each pallet as a process.
 
 And another important contribution is that we employed the {\it iRace} package \citep{LopezIbanezManuel2016} to fine tune the {\it mpShims} volume threshold parameter, guaranteeing the best possible performance for the instances under training and testing.
 
