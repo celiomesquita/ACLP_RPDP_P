@@ -1,5 +1,8 @@
-import gurobipy as gp
-from gurobipy import GRB
+# import gurobipy as gp
+# from gurobipy import GRB
+
+from mip import Model, xsum, minimize, BINARY, CBC
+
 import common
 
 # optimize consolidated positions to minimize CG deviation
@@ -8,25 +11,28 @@ def OptCGCons(kept, pallets, k, nodeTorque):
     KeptRange    = range(len(kept))
     PalletsRange = range(len(pallets))
 
-    mod = gp.Model()
-    mod.setParam('OutputFlag', 0)
+    # mod = gp.Model()
+    mod = Model(solver_name=CBC)
+    # mod.setParam('OutputFlag', 0)
+    mod.verbose = 0 # hide messages
 
-    X = [ [ mod.addVar(name=f"X[{i}],[{j}]", vtype=GRB.BINARY) for j in KeptRange ] for i in PalletsRange ]      
+    # X = [ [ mod.addVar(name=f"X[{i}],[{j}]", vtype=GRB.BINARY) for j in KeptRange ] for i in PalletsRange ]  
+    X = [ [ mod.add_var(name=f"X[{i}],[{j}]", var_type=BINARY) for j in KeptRange ] for i in PalletsRange ]     
 
-    torque1 = sum( X[i][j] * ((140+kept[j].W) * pallets[i].D) for i in PalletsRange for j in KeptRange if pallets[i].D > 0 ) 
-    torque2 = sum( X[i][j] * ((140+kept[j].W) * pallets[i].D) for i in PalletsRange for j in KeptRange if pallets[i].D < 0 )
+    torque1 = xsum( X[i][j] * ((140+kept[j].W) * pallets[i].D) for i in PalletsRange for j in KeptRange if pallets[i].D > 0 ) 
+    torque2 = xsum( X[i][j] * ((140+kept[j].W) * pallets[i].D) for i in PalletsRange for j in KeptRange if pallets[i].D < 0 )
 
-    mod.setObjective(torque1-torque2)
-
-    mod.ModelSense = GRB.MINIMIZE
+    # mod.setObjective(torque1-torque2)
+    # mod.ModelSense = GRB.MINIMIZE
+    mod.objective = minimize( torque1-torque2 )
 
     for j in KeptRange:
-        mod.addConstr(
-            sum(X[i][j] for i in PalletsRange) == 1
+        mod.add_constr(
+            xsum(X[i][j] for i in PalletsRange) == 1
         )        
     for i in PalletsRange:                
-        mod.addConstr(
-            sum(X[i][j] for j in KeptRange) <= 1
+        mod.add_constr(
+            xsum(X[i][j] for j in KeptRange) <= 1
         ) 
 
     mod.optimize() 
@@ -53,25 +59,28 @@ def minCGdev(pallets, k, nodeTorque, cfg):
     for i in PalletsRange:
         pallets[i].reset(cfg.numNodes)
 
-    mod = gp.Model()
-    mod.setParam('OutputFlag', 0)
+    # mod = gp.Model()
+    mod = Model(solver_name=CBC)
+    # mod.setParam('OutputFlag', 0)
+    mod.verbose = 0 # hide messages
 
-    X = [ [ mod.addVar(name=f"X[{i}],[{j}]", vtype=GRB.BINARY) for j in ConsRange ] for i in PalletsRange ] 
+    # X = [ [ mod.addVar(name=f"X[{i}],[{j}]", vtype=GRB.BINARY) for j in ConsRange ] for i in PalletsRange ] 
+    X = [ [ mod.add_var(name=f"X[{i}],[{j}]", var_type=BINARY) for j in ConsRange ] for i in PalletsRange ] 
 
-    torque1 = sum( X[i][j] * ((140+cons[j].W) * pallets[i].D) for i in PalletsRange for j in ConsRange if pallets[i].D > 0 ) 
-    torque2 = sum( X[i][j] * ((140+cons[j].W) * pallets[i].D) for i in PalletsRange for j in ConsRange if pallets[i].D < 0 )
+    torque1 = xsum( X[i][j] * ((140+cons[j].W) * pallets[i].D) for i in PalletsRange for j in ConsRange if pallets[i].D > 0 ) 
+    torque2 = xsum( X[i][j] * ((140+cons[j].W) * pallets[i].D) for i in PalletsRange for j in ConsRange if pallets[i].D < 0 )
 
-    mod.setObjective(torque1-torque2)
-
-    mod.ModelSense = GRB.MINIMIZE
+    # mod.setObjective(torque1-torque2)
+    # mod.ModelSense = GRB.MINIMIZE
+    mod.objective = minimize( torque1-torque2 )
 
     for j in ConsRange:
-        mod.addConstr(
-            sum(X[i][j] for i in PalletsRange) == 1
+        mod.add_constr(
+            xsum(X[i][j] for i in PalletsRange) == 1
         )        
     for i in PalletsRange:                
-        mod.addConstr(
-            sum(X[i][j] for j in ConsRange) == 1
+        mod.add_constr(
+            xsum(X[i][j] for j in ConsRange) == 1
         )
 
     mod.optimize() 
@@ -104,33 +113,36 @@ def minRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque):
     ConsRange    = range(len(cons))
     PalletsRange = range(len(pallets))
 
-    mod = gp.Model()
-    mod.setParam('OutputFlag', 0)
+    # mod = gp.Model()
+    mod = Model(solver_name=CBC)
+    # mod.setParam('OutputFlag', 0)
+    mod.verbose = 0 # hide messages
 
-    X = [ [ mod.addVar(name=f"X[{i}],[{j}]", vtype=GRB.BINARY) for j in ConsRange ] for i in PalletsRange ]      
+    # X = [ [ mod.addVar(name=f"X[{i}],[{j}]", vtype=GRB.BINARY) for j in ConsRange ] for i in PalletsRange ] 
+    X = [ [ mod.add_var(name=f"X[{i}],[{j}]", var_type=BINARY) for j in ConsRange ] for i in PalletsRange ]    
 
-    rampDist = sum( X[i][j] * (rampDistCG - pallets[i].D) for i in PalletsRange for j in ConsRange if cons[j].To == next ) 
+    rampDist = xsum( X[i][j] * (rampDistCG - pallets[i].D) for i in PalletsRange for j in ConsRange if cons[j].To == next ) 
     
-    mod.setObjective(rampDist)
-
-    mod.ModelSense = GRB.MINIMIZE
+    # mod.setObjective(rampDist)
+    # mod.ModelSense = GRB.MINIMIZE
+    mod.objective = minimize(rampDist)
 
     for j in ConsRange:
-        mod.addConstr(
-            sum(X[i][j] for i in PalletsRange) == 1
+        mod.add_constr(
+            xsum(X[i][j] for i in PalletsRange) == 1
         )
 
     for i in PalletsRange:                
-        mod.addConstr(
-            sum(X[i][j] for j in ConsRange) == 1
+        mod.add_constr(
+            xsum(X[i][j] for j in ConsRange) == 1
         )
 
-    sumTorques = sum(pallets[i].D * ( 140 + cons[j].W ) for i in PalletsRange for j in ConsRange)
+    sumTorques = xsum(pallets[i].D * ( 140 + cons[j].W ) for i in PalletsRange for j in ConsRange)
 
-    mod.addConstr(
+    mod.add_constr(
         sumTorques <=    cfg.maxTorque
     )
-    mod.addConstr(
+    mod.add_constr(
         sumTorques >= -1*cfg.maxTorque
     )  
 
@@ -141,7 +153,8 @@ def minRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque):
     # else:
     #     print(f"mod.ObjVal: {mod.ObjVal}")
 
-    if mod.SolCount > 0:
+    # if mod.SolCount > 0:
+    if mod.num_solutions:
 
         nodeTorque.value = 0
 

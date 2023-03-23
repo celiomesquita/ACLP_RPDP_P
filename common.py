@@ -98,6 +98,17 @@ class Pallet(object):
         self.PCV = 0.
         self.PCS = 0.
 
+    def popItem(self, item, nodeTorque, solDict, N, itemsDict): # pop an item from this pallet
+        self.PCW -= item.W
+        self.PCV -= item.V
+        self.PCS -= item.S
+
+        nodeTorque.value -= float(item.W) * float(self.D)
+        i = self.ID
+        j = item.ID 
+        solDict["solMatrix"][N*i+j] = 0 # solution array
+        itemsDict["mpItems"][j]     = 0 # to control items inclusion
+
     def putItem(self, item, nodeTorque, solDict, N, itemsDict, lock): # put an item in this pallet
         self.PCW += item.W
         self.PCV += item.V

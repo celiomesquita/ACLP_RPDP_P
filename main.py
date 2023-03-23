@@ -146,10 +146,44 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
             numOptDict["numOpt"] += 1
 
 
+        nodeElapsed = time.perf_counter() - startNodeTime
+
+        Y = np.reshape(solDict["solMatrix"], (-1, N)) # N number of items (columns)
+       
         if method != "GRB":
 
-            # print(f"Torque before minRampDist: {nodeTorque.value/cfg.maxTorque:.2f}")
+            # begin ---- parallel solving the 3D packing for each pallet  
+            procs   = [None for _ in pallets]
+            packers = [None for _ in pallets]
+            counter1 = 0
+            for i, row in enumerate(Y):
 
+                packers[i] = Packer()
+                packers[i].add_bin( Bin(f'pallet{i}', pallets[i].w, pallets[i].h, pallets[i].l, pallets[i].W, i) )
+                
+                for j, X_ij in enumerate(row):
+                    if X_ij:
+                        packers[i].add_item(Item(f'item{j}', items[j].w, items[j].h, items[j].l, items[j].W, j))
+                        counter1 += 1
+                
+                procs[i] = mp.Process( target=packers[i].pack() )
+                procs[i].start()
+
+            counter2 = 0
+            for i, proc in enumerate(procs):
+                proc.join()
+                for bin in packers[i].bins:
+                    i = bin.ID
+                    for item in bin.unfitted_items:
+                        j = item.ID
+                        Y[i][j] = 0
+                        counter2 += 1
+                        pallets[i].popItem(items[j], nodeTorque, solDict, N, itemsDict)
+
+            print(f"{100*counter2/counter1:.1f}% unfit items excluded from solution!")
+            # end ---- parallel solving the 3D packing for each pallet         
+
+            # begin minRampDist
             for p in pallets:
                 if p.Dest[k] == next.ID:
                     beforeDict['Before'] += rampDistCG - p.D # distance from the pallet to the ramp door
@@ -159,44 +193,7 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
             for p in pallets:
                 if p.Dest[k] == next.ID:
                     afterDict['After'] += rampDistCG - p.D # distance from the pallet to the ramp door
-
-            # print(f"Torque after minRampDist: {nodeTorque.value/cfg.maxTorque:.2f}\n")
-
-        nodeElapsed = time.perf_counter() - startNodeTime
-
-
-        Y = np.reshape(solDict["solMatrix"], (-1, N)) # N number of items (columns)
-       
-        # begin ---- parallel solving the 3D packing for each pallet  
-
-        procs   = [None for _ in pallets]
-        packers = [None for _ in pallets]
-        counter1 = 0
-        for i, row in enumerate(Y):
-
-            packers[i] = Packer()
-            packers[i].add_bin( Bin(f'pallet{i}', pallets[i].w, pallets[i].h, pallets[i].l, pallets[i].W, i) )
-            
-            for j, X_ij in enumerate(row):
-                if X_ij:
-                    packers[i].add_item(Item(f'item{j}', items[j].w, items[j].h, items[j].l, items[j].W, j))
-                    counter1 += 1
-            
-            procs[i] = mp.Process( target=packers[i].pack() )
-            procs[i].start()
-
-        counter2 = 0
-        for i, proc in enumerate(procs):
-            proc.join()
-            for bin in packers[i].bins:
-                i = bin.ID
-                for item in bin.unfitted_items:
-                    j = item.ID
-                    Y[i][j] = 0
-                    counter2 += 1
-
-        print(f"{100*counter2/counter1:.1f}% unfit items excluded from solution!")
-        # end ---- parallel solving the 3D packing for each pallet         
+            # end minRampDist
 
         nodeScore = 0
         torque    = 0.0
@@ -302,7 +299,7 @@ if __name__ == "__main__":
     plot = False
 
     # scenarios = [1,2,3,4,5,6]
-    scenarios = [1] # infeasible solutions with Shims............
+    scenarios = [5,6] # infeasible solutions with Shims............
 
     surplus   = "data20"
     # surplus   = "data50"
@@ -350,8 +347,8 @@ if __name__ == "__main__":
 
             for scenario in scenarios:
 
-                # instances = [1,2,3,4,5,6,7]
-                instances = [1]
+                instances = [1,2,3,4,5,6,7]
+                # instances = [1]
 
                 cfg = common.Config(scenario)
                 
@@ -445,11 +442,11 @@ if __name__ == "__main__":
 
                 percent = 0.0
                 if beforeDict["Before"] > 0:
-                    percent = 100.0*(beforeDict["Before"] - afterDict["After"]) / beforeDict["Before"]   
+                    percent = 100.0*(beforeDict["After"] - afterDict["Before"]) / beforeDict["Before"]   
 
                 avgTime = math.ceil(instanceTime/numInst)
 
-                str = f"{instanceSC/numInst:.2f}\t {avgTime:.0f}\t {worstTime:.1f}\t {bestAV:.2f}\t {bestAT:.2f}\t {numOptDict['numOpt']:.1f}\t {beforeDict['Before']:.0f} & {afterDict['After']:.0f} & {percent:.1f}\n"
+                str = f"{instanceSC/numInst:.2f}\t {avgTime:.0f}\t {worstTime:.1f}\t {bestAV:.2f}\t {bestAT:.2f}\t {numOptDict['numOpt']:.1f}\t {beforeDict['Before']:.1f} & {afterDict['After']:.1f} & {percent:.1f}\n"
                 # instances average
                 writeAvgResults(method, scenario, str, surplus)
                 print(f"\n{str}")
