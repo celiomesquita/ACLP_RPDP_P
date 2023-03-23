@@ -4,7 +4,6 @@ from .auxiliary_methods import intersect, set_to_decimal
 DEFAULT_NUMBER_OF_DECIMALS = 3
 START_POSITION = [0, 0, 0]
 
-
 class Item:
     def __init__(self, name, width, height, depth, weight, id):
         self.name = name
