@@ -159,11 +159,11 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
             for i, row in enumerate(Y):
 
                 packers[i] = Packer()
-                packers[i].add_bin( Bin(f'pallet{i}', pallets[i].w, pallets[i].h, pallets[i].l, pallets[i].W, i) )
+                packers[i].add_bin( Bin(f'pallet{i}', pallets[i].w, pallets[i].h, pallets[i].d, pallets[i].W, i) )
                 
                 for j, X_ij in enumerate(row):
                     if X_ij:
-                        packers[i].add_item(Item(f'item{j}', items[j].w, items[j].h, items[j].l, items[j].W, j))
+                        packers[i].add_item(Item(f'item{j}', items[j].w, items[j].h, items[j].d, items[j].W, j))
                         counter1 += 1
                 
                 procs[i] = mp.Process( target=packers[i].pack() )
@@ -299,7 +299,7 @@ if __name__ == "__main__":
     plot = False
 
     # scenarios = [1,2,3,4,5,6]
-    scenarios = [5,6] # infeasible solutions with Shims............
+    scenarios = [6] # infeasible solutions with Shims............
 
     surplus   = "data20"
     # surplus   = "data50"

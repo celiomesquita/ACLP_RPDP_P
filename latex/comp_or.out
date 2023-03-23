@@ -1,21 +1,21 @@
-\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
-\BOOKMARK [1][-]{section.2}{Related literature}{}% 2
-\BOOKMARK [1][-]{section.3}{Problem context and assumptions}{}% 3
-\BOOKMARK [2][-]{subsection.3.1}{Operational premises}{section.3}% 4
-\BOOKMARK [2][-]{subsection.3.2}{Aircraft and load balancing}{section.3}% 5
-\BOOKMARK [2][-]{subsection.3.3}{Problem Summary}{section.3}% 6
-\BOOKMARK [1][-]{section.4}{The mathematical modelling}{}% 7
-\BOOKMARK [1][-]{section.5}{Resolution strategy}{}% 8
-\BOOKMARK [2][-]{subsection.5.1}{SolveTour algorithm}{section.5}% 9
-\BOOKMARK [2][-]{subsection.5.2}{Node-by-node resolution}{section.5}% 10
-\BOOKMARK [2][-]{subsection.5.3}{Multiprocessing Shims - mpShims}{section.5}% 11
-\BOOKMARK [2][-]{subsection.5.4}{mpShims}{section.5}% 12
-\BOOKMARK [3][-]{subsubsection.5.4.1}{Shims first phase}{subsection.5.4}% 13
-\BOOKMARK [3][-]{subsubsection.5.4.2}{Shims second phase: improvement on minimizing CG deviation}{subsection.5.4}% 14
-\BOOKMARK [3][-]{subsubsection.5.4.3}{Shims third phase}{subsection.5.4}% 15
-\BOOKMARK [2][-]{subsection.5.5}{3D packing}{section.5}% 16
-\BOOKMARK [1][-]{section.6}{Implementation and results}{}% 17
-\BOOKMARK [2][-]{subsection.6.1}{Results obtained}{section.6}% 18
-\BOOKMARK [2][-]{subsection.6.2}{Another possible improvement}{section.6}% 19
-\BOOKMARK [2][-]{subsection.6.3}{Discussion summary}{section.6}% 20
-\BOOKMARK [1][-]{section.7}{Conclusions}{}% 21
+\BOOKMARK [1][-]{section.1}{\376\377\000I\000n\000t\000r\000o\000d\000u\000c\000t\000i\000o\000n}{}% 1
+\BOOKMARK [1][-]{section.2}{\376\377\000R\000e\000l\000a\000t\000e\000d\000\040\000l\000i\000t\000e\000r\000a\000t\000u\000r\000e}{}% 2
+\BOOKMARK [1][-]{section.3}{\376\377\000P\000r\000o\000b\000l\000e\000m\000\040\000c\000o\000n\000t\000e\000x\000t\000\040\000a\000n\000d\000\040\000a\000s\000s\000u\000m\000p\000t\000i\000o\000n\000s}{}% 3
+\BOOKMARK [2][-]{subsection.3.1}{\376\377\000O\000p\000e\000r\000a\000t\000i\000o\000n\000a\000l\000\040\000p\000r\000e\000m\000i\000s\000e\000s}{section.3}% 4
+\BOOKMARK [2][-]{subsection.3.2}{\376\377\000A\000i\000r\000c\000r\000a\000f\000t\000\040\000a\000n\000d\000\040\000l\000o\000a\000d\000\040\000b\000a\000l\000a\000n\000c\000i\000n\000g}{section.3}% 5
+\BOOKMARK [2][-]{subsection.3.3}{\376\377\000P\000r\000o\000b\000l\000e\000m\000\040\000S\000u\000m\000m\000a\000r\000y}{section.3}% 6
+\BOOKMARK [1][-]{section.4}{\376\377\000T\000h\000e\000\040\000m\000a\000t\000h\000e\000m\000a\000t\000i\000c\000a\000l\000\040\000m\000o\000d\000e\000l\000i\000n\000g}{}% 7
+\BOOKMARK [1][-]{section.5}{\376\377\000R\000e\000s\000o\000l\000u\000t\000i\000o\000n\000\040\000s\000t\000r\000a\000t\000e\000g\000y}{}% 8
+\BOOKMARK [2][-]{subsection.5.1}{\376\377\000S\000o\000l\000v\000e\000T\000o\000u\000r\000\040\000a\000l\000g\000o\000r\000i\000t\000h\000m}{section.5}% 9
+\BOOKMARK [2][-]{subsection.5.2}{\376\377\000N\000o\000d\000e\000-\000b\000y\000-\000n\000o\000d\000e\000\040\000r\000e\000s\000o\000l\000u\000t\000i\000o\000n}{section.5}% 10
+\BOOKMARK [2][-]{subsection.5.3}{\376\377\000M\000u\000l\000t\000i\000p\000r\000o\000c\000e\000s\000s\000i\000n\000g\000\040\000S\000h\000i\000m\000s\000\040\000-\000\040\000m\000p\000S\000h\000i\000m\000s}{section.5}% 11
+\BOOKMARK [2][-]{subsection.5.4}{\376\377\000m\000p\000S\000h\000i\000m\000s}{section.5}% 12
+\BOOKMARK [3][-]{subsubsection.5.4.1}{\376\377\000S\000h\000i\000m\000s\000\040\000f\000i\000r\000s\000t\000\040\000p\000h\000a\000s\000e}{subsection.5.4}% 13
+\BOOKMARK [3][-]{subsubsection.5.4.2}{\376\377\000S\000h\000i\000m\000s\000\040\000s\000e\000c\000o\000n\000d\000\040\000p\000h\000a\000s\000e\000:\000\040\000i\000m\000p\000r\000o\000v\000e\000m\000e\000n\000t\000\040\000o\000n\000\040\000m\000i\000n\000i\000m\000i\000z\000i\000n\000g\000\040\000C\000G\000\040\000d\000e\000v\000i\000a\000t\000i\000o\000n}{subsection.5.4}% 14
+\BOOKMARK [3][-]{subsubsection.5.4.3}{\376\377\000S\000h\000i\000m\000s\000\040\000t\000h\000i\000r\000d\000\040\000p\000h\000a\000s\000e}{subsection.5.4}% 15
+\BOOKMARK [2][-]{subsection.5.5}{\376\377\0003\000D\000\040\000p\000a\000c\000k\000i\000n\000g}{section.5}% 16
+\BOOKMARK [1][-]{section.6}{\376\377\000I\000m\000p\000l\000e\000m\000e\000n\000t\000a\000t\000i\000o\000n\000\040\000a\000n\000d\000\040\000r\000e\000s\000u\000l\000t\000s}{}% 17
+\BOOKMARK [2][-]{subsection.6.1}{\376\377\000R\000e\000s\000u\000l\000t\000s\000\040\000o\000b\000t\000a\000i\000n\000e\000d}{section.6}% 18
+\BOOKMARK [2][-]{subsection.6.2}{\376\377\000A\000n\000\040\000a\000t\000t\000e\000m\000p\000t\000\040\000t\000o\000\040\000m\000i\000n\000i\000m\000i\000z\000e\000\040\000g\000r\000o\000u\000n\000d\000\040\000h\000a\000n\000d\000l\000i\000n\000g\000\040\000t\000i\000m\000e}{section.6}% 19
+\BOOKMARK [2][-]{subsection.6.3}{\376\377\000D\000i\000s\000c\000u\000s\000s\000i\000o\000n\000\040\000s\000u\000m\000m\000a\000r\000y}{section.6}% 20
+\BOOKMARK [1][-]{section.7}{\376\377\000C\000o\000n\000c\000l\000u\000s\000i\000o\000n\000s}{}% 21
