@@ -659,6 +659,7 @@ The weight limitation of the aircraft must be respected \ref{eq:payload}. The su
 Consolidated items remain on board \ref{eq:app5} until their destinations. At each node, an item (\ref{eq:pdp8}) and a consolidated item (\ref{eq:pdp2}) must only be allocated to a pallet if the destinations are the same.
 
 
+
 \section{Resolution strategy}
 \label{sec5}
 
@@ -891,9 +892,6 @@ All executed in a multi-process run-time, accessing concurrently, reading and wr
 As to the multi-process run-time, we considered each pallet as a parallel process, taking advantage of nowadays multi-core computers.
 
 
-\subsection{mpShims}
-
-
 \begin{algorithm}[H]
 	\caption{$mpShims$ main process}  \label{alg:mpShims}
 	
@@ -959,7 +957,7 @@ Line \ref{mpShims:join2} wait for all $getBestShims$ processes to finish.
 
 Line \ref{mpShims:return} returns a complete solution, a bipartite graph between pallets and consolidated or items.
 
-\subsubsection{{\it Shims} first phase}
+\subsubsection{{\it mpShims} first phase}
 
 
 Algorithm \ref{alg:greedy} generates a greedy allocation of the items available in node ${\pi(k)}$, according to the non-ascending order of $\theta^{\pi(k)}_{ij}$, and considering the consolidated items already shipped ($E_Q^{\pi(k)}$). Edges are included in this allocation as long as they respect feasibility constraints. Furthermore, the volume of each pallet $p_i$\/ cannot exceed $p_i.v \times limit$, where $ 0 < limit \leq 1$\/ is a given parameter.
@@ -1015,10 +1013,10 @@ Line \ref{greedy:ts} presents the variable $ts$ (torque $\tau$ surplus), that is
 
 
 
-\subsubsection{{\it Shims} second phase: improvement on minimizing CG deviation}
+\subsubsection{{\it mpShims} second phase}
 \label{subsection:second_phase}
 
-Between the greedy and the {\it Shims} selection phases we inserted, in this work, an integer programming method to minimize the CG deviation, as stated by the model that follows.
+Between the greedy and the {\it Shims} selection phases we inserted, in this work, an integer programming method to minimize the CG deviation, as stated by the integer programming model that follows.
 
 Let $\pi$ be a tour in the set of permutations of nodes.
 
@@ -1041,7 +1039,7 @@ Let $H^{\pi(k)}_{iq}$ be the set of decision variables that relates pallet $i$ t
 Equation \ref{eq:distobjshims} minimizes the aircraft absolute torque in node $\pi(k)$, where 140 is the weight of an empty pallet, $a^{\pi(k)}_q.w$ the weight of the consolidated, and $p_i.d$ the distance between the pallet centroid to the aircraft CG; Equation \ref{eq:distconsshims} states that each consolidated will be assigned to exactly one pallet; and Equation \ref{eq:distpalletsshims} states that each pallet will receive one consolidated.
 
 
-\subsubsection{{\it Shims} third phase}
+\subsubsection{{\it mpShims} third phase}
 
 \begin{algorithm}[H]
 	\caption{Mount shims of edges that fills each pallet gap and return the best shims}  \label{alg:getBestShims}
@@ -1111,44 +1109,127 @@ As the last edge was included, forbid a new shims creation (\ref{new_shims_false
 
 Finally, select the best weight shims (\ref{best_weight}), the best volume shims (\ref{best_volume}), and the best score shims (\ref{best_score}) between these 2. The best score shims edges will be returned.
 
-\subsection{3D packing}
 
-We implemented a procedure for three-dimensional (3D) packing according to the instructions on \cite{DubeKanavathy2006}, on \cite{PaquaySchynsLimbourg2016}, and on \cite{PaquayLimbourgSchynsOliveira2018}, to pack the items selected for each pallet.
+\subsection{Multiprocessing 3D packing}
 
-Our implementation was also based on \cite{RuizRibeiro}, taking advantage of the already implemented Python classes and auxiliary procedures, and the needed improvements to multi-core parallelism.
+According to \cite{BrandtStefan2019}, {\it Technically the task to solve is a three-dimensional Container Loading Problem (CLP) with a multitude of constraints. The CLP alone is known to be NP-hard and extremely hard to solve even for instances of moderate size. The typical number of items per transport segment ranges between 300 and 800 items.}
 
-The heuristic solutions consider that, theoretically, all items selected for the pallets would fit on that pallet. But, due to the variability in item dimensions, an actual fit is not possible, causing some unfit items to be excluded from the previous heuristic's solutions (line \ref{3dpacking:unfit}).
+So, to confirm or not Hypothesis (3), we decided to adopt the model for three-dimensional (3D) packing based in the instructions on \cite{DubeKanavathy2006}, \cite{li2014} and on \cite{PaquayLimbourgSchynsOliveira2018}, to pack the items selected for each pallet.
 
-Another important contribution is that we implemented parallel 3D packing with each pallet as a process.
+The main logic of the 3D packing procedure is based on an approximate algorithm like follows:
 
+From a list of items, items are sorted from the biggest to the smallest and placed in such an order on a pallet.Each item has 1 to 6 orientations to choose from when it can be placed. The orientation procedure can select the best direction type among possible orientations.
+
+A pivot point is used to determine item's position. The pivot is an (x, y, z) coordinate which represents a point in the pallet at which an attempt to pack an item will be made.
+
+The back lower left corner of the item will be placed at the pivot. If the item cannot be packed at the pivot position then it is rotated until it can be packed at the pivot point or until we have tried all 6 possible rotation types.
+
+If, after rotating it, the item still cannot be packed at the pivot point, then we move on to packing another item and add the unpacked item to a list of items that will be packed after an attempt to pack the remaining items is made.
+
+The first pivot in the empty pallet is always (0,0,0). When one item can be placed into multiple optimal pivot point, the placement selection module can help make a choice.
+
+Let $n$ be the number of items and $m$ the number of pallets.
+
+Let $A_{j}\ =\ 1$ if item $j$ is assigned to the pallet, $A_{j}\ =\ 0$ otherwise, for $j \in \{1,\ 2,\ 3,\ ...,\ n\}$.
+
+Let $X_{ij}\ =\ 1$ if item $j$ was already assigned to pallet $i$ by {\it mpShims}, $X_{ij}\ =\ 0$ otherwise, for $i \in \{1,\ 2,\ 3,\ ...,\ m\}$.
+
+Let $d_j,\ w_j,\ h_j$ be parameters indicating the depth, width, and height of an item. 
+Let $D_i,\ W_i,\ H_i$ be parameters indicating the depth, width, and height of the pallet.
+
+Let $x_j,\ y_j,\ z_j$ be real type variables for coordinates of item's left-bottom-behind corner.
+
+Let $o_j^1,\ o_j^2,\ o_j^3,\ o_j^4,\ o_j^5,\ o_j^6$ be binary variables, indicating the possible orientations for item $j$. One of the values equal to 1 if item $j$ has orientation in $\{1,\ 2,\ 3,\ 4,\ 5,\ 6\}$, respectively, otherwise equal to 0.
+
+
+\begin{equation} \label{eq:3dpacking1}
+	\mbox{minimize} \Big [ D_i \times W_i \times H_i - \sum_{j \gets 1}^{n} X_{ij} \times A_{j} \times d_j \times w_j \times h_j \Big ]
+\end{equation}
+
+\begin{equation} \label{eq:3dpacking2}
+	\sum_{j \gets 1}^{n} A_{j} \times d_j  \leq X_{ij} \times D_i,\ i \in \{1,\ 2,\ 3,\ ...,\ m\}
+\end{equation}
+
+\begin{equation} \label{eq:3dpacking3}
+	\sum_{j \gets 1}^{n} A_{j} \times w_j  \leq X_{ij} \times W_i,\ i \in \{1,\ 2,\ 3,\ ...,\ m\}
+\end{equation}
+
+\begin{equation} \label{eq:3dpacking4}
+	\sum_{j \gets 1}^{n} A_{j} \times h_j  \leq X_{ij} \times H_i,\ i \in \{1,\ 2,\ 3,\ ...,\ m\}
+\end{equation}
+
+Algorithm \ref{alg:3dpacking} presents the multiprocessing solution method for 3D packing to be applied after {\it mpShims}, to guarantee that the item to be palletized actually fit into the pallet.
 
 \begin{algorithm}[H]
 	\caption{Parallel 3D packing procedure}  \label{alg:3dpacking}
 	
 	\begin{algorithmic}[1]
 		
-		\Procedure{$mp3Dpacking$}{${N^{\pi(k)}, \pi(k)}, limit, G$} \Comment{multi-processing 3D packing}
+		\Procedure{$mp3Dpacking$}{${\pi(k)},\ G$}
 		
-		\State Let $G(M^{\pi(k)},\ Q^{\pi(k)},\ E^{\pi(k)})$ \label{3dpacking:g1} \Comment{the initial solution}
-			
-		\State $proc \gets \{p_1,p_2,..., p_m\}$  \Comment{each pallet has its own process}
+		\State Let $G(M^{\pi(k)},\ N^{\pi(k)} \cup Q^{\pi(k)},\ E^{\pi(k)})$ \label{3dpacking:1}
+		
+		\State $proc \gets \{p_1,p_2,..., p_m\}$ \label{3dpacking:2} 
 		
 		\For{$i \gets 1$ to $m$}
-		\State $proc_i \gets 3Dpacker(p_i,\ N^{\pi(k)}_i,\ \pi(k),\ G )$   \label{3dpacking:greedy}
+		\State $proc_i \gets 3Dpacker(p_i,\ N^{\pi(k)}_i,\ \pi(k),\ G )$   \label{3dpacking:3}
 		\State $proc_i.start$
 		\EndFor
 		
 		\For{$i \gets 1$ to $m$}
-		\State $proc_i.join$   \Comment{wait for the packing process to finish.}
-		\State $E^{\pi(k)}_i \gets E^{\pi(k)}_i \setminus proc_i.unfit$  \label{3dpacking:unfit} \Comment{exclude the unfit items from solution}
+		\State $proc_i.join$ \label{3dpacking:4}
+		\State $E^{\pi(k)}_i \gets E^{\pi(k)}_i \setminus proc_i.unfit$  \label{3dpacking:5} 
 		\EndFor
-			
-		\Return $G(M^{\pi(k)},\ N^{\pi(k)} \cup Q^{\pi(k)},\ E^{\pi(k)})$ \label{3dpacking:return}
+		
+		\Return $G(M^{\pi(k)},\ N^{\pi(k)} \cup Q^{\pi(k)},\ E^{\pi(k)})$
 		
 		\EndProcedure
 		
 	\end{algorithmic}
 \end{algorithm}
+
+According to line \ref{3dpacking:1}, this method receives an initial solution produced by {\it mpShims}, and according to line \ref{3dpacking:2}, each pallet has its own process.
+
+In line \ref{3dpacking:3}, $N^{\pi(k)}_i$ is the set of items previously assigned to pallet $i$.
+
+In line \ref{3dpacking:4}, the algorithm waits for the packing process to finish.
+
+Line \ref{3dpacking:5} excludes the unfit items from solution.
+
+
+\subsection{Minimization of the distance of a next node destined pallet to the ramp door }
+
+\cite{LurkinSchyns2015} considered an aircraft with two doors, and the minimization of loading and unloading costs at the intermediate node was modeled through a container sequencing problem. But, as both aircraft dealt with in this work have only the ramp door, we tried to minimize the distance of travel of pallets inside the cargo bay, favoring unloading in the next node, by a post optimization of pallets positions to favor this distance minimization.
+
+So, to confirm or not Hypothesis (4), that the distances to move pallets on unloading in the next node could be minimized to benefit unloading costs. We modeled this improvement as an integer programming model.
+
+Let $maxD$ be the distance from the last ramp pallet to the center of gravity.
+
+Let $Q^{\pi(k)}  = \{ a^{\pi(k)}_1, a^{\pi(k)}_2, \ldots, a^{\pi(k)}_m \}$ be the set of consolidated items assembled on the set of $m$ pallets in node $\pi(k)$.
+
+Let $Z^{\pi(k)}_{iq}$ be the set of binary decision variables that relates pallet $i$ to consolidated $q$ in node $\pi(k)$.
+
+\begin{equation} \label{eq:distobj}
+	\mbox{minimize} \sum_{i=1}^m \sum_{q=1}^m Z^{\pi(k)}_{iq} \times ( maxD - p_i.d) ,\ \mbox{{\bf if}}\ a^{\pi(k)}_q.to = \pi(k+1) \}
+\end{equation}
+
+\begin{equation} \label{eq:distcons}
+	s.t.: \sum_{i=1}^m Z^{\pi(k)}_{iq} = 1;\ q \in \{1,2,\ldots,m\}
+\end{equation}
+
+\begin{equation} \label{eq:distpallets}
+	s.t.: \sum_{q=1}^{m} Z^{\pi(k)}_{iq}=1;\ i \in \{1,2,\ldots,m\}
+\end{equation}
+
+\begin{equation} \label{eq:distpalletw}
+	p_i.w = 140 + a^{\pi(k)}_q.w ;\ i \in \{1,2,\ldots,m\};\ q \in \{1,2,\ldots,m\}
+\end{equation}
+
+\begin{equation} \label{eq:disttorque}
+	s.t.:\ | \sum\ p_i.d * p_i.w\ | \leq maxW \times limit^{CG}_{long} ;\ i \in \{1,2,\ldots,m\}
+\end{equation}
+
+Equation \ref{eq:distobj} minimizes the sum of distances of the consolidated in node $\pi(k)$ destined to the next node $\pi(k+1)$; Equation \ref{eq:distcons} states that each consolidated will be assigned to exactly one pallet; Equation \ref{eq:distpallets} states that each pallet will receive one consolidated; Equation \ref{eq:distpalletw} calculates the total weight of each pallet; and Equation \ref{eq:disttorque} guarantees that the torque limit will not be exceeded. 
 
 
 \section{Implementation and results}
@@ -1208,10 +1289,10 @@ In each $scenario$, we indicate in bold the best value of $f$\/ found. In each t
 		
 		\cmidrule{2-10}		                       
 		&\multirow{2}{*}{ $Shims$}                       & $f$                &     10.34 &     8.50  &     12.42 &     15.06 &     15.97 &     15.88 &  0.96 \\% 7817
-		&                                                & {\it run time (s)} &     < 1   &     3     &     5     &     20    &     58    &     352   &  1.0 \\% 439			
+		&                                                & {\it run time (s)} &     < 1   &     3     &     5     &     20    &     58    &     352   &  1.00 \\% 439			
 		\cmidrule{2-10}		                       
 		&\multirow{2}{*}{ $mpShims$}                     & $f$                &   12.96   &   7.53    &  12.28    &   13.20   &  13.71    &   13.44   &  0.90\\% 7278
-		&                                                & {\it run time (s)} &     < 1   &     2     &     2     &     8    &     22    &     120   &  {\bf 2.8}\\%
+		&                                                & {\it run time (s)} &     < 1   &     2     &     2     &     8    &     22    &     120   &  {\bf 2.80}\\%
 		
 		\midrule		
 		
@@ -1219,22 +1300,22 @@ In each $scenario$, we indicate in bold the best value of $f$\/ found. In each t
 
         \cmidrule{2-10}		                       
         &\multirow{2}{*}{ $Shims$}                       & $f$                &     14.68 &     12.21 &     17.67 &  21.01    &  22.64    &   21.91   &  0.96  \\%  11012
-        &                                                & {\it run time (s)} &     < 1   &     2     &     3     &     12    &     33    &   209     &  1.0 \\% 260
+        &                                                & {\it run time (s)} &     < 1   &     2     &     3     &     12    &     33    &   209     &  1.00 \\% 260
 
         \cmidrule{2-10}		                       
         &\multirow{2}{*}{ $mpShims$}                     & $f$                &    16.12  &     11.81 &     17.48 &  17.66    &   19.81   &  17.61    &  0.87 \\% 9966
-        &                                                & {\it run time (s)} &     < 1   &     1     &     2     &     7     &   20      &  120      &  {\bf 1.7}\\% 151
+        &                                                & {\it run time (s)} &     < 1   &     1     &     2     &     7     &   20      &  120      &  {\bf 1.70}\\% 151
 
 		\midrule
 		\multirow{6}{*}{$2.0$}&\specialcell{$Relaxed$\\$Gurobi$}& $f$         &{\it 24.56}&{\it 17.47}&{\it 25.19}&{\it 27.94}&{\it 29.90}&{\it 27.60 }&  \specialcell{{\bf 1.00}\\-} \\%15266  
 		
 		\cmidrule{2-10}		                       
 		&\multirow{2}{*}{ $Shims$}                       & $f$                &    21.31  &  17.35    &   24.24   &   27.39    &  29.31     &  27.06     &   0.96  \\%  14666
-		&                                                & {\it run time (s)} &     < 1   &     2     &     4     &     14     &     35     &   220     &  1.0 \\% 260
+		&                                                & {\it run time (s)} &     < 1   &     2     &     4     &     14     &     35     &   220     &  1.00 \\% 260
 		
 		\cmidrule{2-10}		                       
 		&\multirow{2}{*}{ $mpShims$}                     & $f$                &    24.33  &   17.26   &   24.70   &  24.81     &   27.71    &  24.93        &  0.94  \\% 14374
-		&                                                & {\it run time (s)} &     < 1   &     2     &     3     &     9      &   26       &  151      &  {\bf 1.7}\\% 151
+		&                                                & {\it run time (s)} &     < 1   &     2     &     3     &     9      &   26       &  151      &  {\bf 1.70}\\% 151
 
 		\bottomrule	
 		
@@ -1255,79 +1336,70 @@ We confirmed the hypothesis raised in \ref{hypotheses} and in line \ref{mpShims:
 
 After this inclusion {\it Shims} results surpassed that of {\it mpShims}. In multi-processing mode ({\it mpShims}) this inclusion (line \ref{mpShims:minCGdev}) made a negligible difference.
 
-\subsection{An attempt to minimize ground handling time}
+
+\subsection{Results of the 3D packing}
+
+
+%\begin{table}[!h]
+%	\begin{minipage}{0.5\linewidth}
+%		left
+%	\end{minipage}\hfill % these two lines must be close to each other
+%	\begin{minipage}{0.5\linewidth}
+%		right		
+%	\end{minipage}
+%\end{table}
+
+\vspace{2.0mm}
+\begin{table}[!ht]
+\centering
+\caption{Parallel 3D packing time increment}  \label{tab:3d}
+\scriptsize
+\begin{tabular}{c S[table-format=-1.1] S[table-format=-1.1] S[table-format=-1.1]}
+\toprule
+&   \multicolumn{3}{c}{\bf Average tour time - 3D packing}  \\
+\cmidrule{2-4}
+& {\bf without} & {\bf with} & {\bf increment} \\
+{\bf Scenario} & {\bf (s)}    & {\bf (s)}   & {\bf (times)} \\		
+\midrule
+$1$ &   1 &   15 & 15 \\
+$2$ &   5 &   76 & 15 \\
+$3$ &   8 &   97 & 12 \\
+$4$ &  35 &  330 &  9 \\ 
+$5$ &  98 &  740 &  8 \\    
+$6$ & 220 & 1500 &  7 \\                                                                  
+\bottomrule
+\end{tabular}
+\end{table}
+
+According to Table \ref{tab:3d}, the time increase with the 3D packing inclusion was approximately 10 times. About 40 min to solve a complete tour, against 4 min without the 3D packing procedure, considering the worst (6) scenario.
+i.e., with the 3D packing procedure running in multiprocessing mode, this complete solution method for {\it ACLP+RPDP} is still viable for operational use.
+
+
+\subsection{Results of the minimization of the pallet handling distances in the cargo bay}
 \label{improvement}
-
-\cite{LurkinSchyns2015} considered an aircraft with two doors, and the minimization of loading and unloading costs at the intermediate node was modeled through a container sequencing problem. But, as both aircrafts dealt with in this work have only the ramp door, we tried to minimize the distance of travel of pallets inside the cargo bay, favoring unloading in the next node, by a post optimization of pallets positions to favor this distance minimization.
-
-So, to confirm or not Hypothesis (4), that the distances to move pallets on unloading in the next node could be minimized to benefit unloading costs. We modeled this improvement as follows.
-
-Let $maxD$ be the distance from the last ramp pallet to the center of gravity.
-
-Let $Q^{\pi(k)}  = \{ a^{\pi(k)}_1, a^{\pi(k)}_2, \ldots, a^{\pi(k)}_m \}$ be the set of consolidated items assembled on the set of $m$ pallets in node $\pi(k)$.
-
-Let $Z^{\pi(k)}_{iq}$ be the set of binary decision variables that relates pallet $i$ to consolidated $q$ in node $\pi(k)$.
-
-\begin{equation} \label{eq:distobj}
-	\mbox{minimize} \sum_{i=1}^m \sum_{q=1}^m Z^{\pi(k)}_{iq} \times ( maxD - p_i.d) ,\ \mbox{{\bf if}}\ a^{\pi(k)}_q.to = \pi(k+1) \}
-\end{equation}
-
-\begin{equation} \label{eq:distcons}
-	s.t.: \sum_{i=1}^m Z^{\pi(k)}_{iq} = 1;\ q \in \{1,2,\ldots,m\}
-\end{equation}
-
-\begin{equation} \label{eq:distpallets}
-	s.t.: \sum_{q=1}^{m} Z^{\pi(k)}_{iq}=1;\ i \in \{1,2,\ldots,m\}
-\end{equation}
-
-\begin{equation} \label{eq:distpalletw}
-	p_i.w = 140 + a^{\pi(k)}_q.w ;\ i \in \{1,2,\ldots,m\};\ q \in \{1,2,\ldots,m\}
-\end{equation}
-
-\begin{equation} \label{eq:disttorque}
-	s.t.:\ | \sum\ p_i.d * p_i.w\ | \leq maxW \times limit^{CG}_{long} ;\ i \in \{1,2,\ldots,m\}
-\end{equation}
-
-Equation \ref{eq:distobj} minimizes the sum of distances of the consolidated in node $\pi(k)$ destined to the next node $\pi(k+1)$; Equation \ref{eq:distcons} states that each consolidated will be assigned to exactly one pallet; Equation \ref{eq:distpallets} states that each pallet will receive one consolidated; Equation \ref{eq:distpalletw} calculates the total weight of each pallet; and Equation \ref{eq:disttorque} guarantees that the torque limit will not be exceeded. 
 
 As the number of pallets was small (7 or 18) for an integer program solver, the increased time was negligible (less than 1s).
 
 \vspace{2.0mm}
 \begin{table}[!ht]
 \centering
-\caption{Distances minimization}  \label{tab:ground}
-\footnotesize
-%\scriptsize
-\begin{tabular}{cc S[table-format=-1.1] S[table-format=-1.1] S[table-format=-1.3]}
+\caption{Average distances minimization}  \label{tab:ground}
+%\footnotesize
+\scriptsize
+\begin{tabular}{c S[table-format=-1.1] S[table-format=-1.1] S[table-format=-1.3]}
 \toprule
-{\bf Volume}            &                & {\bf Before} & {\bf After} & {\bf Improvement} \\
-{\bf Surplus}           & {\bf Scenario} & {\bf (m)}    & {\bf (m)}   & {\bf (\%)} \\		
+& {\bf Before} & {\bf After} & {\bf Improvement} \\
+{\bf Scenario} & {\bf (m)}    & {\bf (m)}   & {\bf (\%)} \\		
 \midrule
-\multirow{6}{*}{ $1.2$} & $1$ &  31.0 &  29.0 & -5.9 \\
-                        & $2$ & 189.7 & 189.4 & -0.4 \\
-                        & $3$ & 152.0 & 152.0 & 0.0 \\
-                        & $4$ & 134.0 & 130.7 & -2.4 \\ 
-                        & $5$ & 115.7 & 115.7 & 0.0\\    
-                        & $6$ &  &  & 0.0\\                                                                  
-\midrule
-\multirow{6}{*}{ $1.5$} & $1$ &  .0 &  .0 & 5.9 \\
-						& $2$ & .7 & .4 & 0.4 \\
-						& $3$ & .0 & .0 & 0.0 \\
-						& $4$ & .0 & .7 & 2.4 \\ 
-						& $5$ & .7 & .7 & 0.0\\    
-						& $6$ &  &  & 0.0\\                                                                  
-\midrule
-\multirow{6}{*}{ $2.0$} & $1$ &  .0 &  .0 & 5.9 \\
-						& $2$ & .7 & .4 & 0.4 \\
-						& $3$ & .0 & .0 & 0.0 \\
-						& $4$ & .0 & .7 & 2.4 \\ 
-						& $5$ & .7 & .7 & 0.0\\    
-						& $6$ &  &  & 0.0\\                                                                  
-
+$1$ &  32.7 & 28.7 & -12.3 \\
+$2$ & 193.3 & 188.9 & -2.3 \\
+$3$ & 152.0 & 152.0 &  0.0 \\
+$4$ & 134.0 & 130.7 & -2.4 \\ 
+$5$ & 118.0 & 116.1 & -1.6 \\    
+$6$ & 106.0 & 104.1 & -1.8 \\                                                                  
 \bottomrule
 \end{tabular}
 \end{table}
-
 
 
 Table \ref{tab:ground} presents the distances minimization of the next node destined pallets to the ramp door. Columns {\bf Before} and {\bf After} refer to the application of the current method.
@@ -1344,7 +1416,12 @@ In this work, we raised four hypotheses for improvements to the work of \cite{Me
 
 (2) The {\it Shims}' results may have been inferior in that of \cite{MesquitaSanches2023}; it could be that a sequential approach to pallet building may have lead to a premature stop due to the torque constraints. This hypothesis was confirmed as the results were improved by 5\% on average with the inclusion of a CG balancing integer programming procedure.
 
-(3) The procedure for 3-D packing generated an unfit item percentage of approximately 20\%. This solution phase was a parallel 3-D packing with each pallet as a process, which decreased this phase's run time by approximate a $n-1$ factor where $n$ is the number of pallets. This was possible because each packing process is completely independent; there is no multiprocessing shared memory. It is also important to highlight that, after the items were excluded, the CG deviation was kept within its operational and feasible range.
+(3) The procedure for 3-D packing generated an unfit item percentage of approximately 17\%, in average. 
+We are conscious that this unfit rate could be smaller if we had chosen \cite{PaquaySchynsLimbourg2016} or \cite{PaquayLimbourgSchynsOliveira2018} approaches, but as we are concerned with an operational application where the running time is crucial, we stick to an approximate approach.
+
+{\it mpShims} consider that, theoretically, all items selected for the pallets would fit. But, due to the variability in item dimensions, an actual complete fit is not possible, causing some unfit items to be excluded from the previous solution (line \ref{3dpacking:unfit}).
+
+This solution phase was a parallel 3-D packing with each pallet as a process, which decreased this phase's run time by approximate a $n-1$ factor where $n$ is the number of processes. This was possible because each packing process is completely independent; there is no multiprocessing shared memory. It is also important to highlight that, after the items were excluded, the CG deviation was kept within its operational and feasible range.
 
 (4) The distances to move pallets on unloading in the next node could be minimized to benefit ground handling costs.
 %This hypothesis was not confirmed. We implemented an integer programming procedure to minimize these distances, but the results proved that any change in {\it Shims} or {\it mpShims} outcomes could turn the solutions unfeasible due to the CG balance constraints.

@@ -110,6 +110,13 @@
   aircraft}.
 \newblock \bibinfo{journal}{European Journal of Operational Research}
   \bibinfo{volume}{4}, \bibinfo{pages}{367--373}.
+%Type = Inproceedings
+\bibitem[{Li et~al.(2014)Li, Zhao and Zhang}]{li2014}
+\bibinfo{author}{Li, X.}, \bibinfo{author}{Zhao, Z.}, \bibinfo{author}{Zhang,
+  K.}, \bibinfo{year}{2014}.
+\newblock \bibinfo{title}{A genetic algorithm for the three-dimensional bin
+  packing problem with heterogeneous bins.}, in: \bibinfo{booktitle}{{Institute
+  of Industrial and Systems Engineers (IISE)}}.
 %Type = Article
 \bibitem[{Limbourg et~al.(2012)Limbourg, Schyns and Laporte}]{Limbourg2012}
 \bibinfo{author}{Limbourg, S.}, \bibinfo{author}{Schyns, M.},
@@ -223,12 +230,6 @@
   airlift loading problem with insufficient aircraft}.
 \newblock \bibinfo{journal}{Journal of Nonlinear Analysis and Optimization:
   Theory and Applications} \bibinfo{volume}{5}, \bibinfo{pages}{125--141}.
-%Type = Misc
-\bibitem[{Ruiz and Ribeiro(2020)}]{RuizRibeiro}
-\bibinfo{author}{Ruiz, E.}, \bibinfo{author}{Ribeiro, T.B.},
-  \bibinfo{year}{2020}.
-\newblock \bibinfo{title}{{3D Bin Packing v1.1.2}}.
-\newblock \URLprefix \url{https://github.com/enzoruiz/3dbinpacking}.
 %Type = Article
 \bibitem[{Vancroonenburg et~al.(2014)Vancroonenburg, Verstichel, Tavernier and
   Vanden~Berghe}]{Vancroonemburg2014}

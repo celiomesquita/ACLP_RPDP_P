@@ -30,7 +30,7 @@ class Shims(object):
         if item.To != self.Pallet.Dest[k]:
             return False
 
-        if self.Pallet.PCV + self.SCV + item.V > self.Pallet.V:
+        if self.Pallet.PCV + self.SCV + item.V > self.Pallet.V * 1.1:
             return False
 
         if self.Pallet.PCW + self.SCW + item.W > self.Pallet.W:
@@ -80,7 +80,7 @@ def getBestShims(pallet, items, k, nodeTorque, solDict, cfg, surplus, itemsDict,
 
             for i in indexes:
                 item = whip[i]
-                if pallet.isFeasible(item, 1.0, k, nodeTorque,  cfg, itemsDict, lock):
+                if pallet.isFeasible(item, 1.1, k, nodeTorque,  cfg, itemsDict, lock):
                     pallet.putItem(item, nodeTorque, solDict, N, itemsDict, lock)
 
     if tipo == "FFD":
@@ -109,7 +109,7 @@ def getBestShims(pallet, items, k, nodeTorque, solDict, cfg, surplus, itemsDict,
                 bestIndex = i
         # put the best Shim in the solution
         for item in Set[bestIndex].Items:
-            if item != None and pallet.isFeasible(item, 1.0, k, nodeTorque,  cfg, itemsDict, lock):
+            if item != None and pallet.isFeasible(item, 1.1, k, nodeTorque,  cfg, itemsDict, lock):
                 pallet.putItem(item, nodeTorque, solDict, N, itemsDict, lock)
 
 
@@ -132,14 +132,14 @@ def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict
         # parallel greedy phase
         for i, _ in enumerate(pallets):
             procs[i] = mp.Process( target=common.fillPallet, args=( pallets[i], items, k,\
-                 nodeTorque, solDict, cfg, threshold, itemsDict, lock, 1.0) ) # torque surplus
+                 nodeTorque, solDict, cfg, threshold, itemsDict, lock, 1.1) ) # torque surplus
             time.sleep(0.001)
             procs[i].start()
         
         for proc in procs:
             proc.join()
 
-        # optcgcons.minCGdev(pallets, k, nodeTorque, cfg) # made no significant difference
+        optcgcons.minCGdev(pallets, k, nodeTorque, cfg) # made no significant difference
 
         # parallel shims phase
         for i, p in enumerate(pallets):
@@ -164,7 +164,7 @@ def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict
             getBestShims( pallets[i], items, k, nodeTorque, solDict, cfg, surplus,   itemsDict, lock, tipo)
 
     # try to complete the pallet
-    counter += common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, 1.0, itemsDict, lock)
+    counter += common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, 1.1, itemsDict, lock)
 
     print(f"{mode}: {counter} items inserted in post local search.")
 

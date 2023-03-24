@@ -11,8 +11,11 @@ import optcgcons
 import mipGRB
 from plots import TTT
 
-from py3dbp import Packer, Bin, Item
+# from py3Djanet.packer import Packer
+# from py3Djanet.methods import Item
+# from py3Djanet.bin import Bin
 
+from py3Druiz import Packer, Item, Bin
 
 
 def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus, tipo, numOptDict, rampDistCG, afterDict, beforeDict):
@@ -106,6 +109,7 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
                                 vNodeAccum += c.V
 
                             tour.score += c.S
+                            nodeVol    += c.V
 
         # set pallets destinations with items and consolidated to be delivered
         if k < k0: # except when the current node is the base on returning
@@ -163,7 +167,7 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
                 
                 for j, X_ij in enumerate(row):
                     if X_ij:
-                        packers[i].add_item(Item(f'item{j}', items[j].w, items[j].h, items[j].d, items[j].W, j))
+                        packers[i].add_item(Item(f'item{j}', items[j].w, items[j].h, items[j].d, 0, j))
                         counter1 += 1
                 
                 procs[i] = mp.Process( target=packers[i].pack() )
@@ -181,18 +185,21 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
                         pallets[i].popItem(items[j], nodeTorque, solDict, N, itemsDict)
 
             print(f"{100*counter2/counter1:.1f}% unfit items excluded from solution!")
+
+            nodeElapsed2 = time.perf_counter() - startNodeTime
+
             # end ---- parallel solving the 3D packing for each pallet         
 
             # begin minRampDist
             for p in pallets:
                 if p.Dest[k] == next.ID:
-                    beforeDict['Before'] += rampDistCG - p.D # distance from the pallet to the ramp door
+                    beforeDict['value'] += rampDistCG - p.D # distance from the pallet to the ramp door
 
             optcgcons.minRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque)
 
             for p in pallets:
                 if p.Dest[k] == next.ID:
-                    afterDict['After'] += rampDistCG - p.D # distance from the pallet to the ramp door
+                    afterDict['value'] += rampDistCG - p.D # distance from the pallet to the ramp door
             # end minRampDist
 
         nodeScore = 0
@@ -222,6 +229,7 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
                     torque += float(items[j].W) * pallets[i].D
 
         tour.elapsed += nodeElapsed
+        tour.elapsed2 += nodeElapsed2
 
 
         nodeVol /= cfg.volCap
@@ -298,8 +306,8 @@ if __name__ == "__main__":
     # plot = True
     plot = False
 
-    # scenarios = [1,2,3,4,5,6]
-    scenarios = [6] # infeasible solutions with Shims............
+    scenarios = [1,2,3,4,5,6]
+    # scenarios = [3] # infeasible solutions with Shims............
 
     surplus   = "data20"
     # surplus   = "data50"
@@ -348,6 +356,12 @@ if __name__ == "__main__":
             for scenario in scenarios:
 
                 instances = [1,2,3,4,5,6,7]
+                if scenario == 4:
+                    instances = [1,2,3,4,5]                
+                if scenario == 5:
+                    instances = [1,2,3,4]
+                if scenario == 6:
+                    instances = [1,2,3]                    
                 # instances = [1]
 
                 cfg = common.Config(scenario)
@@ -374,12 +388,13 @@ if __name__ == "__main__":
                     perc = 0.25
 
                 instanceTime = 0.
+                instanceTime2 = 0. # with 3D packing
                 instanceSC   = 0.
                 worstTime    = 0
 
                 numOptDict = {"numOpt":0}
-                afterDict  = {"After":0.}
-                beforeDict = {"Before":0.}
+                afterDict  = {"value":0.}
+                beforeDict = {"value":0.}
 
                 for instance in instances:
 
@@ -390,11 +405,13 @@ if __name__ == "__main__":
 
                     # selects the best tour
                     searchTime = 0
+                    searchTime2 = 0 # with 3D packing
                     for pi, tour in enumerate(tours):
 
                         # if pi == 1:
 
                         tour.elapsed = 0
+                        tour.elapsed2 = 0 # with 3D packing
                         tour.score   = 0.0
                         tour.AvgVol  = 0.0
 
@@ -405,6 +422,7 @@ if __name__ == "__main__":
                         tour.cost *= ( 1.0 + abs(tour.AvgTorque)/20.0 )
 
                         searchTime += tour.elapsed
+                        searchTime2 += tour.elapsed2
 
                         tourSC = tour.score / tour.cost
 
@@ -420,6 +438,7 @@ if __name__ == "__main__":
                             worstTime = tour.elapsed
                     
                     instanceTime += searchTime
+                    instanceTime2 += searchTime2
                     instanceSC   += bestSC
 
                     # for plotting
@@ -432,21 +451,22 @@ if __name__ == "__main__":
                 numOptDict["numOpt"] /= float(cfg.numNodes)
                 numOptDict["numOpt"] /= float(len(tours))
 
-                afterDict["After"] /= numInst
-                afterDict["After"] /= float(cfg.numNodes)
-                afterDict["After"] /= float(len(tours))
+                afterDict["value"] /= numInst
+                afterDict["value"] /= float(cfg.numNodes)
+                afterDict["value"] /= float(len(tours))
 
-                beforeDict["Before"] /= numInst
-                beforeDict["Before"] /= float(cfg.numNodes)
-                beforeDict["Before"] /= float(len(tours))
+                beforeDict["value"] /= numInst
+                beforeDict["value"] /= float(cfg.numNodes)
+                beforeDict["value"] /= float(len(tours))
 
                 percent = 0.0
-                if beforeDict["Before"] > 0:
-                    percent = 100.0*(beforeDict["After"] - afterDict["Before"]) / beforeDict["Before"]   
+                if beforeDict["value"] > 0:
+                    percent = 100.0*( afterDict["value"] - beforeDict["value"]  ) / beforeDict["value"]   
 
-                avgTime = math.ceil(instanceTime/numInst)
+                avgTime  = math.ceil(instanceTime/numInst)
+                avgTime2 = math.ceil(instanceTime2/numInst)
 
-                str = f"{instanceSC/numInst:.2f}\t {avgTime:.0f}\t {worstTime:.1f}\t {bestAV:.2f}\t {bestAT:.2f}\t {numOptDict['numOpt']:.1f}\t {beforeDict['Before']:.1f} & {afterDict['After']:.1f} & {percent:.1f}\n"
+                str = f"{instanceSC/numInst:.2f}\t {avgTime:.0f}\t {avgTime2:.0f}\t {worstTime:.1f}\t {bestAV:.2f}\t {bestAT:.2f}\t {numOptDict['numOpt']:.1f}\t {beforeDict['value']:.1f} & {afterDict['value']:.1f} & {percent:.1f}\n"
                 # instances average
                 writeAvgResults(method, scenario, str, surplus)
                 print(f"\n{str}")
@@ -454,8 +474,8 @@ if __name__ == "__main__":
                 print(f"{len(tours)} tours")
                 print(f"secBreak: {secBreak}")
                 print(f"volThreshold: {volThreshold:.2f}")
-                print(f"Before:\t{beforeDict['Before']:.1f}") 
-                print(f"After:\t{afterDict['After']:.1f}")
+                print(f"Before:\t{beforeDict['value']:.1f}") 
+                print(f"After:\t{afterDict['value']:.1f}")
                 print(f"% of optima: {numOptDict['numOpt']:.2f}")
                 print(f"{method}")
 

@@ -15,7 +15,8 @@ class Tour(object):
         self.nodes = nodes
         self.cost  = cost # sum of legs costs plus CG deviation costs
         self.score   = 0.0 # sum of nodes scores
-        self.elapsed = 0 # seconds
+        self.elapsed  = 0 # seconds no 3D packing
+        self.elapsed2 = 0 # seconds with 3D packing
         self.numOpts = 0 # sum of nodes eventual optima solutions
         self.AvgVol  = 0.0 # average ocupation rate
         self.AvgTorque  = 0.0

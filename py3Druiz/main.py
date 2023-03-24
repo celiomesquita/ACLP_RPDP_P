@@ -65,6 +65,16 @@ class Bin:
         self.unfitted_items = []
         self.number_of_decimals = DEFAULT_NUMBER_OF_DECIMALS
 
+    def get_filling_ratio(self):
+        total_filling_volume = 0
+        total_filling_ratio = 0
+        
+        for item in self.items:
+            total_filling_volume += item.get_volume()
+            
+        total_filling_ratio = total_filling_volume / self.get_volume()
+        return set_to_decimal(total_filling_ratio, self.number_of_decimals)
+
     def format_numbers(self, number_of_decimals):
         self.width = set_to_decimal(self.width, number_of_decimals)
         self.height = set_to_decimal(self.height, number_of_decimals)
