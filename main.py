@@ -11,11 +11,11 @@ import optcgcons
 import mipGRB
 from plots import TTT
 
-# from py3Djanet.packer import Packer
-# from py3Djanet.methods import Item
-# from py3Djanet.bin import Bin
+from py3Djanet.packer import Packer
+from py3Djanet.methods import Item
+from py3Djanet.bin import Bin
 
-from py3Druiz import Packer, Item, Bin
+# from py3Druiz import Packer, Item, Bin
 
 
 def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus, tipo, numOptDict, rampDistCG, afterDict, beforeDict):
@@ -306,8 +306,8 @@ if __name__ == "__main__":
     # plot = True
     plot = False
 
-    scenarios = [1,2,3,4,5,6]
-    # scenarios = [3] # infeasible solutions with Shims............
+    # scenarios = [1,2,3,4,5,6]
+    scenarios = [6] # infeasible solutions with Shims............
 
     surplus   = "data20"
     # surplus   = "data50"
