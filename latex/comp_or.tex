@@ -479,7 +479,7 @@ We accept the same assumptions as stated by \cite{MesquitaSanches2023}:
 	\item on each pallet, the items are distributed in such a way that their CG coincides with the centroid of the pallet;
 	\item the CG of the payload must be at a maximum longitudinal distance of $limit^{CG}_{long}$ from the CG of the aircraft;
 	\item in the larger aircraft, the CG of the payload must be at a maximum lateral distance of $limit^{CG}_{lat}$ from the CG of the aircraft;
-	\item in the larger aircraft, pallets are distributed in two identical rows (with odd and even indices, respectively), and their centroids are at a distance $d^{CG}_{pallet}$ from the center-line of the aircraft.
+	\item in the larger aircraft, pallets are distributed in two identical rows (with odd and even indices, respectively), and their centroids are at a distance $p_i.D^{lat}$ from the center-line of the aircraft.
 \end{itemize}
 
 \subsection{Problem Summary}
@@ -516,20 +516,24 @@ s.t.    & Along a tour, the set of unvisited nodes is updated. \\
 \egroup 
 
 
-\section{The mathematical modeling}
+\section{The mathematical model}
 \label{sec4}
 
 Given the assumptions, scenarios and parameters described in the previous section, we are ready to present the mathematical modeling of ACLP+RPDP.
-
-Let $L = \{ l_0, l_1, \ldots, l_K \}$ be the set of $K+1$ nodes (or destinations), where $l_0$ is the origin and end of a flight plan. Let $d(l_i,l_j)$ be the distance from $l_i$ to $l_j$, where $0 \leq i,j \leq K$. By definition, $d(l_i,l_i)=0$. Let $L_k$ be the set of remaining nodes when the aircraft is in $l_k$, $0 \leq k \leq K$. Therefore, $L_0=L$ and $L_K = \{ l_0 \}$.
 
 Let $C=\{c_{ij}\}$ be the cost matrix of flights, where $c_{ij} = c_d*d(l_i,l_j), 0 \leq i,j \leq K$.
 
 Let $S_K = \{s: \{1, \dots, K\} \rightarrow \{1, \dots, K\} \}$ be the set of $K!$ permutations {\color{blue} indexed by $\pi$}, which correspond to all possible tours (or itineraries) that have $l_0$ as origin and end, passing through the other $K$ nodes.
 
-{\color{blue} $k$ is the node index and $\pi_k$ is the node in position $k$ of tour $\pi$. $\tau^{\pi_k}$ is the total torque applied by the loaded pallets to the aircraft in this node. }
+{\color{blue}
+$k$ is the node index and $\pi_k$ is the node in position $k$ of tour $\pi$. $\tau^{\pi_k}$ is the total torque applied by the loaded pallets to the aircraft in this node. 
 
-Let $M^{\pi_k} = \{p_1, p_2, \ldots, p_m \}$ the set of $m$ pallets. Each pallet $p_i$, $1 \leq i \leq m$, has weight capacity $p_i.w$, volume capacity $p_i.v$, pallet destinations $p_i.to^{\pi_k}$, $0 \leq k \leq K$, and distance to the CG of aircraft $p_i.d$. $p_i.to^{\pi_k}$ denotes that pallet $p_i$ may assume a different destination in each node ${\pi_k}$.
+
+Let $L = \{ \pi_0, \pi_1, \ldots, \pi_K \}$ be the set of $K+1$ nodes, where $\pi_0$ is the origin and end of a flight path. Let $d(\pi_i,\ \pi_j)$ be the distance from $\pi_i$ to $\pi_j$, where $0 \leq i,\ j \leq K$. By definition, $d(\pi_i,\ \pi_i)\ =\ 0$.
+Let $L^{\pi_k}$ be the set of remaining nodes when the aircraft is in $\pi_k$, $0 \leq k \leq K$. Therefore, $L^{\pi_0}\ =\ L$ and $L^{\pi_K}\ =\ \{ \pi_0 \}$.
+}
+
+Let $M^{\pi_k} = \{p_1, p_2, \ldots, p_m \}$ the set of $m$ pallets. Each pallet $p_i$, $1 \leq i \leq m$, has weight capacity $p_i.W$, volume capacity $p_i.V$, pallet destinations $p_i.to^{\pi_k}$, $0 \leq k \leq K$, and distance to the CG of aircraft $p_i.D$. $p_i.to^{\pi_k}$ denotes that pallet $p_i$ may assume a different destination in each node ${\pi_k}$. Attributes for constant values are in uppercase.
 
 Let $N^{\pi_k} = \{t^{\pi_k}_1, t^{\pi_k}_2, \ldots, t^{\pi_k}_{n^{\pi_k}} \}$ be the set of $n^{\pi_k}$ items to be loaded in node $\pi_k$, $0 \leq k \leq K$. Each item $t^{\pi_k}_j$, $1 \leq j \leq n^{\pi_k}$, has score $t^{\pi_k}_j.s$, weight $t^{\pi_k}_j.w$, volume $t^{\pi_k}_j.v$, and destination $t^{\pi_k}_j.to \in L^{\pi_k}$. Let $N = \bigcup_{0 \leq k \leq K} N^{\pi_k}$ be the set of items of all nodes along a tour.
 
@@ -556,25 +560,25 @@ The mathematical modeling of this problem is described in the equations below.
 \end{equation}
 
 \begin{equation} \label{eq:costs}
-	\tilde{c} = c_{0,\pi(1)}\times(1+c_g\times|\epsilon_0|) + \sum_{k=1}^{K-1} [ c^{\pi(k), \pi(k+1)}\times(1+c_g\times|\epsilon^{\pi_k}|) ] + c^{\pi(K),0}\times(1+c_g\times|\epsilon_K|)
+	\tilde{c} = c_{0,\pi(1)}\times(1+c_g\times|\epsilon_0|) + \sum_{k=1}^{K-1} \Big [ c^{\pi(k), \pi(k+1)}\times(1+c_g\times|\epsilon^{\pi_k}|) \Big ] + c^{\pi(K),0}\times(1+c_g\times|\epsilon_K|)
 \end{equation}
 
 \begin{equation} \label{eq:maxW}
-	maxW = \min(Payload, \sum_{i=1}^{m}p_i.w)
+	maxW = \min(Payload, \sum_{i=1}^{m}p_i.W)
 \end{equation}
 
 \begin{equation} \label{eq:tau}
-\tau^{\pi_k} = \sum_{i=1}^{m}[ p_i.d \times (\sum_{j=1}^{n^{\pi_k}} X_{ij}^{\pi_k} \times t_j^{\pi_k}.w +  \sum_{q=1}^{m} Y_{iq}^{\pi_k} \times a_q^{\pi_k}.w)];\ k \in \{0, 1, \ldots, K\}
+\tau^{\pi_k} = \sum_{i=1}^{m} \Big [ p_i.D \times (\sum_{j=1}^{n^{\pi_k}} X_{ij}^{\pi_k} \times t_j^{\pi_k}.w +  \sum_{q=1}^{m} Y_{iq}^{\pi_k} \times a_q^{\pi_k}.w) \Big ];\ k \in \{0, 1, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:eps}
 \epsilon^{\pi_k} = \frac{\tau^{\pi_k}}{maxW \times limit^{CG}_{long}};\ k \in \{0, 1, \ldots, K\}
 \end{equation}
-
+{\color{blue}
 \begin{equation} \label{eq:pdp11}
-	L_0 = L; L^{\pi_k} = L^{\pi(k-1)} - \{l^{\pi_k}\}; \ k \in \{1, 2, \ldots, K\}
+	L^{\pi_0} = L;\ L^{\pi_k} = L^{\pi_{k-1}} - \{\pi_k\}; \ k \in \{1, 2, \ldots, K\}
 \end{equation}
-
+}
 \begin{equation} \label{eq:pdp13}
 	Y^0_{iq} = 0; a^0_i.w = 0; a^0_i.v = 0; a^0_i.to = -1;\ i,q \in \{1, 2, \ldots, m\}
 \end{equation}
@@ -600,31 +604,31 @@ The mathematical modeling of this problem is described in the equations below.
 \end{equation}
 
 \begin{equation} \label{eq:LatIt}
-	LatIt^{\pi_k} = \sum_{i=1}^{m} \sum_{j=1}^{n^{\pi_k}} ( X_{ij}^{\pi_k} \times t_j^{\pi_k}.w \times (i\%2) - X_{ij}^{\pi_k} \times t_j^{\pi_k}.w \times (i+1)\%2 ); \ k \in \{0, 1, \ldots, K\}
+	LatIt^{\pi_k} = \sum_{i=1}^{m} \sum_{j=1}^{n^{\pi_k}} \Big ( X_{ij}^{\pi_k} \times t_j^{\pi_k}.w \times (i\%2) - X_{ij}^{\pi_k} \times t_j^{\pi_k}.w \times (i+1)\%2 \Big ); \ k \in \{0, 1, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:LatCons}
-	LatCons^{\pi_k} =  \sum_{i=1}^{m} \sum_{q=1}^{m}  ( Y_{iq}^{\pi_k} \times a_q^{\pi_k}.w \times (i\%2) - Y_{iq}^{\pi_k} \times a_q^{\pi_k}.w \times (i+1)\%2); \ k \in \{0, 1, \ldots, K\}
+	LatCons^{\pi_k} =  \sum_{i=1}^{m} \sum_{q=1}^{m} \Big ( Y_{iq}^{\pi_k} \times a_q^{\pi_k}.w \times (i\%2) - Y_{iq}^{\pi_k} \times a_q^{\pi_k}.w \times (i+1)\%2 \Big ); \ k \in \{0, 1, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:torqlat}
-	s.t.: d^{CG}_{pallet} \times | LatIt^{\pi_k} + LatCons^{\pi_k} | \leq  \sum_{i=1}^{m}p_i.w \times limit^{CG}_{lat}; \ k \in \{0, 1, \ldots, K\}
+	s.t.: p_i.D^{lat} \times \Big | LatIt^{\pi_k} + LatCons^{\pi_k} \Big | \leq  \sum_{i=1}^{m}p_i.W \times limit^{CG}_{lat}; \ k \in \{0, 1, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:torqlong}
-	s.t.: |\tau^{\pi_k}| \leq maxW \times limit^{CG}_{long};\ k \in \{0, 1, \ldots, K\}
+	s.t.: \Big | \tau^{\pi_k} \Big | \leq maxW \times limit^{CG}_{long};\ k \in \{0, 1, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:payload}
-	s.t.: \sum_{i=1}^{m} (\sum_{j=1}^{n^{\pi_k}} X_{ij}^{\pi_k} \times t_j^{\pi_k}.w + \sum_{q=1}^{m_k} Y_{iq}^{\pi_k} \times a_q^k.w ) \leq maxW; \ k \in \{0, 1, \ldots, K\}
+	s.t.: \sum_{i=1}^{m} \Big (\sum_{j=1}^{n^{\pi_k}} X_{ij}^{\pi_k} \times t_j^{\pi_k}.w + \sum_{q=1}^{m_k} Y_{iq}^{\pi_k} \times a_q^k.w \Big ) \leq maxW; \ k \in \{0, 1, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:app2}
-	s.t.: \sum_{j=1}^{n^{\pi_k}} X_{ij}^{\pi_k} \times t_j^{\pi_k}.w + \sum_{q=1}^{m_k} Y_{iq}^{\pi_k} \times a_q^{\pi_k}.w  \leq p_i.w; \ i \in \{1, 2, \ldots, m\}; \ {\pi_k} \in \{0, 1, \ldots, K\}
+	s.t.: \sum_{j=1}^{n^{\pi_k}} X_{ij}^{\pi_k} \times t_j^{\pi_k}.w + \sum_{q=1}^{m_k} Y_{iq}^{\pi_k} \times a_q^{\pi_k}.w  \leq p_i.W; \ i \in \{1, 2, \ldots, m\}; \ {\pi_k} \in \{0, 1, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:app3}
-	s.t.: \sum_{j=1}^{n^{\pi_k}} X_{ij}^{\pi_k} \times t_j^{\pi_k}.v + \sum_{q=1}^{m} Y_{iq}^{\pi_k} \times a_q^{\pi_k}.v  \leq\ p_i.v; \ i \in \{1, 2, \ldots, m\}; \ k \in \{0, 1, \ldots, K\}
+	s.t.: \sum_{j=1}^{n^{\pi_k}} X_{ij}^{\pi_k} \times t_j^{\pi_k}.v + \sum_{q=1}^{m} Y_{iq}^{\pi_k} \times a_q^{\pi_k}.v  \leq\ p_i.V; \ i \in \{1, 2, \ldots, m\}; \ k \in \{0, 1, \ldots, K\}
 \end{equation}
 
 \begin{equation} \label{eq:app4}
@@ -644,7 +648,7 @@ The mathematical modeling of this problem is described in the equations below.
 \end{equation}
 
 
-The objective of this problem is to find a permutation $\pi \in S_K$\/ that maximizes the function $f_\pi(\tilde{s},\tilde{c})$ \ref{eq:maxf}. In this way, the flight plan will be $l_0, l_{\pi(1)}, \ldots, l^{\pi_k}, l_0$. $\tilde{s}$\/ is the total score of transported items \ref{eq:scores} and  $\tilde{c}$\/ is the total cost of fuel consumed \ref{eq:costs}. As can be seen, $\tilde{c}$\/ corresponds to the fuel consumption due to the flights carried out and the CG deviation of the transported cargo. Throughout this work, for simplicity, we use $f=\tilde{s}/\tilde{c}$.
+The objective of this problem is to find a permutation $\pi \in S_K$\/ that maximizes the function $f_\pi(\tilde{s},\tilde{c})$ \ref{eq:maxf}. In this way, the flight path will be $\pi_0, \pi_1, \ldots, \pi_K, \pi_0$. $\tilde{s}$\/ is the total score of transported items \ref{eq:scores} and  $\tilde{c}$\/ is the total cost of fuel consumed \ref{eq:costs}. As can be seen, $\tilde{c}$\/ corresponds to the fuel consumption due to the flights carried out and the CG deviation of the transported cargo. Throughout this work, for simplicity, we use $f=\tilde{s}/\tilde{c}$.
 
 The maximum load will be the minimum between the payload and the capacity supported by the pallets \ref{eq:maxW}. Considering the maximum longitudinal distance allowed for the CG, all torques \ref{eq:tau} and deviations \ref{eq:eps} are calculated.
 
@@ -700,7 +704,7 @@ The tactic will be, at each shipping node, to predefine the destinations of the 
 In this algorithm, there are six values for the $scenario$\/ parameter, according to Table \ref{tab:scenarios}, which defines $K$, the sets of nodes, the aircraft, the pallets and the costs from Tables \ref{tab:smaller} or \ref{tab:larger} that will be used (line \ref{main:LMC}).
 
 
-The other parameter $volume$\/ is a value greater than 1, which corresponds, at each node $\pi_k$, to the ratio between the sum of the volumes of the items ($\sum_{j=1}^{n^{\pi_k}} t^{\pi_k}_j.v$) and the load capacity of the pallets ($\sum_{i=1}^{m} p_i.v$). This parameter is passed to $ItemsGeneration$ (line \ref{main:items}), responsible for creating the items to be shipped, which will be presented in the next section.
+The other parameter $volume$\/ is a value greater than 1, which corresponds, at each node $\pi_k$, to the ratio between the sum of the volumes of the items ($\sum_{j=1}^{n^{\pi_k}} t^{\pi_k}_j.v$) and the load capacity of the pallets ($\sum_{i=1}^{m} p_i.V$). This parameter is passed to $ItemsGeneration$ (line \ref{main:items}), responsible for creating the items to be shipped, which will be presented in the next section.
 
 $method$\/ corresponds to one of the heuristics that we will present in subsection \ref{methods}. The loop of lines \ref{main:loop1}-\ref{main:loop2} goes through all permutations $\pi$, where the node-by-node resolutions are performed by $SolveTour$, whose result is stored in $f_{\pi}$. The best outcome among all $K!$\/ tours will be the answer for $scenario$, $volume$\/ and $method$\/ (line \ref{main:f}). 
 
@@ -823,7 +827,7 @@ To guarantee that performance comparisons are made correctly, our implementation
 The selection of edges for $E_N^{\pi_k}$\/ uses the {\it edge attractiveness}\/ $\theta^{\pi_k}_{ij}$, Equation \ref{eq:edge}, which can be understood as the tendency to allocate the item $t^{\pi_k}_j$\/ to the pallet $p_i$. It is directly proportional to the score, and inversely relative to the volume and torque of each item. 
 
 \begin{equation} \label{eq:edge}
-	\theta^{\pi_k}_{ij}= \frac{t^{\pi_k}_j.s}{t^{\pi_k}_j.v \times 3000}\times(1-\frac{t^{\pi_k}_j.w\times|p_i.d|}{\max_s\{t^{\pi_k}_s.w\}\times\max_q\{|p_q.d|\}});\ i \in \{1,2,\ldots,m\},\ j \in \{1,2,\ldots,n_k\}
+	\theta^{\pi_k}_{ij}= \frac{t^{\pi_k}_j.s}{t^{\pi_k}_j.v \times 3000}\times(1-\frac{t^{\pi_k}_j.w\times|p_i.D|}{\max_s\{t^{\pi_k}_s.w\}\times\max_q\{|p_q.d|\}});\ i \in \{1,2,\ldots,m\},\ j \in \{1,2,\ldots,n_k\}
 \end{equation} 
 
 To compare allocation graphs generated by the heuristics, we choose the one that offer a higher associated score, since the CG deviation is limited by the constraints.
@@ -965,7 +969,7 @@ Line \ref{mpShims:return} returns a complete solution, a bipartite graph between
 \subsubsection{{\it mpShims} first phase}
 
 
-Algorithm \ref{alg:greedy} generates a greedy allocation of the items available in node ${\pi_k}$, according to the non-ascending order of $\theta^{\pi_k}_{ij}$, and considering the consolidated items already shipped ($E_Q^{\pi_k}$). Edges are included in this allocation as long as they respect feasibility constraints. Furthermore, the volume of each pallet $p_i$\/ cannot exceed $p_i.v \times limit$, where $ 0 < limit \leq 1$\/ is a given parameter.
+Algorithm \ref{alg:greedy} generates a greedy allocation of the items available in node ${\pi_k}$, according to the non-ascending order of $\theta^{\pi_k}_{ij}$, and considering the consolidated items already shipped ($E_Q^{\pi_k}$). Edges are included in this allocation as long as they respect feasibility constraints. Furthermore, the volume of each pallet $p_i$\/ cannot exceed $p_i.V \times limit$, where $ 0 < limit \leq 1$\/ is a given parameter.
 
 \begin{algorithm}[H]
 	\caption{Mount a greedy solution until the volume limit for each pallet}  \label{alg:greedy}
@@ -994,11 +998,11 @@ Algorithm \ref{alg:greedy} generates a greedy allocation of the items available 
 		
 		\For {each $e_{ij}^{\pi_k}$ in non-ascending order of $\theta^{\pi_k}_{ij}$}
 		
-		\State $\Delta\tau \gets t_j.w \times p_i.d$
+		\State $\Delta\tau \gets t_j.w \times p_i.D$
 		
 		\State $\tau_{new} \gets | \tau^{\pi_k} + \Delta\tau |$
 		
-		\If{ ($E_N^{\pi_k} \cup \{e_{ij}^{\pi_k}\}$ is feasible) {\bf and} ($volume_i \leq p_i.v \times limit$) {\bf and} ($\tau_{new} \leq \tau_{max} \times ts$ )} \label{greedy:ts}
+		\If{ ($E_N^{\pi_k} \cup \{e_{ij}^{\pi_k}\}$ is feasible) {\bf and} ($volume_i \leq p_i.V \times limit$) {\bf and} ($\tau_{new} \leq \tau_{max} \times ts$ )} \label{greedy:ts}
 				 
 			\State $E_N^{\pi_k} \gets E_N^{\pi_k} \cup \{e_{ij}^{\pi_k}\}$ 
 			\State $volume_i \gets volume_i + t_j^{\pi_k}.v$
@@ -1031,7 +1035,7 @@ Let $Q^{\pi_k}  = \{ a^{\pi_k}_1, a^{\pi_k}_2, \ldots, a^{\pi_k}_m \}$ be the se
 Let $H^{\pi_k}_{iq}$ be the set of decision variables that relates pallet $i$ to consolidated $q$ in node $\pi_k$.
 
 \begin{equation} \label{eq:distobjshims}
-	\mbox{minimize}\ \Bigg |  \sum_{i=1}^{m} \sum_{q=1}^{m} H^{\pi_k}_{iq} \times  (140 + a^{\pi_k}_q.w) \times p_i.d\ \Bigg | 
+	\mbox{minimize}\ \Bigg |  \sum_{i=1}^{m} \sum_{q=1}^{m} H^{\pi_k}_{iq} \times  (140 + a^{\pi_k}_q.w) \times p_i.D\ \Bigg | 
 \end{equation}
 
 \begin{equation} \label{eq:distconsshims}
@@ -1042,7 +1046,7 @@ Let $H^{\pi_k}_{iq}$ be the set of decision variables that relates pallet $i$ to
 	s.t.: \sum_{q=1}^{m} H^{\pi_k}_{iq}=1;\ i \in \{1,2,\ldots,m\}
 \end{equation}
 
-Equation \ref{eq:distobjshims} minimizes the aircraft absolute torque in node $\pi_k$, where 140 is the weight of an empty pallet, $a^{\pi_k}_q.w$ the weight of the consolidated, and $p_i.d$ the distance between the pallet centroid to the aircraft CG; Equation \ref{eq:distconsshims} states that each consolidated will be assigned to exactly one pallet; and Equation \ref{eq:distpalletsshims} states that each pallet will receive one consolidated.
+Equation \ref{eq:distobjshims} minimizes the aircraft absolute torque in node $\pi_k$, where 140 is the weight of an empty pallet, $a^{\pi_k}_q.w$ the weight of the consolidated, and $p_i.D$ the distance between the pallet centroid to the aircraft CG; Equation \ref{eq:distconsshims} states that each consolidated will be assigned to exactly one pallet; and Equation \ref{eq:distpalletsshims} states that each pallet will receive one consolidated.
 
 
 \subsubsection{{\it mpShims} third phase}
@@ -1216,7 +1220,7 @@ Let $Q^{\pi_k}  = \{ a^{\pi_k}_1, a^{\pi_k}_2, \ldots, a^{\pi_k}_m \}$ be the se
 Let $Z^{\pi_k}_{iq}$ be the set of binary decision variables that relates pallet $i$ to consolidated $q$ in node $\pi_k$.
 
 \begin{equation} \label{eq:distobj}
-	\mbox{minimize} \sum_{i=1}^m \sum_{q=1}^m Z^{\pi_k}_{iq} \times ( maxD - p_i.d) ,\ \mbox{{\bf if}}\ a^{\pi_k}_q.to = \pi(k+1) \}
+	\mbox{minimize} \sum_{i=1}^m \sum_{q=1}^m Z^{\pi_k}_{iq} \times ( maxD - p_i.D) ,\ \mbox{{\bf if}}\ a^{\pi_k}_q.to = \pi(k+1) \}
 \end{equation}
 
 \begin{equation} \label{eq:distcons}
@@ -1228,11 +1232,11 @@ Let $Z^{\pi_k}_{iq}$ be the set of binary decision variables that relates pallet
 \end{equation}
 
 \begin{equation} \label{eq:distpalletw}
-	p_i.w = 140 + a^{\pi_k}_q.w ;\ i \in \{1,2,\ldots,m\};\ q \in \{1,2,\ldots,m\}
+	p_i.W = 140 + a^{\pi_k}_q.w ;\ i \in \{1,2,\ldots,m\};\ q \in \{1,2,\ldots,m\}
 \end{equation}
 
 \begin{equation} \label{eq:disttorque}
-	s.t.:\ | \sum\ p_i.d * p_i.w\ | \leq maxW \times limit^{CG}_{long} ;\ i \in \{1,2,\ldots,m\}
+	s.t.:\ | \sum\ p_i.D * p_i.W\ | \leq maxW \times limit^{CG}_{long} ;\ i \in \{1,2,\ldots,m\}
 \end{equation}
 
 Equation \ref{eq:distobj} minimizes the sum of distances of the consolidated in node $\pi_k$ destined to the next node $\pi(k+1)$; Equation \ref{eq:distcons} states that each consolidated will be assigned to exactly one pallet; Equation \ref{eq:distpallets} states that each pallet will receive one consolidated; Equation \ref{eq:distpalletw} calculates the total weight of each pallet; and Equation \ref{eq:disttorque} guarantees that the torque limit will not be exceeded. 
