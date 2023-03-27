@@ -13,12 +13,12 @@
 \BOOKMARK [3][-]{subsubsection.5.3.2}{The mpShims second phase}{subsection.5.3}% 13
 \BOOKMARK [3][-]{subsubsection.5.3.3}{The mpShims third phase}{subsection.5.3}% 14
 \BOOKMARK [2][-]{subsection.5.4}{Multiprocessing 3D packing}{section.5}% 15
-\BOOKMARK [2][-]{subsection.5.5}{Minimization of the distance of a next node destined pallet to the ramp door }{section.5}% 16
+\BOOKMARK [2][-]{subsection.5.5}{Minimization of the unloading costs}{section.5}% 16
 \BOOKMARK [1][-]{section.6}{Implementation and results}{}% 17
 \BOOKMARK [2][-]{subsection.6.1}{Parameters tuning}{section.6}% 18
 \BOOKMARK [2][-]{subsection.6.2}{Multiprocessing}{section.6}% 19
-\BOOKMARK [2][-]{subsection.6.3}{Results obtained}{section.6}% 20
-\BOOKMARK [2][-]{subsection.6.4}{Results of the 3D packing}{section.6}% 21
-\BOOKMARK [2][-]{subsection.6.5}{Results of the minimization of the pallet handling distances in the cargo bay}{section.6}% 22
+\BOOKMARK [2][-]{subsection.6.3}{Results before 3D packing}{section.6}% 20
+\BOOKMARK [2][-]{subsection.6.4}{Results after 3D packing}{section.6}% 21
+\BOOKMARK [2][-]{subsection.6.5}{Results on the minimization of the unloading costs}{section.6}% 22
 \BOOKMARK [2][-]{subsection.6.6}{Discussion summary}{section.6}% 23
 \BOOKMARK [1][-]{section.7}{Conclusions}{}% 24
