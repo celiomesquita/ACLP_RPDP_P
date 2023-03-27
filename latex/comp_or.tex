@@ -703,10 +703,11 @@ The tactic will be, at each shipping node, to predefine the destinations of the 
 
 In this algorithm, there are six values for the $scenario$\/ parameter, according to Table \ref{tab:scenarios}, which defines $K$, the sets of nodes, the aircraft, the pallets and the costs from Tables \ref{tab:smaller} or \ref{tab:larger} that will be used (line \ref{main:LMC}).
 
+Argument $method$ corresponds to one of the heuristics that we will present in subsection \ref{methods}.
 
-The other parameter $volume$\/ is a value greater than 1, which corresponds, at each node $\pi_k$, to the ratio between the sum of the volumes of the items ($\sum_{j=1}^{n^{\pi_k}} t^{\pi_k}_j.v$) and the load capacity of the pallets ($\sum_{i=1}^{m} p_i.V$). This parameter is passed to $ItemsGeneration$ (line \ref{main:items}), responsible for creating the items to be shipped, which will be presented in the next section.
+The loop of lines \ref{main:loop1}-\ref{main:loop2} goes through all permutations $\pi$, where the node-by-node resolutions are performed by $SolveTour()$, whose result is stored in $f_{\pi}$.
 
-$method$\/ corresponds to one of the heuristics that we will present in subsection \ref{methods}. The loop of lines \ref{main:loop1}-\ref{main:loop2} goes through all permutations $\pi$, where the node-by-node resolutions are performed by $SolveTour$, whose result is stored in $f_{\pi}$. The best outcome among all $K!$\/ tours will be the answer for $scenario$, $volume$\/ and $method$\/ (line \ref{main:f}). 
+The best outcome among all $K!$ tours will be the answer for $scenario$, $volume$ and $method$ (line \ref{main:f}). 
 
 \vspace{2.0mm}
 \begin{table}[H]
@@ -732,10 +733,10 @@ Next, we will present two subsections: in the first we explain how $SolveTour$ i
 \subsection{SolveTour algorithm}
 \label{tour}
 
-In addition to the set of nodes, pallets, costs and items, $SolveTour$, described in Algorithm \ref{alg:tour}, receives the parameter $method$, which corresponds to a heuristic for solving the node-by-node problems, and the parameter $\pi$, which is a permutation that defines the order of visits in this tour.
+In addition to the set of nodes, pallets, costs and items, $SolveTour$, described in Algorithm \ref{alg:tour}, receives the parameter $method$, which corresponds to a heuristic for solving the node-by-node sub-problems, and the parameter $\pi$, which is a permutation that defines the order of visits in this tour.
 
 As we mentioned in the previous section, all tours start and end at $\pi_0$\/ (lines \ref{tour:pi1}-\ref{tour:pi2}).
-After initializing the score and cost values (lines \ref{tour:score}-\ref{tour:cost}), there is a loop for the $K+1$\/ flights (lines \ref{tour:loop1}-\ref{tour:loop2}). Initially we set pallets destination as $-1$\/ (line \ref{tour:-1}). When the aircraft is at node $\pi_0$, the initial graph $G_1$\/ is empty because it has no consolidated items \ref{tour:g11}. Otherwise, the set $L_k$\/ of remaining nodes when departing from $\pi_k$ is updated (line \ref{tour:lk1}), and $UpdateConsolidated$\/ (line \ref{tour:dest}) returns the set of consolidated items that have not yet reached their destinations and remain on board, rearranging them on the pallets to minimize CG deviation. This allocation is stored in graph $G_1$\/ (line \ref{tour:g12}).
+After initializing the score and cost values (lines \ref{tour:score}-\ref{tour:cost}), there is a loop for the $K+1$\/ tours (lines \ref{tour:loop1}-\ref{tour:loop2}). Initially we set pallets destination as $-1$\/ (line \ref{tour:-1}). When the aircraft is at node $\pi_0$, the initial graph $G_1$\/ is empty because it has no consolidated items \ref{tour:g11}. Otherwise, the set $L^{\pi_k}$\/ of remaining nodes when departing from $\pi_k$ is updated (line \ref{tour:lk1}), and $UpdateConsolidated$\/ (line \ref{tour:dest}) returns the set of consolidated items that have not yet reached their destinations and remain on board, rearranging them on the pallets to minimize CG deviation. This allocation is stored in graph $G_1$\/ (line \ref{tour:g12}).
 
 
 \begin{algorithm}[H]
@@ -761,10 +762,10 @@ After initializing the score and cost values (lines \ref{tour:score}-\ref{tour:c
 				\State $Q^{\pi_k}, E_Q^{\pi_k}, M^{\pi_k} \gets UpdateConsolidated(\pi(k))$ \label{tour:dest}			
 				\State Let $G_1(M^{\pi_k} \cup N^{\pi_k} \cup Q^{\pi_k}, E_Q^{\pi_k})$ \label{tour:g12}
 			\EndIf  \label{tour:lk2}	
-			\State $M^{\pi_k} \gets SetPalletsDestination( \pi(k) )$ \label{tour:dest2}		
+			\State $M^{\pi_k} \gets SetPalletsDestinations( \pi(k) )$ \label{tour:dest2}		
 			\State $G_2 \gets SolveNode(method, \pi(k), G_1, timeLim)$ \label{tour:node}
 
-{\color{purple} \State	$G_3 \gets 3Dpacking(G_2)$  \label{tour:3dpacking} }	
+{\color{purple} \State	$G_3 \gets mp3Dpacking(G_2)$  \label{tour:3dpacking} }	
 		
 {\color{blue}   \State	$G_4 \gets minRampDist(G_3)$  \label{tour:minRampDist} }
 			
@@ -780,7 +781,7 @@ After initializing the score and cost values (lines \ref{tour:score}-\ref{tour:c
 \end{algorithm}
 
 
-In the context of this work, we know that $m>K$, once the aircraft has $7$\/ or $18$\/ pallets and $K\leq 6$, allowing there to be at least one pallet for each node to be visited. $SetPalletsDestination$\/ (line \ref{tour:dest2}) presets the destination of each pallet based on the volume demands caused by the items to be embarked in the current node, without changing the pallets destination with consolidated items.
+In the context of this work, we know that $m>K$, once the aircraft has $7$\/ or $18$\/ pallets and $K\leq 6$, allowing there to be at least one pallet for each node to be visited. $SetPalletsDestinations$\/ (line \ref{tour:dest2}) presets the destination of each pallet based on the volume demands caused by the items to be embarked in the current node, without changing the pallets destination with consolidated items.
 
 Finally, $SolveNode$\/ includes the edges corresponding to the items shipped at the current node, returning the graph $G_2$\/ (line \ref{tour:node}). The score and the CG deviation of this graph are calculated (line \ref{tour:analyse}) and accumulated (lines \ref{tour:score2}-\ref{tour:cost2}), allowing the final result of this tour (line \ref{tour:f}).
 
@@ -788,13 +789,19 @@ $UpdateConsolidated$ finds the best allocation for the consolidated items that r
 
 Then $MinCGDeviation$ is run through a MIP solver to relocate the consolidated items on the pallets minimizing torque and ensuring that they all remain on board, one on each pallet. As there are few variables, the MIP solver returns an allocation $E_Q^{\pi_k}$ very quickly.
 
-$SetPalletsDestination$ sets pallets destination not yet defined. The total volume of items and the number of pallets with consolidated items destined for each node. The destinations of each pallet are defined proportionally to the volume of items, regarding the pallets with consolidated items.
+$SetPalletsDestinations$ sets pallets destination not yet defined. The total volume of items and the number of pallets with consolidated items destined for each node. The destinations of each pallet are defined proportionally to the volume of items, regarding the pallets with consolidated items.
 
-In line \ref{tour:minRampDist}, $minRampDist$ minimizes the distance of the next node destined pallets, keeping the CG in its operational range. This procedure is implemented in integer programming as presented in Subsection \ref{improvement}, according to equations \ref{eq:distobj} to \ref{eq:disttorque}.
+{\color{purple}
+In line \ref{tour:3dpacking}, $mp3Dpacking(G)$ packs the items previously assigned to a pallet, which is feasible in terms of volume, weight, and torque but still not guaranteed to fit into the pallet. In this procedure, some unfit items are excluded from the solution.
+}
 
-$ScoreAndDeviation$ evaluates the allocation graph generated by $SolveNode$, returning the corresponding score and CG deviation. It consists of a loop that goes through all the pallets, accumulating the scores and the torques of the shipped items, allowing the final calculation of the CG deviation.
+{\color{blue}
+In line \ref{tour:minRampDist}, $minRampDist(G)$ minimizes the distance of the next node destined pallets, keeping the CG in its operational range. This procedure is implemented in integer programming. This method does not affect palletization or the objective function value.
+}
 
-$UpdateConsolidated$, $MinCGDeviation$, $SetPalletsDestination$, and $ScoreAndDeviation$ are thoroughly described by \cite{MesquitaSanches2023}.
+$ScoreAndDeviation(\pi(k), G_4)$ evaluates the allocation graph generated by $SolveNode$, returning the corresponding score and CG deviation. It consists of a loop that goes through all the pallets, accumulating the scores and the torques of the shipped items, allowing the final calculation of the CG deviation.
+
+$UpdateConsolidated$, $MinCGDeviation$, $SetPalletsDestinations$, and $ScoreAndDeviation$ are thoroughly described by \cite{MesquitaSanches2023}.
 
 
 \subsection{Node-by-node resolution}
@@ -836,13 +843,19 @@ In the pseudo-codes presented below, given an allocation graph $G$\/ for the nod
 
 Below, we present the implementation for $SolveNode$, the new parallel heuristic that we propose called {\it Multiprocessing Shims (mpShims)}.
 
-According to \cite[p.226]{manfrin2006}, there are five topologies for multiprocessing interchange of information: {\it fully-connected}, where the master process broadcasts to all remaining child processes; {\it replace-worst}, where the best-so-far solution process broadcasts only to the current worst solution process; {\it hypercube}, where processes are connected as a hypercube, and a vertex process broadcasts only to the connected vertices; {\it ring}, in which one process only sends a message to the next process connected to it; and {\it parallel independent runs (PIR)}, in which there are no communication costs and the best solution is chosen among all processes. They concluded that the PIR topology presented, in average, the smallest distance from the optimal solutions.
+According to \cite[p.226]{manfrin2006}, there are five topologies for multiprocessing interchange of information: {\it fully-connected}, where the master process broadcasts to all remaining child processes; {\it replace-worst}, where the best-so-far solution process broadcasts only to the current worst solution process; {\it hypercube}, where processes are connected as a hypercube, and a vertex process broadcasts only to the connected vertices; {\it ring}, in which one process only sends a message to the next process connected to it; and {\it parallel independent runs}, in which there are no communication costs and the best solution is chosen among all processes.
+
+In this work, we had to select the {\it fully-connected} topology for the {\it Greedy} heuristics and for {\it mpShims} because the list of items to embark and the aircraft torque must be accessible for reading and writing by all child processes. This decision require an effective race condition management.
+
+{\it When threads or processes attempt to simultaneously access a shared resource, and the accesses can result in an error, we often say the program has a race condition, because the threads or processes are in a "race" to carry out an operation.} \cite[p. 53]{Pacheco:2020}.
+
+For the {\it mp3Dpacking} we used {\it parallel independent runs}, because there is no memory sharing.
 
 
 \subsection{Multiprocessing Shims - mpShims}
 
 
-Finally, we present a new heuristic designed specifically for ACLP+RPDP, which we named \emph{mpShims}. Like in mechanics, shims are collections of spacers to fill gaps, which may be composed of parts with different thicknesses (see Figure \ref{fig:shims}). This strategy is based on a practical observation: usually, subsets of smaller and lighter items are saved for later adjustments to the remaining clearances.
+Finally, we present a new multiprocessing heuristic designed specifically for ACLP+RPDP, which we named \emph{mpShims}. Like in mechanics, shims are collections of spacers to fill gaps, which may be composed of parts with different thicknesses (see Figure \ref{fig:shims}). This strategy is based on a practical observation: usually, subsets of smaller and lighter items are saved for later adjustments to the remaining clearances.
 
 
 \begin{table}[H]
@@ -863,11 +876,11 @@ Finally, we present a new heuristic designed specifically for ACLP+RPDP, which w
 		\begin{tikzpicture}[scale=0.75, samples=100]
 			\filldraw[fill=blue!3!white, draw=black] (0, 0) rectangle (12.5, 5.5);
 			\draw[->] (.2, .6) -- coordinate (x axis mid) (12, .6);
-			\node at (5, 0.3) {$\eta_1[i]$};
+			\node at (5, 0.3) {$\eta_1^{\ i}$};
 			\node at (5, 2.5) {|};
 			\node at (6, 2.5) {shims};
 			\node at (7, 2.5) {|};
-			\node at (7, 0.3) {$\eta_2[i]$};
+			\node at (7, 0.3) {$\eta_2^{\ i}$};
 			\node at (0.3, 5) {$\theta_{ij}^{\pi_k}$};
 			\draw[->] (.6, .2) -- coordinate (y axis mid) (0.6, 5.3);
 			\node at (12, 0.3) {$e_{ij}^{\pi_k}$};
@@ -882,18 +895,15 @@ Finally, we present a new heuristic designed specifically for ACLP+RPDP, which w
 \end{table}
 
 
-Figure \ref{fig:whip} represents the $n^{\pi_k}$\/ possible edges $e_{ij}^{\pi_k}$\/ of $p_i$\/ sorted by $\theta_{ij}^{\pi_k}$. \emph{mpShims}\/ starts with a greedy solution for each pallet, stopping at the edge with index in $\eta_1^i$ close to the local optimum (first phase). Then, performs an integer programming procedure to minimize the CG deviation (second phase), and finally, considering even the edge with the index $\eta_2^i$, it elaborates different possible complements for this pallet and selects the best of these complements (third phase).
+Figure \ref{fig:whip} represents the $n^{\pi_k}$\/ possible edges $e_{ij}^{\pi_k}$\/ of $p_i$\/ sorted by $\theta_{ij}^{\pi_k}$. \emph{mpShims}\/ starts with a greedy solution for each pallet, stopping at the edge with index in $\eta_1^{\ i}$ close to the local optimum (first phase). Then, performs an integer programming procedure to minimize the CG deviation (second phase), and finally, considering even the edge with the index $\eta_2^{\ i}$, it elaborates different possible complements for this pallet and selects the best of these complements (third phase).
 
-Although the third phase solves a {\it Knapsack Problem}, a faster algorithm for solving a {\it Bin Packing Problem} was used ({\it the First Fit Decreasing - FFD}), and the most profitable bin ({\it Shims}) was selected. This method was proved to be faster than a {\it Dynamic Programming} solution for the {\it Knapsack Problem}.
+Although the third phase solves a {\it Knapsack Problem}, a faster algorithm for solving a {\it Bin Packing Problem} was used ({\it the First Fit Decreasing - FFD}), and the most profitable bin ({\it Shims}) was selected.
 		
-	In this work, we included a new phase after the first: a minimization of the CG deviation. An integer programming procedure that helps improve the overall {\it mpShims} results.
-
 $1^{st}$ - A Greedy phase to partially build pallets.
 
 $2^{st}$ - Minimization of CG deviation.
 
-$3^{st}$ - {\it Shims} set construction and best {\it Shims} selection
-ess run-time, we considered each pallet as a parallel process, taking advantage of nowadays multi-core computers.
+$3^{st}$ - {\it Shims} set construction and best {\it Shims} selection.
 
 
 \begin{algorithm}[H]
@@ -909,7 +919,7 @@ ess run-time, we considered each pallet as a parallel process, taking advantage 
 		
 		\State $nodeTorque \gets 0$
 		
-		\State $ts \gets 2.0$ \Comment{torque surplus} \label{mpShims:ts}
+		\State $ts \gets 1.2$ \Comment{torque surplus} \label{mpShims:ts}
 		
 		\State $lock \gets$ multiprocessing lock  \label{mpShims:lock} \Comment{avoid race condition}
 		
@@ -943,14 +953,13 @@ ess run-time, we considered each pallet as a parallel process, taking advantage 
 	\end{algorithmic}
 \end{algorithm}
 
-
-All phases being executed in a multiprocessing run-time, accessing concurrently, reading and writing the list of items and the current value of the CG deviation.
+In the first and third phases, we considered each pallet as a parallel process, taking advantage of nowadays multi-core computers, being executed in a multiprocessing run-time, accessing concurrently, reading and writing the list of items and the current value of the CG deviation.
 
 Follow the comments on Algorithm \ref{alg:mpShims}:
 
 Line \ref{mpShims:g1} the initial solution comes with some consolidated on board, a bipartite graph between pallets and consolidated.
 
-Line \ref{mpShims:ts} defines the torque surplus ($ts$). For the greedy phase, the solution may generate torque infeasible solutions with doubled torque ($2.0$), which will be repaired by the next phase, the minimization of the CG deviation.
+Line \ref{mpShims:ts} defines the torque surplus ($ts$). For the $Greedy$ phase, the solution may generate temporary torque unfeasible solutions. We raised the Hypothesis (2) that, in sequential mode, where one pallet is built at a time, torque constraints may be more restrictive than volume or weight constraints, which could stop the palletization process earlier, fostering a solution that may be not as good as it could be. So, we decided to extend torque limit and balance cargo before the next {\it Shims} phase to allow more room for pallet fulfillment.
 
 Line \ref{mpShims:lock} creates a lock feature for shared data among processes to avoid race condition.
 
@@ -958,15 +967,16 @@ Line \ref{mpShims:greedy} calls the greedy method which updates $p_i$, $N^{\pi_k
 
 Line \ref{mpShims:join1} wait for all $Greedy$ processes to finish.
 
-Line \ref{mpShims:minCGdev} calls the $minCGdev$ integer programming method (Subsection \ref{subsection:second_phase}) which updates the $nodeTorque$ and $G$. $minCGdev$ minimizes the CG deviation. We raise the hypothesis that, in sequential mode, where one pallet is built at a time, torque constraints may be more restrictive than volume or weight constraints, which could stop the palletization process earlier, fostering a solution that may be not as good as it could be. So, we decided to balance cargo before the next {\it Shims} phase to allow more room for pallet fulfillment. This will be confirmed (or not) in Section \ref{sec6}.
+Line \ref{mpShims:minCGdev} calls the $minCGdev()$ integer programming method (Subsection \ref{subsection:second_phase}) which updates the $nodeTorque$ and $G$. $minCGdev()$ minimizes the CG deviation, bringing it back to its operational range. A proper value for $ts$ must be empirically found to guarantee this intent (the {\it iRace} tool (\cite{LopezIbanezManuel2016}) is good for this value determination).
 
-Line \ref{mpShims:getBestShims} calls the $getBestShims$ method which updates $p_i$, $N^{\pi_k}$, $nodeTorque$, and $G$.
+Line \ref{mpShims:getBestShims} calls the $getBestShims()$ method which updates $p_i$, $N^{\pi_k}$, $nodeTorque$, and $G$.
 
-Line \ref{mpShims:join2} wait for all $getBestShims$ processes to finish.
+Line \ref{mpShims:join2} wait for all $getBestShims()$ processes to finish.
 
 Line \ref{mpShims:return} returns a complete solution, a bipartite graph between pallets and consolidated or items.
 
-\subsubsection{{\it mpShims} first phase}
+
+\subsubsection{The {\it mpShims} first phase}
 
 
 Algorithm \ref{alg:greedy} generates a greedy allocation of the items available in node ${\pi_k}$, according to the non-ascending order of $\theta^{\pi_k}_{ij}$, and considering the consolidated items already shipped ($E_Q^{\pi_k}$). Edges are included in this allocation as long as they respect feasibility constraints. Furthermore, the volume of each pallet $p_i$\/ cannot exceed $p_i.V \times limit$, where $ 0 < limit \leq 1$\/ is a given parameter.
@@ -1006,7 +1016,7 @@ Algorithm \ref{alg:greedy} generates a greedy allocation of the items available 
 				 
 			\State $E_N^{\pi_k} \gets E_N^{\pi_k} \cup \{e_{ij}^{\pi_k}\}$ 
 			\State $volume_i \gets volume_i + t_j^{\pi_k}.v$
-			\State $\eta_1^i \gets \eta_1^i + 1$ 
+			\State $\eta_1^{\ i} \gets \eta_1^{\ i} + 1$ 
 			\State $\tau^{\pi_k} \gets \tau^{\pi_k} + \Delta\tau$
 			
 		\EndIf
@@ -1021,11 +1031,10 @@ Algorithm \ref{alg:greedy} generates a greedy allocation of the items available 
 
 In Algorithm \ref{alg:greedy}, line \ref{greedy:eta} defines an array with the same size as pallets array to save the set of last edges inserted in the greedy solution. The set $\eta_1$ is returned together with the greedy solution.
 
-Line \ref{greedy:ts} presents the variable $ts$ (torque $\tau$ surplus), that is an extra-torque limit to allow each greedy pallet construction to, temporally, exceed the torque limit, that will be turned feasible again by the next {\it mpShims}' phase, the CG minimization phase. $ts$ value will be adjusted empirically, by means of the {\it iRace} tool (\cite{LopezIbanezManuel2016}), to produce feasible solutions in all problem instances.
+Line \ref{greedy:ts} presents the variable $ts$ (torque surplus), that is an extra-torque limit to allow each greedy pallet construction to, temporally, exceed the torque limit, that will be turned feasible again by the next {\it mpShims}' phase, the CG minimization phase.
 
 
-
-\subsubsection{{\it mpShims} second phase}
+\subsubsection{The {\it mpShims} second phase}
 \label{subsection:second_phase}
 
 Between the greedy and the {\it Shims} selection phases we inserted, in this work, an integer programming method to minimize the CG deviation, as stated by the integer programming model that follows.
@@ -1046,10 +1055,10 @@ Let $H^{\pi_k}_{iq}$ be the set of decision variables that relates pallet $i$ to
 	s.t.: \sum_{q=1}^{m} H^{\pi_k}_{iq}=1;\ i \in \{1,2,\ldots,m\}
 \end{equation}
 
-Equation \ref{eq:distobjshims} minimizes the aircraft absolute torque in node $\pi_k$, where 140 is the weight of an empty pallet, $a^{\pi_k}_q.w$ the weight of the consolidated, and $p_i.D$ the distance between the pallet centroid to the aircraft CG; Equation \ref{eq:distconsshims} states that each consolidated will be assigned to exactly one pallet; and Equation \ref{eq:distpalletsshims} states that each pallet will receive one consolidated.
+Equation \ref{eq:distobjshims} minimizes the aircraft absolute torque in node $\pi_k$, where 140kg is the weight of an empty pallet, $a^{\pi_k}_q.w$ the weight of the consolidated, and $p_i.D$ the distance between the pallet centroid to the aircraft CG; Equation \ref{eq:distconsshims} states that each consolidated will be assigned to exactly one pallet; and Equation \ref{eq:distpalletsshims} states that each pallet will receive one consolidated.
 
 
-\subsubsection{{\it mpShims} third phase}
+\subsubsection{The {\it mpShims} third phase}
 
 \begin{algorithm}[H]
 	\caption{Mount shims of edges that fills each pallet gap and return the best shims}  \label{alg:getBestShims}
@@ -1063,11 +1072,11 @@ Equation \ref{eq:distobjshims} minimizes the aircraft absolute torque in node $\
 		\State $shims_b \gets \{\}$  \label{empty_shims}
 		\State $Set \gets Set \cup \{shims_b\}$ \label{empty_set}
 		
-		\For{$x \gets \eta_1^i$ to $\eta_2^i$} \label{edges_indexes}
+		\For{$x \gets \eta_1^{\ i}$ to $\eta_2^{\ i}$} \label{edges_indexes}
 		
 		
 		\State $NewShims \gets$ {\bf True} \label{new_shims}
-		\State $e_{ij}^{\pi_k} \gets E_x^i$
+		\State $e_{ij}^{\pi_k} \gets E_x^{\ i}$
 		
 		\For{$shims \in Set$} \label{shims_set}
 		
@@ -1126,52 +1135,57 @@ According to \cite{BrandtStefan2019}, {\it Technically the task to solve is a th
 
 So, to confirm or not Hypothesis (3), we decided to adopt the model for three-dimensional (3D) packing based in the instructions on \cite{DubeKanavathy2006}, \cite{li2014} and on \cite{PaquayLimbourgSchynsOliveira2018}, to pack the items selected for each pallet.
 
-The main logic of the 3D packing procedure is based on an approximate algorithm like follows:
+The main logic of the 3D packing procedure ($3Dpacker$) is based on an approximate algorithm like follows:
 
-From a list of items, items are sorted from the biggest to the smallest and placed in such an order on a pallet.Each item has 1 to 6 orientations to choose from when it can be placed. The orientation procedure can select the best direction type among possible orientations.
+\begin{itemize}
+	\item[1] From a list of items assigned to a pallet, items are sorted from the biggest to the smallest and placed in such an order on a pallet. Each item has 1 to 6 orientations to choose from in the moment of placement. The orientation procedure can select the best direction type among possible orientations.
+	\item[2] A pivot point is used to determine item's position. The pivot is an (x, y, z) coordinate which represents a point in the pallet at which an attempt to pack an item will be made.
+	\item[3] The back lower left corner of the item will be placed at the pivot. If the item cannot be packed at the pivot position then it is rotated until it can be packed at the pivot point or until we have tried all 6 possible rotation types (first fit).
+	\item[4] If, after rotating it, the item still cannot be packed at the pivot point, then we move on to packing another item and add the unpacked item to a list of items that will be packed after an attempt to pack the remaining items is made.
+	\item[5] The first pivot in the empty pallet is always (0, 0, 0). When one item can be placed into multiple optimal pivot point, the placement selection module can help make a choice (best fit).
+\end{itemize}
 
-A pivot point is used to determine item's position. The pivot is an (x, y, z) coordinate which represents a point in the pallet at which an attempt to pack an item will be made.
+Let $n^i$ be the number of items assigned to pallet $i$ and $m$ the number of pallets.
 
-The back lower left corner of the item will be placed at the pivot. If the item cannot be packed at the pivot position then it is rotated until it can be packed at the pivot point or until we have tried all 6 possible rotation types.
+Let $A_{j} = 1$ if item $t_j$ is assigned to the pallet, $A_{j}\ =\ 0$ otherwise, for $j \in \{1,\ 2,\ 3,\ ...,\ n^i\}$.
 
-If, after rotating it, the item still cannot be packed at the pivot point, then we move on to packing another item and add the unpacked item to a list of items that will be packed after an attempt to pack the remaining items is made.
+Let $X_{ij} = 1$ if item $j$ was already assigned to pallet $i$ by {\it mpShims}, $X_{ij}\ =\ 0$ otherwise.
 
-The first pivot in the empty pallet is always (0,0,0). When one item can be placed into multiple optimal pivot point, the placement selection module can help make a choice.
+Let $t_j.d,\ t_j.wh,\ t_j.h$ be parameters indicating the depth, width, and height of an item.
 
-Let $n$ be the number of items and $m$ the number of pallets.
-
-Let $A_{j}\ =\ 1$ if item $j$ is assigned to the pallet, $A_{j}\ =\ 0$ otherwise, for $j \in \{1,\ 2,\ 3,\ ...,\ n\}$.
-
-Let $X_{ij}\ =\ 1$ if item $j$ was already assigned to pallet $i$ by {\it mpShims}, $X_{ij}\ =\ 0$ otherwise, for $i \in \{1,\ 2,\ 3,\ ...,\ m\}$.
-
-Let $d_j,\ w_j,\ h_j$ be parameters indicating the depth, width, and height of an item. 
-Let $D_i,\ W_i,\ H_i$ be parameters indicating the depth, width, and height of the pallet.
+Let $p_i.Dh,\ p_i.Wh,\ p_i.H$ be parameters indicating the depth, width, and height of the pallet. We included letter $h$ at the end of parameters $p_i.Dh$ and $p_i.Wh$ to make them different from $p_i.D$ (distance from CG) and $p_i.W$ (weight limit).
 
 Let $x_j,\ y_j,\ z_j$ be real type variables for coordinates of item's left-bottom-behind corner.
 
-Let $o_j^1,\ o_j^2,\ o_j^3,\ o_j^4,\ o_j^5,\ o_j^6$ be binary variables, indicating the possible orientations for item $j$. One of the values equal to 1 if item $j$ has orientation in $\{1,\ 2,\ 3,\ 4,\ 5,\ 6\}$, respectively, otherwise equal to 0.
+Let $t_j.o^1,\ t_j.o^2,\ t_j.o^3,\ t_j.o^4,\ t_j.o^5,\ t_j.o^6$ be binary variables, indicating the possible orientations for item $t_j$.
 
 
 \begin{equation} \label{eq:3dpacking1}
-	\mbox{minimize} \Big [ D_i \times W_i \times H_i - \sum_{j \gets 1}^{n} X_{ij} \times A_{j} \times d_j \times w_j \times h_j \Big ]
+	\mbox{minimize} \Big [ p_i.Dh \times p_i.Wh \times p_i.H - \sum_{j \gets 1}^{n^{\ i}} X_{ij} \times A_{j} \times t_j.d \times t_j.wh \times t_j.h \Big ]
 \end{equation}
 
 \begin{equation} \label{eq:3dpacking2}
-	\sum_{j \gets 1}^{n} A_{j} \times d_j  \leq X_{ij} \times D_i,\ i \in \{1,\ 2,\ 3,\ ...,\ m\}
+	\sum_{j \gets 1}^{n^{\ i}} A_{j} \times t_j.d  \leq X_{ij} \times p_i.Dh\ i \in \{1,\ 2,\ 3,\ ...,\ m\}
 \end{equation}
 
 \begin{equation} \label{eq:3dpacking3}
-	\sum_{j \gets 1}^{n} A_{j} \times w_j  \leq X_{ij} \times W_i,\ i \in \{1,\ 2,\ 3,\ ...,\ m\}
+	\sum_{j \gets 1}^{n^{\ i}} A_{j} \times t_j.wh  \leq X_{ij} \times p_i.Wh,\ i \in \{1,\ 2,\ 3,\ ...,\ m\}
 \end{equation}
 
 \begin{equation} \label{eq:3dpacking4}
-	\sum_{j \gets 1}^{n} A_{j} \times h_j  \leq X_{ij} \times H_i,\ i \in \{1,\ 2,\ 3,\ ...,\ m\}
+	\sum_{j \gets 1}^{n^{\ i}} A_{j} \times t_j.h  \leq X_{ij} \times p_i.H,\ i \in \{1,\ 2,\ 3,\ ...,\ m\}
 \end{equation}
+
+\begin{equation} \label{eq:3dpacking5}
+t_j.o^1 + t_j.o^2 + t_j.o^3 + t_j.o^4 + t_j.o^5 + t_j.o^6 \leq 1
+\end{equation}
+
+Equation \ref{eq:3dpacking1} minimizes the volume slack; equations \ref{eq:3dpacking2}, \ref{eq:3dpacking3}, and \ref{eq:3dpacking4} constrains the packing to the three dimensions; and \ref{eq:3dpacking5} guarantees that at most one orientation is chosen for the item.
 
 Algorithm \ref{alg:3dpacking} presents the multiprocessing solution method for 3D packing to be applied after {\it mpShims}, to guarantee that the item to be palletized actually fit into the pallet.
 
 \begin{algorithm}[H]
-	\caption{Parallel 3D packing procedure}  \label{alg:3dpacking}
+	\caption{Multiprocessing 3D packing procedure}  \label{alg:3dpacking}
 	
 	\begin{algorithmic}[1]
 		
@@ -1200,14 +1214,14 @@ Algorithm \ref{alg:3dpacking} presents the multiprocessing solution method for 3
 
 According to line \ref{3dpacking:1}, this method receives an initial solution produced by {\it mpShims}, and according to line \ref{3dpacking:2}, each pallet has its own process.
 
-In line \ref{3dpacking:3}, $N^{\pi_k}_i$ is the set of items previously assigned to pallet $i$.
+In line \ref{3dpacking:3}, $N^{\pi_k}_i$ is the set of items previously assigned to pallet $i$ and the method $3Dpacker()$ conforms to equations \ref{eq:3dpacking1}, \ref{eq:3dpacking2}, \ref{eq:3dpacking3}, \ref{eq:3dpacking4}, and \ref{eq:3dpacking5}.
 
 In line \ref{3dpacking:4}, the algorithm waits for the packing process to finish.
 
 Line \ref{3dpacking:5} excludes the unfit items from solution.
 
 
-\subsection{Minimization of the distance of a next node destined pallet to the ramp door }
+\subsection{Minimization of the unloading costs}
 
 \cite{LurkinSchyns2015} considered an aircraft with two doors, and the minimization of loading and unloading costs at the intermediate node was modeled through a container sequencing problem. But, as both aircraft dealt with in this work have only the ramp door, we tried to minimize the distance of travel of pallets inside the cargo bay, favoring unloading in the next node, by a post optimization of pallets positions to favor this distance minimization.
 
@@ -1232,15 +1246,24 @@ Let $Z^{\pi_k}_{iq}$ be the set of binary decision variables that relates pallet
 \end{equation}
 
 \begin{equation} \label{eq:distpalletw}
-	p_i.W = 140 + a^{\pi_k}_q.w ;\ i \in \{1,2,\ldots,m\};\ q \in \{1,2,\ldots,m\}
+	p_i.w = 140 + a^{\pi_k}_q.w ;\ i \in \{1,2,\ldots,m\};\ q \in \{1,2,\ldots,m\}
 \end{equation}
 
 \begin{equation} \label{eq:disttorque}
-	s.t.:\ | \sum\ p_i.D * p_i.W\ | \leq maxW \times limit^{CG}_{long} ;\ i \in \{1,2,\ldots,m\}
+	s.t.:\ | \sum\ p_i.D * p_i.w\ | \leq maxW \times limit^{CG}_{long} ;\ i \in \{1,2,\ldots,m\}
 \end{equation}
 
-Equation \ref{eq:distobj} minimizes the sum of distances of the consolidated in node $\pi_k$ destined to the next node $\pi(k+1)$; Equation \ref{eq:distcons} states that each consolidated will be assigned to exactly one pallet; Equation \ref{eq:distpallets} states that each pallet will receive one consolidated; Equation \ref{eq:distpalletw} calculates the total weight of each pallet; and Equation \ref{eq:disttorque} guarantees that the torque limit will not be exceeded. 
+Equation \ref{eq:distobj} minimizes the sum of distances of the consolidated in node $\pi_k$ destined to the next node $\pi(k+1)$;
 
+Equation \ref{eq:distcons} states that each consolidated will be assigned to exactly one pallet;
+
+Equation \ref{eq:distpallets} states that each pallet will receive one consolidated;
+
+Equation \ref{eq:distpalletw} calculates the total weight on each pallet (note that it is different from $p_i.W$, the capacity of the pallet); and
+
+Equation \ref{eq:disttorque} guarantees that the torque limit will not be exceeded. 
+
+The instruction referred in Algorithm \ref{alg:tour}, line \ref{tour:minRampDist} implements this model.
 
 \section{Implementation and results}
 \label{sec6}
@@ -1252,17 +1275,24 @@ We test our methods with 126 different instances: six operational scenarios with
 
 The final experiments are performed on a 64-bit, 16GiB, 3.4GHz, 8-core Intel® i7-3770 CPU, 2 threads per core, with {\it Linux Ubuntu 22.04 LTS} as the operational system and {\it Python 3.10.6} as the programming language.
 
-A relevant problem with meta-heuristics is the parameter's adjustment to extract the best possible efficiency in the optimization. The bulk of the tools to fine-tune these parameters utilize a statistical backdrop that enables them to make accurate predictions regarding the differences in candidate configurations' performance. Inadequacies in the design of the statistical experiment may therefore lead to erroneous results from the statistical tests and, subsequently, cause the approach to produce inaccurate comparisons of candidate configurations. That is why all parameters were set using the $iRace$ package \cite{LopezIbanezManuel2016}. Supplying $iRace$ with a range for $volThreshold$ as [0.80 to 0.99], {\it iRace} yielded 0.92, by training on the uneven instances numbers. The values tested for 20\%, 50\%, and 100\% volume surpluses were very close, considering the confidence level offered by {\it iRace}.
+\subsection{Parameters tuning}
 
-For parallelization, we used the {\it Python Multiprocessing} package, which implements {\it process-based parallelism} or {\it parallel shared memory algorithm}. According to \cite{multiprocessing}, {\it Multiprocessing} is a package that supports spawning processes using an API similar to the {\it Python Threading} package.
+A relevant problem with meta-heuristics is the parameter's adjustment to extract the best possible efficiency in the optimization. The bulk of the tools to fine-tune these parameters utilize a statistical backdrop that enables them to make accurate predictions regarding the differences in candidate configurations' performance. Inadequacies in the design of the statistical experiment may therefore lead to erroneous results from the statistical tests and, subsequently, cause the approach to produce inaccurate comparisons of candidate configurations. That is why all parameters were set using the $iRace$ package \cite{LopezIbanezManuel2016}. Supplying $iRace$ with a range for $volThreshold$ as $[0.80,\ 0.99]$, {\it iRace} yielded 0.92, by training on the uneven instances numbers. The values tested for 20\%, 50\%, and 100\% volume surpluses were very close, considering the confidence level offered by {\it iRace}.
 
-According to \cite[p.271]{Breshears2009}, a {\it Process} is the operating system’s spawned and controlled entity that encapsulates an executing application. A process has two main jobs: the first is to hold the application's resources, and the second is to carry out the application's instructions. 
+For the {\it torque surplus - ts}, we input {\it iRace} with the range $[1.0,\ 2.0]$ and this tool chose $ts = 1.7$ as a value that brings torque of the $Greedy$ first phase to a feasible region.
 
-It is known that working concurrently opens up synchronization issues. But the {\it Multiprocessing} package ({\it mp}) offers both local and remote concurrency, effectively side-stepping the global interpreter lock by using sub-processes instead of threads. Because of this, the {\it Multiprocessing} module lets the programmer take full advantage of the fact that a machine has more than one processor, normally capable of 2 threads each.
+\subsection{Multiprocessing}
 
 By Amdahl's law, there is an optimal number of parallel executions for each problem in each environment. While working at IBM in 1967, Gene Amdahl developed the foundation for what became known as Amdahl's Law or Amdahl's Argument. Essentially, the law states that while a process can be decomposed into steps that may then be run in parallel, the time taken for the whole process will be significantly limited by the steps that remain serialized. In our case, the reading and writing process on the shared torque variable and the list of items to be embarked.
 
-\subsection{Results obtained}
+According to \cite[p.271]{Breshears2009}, a {\it Process} is the operating system’s spawned and controlled entity that encapsulates an executing application.
+
+It is known that working concurrently opens up synchronization issues. But the {\it Multiprocessing} package ({\it mp}) offers both local and remote concurrency, effectively side-stepping the global interpreter lock by using sub-processes instead of threads. Because of this, the {\it Multiprocessing} module lets the programmer take full advantage of the fact that a machine has more than one processor, normally capable of 2 threads each.
+
+As in the larger aircraft the number of pallets is bigger than the number of threads available in a common handheld computer, for parallelization, we used the {\it Python Multiprocessing} package, which implements {\it process-based parallelism} or {\it parallel shared memory algorithm}. According to \cite{multiprocessing}, {\it Multiprocessing} is a package that supports spawning processes using an API similar to the {\it Python Threading} package.
+
+
+\subsection{Results before 3D packing}
 
 We ran Algorithm \ref{alg:main} in the 6 scenarios described in Table \ref{tab:scenarios}, considering 3 methods for node-by-node resolution: the state-of-the-art {\it Gurobi} MIP solver, {\it Shims}, and {\it mpShims} (Algorithm \ref{alg:mpShims}).
 
@@ -1287,113 +1317,42 @@ In each $scenario$, we indicate in bold the best value of $f$\/ found. In each t
 	%\scriptsize
 	\begin{tabular}{crcccccccc}
 		\toprule
-		{\bf Volume}     &  {\bf Resolution}   &                              &\multicolumn{6}{c}{\bf Scenarios}                                                   &{\bf Normalized}\\
+		{\bf Volume}     &{\bf Resolution}&                              &\multicolumn{6}{c}{\bf Scenarios}                                                   &{\bf Normalized}\\
 		\cmidrule{4-9}		
-		{\it surplus}    & {\it method}        & {\bf Results}                &{\bf 1}    &{\bf 2}    &{\bf 3}    &{\bf 4}    &{\bf 5}    &{\bf 6}    &{\bf Speedup} \\
-		\toprule
-		
-		%\specialcell{$Volume$\\$surplus$}
-		
-		\multirow{6}{*}{$1.2$}&$Relaxed$                 & $f$         &{\it 12.23}&{\it 8.67} &{\it 12.67}&{\it 15.36}&{\it 16.29}&{\it 16.20}&  \specialcell{{\bf 1.00}\\-} \\%  8142
-		&                      $MIP$                     & {\it run time (s)} &     3     &     13    &     20    &     78   &      198  &     1103  &  1.00 \\% 439							
+		{\it surplus}    &{\it method}    & {\bf Results}                &{\bf 1}    &{\bf 2}    &{\bf 3}    &{\bf 4}    &{\bf 5}    &{\bf 6}    &{\bf Speedup} \\
+		\toprule	
+		\multirow{6}{*}{$1.2$}&$Relaxed$  & $f$                &{\it 12.23}&{\it 8.67} &{\it 12.67}&{\it 15.36}&{\it 16.29}&{\it 16.20}&  \specialcell{{\bf 1.00}} \\%  8142
+		&                      $MIP$      & {\it run time (s)} &     3     &     13    &     20    &     78   &      198  &     1103  &  1.00 \\% 439							
 		\cmidrule{2-10}		                       
-		&\multirow{2}{*}{ $Shims$}                       & $f$                &     10.34 &     8.50  &     12.42 &     15.06 &     15.97 &     15.88 &  0.96 \\% 7817
-		&                                                & {\it run time (s)} &     < 1   &     3     &     5     &     20    &     58    &     352   &  1.00 \\% 439			
+		&\multirow{2}{*}{ $Shims$}        & $f$                &     10.34 &     8.50  &     12.42 &     15.06 &     15.97 &     15.88 &  0.96 \\% 7817
+		&                                 & {\it run time (s)} &     < 1   &     3     &     5     &     20    &     58    &     352   &  1.00 \\% 439			
 		\cmidrule{2-10}		                       
-		&\multirow{2}{*}{ $mpShims$}                     & $f$                &   12.96   &   7.53    &  12.28    &   13.20   &  13.71    &   13.44   &  0.90\\% 7278
-		&                                                & {\it run time (s)} &     < 1   &     2     &     2     &     8    &     22    &     120   &  {\bf 2.80}\\%
-		
+		&\multirow{2}{*}{ $mpShims$}      & $f$                &   12.96   &   7.53    &  12.28    &   13.20   &  13.71    &   13.44   &  0.90\\% 7278
+		&                                 & {\it run time (s)} &     < 1   &     2     &     2     &     8    &     22    &     120   &  {\bf 2.80}\\%
 		\midrule		
-		
-		\multirow{6}{*}{$1.5$}&\specialcell{$Relaxed$\\$MIP solver$}& $f$         &{\it 17.01}&{\it 12.45}&{\it 18.02}&{\it 22.03}&{\it 23.09}&{\it 22.35}&  \specialcell{{\bf 1.00}\\-} \\%11495  
-
+		\multirow{6}{*}{$1.5$}&$Relaxed$  & $f$                &{\it 17.01}&{\it 12.45}&{\it 18.02}&{\it 22.03}&{\it 23.09}&{\it 22.35}&  \specialcell{{\bf 1.00}} \\%11495  
+		&                       $MIP$     & {\it run time (s)} &     6     &     25    &     41    &     158   &      401  &     2161  &  1.00\\%					
         \cmidrule{2-10}		                       
-        &\multirow{2}{*}{ $Shims$}                       & $f$                &     14.68 &     12.21 &     17.67 &  21.01    &  22.64    &   21.91   &  0.96  \\%  11012
-        &                                                & {\it run time (s)} &     < 1   &     2     &     3     &     12    &     33    &   209     &  1.00 \\% 260
-
-        \cmidrule{2-10}		                       
-        &\multirow{2}{*}{ $mpShims$}                     & $f$                &    16.12  &     11.81 &     17.48 &  17.66    &   19.81   &  17.61    &  0.87 \\% 9966
-        &                                                & {\it run time (s)} &     < 1   &     1     &     2     &     7     &   20      &  120      &  {\bf 1.70}\\% 151
-
+        &\multirow{2}{*}{ $Shims$}        & $f$                &     14.68 &     12.21 &     17.67 &  21.01    &  22.64    &   21.91   &  0.96  \\%  11012
+        &                                 & {\it run time (s)} &     < 1   &     2     &     3     &     12    &     33    &   209     &  1.00 \\% 260
+        \cmidrule{2-10}		                      
+        &\multirow{2}{*}{ $mpShims$}      & $f$                &    16.12  &     11.81 &     17.48 &  17.66    &   19.81   &  17.61    &  0.87 \\% 9966
+        &                                 & {\it run time (s)} &     < 1   &     1     &     2     &     7     &   20      &  120      &  {\bf 1.70}\\% 151
 		\midrule
-		\multirow{6}{*}{$2.0$}&\specialcell{$Relaxed$\\$MIP solver$}& $f$         &{\it 24.56}&{\it 17.47}&{\it 25.19}&{\it 27.94}&{\it 29.90}&{\it 27.60 }&  \specialcell{{\bf 1.00}\\-} \\%15266  
-		
+		\multirow{6}{*}{$2.0$}&$Relaxed$  & $f$                &{\it 24.56}&{\it 17.47}&{\it 25.19}&{\it 27.94}&{\it 29.90}&{\it 27.60 }&  \specialcell{{\bf 1.00}} \\%15266  
+		&                       $MIP$     & {\it run time (s)} &     6     &     25    &     41    &     158   &      401  &     2161  & 1.00\\%							
 		\cmidrule{2-10}		                       
-		&\multirow{2}{*}{ $Shims$}                       & $f$                &    21.31  &  17.35    &   24.24   &   27.39    &  29.31     &  27.06     &   0.96  \\%  14666
-		&                                                & {\it run time (s)} &     < 1   &     2     &     4     &     14     &     35     &   220     &  1.00 \\% 260
-		
+		&\multirow{2}{*}{ $Shims$}        & $f$                &    21.31  &  17.35    &   24.24   &   27.39    &  29.31     &  27.06     &   0.96  \\%  14666
+		&                                 & {\it run time (s)} &     < 1   &     2     &     4     &     14     &     35     &   220     &  1.00 \\% 260
 		\cmidrule{2-10}		                       
-		&\multirow{2}{*}{ $mpShims$}                     & $f$                &    24.33  &   17.26   &   24.70   &  24.81     &   27.71    &  24.93        &  0.94  \\% 14374
-		&                                                & {\it run time (s)} &     < 1   &     2     &     3     &     9      &   26       &  151      &  {\bf 1.70}\\% 151
-
+		&\multirow{2}{*}{ $mpShims$}      & $f$                &    24.33  &   17.26   &   24.70   &  24.81     &   27.71    &  24.93        &  0.94  \\% 14374
+		&                                 & {\it run time (s)} &     < 1   &     2     &     3     &     9      &   26       &  151      &  {\bf 1.70}\\% 151
 		\bottomrule	
-		
 	\end{tabular}
-	%\textsuperscript{asdf sd .}	
 	\normalsize
 \end{table}
 
 Table \ref{tab:results2} presents the results of the MIP solver compared to {\it Shims} and {\it mpShims}, after the post-optimization with the multiprocessing 3D packing.
-
-\vspace{2.0mm}
-
-\begin{table}[H]
-	\centering
-	\caption{Volume surpluses, methods and scenarios results {\bf after} 3D packing}  \label{tab:results2}
-	\footnotesize
-	
-\color{blue}{
-	
-	%\scriptsize
-	\begin{tabular}{crcccccccc}
-		\toprule
-		{\bf Volume}     &  {\bf Resolution}   &                              &\multicolumn{6}{c}{\bf Scenarios}                                                   &{\bf Normalized}\\
-		\cmidrule{4-9}		
-		{\it surplus}    & {\it method}        & {\bf Results}                &{\bf 1}    &{\bf 2}    &{\bf 3}    &{\bf 4}    &{\bf 5}    &{\bf 6}    &{\bf Speedup} \\
-		\toprule
-		
-		%\specialcell{$Volume$\\$surplus$}
-		
-		\multirow{6}{*}{$1.2$}&\specialcell{$Relaxed$\\$MIP solver$}& $f$            &{\it 11.47}&{\it 7.24} &{\it 10.78}&{\it 12.06}&{\it 12.97}&{\it 12.44}&  \specialcell{{\bf 1.00}\\-} \\%  8142
-		&                                                & {\it run time (s)} &     6     &     25    &     41    &     158   &      401  &     2161  &  1.00 \\% 439					
-		\cmidrule{2-10}		                       
-		&\multirow{2}{*}{ $Shims$}                       & $f$                &    9.05   &   5.11    &   9.75    &   10.96   &   12.86   &   13.25   &  0.96 \\% 7817
-		&                                                & {\it run time (s)} &     16    &     68    &     94    &    323    &    719    &    3549   &  1.00 \\% 439			
-		\cmidrule{2-10}		                       
-		&\multirow{2}{*}{ $mpShims$}                     & $f$                &    12.14  &   7.29    &   10.36   &   12.63   &   14.04   &   13.92   &  0.90\\% 7278
-		&                                                & {\it run time (s)} &     9     &     36    &     54    &     192   &     427   &    2118   &  {\bf 2.80}\\%
-		
-		\midrule		
-		
-		\multirow{6}{*}{$1.5$}&\specialcell{$Relaxed$\\$MIP solver$}& $f$     &{\it 15.83}&{\it 10.08}&{\it 15.14}&{\it 16.87}&{\it }&{\it }&  \specialcell{{\bf 1.00}\\-} \\%11495  
-		&                                                & {\it run time (s)} &    10     &     43    &     72    &     262   &     58    &     352   &  1.00 \\% 439					
-		\cmidrule{2-10}		                       
-		&\multirow{2}{*}{ $Shims$}                       & $f$                &   11.55   &   7.61   &   12.28   &   15.00   &   17.55   &   17.57   &  0.96  \\%  11012
-		&                                                & {\it run time (s)} &    25     &    107   &     156   &    498    &    1217   &   5743     &  1.00 \\% 260
-		
-		\cmidrule{2-10}		                       
-		&\multirow{2}{*}{ $mpShims$}                     & $f$                &   17.05  &   10.01   &   15.01  &   16.75   &   20.09   &      &  0.87 \\% 9966
-		&                                                & {\it run time (s)} &    18    &    64     &     101  &    351    &   828     &  120      &  {\bf 1.70}\\% 151
-		
-		\midrule
-		\multirow{6}{*}{$2.0$}&\specialcell{$Relaxed$\\$MIP solver$}& $f$            &{\it }&{\it }&{\it }&{\it }&{\it }&{\it  }&  \specialcell{{\bf 1.00}\\-} \\%15266  
-		&                                                & {\it run time (s)} &     < 1   &     3     &     5     &     20    &     58    &     352   &  1.00 \\% 439					
-		\cmidrule{2-10}		                       
-		&\multirow{2}{*}{ $Shims$}                       & $f$                &      &      &      &       &       &       &   0.96  \\%  14666
-		&                                                & {\it run time (s)} &     < 1   &     2     &     4     &     14     &     35     &   220     &  1.00 \\% 260
-		
-		\cmidrule{2-10}		                       
-		&\multirow{2}{*}{ $mpShims$}                     & $f$                &      &      &      &       &       &          &  0.94  \\% 14374
-		&                                                & {\it run time (s)} &     < 1   &     2     &     3     &     9      &   26       &  151      &  {\bf 1.70}\\% 151
-		
-		\bottomrule	
-		
-	\end{tabular}
-}
-	%\textsuperscript{asdf sd .}	
-	\normalsize
-\end{table}
-
 
 The upper bound is the objective function value of a linear programming relaxation of the problem, demonstrating that no integer viable solution can have an objective value greater (in maximization) than this.
 
@@ -1401,52 +1360,60 @@ We solved all scenarios and instances with a MIP solver in a relaxed linear mode
 
 {\it Shims} had a quality performance very close to the {\it Relaxed MIP solver} upper bound solution, and, as to the {\bf Speedup}, on average, {\it mpShims} was 2 times faster than {\it Shims}. Theoretically, it could be more, but due to the burden of sharing, for reading and writing, the CG deviation and the list of items among the processes (pallets), the {\it race condition} management limited {\it mpShims} performance.
 
-{\it When threads or processes attempt to simultaneously access a shared resource, and the accesses can result in an error, we often say the program has a race condition, because the threads or processes are in a "race" to carry out an operation.} \cite[p. 53]{Pacheco:2020}.
-
-We confirmed the hypothesis raised in \ref{hypotheses} and in line \ref{mpShims:minCGdev} of Algorithm \ref{alg:mpShims} that, in sequential mode, where one pallet is built at a time, torque constraints could be more restrictive than volume or weight constraints, which could stop the palletization process earlier, yielding a solution that may be not as good as it could be. This integer programming procedure inclusion really improved all {\it Shims} results.
+We confirmed the hypothesis raised in \ref{hypotheses} and in line \ref{mpShims:minCGdev} of Algorithm \ref{alg:mpShims} that, in sequential mode, where one pallet is built at a time, torque constraints could be more restrictive than volume or weight constraints, which could stop the palletization process earlier, yielding a solution that may be not as good as it could be. This integer programming procedure inclusion noticeably improved all {\it Shims} results.
 
 After this inclusion {\it Shims} results surpassed that of {\it mpShims}. In multiprocessing mode ({\it mpShims}) this inclusion (line \ref{mpShims:minCGdev}) made a negligible difference.
 
-
-\subsection{Results of the 3D packing}
-
-
-%\begin{table}[!h]
-%	\begin{minipage}{0.5\linewidth}
-%		left
-%	\end{minipage}\hfill % these two lines must be close to each other
-%	\begin{minipage}{0.5\linewidth}
-%		right		
-%	\end{minipage}
-%\end{table}
+\subsection{Results after 3D packing}
 
 \vspace{2.0mm}
-\begin{table}[!ht]
-\centering
-\caption{Parallel 3D packing time increment}  \label{tab:3d}
-\scriptsize
-\begin{tabular}{c S[table-format=-1.1] S[table-format=-1.1] S[table-format=-1.1]}
-\toprule
-&   \multicolumn{3}{c}{\bf Average tour time - 3D packing}  \\
-\cmidrule{2-4}
-& {\bf without} & {\bf with} & {\bf increment} \\
-{\bf Scenario} & {\bf (s)}    & {\bf (s)}   & {\bf (times)} \\		
-\midrule
-$1$ &   1 &   15 & 15 \\ % 1	 9   , 3	 6, 1	 25	
-$2$ &   5 &   76 & 15 \\ % 2	 36  , 13	 25
-$3$ &   8 &   97 & 12 \\ % 3	 54  , 20	 41	
-$4$ &  35 &  330 &  9 \\ % 12	 192 , 78	 158
-$5$ &  98 &  740 &  8 \\ % 34	 427 , 198	 401
-$6$ & 591 & 3709 &  6 \\ % 202	 2118, 1103	 2161                                                       
-\bottomrule
-\end{tabular}
+\begin{table}[H]
+	\centering
+\color{blue}{	
+	\caption{Volume surpluses, methods and scenarios results {\bf after} 3D packing}  \label{tab:results2}
+}
+	\footnotesize
+	\begin{tabular}{crcccccccc}
+		\toprule
+		{\bf Volume}     &{\bf Resolution}&                    &\multicolumn{6}{c}{\bf Scenarios}                                                   &{\bf Normalized}\\
+		\cmidrule{4-9}		
+		{\it surplus}    &{\it method}    & {\bf Results}      &{\bf 1}    &{\bf 2}    &{\bf 3}    &{\bf 4}    &{\bf 5}    &{\bf 6}    &{\bf Speedup} \\
+		\toprule
+		\multirow{6}{*}{$1.2$}&$Relaxed$  & $f$                &{\it 11.47}&{\it 7.24} &{\it 10.78}&{\it 12.06}&{\it 12.97}&{\it 12.44}&  \specialcell{{\bf 1.00}} \\%
+		&                       $MIP$     & {\it run time (s)} &     6     &     25    &     41    &     158   &      401  &     2161  &  1.00\\%					
+		\cmidrule{2-10}		                       
+		&\multirow{2}{*}{ $Shims$}        & $f$                &    9.05   &   5.11    &   9.75    &   10.96   &   12.86   &   13.25   &  0.96 \\% 7817
+		&                                 & {\it run time (s)} &     16    &     68    &     94    &    323    &    719    &    3549   &  1.00 \\% 439			
+		\cmidrule{2-10}		                       
+		&\multirow{2}{*}{ $mpShims$}      & $f$                &    12.14  &   7.29    &   10.36   &   12.63   &   14.04   &   13.92   &  0.90\\% 7278
+		&                                 & {\it run time (s)} &     9     &     36    &     54    &     192   &     427   &    2118   &  {\bf 2.80}\\%		
+		\midrule		
+		\multirow{6}{*}{$1.5$}&$Relaxed$  & $f$                &{\it 15.83}&{\it 10.08}&{\it 15.14}&{\it 16.87}&{\it }&{\it }&  \specialcell{{\bf 1.00}} \\%11495  
+		&                      $MIP$      & {\it run time (s)} &    10     &     43    &     72    &     262   &     58    &     352   &  1.00 \\% 439					
+		\cmidrule{2-10}		                       
+		&\multirow{2}{*}{ $Shims$}        & $f$                &   11.55   &   7.61   &   12.28   &   15.00   &   17.55   &   17.57   &  0.96  \\%  11012
+		&                                 & {\it run time (s)} &    25     &    107   &     156   &    498    &    1217   &   5743     &  1.00 \\% 260
+		\cmidrule{2-10}		                       
+		&\multirow{2}{*}{ $mpShims$}      & $f$                &   17.05   &   10.01   &   15.01  &   16.75   &   20.09   &      &  0.87 \\% 9966
+		&                                 & {\it run time (s)} &    18     &    64     &     101  &    351    &   828     &  120      &  {\bf 1.70}\\% 151
+		\midrule
+		\multirow{6}{*}{$2.0$}&$Relaxed$  & $f$                &{\it 23.73}&{\it }&{\it }&{\it }&{\it }&{\it  }&  \specialcell{{\bf 1.00}} \\%15266  
+		&                       $MIP$     & {\it run time (s)} &    14     &     3     &     5     &     20    &     58    &     352   &  1.00 \\% 439					
+		\cmidrule{2-10}		                       
+		&\multirow{2}{*}{ $Shims$}        & $f$                &   16.28   &      &      &       &       &       &   0.96  \\%  14666
+		&                                 & {\it run time (s)} &    37     &     2     &     4     &     14     &     35     &   220     &  1.00 \\% 260
+		\cmidrule{2-10}		                       
+		&\multirow{2}{*}{ $mpShims$}      & $f$                &   24.52   &      &      &       &       &          &  0.94  \\% 14374
+		&                                 & {\it run time (s)} &    27     &     2     &     3     &     9      &   26       &  151      &  {\bf 1.70}\\% 151
+		\bottomrule	
+	\end{tabular}
+	\normalsize
 \end{table}
 
-According to Table \ref{tab:3d}, the time increase with the 3D packing inclusion was approximately 10 times. Considering the worst (6) scenario, about 62 min to solve a complete tour, against 10 min without the 3D packing procedure.
-i.e., with the 3D packing procedure running in multiprocessing mode, this complete solution method for {\it ACLP+RPDP} is still viable for operational use.
 
 
-\subsection{Results of the minimization of the pallet handling distances in the cargo bay}
+
+\subsection{Results on the minimization of the unloading costs}
 \label{improvement}
 
 As the number of pallets was small (7 or 18) for an integer program solver, the increased time was negligible (less than 1s).
@@ -1462,18 +1429,18 @@ As the number of pallets was small (7 or 18) for an integer program solver, the 
 & {\bf Before} & {\bf After} & {\bf Improvement} \\
 {\bf Scenario} & {\bf (m)}    & {\bf (m)}   & {\bf (\%)} \\		
 \midrule
-$1$ &  32.7 & 28.7 & -12.3 \\ % CBC 32.1 & 31.3 & -2.4 Shims 34.0 & 29.5 & -13.1, 31.5 & 29.9 & -5.1
-$2$ & 193.3 & 188.9 & -2.3 \\ % mpShims 212.0 & 188.9 & -10.9
-$3$ & 165.1 & 153.3 & -7.1 \\ % 
-$4$ & 134.0 & 130.7 & -2.4 \\ % CBC 137.1 & 132.0 & -3.7 mpShim 143.4 & 136.6 & -4.7
-$5$ & 118.0 & 116.1 & -1.6 \\ % CBC 124.9 & 116.3 & -6.9 mpShim 126.7 & 122.0 & -3.8 
-$6$ & 105.2 & 104.8 & -0.4 \\ % CBC 117.4 & 107.6 & -8.3 mpShim 115.3 & 110.4 & -4.2                                                                
+$1$ &  32.7 &  28.7 & -7.3 \\
+$2$ & 193.3 & 188.9 & -6.3 \\
+$3$ & 165.1 & 153.3 & -7.1 \\
+$4$ & 137.1 & 132.0 & -3.7 \\
+$5$ & 126.7 & 122.0 & -3.8 \\
+$6$ & 115.3 & 110.4 & -4.2 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 
-Table \ref{tab:ground} presents the distances minimization of the next node destined pallets to the ramp door. Columns {\bf Before} and {\bf After} refer to the application of the current method.
+Table \ref{tab:ground} presents the distances minimization of the next node destined pallets to the ramp door. Columns {\bf Before} and {\bf After} refer to the application of the current method. In average, the distances from the pallets and the last ramp door position was diminished by 5\% along a tour.
 
 
 \subsection{Discussion summary}
@@ -1492,9 +1459,7 @@ We are conscious that this unfit rate could be smaller if we had chosen \cite{Pa
 This solution phase was a parallel 3-D packing with each pallet as a process, which decreased this phase's run time by approximate a $n-1$ factor where $n$ is the number of processes. This was possible because each packing process is completely independent; there is no multiprocessing shared memory. It is also important to highlight that, after the items were excluded, the CG deviation was kept within its operational and feasible range.
 
 (4) The distances to move pallets on unloading in the next node could be minimized to benefit ground handling costs.
-This hypothesis was confirmed by the results on Table \ref{tab:ground}, although in Scenario 3 this procedure could not improve in any of the volume surplus instances (1.2, 1.5, and 2.0).
-
-A new question is raised about whether it is worth using parallelism as, although {\it mpShims} was twice as fast as {\it Shims}, the results of {\it Shims} were still better than those of {\it mpShims}. May this question be solved through the real-world application of these methods.
+This hypothesis was confirmed by the results on Table \ref{tab:ground}.
 
 
 \section{Conclusions}
@@ -1506,7 +1471,7 @@ We converted {\it Shims} into a process-based parallel computing heuristic, whic
 
 We also carried out 126 experiments with each method on synthetic data based on real data from the {\it Brazilian Air Force} transportation history.
 
-Other important contributions are that we checked four hypotheses: Computer parallelism improved {\it Shims} performance; the intermediate integer programming procedure added to {\it Shims} algorithm enhanced it's results; but the integer programming procedure to minimize pallets' travel in the cargo bay did not improve the results; and a procedure for 3-D packing was turned possible for operational use due to a process-based parallel computing heuristic.
+Other important contributions are that we verified four hypotheses: Computer parallelism improved {\it Shims} performance; the intermediate integer programming procedure added to {\it Shims} algorithm enhanced it's results; a procedure for 3-D packing was turned possible for operational use due to a process-based parallel computing heuristic, and the integer programming procedure to minimize pallets' travel in the cargo bay was successful.
 
 And another important contribution is that we employed the {\it iRace} package to fine tune the {\it mpShims} volume threshold and torque surplus parameters, guaranteeing the best possible performance for the instances under training and testing.
 

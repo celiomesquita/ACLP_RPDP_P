@@ -310,17 +310,17 @@ if __name__ == "__main__":
     plot = False
 
     # scenarios = [1,2,3,4,5,6]
-    scenarios = [6] # infeasible solutions with Shims............
+    scenarios = [2,3,4,5,6] # infeasible solutions with Shims............
 
     # surplus   = "data20"
-    surplus   = "data50"
-    # surplus   = "data100"
+    # surplus   = "data50"
+    surplus   = "data100"
 
     methods = ["Shims","mpShims","CBC"]  
     
     # methods = ["Shims", "mpShims"]
     # methods = ["GRB"]
-    methods = ["CBC"]
+    # methods = ["CBC"]
     # methods = ["Shims"]
     # methods = ["mpShims"]
 
