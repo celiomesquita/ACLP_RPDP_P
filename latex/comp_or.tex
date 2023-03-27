@@ -1292,7 +1292,7 @@ It is known that working concurrently opens up synchronization issues. But the 
 As in the larger aircraft the number of pallets is bigger than the number of threads available in a common handheld computer, for parallelization, we used the {\it Python Multiprocessing} package, which implements {\it process-based parallelism} or {\it parallel shared memory algorithm}. According to \cite{multiprocessing}, {\it Multiprocessing} is a package that supports spawning processes using an API similar to the {\it Python Threading} package.
 
 
-\subsection{Results before 3D packing}
+\subsection{Results {\bf before} 3D packing}
 
 We ran Algorithm \ref{alg:main} in the 6 scenarios described in Table \ref{tab:scenarios}, considering 3 methods for node-by-node resolution: the state-of-the-art {\it Gurobi} MIP solver, {\it Shims}, and {\it mpShims} (Algorithm \ref{alg:mpShims}).
 
@@ -1308,6 +1308,8 @@ The average tour values were presented for $f$ and, for the run time, the worst 
 
 In each $scenario$, we indicate in bold the best value of $f$\/ found. In each table, we also indicate in bold the best {\bf Normalized}\/ and {\bf Speed-up}\/ values.
 
+Note that, in Table \ref{tab:results} all $Relaxed\ MIP\ f$ value are italicized to indicate that these values may not be optimal or feasible as the decision variables are not integers.
+
 \vspace{2.0mm}
 
 \begin{table}[H]
@@ -1321,7 +1323,7 @@ In each $scenario$, we indicate in bold the best value of $f$\/ found. In each t
 		\cmidrule{4-9}		
 		{\it surplus}    &{\it method}    & {\bf Results}                &{\bf 1}    &{\bf 2}    &{\bf 3}    &{\bf 4}    &{\bf 5}    &{\bf 6}    &{\bf Speedup} \\
 		\toprule	
-		\multirow{6}{*}{$1.2$}&$Relaxed$  & $f$                &{\it 12.23}&{\it 8.67} &{\it 12.67}&{\it 15.36}&{\it 16.29}&{\it 16.20}&  \specialcell{{\bf 1.00}} \\%  8142
+		\multirow{7}{*}{$1.2$}&$Relaxed$  & $f$                &{\it 12.23}&{\it 8.67} &{\it 12.67}&{\it 15.36}&{\it 16.29}&{\it 16.20}&  \specialcell{{\bf 1.00}} \\%  8142
 		&                      $MIP$      & {\it run time (s)} &     3     &     13    &     20    &     78   &      198  &     1103  &  1.00 \\% 439							
 		\cmidrule{2-10}		                       
 		&\multirow{2}{*}{ $Shims$}        & $f$                &     10.34 &     8.50  &     12.42 &     15.06 &     15.97 &     15.88 &  0.96 \\% 7817
@@ -1330,8 +1332,8 @@ In each $scenario$, we indicate in bold the best value of $f$\/ found. In each t
 		&\multirow{2}{*}{ $mpShims$}      & $f$                &   12.96   &   7.53    &  12.28    &   13.20   &  13.71    &   13.44   &  0.90\\% 7278
 		&                                 & {\it run time (s)} &     < 1   &     2     &     2     &     8    &     22    &     120   &  {\bf 2.80}\\%
 		\midrule		
-		\multirow{6}{*}{$1.5$}&$Relaxed$  & $f$                &{\it 17.01}&{\it 12.45}&{\it 18.02}&{\it 22.03}&{\it 23.09}&{\it 22.35}&  \specialcell{{\bf 1.00}} \\%11495  
-		&                       $MIP$     & {\it run time (s)} &     6     &     25    &     41    &     158   &      401  &     2161  &  1.00\\%					
+		\multirow{7}{*}{$1.5$}&$Relaxed$  & $f$                &{\it 17.01}&{\it 12.45}&{\it 18.02}&{\it 22.03}&{\it 23.09}&{\it 22.35}&  \specialcell{{\bf 1.00}} \\%11495  
+		&                       $MIP$     & {\it run time (s)} &     4     &     20    &     32    &     115   &     296  &     1685  &  1.00\\%					
         \cmidrule{2-10}		                       
         &\multirow{2}{*}{ $Shims$}        & $f$                &     14.68 &     12.21 &     17.67 &  21.01    &  22.64    &   21.91   &  0.96  \\%  11012
         &                                 & {\it run time (s)} &     < 1   &     2     &     3     &     12    &     33    &   209     &  1.00 \\% 260
@@ -1339,8 +1341,8 @@ In each $scenario$, we indicate in bold the best value of $f$\/ found. In each t
         &\multirow{2}{*}{ $mpShims$}      & $f$                &    16.12  &     11.81 &     17.48 &  17.66    &   19.81   &  17.61    &  0.87 \\% 9966
         &                                 & {\it run time (s)} &     < 1   &     1     &     2     &     7     &   20      &  120      &  {\bf 1.70}\\% 151
 		\midrule
-		\multirow{6}{*}{$2.0$}&$Relaxed$  & $f$                &{\it 24.56}&{\it 17.47}&{\it 25.19}&{\it 27.94}&{\it 29.90}&{\it 27.60 }&  \specialcell{{\bf 1.00}} \\%15266  
-		&                       $MIP$     & {\it run time (s)} &     6     &     25    &     41    &     158   &      401  &     2161  & 1.00\\%							
+		\multirow{7}{*}{$2.0$}&$Relaxed$  & $f$                &{\it 24.56}&{\it 17.47}&{\it 25.19}&{\it 27.94}&{\it 29.90}&{\it 27.60 }&  \specialcell{{\bf 1.00}} \\%15266  
+		&                       $MIP$     & {\it run time (s)} &          &         &         &        &        &       & 1.00\\%							
 		\cmidrule{2-10}		                       
 		&\multirow{2}{*}{ $Shims$}        & $f$                &    21.31  &  17.35    &   24.24   &   27.39    &  29.31     &  27.06     &   0.96  \\%  14666
 		&                                 & {\it run time (s)} &     < 1   &     2     &     4     &     14     &     35     &   220     &  1.00 \\% 260
@@ -1352,7 +1354,7 @@ In each $scenario$, we indicate in bold the best value of $f$\/ found. In each t
 	\normalsize
 \end{table}
 
-Table \ref{tab:results2} presents the results of the MIP solver compared to {\it Shims} and {\it mpShims}, after the post-optimization with the multiprocessing 3D packing.
+
 
 The upper bound is the objective function value of a linear programming relaxation of the problem, demonstrating that no integer viable solution can have an objective value greater (in maximization) than this.
 
@@ -1364,7 +1366,9 @@ We confirmed the hypothesis raised in \ref{hypotheses} and in line \ref{mpShims:
 
 After this inclusion {\it Shims} results surpassed that of {\it mpShims}. In multiprocessing mode ({\it mpShims}) this inclusion (line \ref{mpShims:minCGdev}) made a negligible difference.
 
-\subsection{Results after 3D packing}
+\subsection{Results {\bf after} 3D packing}
+
+Table \ref{tab:results2} presents the results of the MIP solver compared to {\it Shims} and {\it mpShims}, after the post-optimization with the multiprocessing 3D packing.
 
 \vspace{2.0mm}
 \begin{table}[H]
@@ -1379,31 +1383,31 @@ After this inclusion {\it Shims} results surpassed that of {\it mpShims}. In mul
 		\cmidrule{4-9}		
 		{\it surplus}    &{\it method}    & {\bf Results}      &{\bf 1}    &{\bf 2}    &{\bf 3}    &{\bf 4}    &{\bf 5}    &{\bf 6}    &{\bf Speedup} \\
 		\toprule
-		\multirow{6}{*}{$1.2$}&$Relaxed$  & $f$                &{\it 11.47}&{\it 7.24} &{\it 10.78}&{\it 12.06}&{\it 12.97}&{\it 12.44}&  \specialcell{{\bf 1.00}} \\%
+		\multirow{7}{*}{$1.2$}&$Relaxed$  & $f$                &   11.47   &    7.24   &{\bf 10.78}&     12.06 &     12.97 &    12.44  &  \specialcell{{\bf 1.00}} \\%
 		&                       $MIP$     & {\it run time (s)} &     6     &     25    &     41    &     158   &      401  &     2161  &  1.00\\%					
 		\cmidrule{2-10}		                       
 		&\multirow{2}{*}{ $Shims$}        & $f$                &    9.05   &   5.11    &   9.75    &   10.96   &   12.86   &   13.25   &  0.96 \\% 7817
 		&                                 & {\it run time (s)} &     16    &     68    &     94    &    323    &    719    &    3549   &  1.00 \\% 439			
 		\cmidrule{2-10}		                       
-		&\multirow{2}{*}{ $mpShims$}      & $f$                &    12.14  &   7.29    &   10.36   &   12.63   &   14.04   &   13.92   &  0.90\\% 7278
+		&\multirow{2}{*}{ $mpShims$}      & $f$                &{\bf 12.14}&{\bf 7.29} &   10.36   &{\bf 12.63}&{\bf 14.04}&{\bf 13.92}&  0.90\\% 7278
 		&                                 & {\it run time (s)} &     9     &     36    &     54    &     192   &     427   &    2118   &  {\bf 2.80}\\%		
 		\midrule		
-		\multirow{6}{*}{$1.5$}&$Relaxed$  & $f$                &{\it 15.83}&{\it 10.08}&{\it 15.14}&{\it 16.87}&{\it }&{\it }&  \specialcell{{\bf 1.00}} \\%11495  
-		&                      $MIP$      & {\it run time (s)} &    10     &     43    &     72    &     262   &     58    &     352   &  1.00 \\% 439					
+		\multirow{7}{*}{$1.5$}&$Relaxed$  & $f$                &     15.83 &     10.08 &   15.14   &     16.87 &     18.58 &     17.52 &  \specialcell{{\bf 1.00}} \\%11495  
+		&                      $MIP$      & {\it run time (s)} &    10     &     43    &     72    &     262   &     696   &     3741  &  1.00 \\% 439					
 		\cmidrule{2-10}		                       
-		&\multirow{2}{*}{ $Shims$}        & $f$                &   11.55   &   7.61   &   12.28   &   15.00   &   17.55   &   17.57   &  0.96  \\%  11012
-		&                                 & {\it run time (s)} &    25     &    107   &     156   &    498    &    1217   &   5743     &  1.00 \\% 260
+		&\multirow{2}{*}{ $Shims$}        & $f$                &   11.55   &   7.61    &   12.28   &   15.00   &   17.55   &   17.57    &  0.96  \\%  11012
+		&                                 & {\it run time (s)} &    25     &    107    &     156   &    498    &    1217   &   5743     &  1.00 \\% 260
 		\cmidrule{2-10}		                       
-		&\multirow{2}{*}{ $mpShims$}      & $f$                &   17.05   &   10.01   &   15.01  &   16.75   &   20.09   &      &  0.87 \\% 9966
-		&                                 & {\it run time (s)} &    18     &    64     &     101  &    351    &   828     &  120      &  {\bf 1.70}\\% 151
+		&\multirow{2}{*}{ $mpShims$}      & $f$                &   17.05   &   10.01   &   15.01   &   16.75   &   20.09   &   17.85   &  0.87 \\% 9966
+		&                                 & {\it run time (s)} &    18     &    64     &     101   &    351    &   828     &  3879      &  {\bf 1.70}\\% 151
 		\midrule
-		\multirow{6}{*}{$2.0$}&$Relaxed$  & $f$                &{\it 23.73}&{\it }&{\it }&{\it }&{\it }&{\it  }&  \specialcell{{\bf 1.00}} \\%15266  
+		\multirow{7}{*}{$2.0$}&$Relaxed$  & $f$                &     23.73 &           &           &           &           &            &  \specialcell{{\bf 1.00}} \\%15266  
 		&                       $MIP$     & {\it run time (s)} &    14     &     3     &     5     &     20    &     58    &     352   &  1.00 \\% 439					
 		\cmidrule{2-10}		                       
-		&\multirow{2}{*}{ $Shims$}        & $f$                &   16.28   &      &      &       &       &       &   0.96  \\%  14666
+		&\multirow{2}{*}{ $Shims$}        & $f$                &   16.28   &           &           &       &       &       &   0.96  \\%  14666
 		&                                 & {\it run time (s)} &    37     &     2     &     4     &     14     &     35     &   220     &  1.00 \\% 260
 		\cmidrule{2-10}		                       
-		&\multirow{2}{*}{ $mpShims$}      & $f$                &   24.52   &      &      &       &       &          &  0.94  \\% 14374
+		&\multirow{2}{*}{ $mpShims$}      & $f$                &   24.52   &           &           &       &       &          &  0.94  \\% 14374
 		&                                 & {\it run time (s)} &    27     &     2     &     3     &     9      &   26       &  151      &  {\bf 1.70}\\% 151
 		\bottomrule	
 	\end{tabular}
