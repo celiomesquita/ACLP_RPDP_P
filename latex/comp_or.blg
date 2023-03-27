@@ -3,50 +3,45 @@ Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: comp_or.aux
 The style file: elsarticle-harv.bst
 Database file #1: references.bib
-Warning--I'm ignoring HoughtonCarpenter2003's extra "title" field
---line 30 of file references.bib
 Reallocated singl_function (elt_size=4) to 100 items from 50.
-Warning--empty pages in fok2004optimizing
-Warning--empty pages in li2014
-You've used 33 entries,
+You've used 34 entries,
             2990 wiz_defined-function locations,
-            873 strings with 11792 characters,
-and the built_in function-call counts, 21220 in all, are:
-= -- 1623
-> -- 746
-< -- 21
-+ -- 314
-- -- 255
-* -- 2257
-:= -- 3062
-add.period$ -- 100
-call.type$ -- 33
-change.case$ -- 246
-chr.to.int$ -- 33
-cite$ -- 35
-duplicate$ -- 1626
-empty$ -- 1627
-format.name$ -- 376
-if$ -- 4007
+            878 strings with 11976 characters,
+and the built_in function-call counts, 21924 in all, are:
+= -- 1686
+> -- 764
+< -- 24
++ -- 321
+- -- 261
+* -- 2313
+:= -- 3151
+add.period$ -- 103
+call.type$ -- 34
+change.case$ -- 252
+chr.to.int$ -- 34
+cite$ -- 34
+duplicate$ -- 1689
+empty$ -- 1676
+format.name$ -- 387
+if$ -- 4158
 int.to.chr$ -- 1
 int.to.str$ -- 1
-missing$ -- 306
-newline$ -- 181
-num.names$ -- 132
-pop$ -- 601
+missing$ -- 315
+newline$ -- 186
+num.names$ -- 136
+pop$ -- 623
 preamble$ -- 1
-purify$ -- 217
+purify$ -- 223
 quote$ -- 0
-skip$ -- 483
+skip$ -- 515
 stack$ -- 0
-substring$ -- 922
-swap$ -- 1120
-text.length$ -- 2
+substring$ -- 945
+swap$ -- 1168
+text.length$ -- 4
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 285
-warning$ -- 2
-while$ -- 129
+type$ -- 294
+warning$ -- 0
+while$ -- 134
 width$ -- 0
-write$ -- 476
-(There were 3 warnings)
+write$ -- 491

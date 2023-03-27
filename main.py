@@ -8,14 +8,15 @@ import math
 import mpShims
 import mpACO
 import optcgcons
-import mipGRB
+# import mipGRB
+import mipCBC
 from plots import TTT
 
-from py3Djanet.packer import Packer
-from py3Djanet.methods import Item
-from py3Djanet.bin import Bin
+# from py3Djanet.packer import Packer
+# from py3Djanet.methods import Item
+# from py3Djanet.bin import Bin
 
-# from py3Druiz import Packer, Item, Bin
+from py3Druiz import Packer, Item, Bin
 
 
 def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus, tipo, numOptDict, rampDistCG, afterDict, beforeDict):
@@ -143,8 +144,11 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
         if method == "ACO":       
             mpACO.Solve(  pallets, items, cfg, k, volThreshold, secBreak, "s", nodeTorque, solDict, itemsDict) 
 
-        if method == "GRB":
-            modStatus, ObjBound = mipGRB.Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict) 
+        # if method == "GRB":
+        #     modStatus, ObjBound = mipGRB.Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict) 
+
+        if method == "CBC":
+            modStatus, ObjBound = mipCBC.Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict) 
 
         if modStatus == 2: # 2: optimal
             numOptDict["numOpt"] += 1
@@ -154,53 +158,52 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
 
         Y = np.reshape(solDict["solMatrix"], (-1, N)) # N number of items (columns)
        
-        if method != "GRB":
+        # begin ---- parallel solving the 3D packing for each pallet  
+        procs   = [None for _ in pallets]
+        packers = [None for _ in pallets]
+        counter1 = 0
+        for i, row in enumerate(Y):
 
-            # begin ---- parallel solving the 3D packing for each pallet  
-            procs   = [None for _ in pallets]
-            packers = [None for _ in pallets]
-            counter1 = 0
-            for i, row in enumerate(Y):
+            packers[i] = Packer()
+            packers[i].add_bin( Bin(f'pallet{i}', pallets[i].w, pallets[i].h, pallets[i].d, pallets[i].W, i) )
+            
+            for j, X_ij in enumerate(row):
+                if X_ij:
+                    packers[i].add_item(Item(f'item{j}', items[j].w, items[j].h, items[j].d, 0, j))
+                    counter1 += 1
+            
+            procs[i] = mp.Process( target=packers[i].pack() )
+            procs[i].start()
 
-                packers[i] = Packer()
-                packers[i].add_bin( Bin(f'pallet{i}', pallets[i].w, pallets[i].h, pallets[i].d, pallets[i].W, i) )
-                
-                for j, X_ij in enumerate(row):
-                    if X_ij:
-                        packers[i].add_item(Item(f'item{j}', items[j].w, items[j].h, items[j].d, 0, j))
-                        counter1 += 1
-                
-                procs[i] = mp.Process( target=packers[i].pack() )
-                procs[i].start()
+        counter2 = 0
+        for i, proc in enumerate(procs):
+            proc.join()
+            for bin in packers[i].bins:
+                i = bin.ID
+                for item in bin.unfitted_items:
+                    j = item.ID
+                    Y[i][j] = 0
+                    counter2 += 1
+                    pallets[i].popItem(items[j], nodeTorque, solDict, N, itemsDict)
 
-            counter2 = 0
-            for i, proc in enumerate(procs):
-                proc.join()
-                for bin in packers[i].bins:
-                    i = bin.ID
-                    for item in bin.unfitted_items:
-                        j = item.ID
-                        Y[i][j] = 0
-                        counter2 += 1
-                        pallets[i].popItem(items[j], nodeTorque, solDict, N, itemsDict)
-
+        if counter1 > 0:
             print(f"{100*counter2/counter1:.1f}% unfit items excluded from solution!")
 
-            nodeElapsed2 = time.perf_counter() - startNodeTime
+        nodeElapsed2 = time.perf_counter() - startNodeTime
 
-            # end ---- parallel solving the 3D packing for each pallet         
+        # end ---- parallel solving the 3D packing for each pallet         
 
-            # begin minRampDist
-            for p in pallets:
-                if p.Dest[k] == next.ID:
-                    beforeDict['value'] += rampDistCG - p.D # distance from the pallet to the ramp door
+        # begin minRampDist
+        for p in pallets:
+            if p.Dest[k] == next.ID:
+                beforeDict['value'] += rampDistCG - p.D # distance from the pallet to the ramp door
 
-            optcgcons.minRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque)
+        optcgcons.minRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque)
 
-            for p in pallets:
-                if p.Dest[k] == next.ID:
-                    afterDict['value'] += rampDistCG - p.D # distance from the pallet to the ramp door
-            # end minRampDist
+        for p in pallets:
+            if p.Dest[k] == next.ID:
+                afterDict['value'] += rampDistCG - p.D # distance from the pallet to the ramp door
+        # end minRampDist
 
         nodeScore = 0
         torque    = 0.0
@@ -236,10 +239,10 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
 
         epsilon = torque/cfg.maxTorque
 
-        if method == "GRB":
-            tour.score += max(ObjBound, nodeScore) # Gurobi linear relaxation
-        else:
-            tour.score += nodeScore
+        # if method == "GRB":
+        #     tour.score += max(ObjBound, nodeScore) # linear relaxation
+        # else:
+        tour.score += nodeScore
 
         tour.AvgVol    += nodeVol
         tour.AvgTorque += epsilon
@@ -309,15 +312,16 @@ if __name__ == "__main__":
     # scenarios = [1,2,3,4,5,6]
     scenarios = [6] # infeasible solutions with Shims............
 
-    surplus   = "data20"
-    # surplus   = "data50"
+    # surplus   = "data20"
+    surplus   = "data50"
     # surplus   = "data100"
 
-    # methods = ["Shims","mpShims","GRB"]  
+    methods = ["Shims","mpShims","CBC"]  
     
     # methods = ["Shims", "mpShims"]
     # methods = ["GRB"]
-    methods = ["Shims"]
+    methods = ["CBC"]
+    # methods = ["Shims"]
     # methods = ["mpShims"]
 
     # tipo = "KP"
