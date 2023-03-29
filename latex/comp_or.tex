@@ -315,7 +315,9 @@ As we are dealing with an extremely complex and diverse problem, we decided to e
 	
 	\item We considered a unique pallet type: the {\it 463L Master Pallet}, a common size platform for bundling and moving air cargo. It is the primary air cargo pallet for more than 70 Air Forces and many air transport companies. This pallet has a capacity of $4500 kg$ and $14.8 m^3$ (depending on the aircraft ceiling height), is equipped for locking into cargo aircraft rail systems, and includes tie-down rings to secure nets and cargo loads, which in total weighs $140 kg$. For more information, see {\tt www.463LPallet.com}.
 	
-	\item All items allocated on a pallet must have the same destination. A pallet which has not yet reached its destination may receive more items, although it is known that these operations of removing restraining nets increase handling time and the risk of improper delivery. We do not consider over-sized cargo in this work, but only cargoes that fit on these pallets.
+	\item All items allocated on a pallet must have the same destination. A pallet which has not yet reached its destination may receive more items, although it is known that these operations of removing restraining nets increase handling time and the risk of improper delivery.
+	
+	\item We do not consider over-sized cargo in this work, but only cargoes that fit on these pallets.
 	
 \end{itemize}
 
@@ -497,6 +499,7 @@ We accept the same assumptions as stated by \cite{MesquitaSanches2023}:
 		\midrule
 		max &  (items score sum) / (tour cost) of picked up and delivered items on a tour  \\
 		\midrule
+\multicolumn{2}{l}{--- from \cite{MesquitaSanches2023} ---}\\		
 s.t.    & Along a tour, the set of unvisited nodes is updated. \\
 		& In each node, an item may be included in at most one pallet.\\		
 		& In each node, consolidated items are composed of items with the same destination. \\
@@ -506,9 +509,10 @@ s.t.    & Along a tour, the set of unvisited nodes is updated. \\
 		& Only items destined for the remaining nodes can be loaded.  \\
 		& The lateral and longitudinal torques must be within the operational range of the aircraft.\\
 		& Weight and volume limitations of pallets must be respected.\\
-		& The total weight must be less than the aircraft payload or the total pallet capacity, whichever is the lowest.\\	
-		& {\bf The pallets destined for the next node of the tour should be put as near as possible to the cargo ramp door (our inclusion)}.\\
-		& {\bf The items allocated to each pallet should be submitted to a 3D packing procedure (our inclusion)}.\\				
+		& The total weight must be less than the aircraft payload or the total pallet capacity, whichever is the lowest.\\
+\multicolumn{2}{l}{--- our inclusion ---}\\
+s.t.    & Pallets destined for the next node should be put as near as possible to the ramp door.\\
+		& Items allocated to the pallet must fit on the pallet before consolidation.\\				
 		\midrule
 	\end{tabular}
 	\normalsize
@@ -927,7 +931,7 @@ $3^{st}$ - {\it Shims} set construction and best {\it Shims} selection.
 		
 		\For{$i \gets 1$ to $m$}
 		\State $proc_i \gets Greedy(p_i,\ N^{\pi_k},\ \pi(k),\ nodeTorque,\ G,\ limit,\ lock,\ ts )$   \label{mpShims:greedy}
-		\State $proc_i.start$
+		\State $proc_i.fork$
 		\EndFor
 		
 		\For{$i \gets 1$ to $m$}
@@ -938,7 +942,7 @@ $3^{st}$ - {\it Shims} set construction and best {\it Shims} selection.
 		
 		\For{$i \gets 1$ to $m$}
 		\State $proc_i \gets getBestShims(p_i,\ N^{\pi_k},\ \pi(k),\ nodeTorque,\ G,\ surplus,\ lock,\ ts )$ \label{mpShims:getBestShims}
-		\State $proc_i.start$
+		\State $proc_i.fork$
 		\EndFor
 		
 		\For{$i \gets 1$ to $m$}
@@ -1145,11 +1149,13 @@ The main logic of the 3D packing procedure ($3Dpacker$) is based on an approxima
 	\item[5] The first pivot in the empty pallet is always (0, 0, 0). When one item can be placed into multiple optimal pivot point, the placement selection module can help make a choice (best fit).
 \end{itemize}
 
-Let $n^i$ be the number of items assigned to pallet $i$ and $m$ the number of pallets.
+The algorithm $3Dpacker$ is implemented according to the mathematical model that follows:
+
+Let $n^i$ be the number of items assigned to pallet $i$ and $m$ the amount of pallets.
 
 Let $A_{j} = 1$ if item $t_j$ is assigned to the pallet, $A_{j}\ =\ 0$ otherwise, for $j \in \{1,\ 2,\ 3,\ ...,\ n^i\}$.
 
-Let $X_{ij} = 1$ if item $j$ was already assigned to pallet $i$ by {\it mpShims}, $X_{ij}\ =\ 0$ otherwise.
+Let $X_{ij} = 1$ if item $j$ was already assigned to pallet $i$ by the previous resolution, $X_{ij}\ =\ 0$ otherwise.
 
 Let $t_j.d,\ t_j.wh,\ t_j.h$ be parameters indicating the depth, width, and height of an item.
 
@@ -1182,7 +1188,7 @@ t_j.o^1 + t_j.o^2 + t_j.o^3 + t_j.o^4 + t_j.o^5 + t_j.o^6 \leq 1
 
 Equation \ref{eq:3dpacking1} minimizes the volume slack; equations \ref{eq:3dpacking2}, \ref{eq:3dpacking3}, and \ref{eq:3dpacking4} constrains the packing to the three dimensions; and \ref{eq:3dpacking5} guarantees that at most one orientation is chosen for the item.
 
-Algorithm \ref{alg:3dpacking} presents the multiprocessing solution method for 3D packing to be applied after {\it mpShims}, to guarantee that the item to be palletized actually fit into the pallet.
+Algorithm \ref{alg:3dpacking} presents the multiprocessing solution method for 3D packing to be applied to an existent solution, to guarantee that the item to be palletized actually fit into the pallet.
 
 \begin{algorithm}[H]
 	\caption{Multiprocessing 3D packing procedure}  \label{alg:3dpacking}
@@ -1197,7 +1203,7 @@ Algorithm \ref{alg:3dpacking} presents the multiprocessing solution method for 3
 		
 		\For{$i \gets 1$ to $m$}
 		\State $proc_i \gets 3Dpacker(p_i,\ N^{\pi_k}_i,\ \pi(k),\ G )$   \label{3dpacking:3}
-		\State $proc_i.start$
+		\State $proc_i.fork$ \Comment{pallet $p_i$ packing processes is forked}
 		\EndFor
 		
 		\For{$i \gets 1$ to $m$}
@@ -1212,7 +1218,7 @@ Algorithm \ref{alg:3dpacking} presents the multiprocessing solution method for 3
 	\end{algorithmic}
 \end{algorithm}
 
-According to line \ref{3dpacking:1}, this method receives an initial solution produced by {\it mpShims}, and according to line \ref{3dpacking:2}, each pallet has its own process.
+According to line \ref{3dpacking:1}, this method receives an initial solution produced by a previous resolution, and according to line \ref{3dpacking:2}, each pallet has its own process.
 
 In line \ref{3dpacking:3}, $N^{\pi_k}_i$ is the set of items previously assigned to pallet $i$ and the method $3Dpacker()$ conforms to equations \ref{eq:3dpacking1}, \ref{eq:3dpacking2}, \ref{eq:3dpacking3}, \ref{eq:3dpacking4}, and \ref{eq:3dpacking5}.
 
@@ -1289,7 +1295,7 @@ According to \cite[p.271]{Breshears2009}, a {\it Process} is the operating syste
 
 It is known that working concurrently opens up synchronization issues. But the {\it Multiprocessing} package ({\it mp}) offers both local and remote concurrency, effectively side-stepping the global interpreter lock by using sub-processes instead of threads. Because of this, the {\it Multiprocessing} module lets the programmer take full advantage of the fact that a machine has more than one processor, normally capable of 2 threads each.
 
-As in the larger aircraft the number of pallets is bigger than the number of threads available in a common handheld computer, for parallelization, we used the {\it Python Multiprocessing} package, which implements {\it process-based parallelism} or {\it parallel shared memory algorithm}. According to \cite{multiprocessing}, {\it Multiprocessing} is a package that supports spawning processes using an API similar to the {\it Python Threading} package.
+As in the larger aircraft the number of pallets is bigger than the number of threads available in a common handheld computer, for parallelization, we used the {\it Python Multiprocessing} package, which implements {\it process-based parallelism} or {\it parallel shared memory algorithm}. More details on {\it process-based parallelism} may be found in  \cite{multiprocessing}.
 
 
 \subsection{Results {\bf before} 3D packing}
@@ -1375,7 +1381,7 @@ Although the {\it Relaxed MIP solver} results are not always feasible, the multi
 \vspace{2.0mm}
 \begin{table}[H]
 	\centering
-	\caption{Volume surpluses, methods and scenarios results {\bf after} 3D packing}  \label{tab:results2}
+	\caption{Volume surpluses, methods and scenarios results {\bf after} 3D packing (3Dp)}  \label{tab:results2}
 	\footnotesize
 	\begin{tabular}{crcccccccc}
 		\toprule
@@ -1384,30 +1390,30 @@ Although the {\it Relaxed MIP solver} results are not always feasible, the multi
 		{\it surplus}    &{\it method}    & {\bf Results}      &{\bf 1}    &{\bf 2}    &{\bf 3}    &{\bf 4}    &{\bf 5}    &{\bf 6}    &{\bf Speedup} \\
 		\toprule
 		\multirow{7}{*}{$1.2$}&$Relaxed$  & $f$                &   11.47   &    7.24   &{\bf 10.78}&     12.06 &     12.97 &    12.44  &     0.95 \\%
-		&                       $MIP$     & {\it run time (s)} &     12     &     51    &     81    &     258   &      601  &     3161  &{\bf 1.15}\\% 	4164				
+		&                       $MIP+3Dp$     & {\it run time (s)} &     12     &     51    &     81    &     258   &      601  &     3161  &{\bf 1.15}\\% 	4164				
 		\cmidrule{2-10}		                       
-		&\multirow{2}{*}{ $Shims$}        & $f$                &    9.05   &   5.11    &   9.75    &   10.96   &   12.86   &   13.25   &     0.86 \\% 
+		&\multirow{2}{*}{ $Shims+3Dp$}        & $f$                &    9.05   &   5.11    &   9.75    &   10.96   &   12.86   &   13.25   &     0.86 \\% 
 		&                                 & {\it run time (s)} &     16    &     68    &     94    &    323    &    719    &    3549   &     1.00 \\% 	4769		
 		\cmidrule{2-10}		                       
-		&\multirow{2}{*}{ $mpShims$}      & $f$                &{\bf 12.14}&{\bf 7.29} &   10.36   &{\bf 12.63}&{\bf 14.04}&{\bf 13.92}&{\bf 0.99}\\% best 7080
+		&\multirow{2}{*}{ $mpShims+3Dp$}      & $f$                &{\bf 12.14}&{\bf 7.29} &   10.36   &{\bf 12.63}&{\bf 14.04}&{\bf 13.92}&{\bf 0.99}\\% best 7080
 		&                                 & {\it run time (s)} &     9     &     36    &     54    &     192   &     427   &    2118   &{\bf 1.70}\\%	2836	
 		\toprule		
 		\multirow{7}{*}{$1.5$}&$Relaxed$  & $f$                &     15.83 &{\bf 10.08}&{\bf 15.14}&{\bf 16.87}&     18.58 &     17.52 &     0.97 \\%  
-		&                      $MIP$      & {\it run time (s)} &    20     &     83    &     142   &     362   &     996   &     4741  &{\bf 1.22} \\% 6344					
+		&                      $MIP+3Dp$      & {\it run time (s)} &    20     &     83    &     142   &     362   &     996   &     4741  &{\bf 1.22} \\% 6344					
 		\cmidrule{2-10}		                       
-		&\multirow{2}{*}{ $Shims$}        & $f$                &   11.55   &   7.61    &   12.28   &   15.00   &   17.55   &   17.57   &     0.84  \\%  
+		&\multirow{2}{*}{ $Shims+3Dp$}        & $f$                &   11.55   &   7.61    &   12.28   &   15.00   &   17.55   &   17.57   &     0.84  \\%  
 		&                                 & {\it run time (s)} &    25     &    107    &     156   &    498    &    1217   &   5743    &     1.00  \\% 7746
 		\cmidrule{2-10}		                       
-		&\multirow{2}{*}{ $mpShims$}      & $f$                &{\bf 17.05}&   10.01   &   15.01   &   16.75   &{\bf 20.09}&{\bf 17.85}&{\bf 1.00} \\%   best 9708
+		&\multirow{2}{*}{ $mpShims+3Dp$}      & $f$                &{\bf 17.05}&   10.01   &   15.01   &   16.75   &{\bf 20.09}&{\bf 17.85}&{\bf 1.00} \\%   best 9708
 		&                                 & {\it run time (s)} &    18     &    64     &     101   &    351    &   828     &  3879     &     1.50  \\% 5421
 		\toprule
 		\multirow{7}{*}{$2.0$}&$Relaxed$  & $f$                &     23.73 &{\bf 15.23}&   21.96   &   24.22   &   26.69   &    24.29  &     0.99  \\%  
-		&                       $MIP$     & {\it run time (s)} &    28     &     99    &     185   &    648    &   1680    &   8774    &     1.00  \\% 11414					
+		&                       $MIP+3Dp$     & {\it run time (s)} &    28     &     99    &     185   &    648    &   1680    &   8774    &     1.00  \\% 11414					
 		\cmidrule{2-10}		                       
-		&\multirow{2}{*}{ $Shims$}        & $f$                &   16.28   &   10.93   &   18.16   &   22.35   &   25.12   &   24.53   &     0.85  \\%  
+		&\multirow{2}{*}{ $Shims+3Dp$}        & $f$                &   16.28   &   10.93   &   18.16   &   22.35   &   25.12   &   24.53   &     0.85  \\%  
 		&                                 & {\it run time (s)} &    37     &    141    &   196     &     653   &   1453    &   6851    &     1.22  \\% 9331
 		\cmidrule{2-10}		                       
-		&\multirow{2}{*}{ $mpShims$}      & $f$                &{\bf 24.52}&   15.18   &{\bf 21.99}&{\bf 24.61}&{\bf 26.94}&{\bf 24.83}&{\bf 1.00} \\% best 13812
+		&\multirow{2}{*}{ $mpShims+3Dp$}      & $f$                &{\bf 24.52}&   15.18   &{\bf 21.99}&{\bf 24.61}&{\bf 26.94}&{\bf 24.83}&{\bf 1.00} \\% best 13812
 		&                                 & {\it run time (s)} &    27     &    87     &   146     &    496    &   1080    &   5160    &     1.63  \\% 6996
 		\bottomrule	
 	\end{tabular}
@@ -1458,8 +1464,7 @@ In this work, we raised four hypotheses for improvements to the work of \cite{Me
 
 (2) The {\it Shims}' results may have been inferior in that of \cite{MesquitaSanches2023}; it could be that a sequential approach to pallet building may have lead to a premature stop due to the torque constraints. This hypothesis was confirmed as the results were improved by 5\% on average with the inclusion of a CG balancing integer programming procedure.
 
-(3) The procedure for 3D packing generated an unfit item rate of, on average, 17\% after {\it Shims} solutions, 13\% after {\it mpShims} solutions, and 9\% after the MIP solver solutions. 
-We are conscious that this unfit rate could be smaller if we had chosen \cite{PaquayLimbourgSchynsOliveira2018} approach, but as we are concerned with an operational application where the running time is crucial, we stick to faster approximate approaches like the {\it First Fit Decreasing} (first orientation that fits) and the {\it Best Fit} (best pivot point if more than one is available).
+(3) The procedure for 3D packing generated an unfit item rate of, on average, 13\%. We are conscious that this unfit rate could be smaller if we had chosen \cite{PaquayLimbourgSchynsOliveira2018} approach, but as we are concerned with an operational application where the running time is crucial, we stick to faster approximate approaches like the {\it First Fit Decreasing} (first orientation that fits) and the {\it Best Fit} (best pivot point if more than one is available).
 
 {\it mpShims} consider that, theoretically, all items selected for the pallets would fit. But, due to the variability in item dimensions, an actual complete fit is not possible, causing some unfit items to be excluded from the previous solution.
 

@@ -210,9 +210,10 @@
 \newblock \bibinfo{journal}{International Transactions in Operational Research}
   \bibinfo{volume}{23}, \bibinfo{pages}{187--213}.
 %Type = Misc
-\bibitem[{{Python}(2022)}]{multiprocessing}
-\bibinfo{author}{{Python}}, \bibinfo{year}{2022}.
-\newblock \bibinfo{title}{{Process-based parallelism}}.
+\bibitem[{{Python Software Foundation.}(2022)}]{multiprocessing}
+\bibinfo{author}{{Python Software Foundation.}}, \bibinfo{year}{2022}.
+\newblock \bibinfo{title}{{Python 3.10.10 documentation: Process-based
+  parallelism}}.
 \newblock \URLprefix
   \url{https://docs.python.org/3/library/multiprocessing.html}.
 %Type = Article
