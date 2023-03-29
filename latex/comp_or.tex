@@ -1342,7 +1342,7 @@ Note that, in Table \ref{tab:results} all $Relaxed\ MIP\ f$ value are italicized
         &                                 & {\it run time (s)} &     < 1   &     1     &     2     &     7     &   20      &  120      &  {\bf 1.70}\\% 
 		\toprule
 		\multirow{7}{*}{$2.0$}&$Relaxed$  & $f$                &{\it 24.56}&{\it 17.47}&{\it 25.19}&{\it 27.94}&{\it 29.90}&{\it 27.60}& -\\%  
-		&                       $MIP$     & {\it run time (s)} &     4     &     23    &    34     &   119     &     317      &           & -\\%							
+		&                       $MIP$     & {\it run time (s)} &     4     &     23    &    34     &   119     &     317      &   1762        & -\\%							
 		\cmidrule{2-10}		                       
 		&\multirow{2}{*}{ $Shims$}        & $f$                &    21.31  &{\bf 17.35}&   24.24   &{\bf 27.39}&{\bf 29.31}&{\bf 27.06}&{\bf 0.98}  \\%  best 15014
 		&                                 & {\it run time (s)} &     < 1   &     2     &     4     &     14    &     35    &   220     &  1.00 \\% 
@@ -1368,16 +1368,14 @@ After this inclusion {\it Shims} results surpassed that of {\it mpShims}. In mul
 
 \subsection{Results {\bf after} 3D packing}
 
-Table \ref{tab:results2} presents the results of the MIP solver compared to {\it Shims} and {\it mpShims}, after the post-optimization with the multiprocessing 3D packing.
+Table \ref{tab:results2} presents the results of the {\it Relaxed MIP solver} compared to {\it Shims} and {\it mpShims}, after the post-optimization with the multiprocessing 3D packing.
 
-Although the relaxed MIP solver results are not always feasible, the multiprocessing 3D packing turns them feasible regarding dimensions and weight. So, in Table \ref{tab:results2}, we considered it's results in the performance comparisons.
+Although the {\it Relaxed MIP solver} results are not always feasible, the multiprocessing 3D packing turns them feasible regarding dimensions and weight. So, in Table \ref{tab:results2}, we considered it's results in the performance comparisons.
 
 \vspace{2.0mm}
 \begin{table}[H]
 	\centering
-\color{blue}{	
 	\caption{Volume surpluses, methods and scenarios results {\bf after} 3D packing}  \label{tab:results2}
-}
 	\footnotesize
 	\begin{tabular}{crcccccccc}
 		\toprule
@@ -1386,7 +1384,7 @@ Although the relaxed MIP solver results are not always feasible, the multiproces
 		{\it surplus}    &{\it method}    & {\bf Results}      &{\bf 1}    &{\bf 2}    &{\bf 3}    &{\bf 4}    &{\bf 5}    &{\bf 6}    &{\bf Speedup} \\
 		\toprule
 		\multirow{7}{*}{$1.2$}&$Relaxed$  & $f$                &   11.47   &    7.24   &{\bf 10.78}&     12.06 &     12.97 &    12.44  &     0.95 \\%
-		&                       $MIP$     & {\it run time (s)} &     6     &     25    &     41    &     158   &      401  &     2161  &{\bf 1.70}\\% 2792					
+		&                       $MIP$     & {\it run time (s)} &     12     &     51    &     81    &     258   &      601  &     3161  &{\bf 1.15}\\% 	4164				
 		\cmidrule{2-10}		                       
 		&\multirow{2}{*}{ $Shims$}        & $f$                &    9.05   &   5.11    &   9.75    &   10.96   &   12.86   &   13.25   &     0.86 \\% 
 		&                                 & {\it run time (s)} &     16    &     68    &     94    &    323    &    719    &    3549   &     1.00 \\% 	4769		
@@ -1395,29 +1393,32 @@ Although the relaxed MIP solver results are not always feasible, the multiproces
 		&                                 & {\it run time (s)} &     9     &     36    &     54    &     192   &     427   &    2118   &{\bf 1.70}\\%	2836	
 		\toprule		
 		\multirow{7}{*}{$1.5$}&$Relaxed$  & $f$                &     15.83 &{\bf 10.08}&{\bf 15.14}&{\bf 16.87}&     18.58 &     17.52 &     0.97 \\%  
-		&                      $MIP$      & {\it run time (s)} &    10     &     43    &     72    &     262   &     696   &     3741  &{\bf 1.60} \\% 4824					
+		&                      $MIP$      & {\it run time (s)} &    20     &     83    &     142   &     362   &     996   &     4741  &{\bf 1.22} \\% 6344					
 		\cmidrule{2-10}		                       
-		&\multirow{2}{*}{ $Shims$}        & $f$                &   11.55   &   7.61    &   12.28   &   15.00   &   17.55   &   17.57   &  0.84  \\%  
-		&                                 & {\it run time (s)} &    25     &    107    &     156   &    498    &    1217   &   5743    &  1.00 \\% 7746
+		&\multirow{2}{*}{ $Shims$}        & $f$                &   11.55   &   7.61    &   12.28   &   15.00   &   17.55   &   17.57   &     0.84  \\%  
+		&                                 & {\it run time (s)} &    25     &    107    &     156   &    498    &    1217   &   5743    &     1.00  \\% 7746
 		\cmidrule{2-10}		                       
 		&\multirow{2}{*}{ $mpShims$}      & $f$                &{\bf 17.05}&   10.01   &   15.01   &   16.75   &{\bf 20.09}&{\bf 17.85}&{\bf 1.00} \\%   best 9708
-		&                                 & {\it run time (s)} &    18     &    64     &     101   &    351    &   828     &  3879     &     1.50\\% 5421
+		&                                 & {\it run time (s)} &    18     &    64     &     101   &    351    &   828     &  3879     &     1.50  \\% 5421
 		\toprule
-		\multirow{7}{*}{$2.0$}&$Relaxed$  & $f$                &     23.73 &{\bf 15.23}&   21.96   &   24.22   &   26.69   &           &  {\bf 1.00} \\%  
-		&                       $MIP$     & {\it run time (s)} &    14     &     59    &     95    &    348    &   880     &         &  1.00 \\% 					
+		\multirow{7}{*}{$2.0$}&$Relaxed$  & $f$                &     23.73 &{\bf 15.23}&   21.96   &   24.22   &   26.69   &    24.29  &     0.99  \\%  
+		&                       $MIP$     & {\it run time (s)} &    28     &     99    &     185   &    648    &   1680    &   8774    &     1.00  \\% 11414					
 		\cmidrule{2-10}		                       
-		&\multirow{2}{*}{ $Shims$}        & $f$                &   16.28   &   10.93   &   18.16   &   22.35   &   25.12   &   24.53    &   0.96  \\%  
-		&                                 & {\it run time (s)} &    37     &    141    &   196     &     653   &   1453    &   6851     &  1.00 \\% 
+		&\multirow{2}{*}{ $Shims$}        & $f$                &   16.28   &   10.93   &   18.16   &   22.35   &   25.12   &   24.53   &     0.85  \\%  
+		&                                 & {\it run time (s)} &    37     &    141    &   196     &     653   &   1453    &   6851    &     1.22  \\% 9331
 		\cmidrule{2-10}		                       
-		&\multirow{2}{*}{ $mpShims$}      & $f$                &{\bf 24.52}&   15.18   &{\bf 21.99}&{\bf 24.61}&{\bf 26.94}&   24.83    &  0.94  \\% 
-		&                                 & {\it run time (s)} &    27     &    87     &   146     &    496    &   1080    &   5160     &  {\bf 1.70}\\% 
+		&\multirow{2}{*}{ $mpShims$}      & $f$                &{\bf 24.52}&   15.18   &{\bf 21.99}&{\bf 24.61}&{\bf 26.94}&{\bf 24.83}&{\bf 1.00} \\% best 13812
+		&                                 & {\it run time (s)} &    27     &    87     &   146     &    496    &   1080    &   5160    &     1.63  \\% 6996
 		\bottomrule	
 	\end{tabular}
 	\normalsize
 \end{table}
 
+The average value of $f$ obtained by {\it mpShims} was 0.997, followed by the {\it Relaxed MIP} with 0.971.  {\it Shims} obtained 0.851, on average.
 
+As to the performance, the average {\bf Speedup} obtained by {\it mpShims} was 1.61, followed by the {\it Relaxed MIP} with 1.12. {\it Shims} reached 1.07, on average.
 
+So, in terms of quality and speed, {\it mpShims} with the {\it Multiprocessing 3D packing} was the best method to solve the ACLP-RPDP.
 
 \subsection{Results on the minimization of the unloading costs}
 \label{improvement}

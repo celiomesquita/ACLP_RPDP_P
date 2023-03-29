@@ -310,7 +310,7 @@ if __name__ == "__main__":
     plot = False
 
     # scenarios = [1,2,3,4,5,6]
-    scenarios = [2,3,4,5,6] # infeasible solutions with Shims............
+    scenarios = [2,3,4,5,6] # 
 
     # surplus   = "data20"
     # surplus   = "data50"
