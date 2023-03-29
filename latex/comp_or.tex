@@ -919,7 +919,7 @@ $3^{st}$ - {\it Shims} set construction and best {\it Shims} selection.
 		
 		\State $nodeTorque \gets 0$
 		
-		\State $ts \gets 1.2$ \Comment{torque surplus} \label{mpShims:ts}
+		\State $ts \gets 1.7$ \Comment{torque surplus} \label{mpShims:ts}
 		
 		\State $lock \gets$ multiprocessing lock  \label{mpShims:lock} \Comment{avoid race condition}
 		
@@ -959,7 +959,7 @@ Follow the comments on Algorithm \ref{alg:mpShims}:
 
 Line \ref{mpShims:g1} the initial solution comes with some consolidated on board, a bipartite graph between pallets and consolidated.
 
-Line \ref{mpShims:ts} defines the torque surplus ($ts$). For the $Greedy$ phase, the solution may generate temporary torque unfeasible solutions. We raised the Hypothesis (2) that, in sequential mode, where one pallet is built at a time, torque constraints may be more restrictive than volume or weight constraints, which could stop the palletization process earlier, fostering a solution that may be not as good as it could be. So, we decided to extend torque limit and balance cargo before the next {\it Shims} phase to allow more room for pallet fulfillment.
+Line \ref{mpShims:ts} defines the torque surplus ($ts$). For the $Greedy$ phase, the solution may generate temporary torque unfeasible solutions. We raised the Hypothesis (2) that, in sequential mode, where one pallet is built at a time, torque constraints may be more restrictive than volume or weight constraints, which could stop the palletization process earlier, fostering a solution that may be not as good as it could be. So, we decided to extend torque limit and balance cargo before the next {\it Shims} phase to allow more room for pallet fulfillment. The value $1.7$ was determined by the {\it iRace} tool developed by \cite{LopezIbanezManuel2016}.
 
 Line \ref{mpShims:lock} creates a lock feature for shared data among processes to avoid race condition.
 
@@ -967,7 +967,7 @@ Line \ref{mpShims:greedy} calls the greedy method which updates $p_i$, $N^{\pi_k
 
 Line \ref{mpShims:join1} wait for all $Greedy$ processes to finish.
 
-Line \ref{mpShims:minCGdev} calls the $minCGdev()$ integer programming method (Subsection \ref{subsection:second_phase}) which updates the $nodeTorque$ and $G$. $minCGdev()$ minimizes the CG deviation, bringing it back to its operational range. A proper value for $ts$ must be empirically found to guarantee this intent (the {\it iRace} tool (\cite{LopezIbanezManuel2016}) is good for this value determination).
+Line \ref{mpShims:minCGdev} calls the $minCGdev()$ integer programming method (Subsection \ref{subsection:second_phase}) which updates the $nodeTorque$ and $G$. $minCGdev()$ minimizes the CG deviation, bringing it back to its operational range. 
 
 Line \ref{mpShims:getBestShims} calls the $getBestShims()$ method which updates $p_i$, $N^{\pi_k}$, $nodeTorque$, and $G$.
 
@@ -1298,15 +1298,13 @@ We ran Algorithm \ref{alg:main} in the 6 scenarios described in Table \ref{tab:s
 
 In generating the items in each node, we consider 3 values for the parameter ${\it surplus}$. The results obtained for the function $f$, with the corresponding run time in seconds, are shown in Tables \ref{tab:results} (${\it surplus} = 1.2$, ${\it surplus} = 1.5$, and ${\it surplus} = 2.0$).
 
-For each $method$, $scenario$ and $surplus$, 7 different instances were generated. Therefore, 126 tests (6 scenarios $\times$ 3 volumes $\times$ 7 instances) were performed for each method. 
-
 The average tour values were presented for $f$ and, for the run time, the worst result obtained. To facilitate the comparison between the methods, we added a last column in these tables, where two values are indicated:
 \begin{itemize}
 	\item {\bf Normalized}: value between 0 and 1, which corresponds to the ratio between the sum of $f$\/ values obtained by the method in all scenarios and the sum of the best values obtained among all methods in all scenarios. The higher the value of {\bf Normalized}, the closer the method approached the best solutions found.
-	\item {\bf Speedup}: ratio of the sums of the worst run times of all scenarios and the sum of the method run times in all scenarios. The method with the highest {\bf Speed-up}\/ is the fastest.
+	\item {\bf Speedup}: ratio of the sums of the worst run times of all scenarios and the sum of the method run times in all scenarios. The method with the highest {\bf Speedup}\/ is the fastest.
 \end{itemize}
 
-In each $scenario$, we indicate in bold the best value of $f$\/ found. In each table, we also indicate in bold the best {\bf Normalized}\/ and {\bf Speed-up}\/ values.
+In each $scenario$, we indicate in bold the best value of $f$\/ found. In each table, we also indicate in bold the best {\bf Normalized}\/ and {\bf Speedup}\/ values.
 
 Note that, in Table \ref{tab:results} all $Relaxed\ MIP\ f$ value are italicized to indicate that these values may not be optimal or feasible as the decision variables are not integers.
 
@@ -1365,6 +1363,8 @@ We solved all scenarios and instances with a MIP solver in a relaxed linear mode
 We confirmed the hypothesis raised in \ref{hypotheses} and in line \ref{mpShims:minCGdev} of Algorithm \ref{alg:mpShims} that, in sequential mode, where one pallet is built at a time, torque constraints could be more restrictive than volume or weight constraints, which could stop the palletization process earlier, yielding a solution that may be not as good as it could be. This integer programming procedure inclusion noticeably improved all {\it Shims} results.
 
 After this inclusion {\it Shims} results surpassed that of {\it mpShims}. In multiprocessing mode ({\it mpShims}) this inclusion (line \ref{mpShims:minCGdev}) made a negligible difference.
+
+
 
 \subsection{Results {\bf after} 3D packing}
 
@@ -1458,15 +1458,21 @@ In this work, we raised four hypotheses for improvements to the work of \cite{Me
 
 (2) The {\it Shims}' results may have been inferior in that of \cite{MesquitaSanches2023}; it could be that a sequential approach to pallet building may have lead to a premature stop due to the torque constraints. This hypothesis was confirmed as the results were improved by 5\% on average with the inclusion of a CG balancing integer programming procedure.
 
-(3) The procedure for 3-D packing generated an unfit item rate of, on average, 17\% after {\it Shims} solutions, 13\% after {\it mpShims} solutions, and 9\% after the MIP solver solutions. 
+(3) The procedure for 3D packing generated an unfit item rate of, on average, 17\% after {\it Shims} solutions, 13\% after {\it mpShims} solutions, and 9\% after the MIP solver solutions. 
 We are conscious that this unfit rate could be smaller if we had chosen \cite{PaquayLimbourgSchynsOliveira2018} approach, but as we are concerned with an operational application where the running time is crucial, we stick to faster approximate approaches like the {\it First Fit Decreasing} (first orientation that fits) and the {\it Best Fit} (best pivot point if more than one is available).
 
 {\it mpShims} consider that, theoretically, all items selected for the pallets would fit. But, due to the variability in item dimensions, an actual complete fit is not possible, causing some unfit items to be excluded from the previous solution.
 
-This solution phase was a multiprocessing 3-D packing with each pallet as a process, which decreased this phase's run time by approximate a $n-1$ factor where $n$ is the number of processes. This was possible because each packing process is completely independent; there is no multiprocessing shared memory. It is also important to highlight that, after the items were excluded, the CG deviation was kept within its operational and feasible range.
+This solution phase was a multiprocessing 3D packing with each pallet as a process, which decreased this phase's run time by approximate a $n-1$ factor where $n$ is the number of processes. This was possible because each packing process is completely independent; there is no multiprocessing shared memory. It is also important to highlight that, after the items were excluded, the CG deviation was kept within its operational and feasible range.
+
+It is important to  emphasize that, as the {\it Multiprocessing 3D packing} is a post-optimization procedure, it benefited all three resolution methods.
 
 (4) The distances to move pallets on unloading in the next node could be minimized to benefit ground handling costs.
 This hypothesis was confirmed by the results on Table \ref{tab:ground}.
+
+
+
+Another important fact is the inversion of quality results between {\it Shims} and {\it mpShims}. In Table \ref{tab:results}, {\it Shims} was better, but, in Table \ref{tab:results2} (with the inclusion of the {\it Multiprocessing 3D packing}), {\it mpShims} surpassed {\it Shims}' results. The rationale behind this is that .....
 
 \section{Conclusions}
 \label{sec7}
@@ -1477,7 +1483,7 @@ We converted {\it Shims} into a process-based parallel computing heuristic, whic
 
 We also carried out 126 experiments with each method on synthetic data based on real data from the {\it Brazilian Air Force} transportation history.
 
-Other important contributions are that we verified four hypotheses: Computer parallelism improved {\it Shims} performance; the intermediate integer programming procedure added to {\it Shims} algorithm enhanced it's results; a procedure for 3-D packing was turned possible for operational use due to a process-based parallel computing heuristic, and the integer programming procedure to minimize pallets' travel in the cargo bay was successful.
+Other important contributions are that we verified four hypotheses: Computer parallelism improved {\it Shims} performance; the intermediate integer programming procedure added to {\it Shims} algorithm enhanced it's results; a procedure for 3D packing was turned possible for operational use due to a process-based parallel computing heuristic, and the integer programming procedure to minimize pallets' travel in the cargo bay was successful.
 
 And another important contribution is that we employed the {\it iRace} package to fine tune the {\it mpShims} volume threshold and torque surplus parameters, guaranteeing the best possible performance for the instances under training and testing.
 
