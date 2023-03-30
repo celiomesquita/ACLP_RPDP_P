@@ -8,13 +8,11 @@ import math
 import mpShims
 import mpACO
 import optcgcons
-# import mipGRB
+import mipGRB
 import mipCBC
 from plots import TTT
 
-# from py3Djanet.packer import Packer
-# from py3Djanet.methods import Item
-# from py3Djanet.bin import Bin
+# from py3Djanet import Packer, Item, Bin
 
 from py3Druiz import Packer, Item, Bin
 
@@ -144,8 +142,8 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
         if method == "ACO":       
             mpACO.Solve(  pallets, items, cfg, k, volThreshold, secBreak, "s", nodeTorque, solDict, itemsDict) 
 
-        # if method == "GRB":
-        #     modStatus, ObjBound = mipGRB.Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict) 
+        if method == "GRB":
+            modStatus, ObjBound = mipGRB.Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict) 
 
         if method == "CBC":
             modStatus, ObjBound = mipCBC.Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict) 
@@ -310,16 +308,16 @@ if __name__ == "__main__":
     plot = False
 
     # scenarios = [1,2,3,4,5,6]
-    scenarios = [2,3,4,5,6] # 
+    scenarios = [1] # 
 
-    # surplus   = "data20"
+    surplus   = "data20"
     # surplus   = "data50"
-    surplus   = "data100"
+    # surplus   = "data100"
 
-    methods = ["Shims","mpShims","CBC"]  
+    # methods = ["Shims","mpShims","CBC"]  
     
     # methods = ["Shims", "mpShims"]
-    # methods = ["GRB"]
+    methods = ["GRB"]
     # methods = ["CBC"]
     # methods = ["Shims"]
     # methods = ["mpShims"]
@@ -366,7 +364,7 @@ if __name__ == "__main__":
                     instances = [1,2,3,4]
                 if scenario == 6:
                     instances = [1,2,3]                    
-                # instances = [1]
+                instances = [1]
 
                 cfg = common.Config(scenario)
                 

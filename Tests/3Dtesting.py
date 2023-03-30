@@ -1,6 +1,6 @@
-from py3Druiz import Packer as pr
-from py3Druiz import Bin as br
-from py3Druiz import Item as ir
+# from py3Druiz import Packer as pr
+# from py3Druiz import Bin as br
+# from py3Druiz import Item as ir
 
 from py3Djanet.packer import Packer as pj
 from py3Djanet.methods import Item as ij

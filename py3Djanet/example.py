@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-from packer import Packer
+from py3Djanet.packer import Packer
 from methods import Item
 from bin import Bin
 
