@@ -1003,27 +1003,27 @@ Algorithm \ref{alg:greedy} generates a greedy allocation of the items available 
 		\State $\tau^{\pi_k} \gets 0$	 \Comment{aircraft torque in node $\pi_k$}	
 		
 		\For{$q \gets 1$ {\bf to} $m$}
-		\If{$(p_i, a_q^{\pi_k}) \in E_Q^{\pi_k}$} 
-		\State $volume_q \gets volume_q + a_q^{\pi_k}.v$ 
-		\EndIf		
+			\If{$(p_i, a_q^{\pi_k}) \in E_Q^{\pi_k}$} 
+				\State $volume_q \gets volume_q + a_q^{\pi_k}.v$ 
+			\EndIf		
 		\EndFor
 		
 		\State $\tau_{max} \gets maxW \times limit^{CG}_{long}$ \Comment{maximum aircraft torque}
 		
 		\For {each $e_{ij}^{\pi_k}$ in non-ascending order of $\theta^{\pi_k}_{ij}$}
 		
-		\State $\Delta\tau \gets t_j.w \times p_i.D$
-		
-		\State $\tau_{new} \gets | \tau^{\pi_k} + \Delta\tau |$
-		
-		\If{ ($E_N^{\pi_k} \cup \{e_{ij}^{\pi_k}\}$ is feasible) {\bf and} ($volume_i \leq p_i.V \times limit$) {\bf and} ($\tau_{new} \leq \tau_{max} \times ts$ )} \label{greedy:ts}
-				 
-			\State $E_N^{\pi_k} \gets E_N^{\pi_k} \cup \{e_{ij}^{\pi_k}\}$ 
-			\State $volume_i \gets volume_i + t_j^{\pi_k}.v$
-			\State $\eta_1^{\ i} \gets \eta_1^{\ i} + 1$ 
-			\State $\tau^{\pi_k} \gets \tau^{\pi_k} + \Delta\tau$
+			\State $\Delta\tau \gets t_j.w \times p_i.D$
 			
-		\EndIf
+			\State $\tau_{new} \gets | \tau^{\pi_k} + \Delta\tau |$
+			
+			\If{ ($E_N^{\pi_k} \cup \{e_{ij}^{\pi_k}\}$ is feasible) {\bf and} ($volume_i \leq p_i.V \times limit$) {\bf and} ($\tau_{new} \leq \tau_{max} \times ts$ )} \label{greedy:ts}
+					 
+				\State $E_N^{\pi_k} \gets E_N^{\pi_k} \cup \{e_{ij}^{\pi_k}\}$ 
+				\State $volume_i \gets volume_i + t_j^{\pi_k}.v$
+				\State $\eta_1^{\ i} \gets \eta_1^{\ i} + 1$ 
+				\State $\tau^{\pi_k} \gets \tau^{\pi_k} + \Delta\tau$
+				
+			\EndIf
 		\EndFor \Comment{return the partial solution and the last item indexes array }
 		
 		\Return $G(V^{\pi_k}, E_N^{\pi_k} \cup E_Q^{\pi_k}),\ \eta_1$

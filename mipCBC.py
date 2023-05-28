@@ -1,8 +1,8 @@
 
 # include the MILP Solver: https://www.python-mip.com/
-from mip import Model, xsum, maximize, BINARY, CBC, CONTINUOUS
+from mip import Model, xsum, maximize, BINARY, CBC, CONTINUOUS, INTEGER
 
-def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
+def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict, K):
 
     # itemsDict to control items inclusion feasibility
 
@@ -19,9 +19,15 @@ def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
 
     mod = Model(solver_name=CBC)
     mod.verbose = 0 # hide messages
-    
+    mod.max_seconds = secBreak
+
+    # Z = mod.add_var(name=f"Z", var_type=INTEGER)
+   
     # decision matrix for which items will be put in which pallet in node "k"         
-    X = [ [ mod.add_var(name=f"X[{i}],[{j}]", var_type=CONTINUOUS) for j in set_N ] for i in set_M ]   
+    # X = [ [ mod.add_var(name=f"X[{i}],[{j}]", var_type=CONTINUOUS) for j in set_N ] for i in set_M ]   
+    X = [ [ mod.add_var(name=f"X[{i}],[{j}]", var_type=BINARY) for j in set_N ] for i in set_M ] 
+
+    Z = [ [ mod.add_var(name=f"Z[{a}],[{b}]", var_type=INTEGER) for b in set_N ] for a in set_N ] 
 
     mod.objective = maximize( xsum( X[i][j] * items[j].S for i in set_M for j in set_N ) )
 
@@ -48,11 +54,37 @@ def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
                 X[i][j] <= X[i][j] * ( items[j].To - pallets[i].Dest[k] + 1 )
             )
 
+
+# As long as variables X and Y you want to multiply are binaries, you might introduce a new binary variable Z and
+# add constraints: Z <= X, Z <= Y and Z >= X + Y - 1. That way, Z = X * Y. You can then use Z in your equations.
+
+        # for a in set_N:
+        #     for b in set_N:
+
+        #         if a != b:
+
+        #             mod.add_constr(
+        #                 Z[a][b] <= X[i][a]
+        #             )
+        #             mod.add_constr(
+        #                 Z[a][b] <= X[i][b]
+        #             )
+        #             mod.add_constr(
+        #                 Z[a][b] >= X[i][a] + X[i][b] - 1
+        #             )                    
+
+        #             mod.add_constr(
+        #                 items[a].To - items[b].To >= -K * ( 1 - Z[a][b] )
+        #             )
+        #             mod.add_constr(
+        #                 items[a].To - items[b].To <=  K * ( 1 - Z[a][b] )
+        #             )
+
         # Pallet weight constraint                      PCW: pallet current weight
         itemsWeights[i] = xsum(X[i][j] * items[j].W  for j in set_N)
-        # mod.addConstr(
-        #     itemsWeights[i] + pallets[i].PCW <= pallets[i].W
-        # )
+        mod.add_constr(
+            itemsWeights[i] + pallets[i].PCW <= pallets[i].W
+        )
 
         # Pallet volume constraint
         itemsVolumes[i] = xsum(X[i][j] * items[j].V  for j in set_N)
@@ -63,7 +95,7 @@ def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
         # for torque calculation
         palletWeights[i] = pallets[i].PCW + 140 + itemsWeights[i]
 
-    # the final torque must be between minus maxTorque and maxTorqu
+    # the final torque must be between minus maxTorque and maxTorque
 
     sumTorques = xsum(pallets[i].D * palletWeights[i] for i in set_M)
     mod.add_constr(

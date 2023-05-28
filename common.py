@@ -341,6 +341,7 @@ def loadNodeCons(surplus, scenario, instance, pi, node, id):
 def loadNodeItems(scenario, instance, node, unatended, surplus): # unatended, future nodes
     """
     Load this node to unnatended items attributes
+    Items destined outside the rest of the flight plan will not be loaded (13 and 14).
     """
 
     fname = f"{surplus}/scenario_{scenario}/instance_{instance}/items.txt"

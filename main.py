@@ -145,8 +145,8 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
         if method == "GRB":
             modStatus, ObjBound = mipGRB.Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict) 
 
-        if method == "CBC":
-            modStatus, ObjBound = mipCBC.Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict) 
+        if method == "CBC": # new formulation
+            modStatus, ObjBound = mipCBC.Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict, len(tour.nodes)) 
 
         if modStatus == 2: # 2: optimal
             numOptDict["numOpt"] += 1
@@ -157,50 +157,50 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
         Y = np.reshape(solDict["solMatrix"], (-1, N)) # N number of items (columns)
        
         # begin ---- parallel solving the 3D packing for each pallet  
-        procs   = [None for _ in pallets]
-        packers = [None for _ in pallets]
-        counter1 = 0
-        for i, row in enumerate(Y):
+        # procs   = [None for _ in pallets]
+        # packers = [None for _ in pallets]
+        # counter1 = 0
+        # for i, row in enumerate(Y):
 
-            packers[i] = Packer()
-            packers[i].add_bin( Bin(f'pallet{i}', pallets[i].w, pallets[i].h, pallets[i].d, pallets[i].W, i) )
+        #     packers[i] = Packer()
+        #     packers[i].add_bin( Bin(f'pallet{i}', pallets[i].w, pallets[i].h, pallets[i].d, pallets[i].W, i) )
             
-            for j, X_ij in enumerate(row):
-                if X_ij:
-                    packers[i].add_item(Item(f'item{j}', items[j].w, items[j].h, items[j].d, 0, j))
-                    counter1 += 1
+        #     for j, X_ij in enumerate(row):
+        #         if X_ij:
+        #             packers[i].add_item(Item(f'item{j}', items[j].w, items[j].h, items[j].d, 0, j))
+        #             counter1 += 1
             
-            procs[i] = mp.Process( target=packers[i].pack() )
-            procs[i].start()
+        #     procs[i] = mp.Process( target=packers[i].pack() )
+        #     procs[i].start()
 
-        counter2 = 0
-        for i, proc in enumerate(procs):
-            proc.join()
-            for bin in packers[i].bins:
-                i = bin.ID
-                for item in bin.unfitted_items:
-                    j = item.ID
-                    Y[i][j] = 0
-                    counter2 += 1
-                    pallets[i].popItem(items[j], nodeTorque, solDict, N, itemsDict)
+        # counter2 = 0
+        # for i, proc in enumerate(procs):
+        #     proc.join()
+        #     for bin in packers[i].bins:
+        #         i = bin.ID
+        #         for item in bin.unfitted_items:
+        #             j = item.ID
+        #             Y[i][j] = 0
+        #             counter2 += 1
+        #             pallets[i].popItem(items[j], nodeTorque, solDict, N, itemsDict)
 
-        if counter1 > 0:
-            print(f"{100*counter2/counter1:.1f}% unfit items excluded from solution!")
+        # if counter1 > 0:
+        #     print(f"{100*counter2/counter1:.1f}% unfit items excluded from solution!")
 
         nodeElapsed2 = time.perf_counter() - startNodeTime
 
         # end ---- parallel solving the 3D packing for each pallet         
 
         # begin minRampDist
-        for p in pallets:
-            if p.Dest[k] == next.ID:
-                beforeDict['value'] += rampDistCG - p.D # distance from the pallet to the ramp door
+        # for p in pallets:
+        #     if p.Dest[k] == next.ID:
+        #         beforeDict['value'] += rampDistCG - p.D # distance from the pallet to the ramp door
 
-        optcgcons.minRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque)
+        # optcgcons.minRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque)
 
-        for p in pallets:
-            if p.Dest[k] == next.ID:
-                afterDict['value'] += rampDistCG - p.D # distance from the pallet to the ramp door
+        # for p in pallets:
+        #     if p.Dest[k] == next.ID:
+        #         afterDict['value'] += rampDistCG - p.D # distance from the pallet to the ramp door
         # end minRampDist
 
         nodeScore = 0
@@ -307,19 +307,19 @@ if __name__ == "__main__":
     # plot = True
     plot = False
 
-    # scenarios = [1,2,3,4,5,6]
-    scenarios = [1] # 
+    scenarios = [2,3,4,5,6]
+    # scenarios = [6] # 
 
-    surplus   = "data20"
+    # surplus   = "data20"
     # surplus   = "data50"
-    # surplus   = "data100"
+    surplus   = "data100"
 
     # methods = ["Shims","mpShims","CBC"]  
     
     # methods = ["Shims", "mpShims"]
-    methods = ["GRB"]
+    # methods = ["GRB"]
     # methods = ["CBC"]
-    # methods = ["Shims"]
+    methods = ["Shims"]
     # methods = ["mpShims"]
 
     # tipo = "KP"
@@ -349,7 +349,7 @@ if __name__ == "__main__":
         dists = common.loadDistances("params/distances.txt")
         costs = [[0.0 for _ in dists] for _ in dists]
 
-        secBreak     = 60.0 # second - limit for Gurobi
+        secBreak     = 5.0 # second - limit for Gurobi or CBC
         volThreshold = 0.92 # 0.92 best for scenario 1
 
 
@@ -363,8 +363,9 @@ if __name__ == "__main__":
                 if scenario == 5:
                     instances = [1,2,3,4]
                 if scenario == 6:
-                    instances = [1,2,3]                    
-                instances = [1]
+                    instances = [1,2,3] 
+
+                # instances = [1]
 
                 cfg = common.Config(scenario)
                 
@@ -391,7 +392,8 @@ if __name__ == "__main__":
 
                 instanceTime = 0.
                 instanceTime2 = 0. # with 3D packing
-                instanceSC   = 0.
+                instanceSC   = 0. # minimum cost score/cost relation
+                leastSC      = 0.
                 worstTime    = 0
 
                 numOptDict = {"numOpt":0}
@@ -401,6 +403,7 @@ if __name__ == "__main__":
                 for instance in instances:
 
                     bestSC = 0. # maximum score/cost relation
+                    # leastSC = 0. # minimum cost score/cost relation
                     bestAV = 0.
                     bestAT = 0.
                     tours = common.getTours(cfg.numNodes-1, costs, perc)
@@ -410,7 +413,8 @@ if __name__ == "__main__":
                     searchTime2 = 0 # with 3D packing
                     for pi, tour in enumerate(tours):
 
-                        # if pi == 1:
+                        # if pi > 0: # solve only the least cost tour
+                        #     break
 
                         tour.elapsed = 0
                         tour.elapsed2 = 0 # with 3D packing
@@ -438,10 +442,13 @@ if __name__ == "__main__":
 
                         if tour.elapsed > worstTime:
                             worstTime = tour.elapsed
+
+                        if pi == 0:
+                            leastSC += tourSC
                     
-                    instanceTime += searchTime
+                    instanceTime  += searchTime
                     instanceTime2 += searchTime2
-                    instanceSC   += bestSC
+                    instanceSC    += bestSC
 
                     # for plotting
                     # writeResults(method, scenario, surplus, f"{instanceSC:.2f}", f"{tour.elapsed:.2f}")
@@ -468,7 +475,7 @@ if __name__ == "__main__":
                 avgTime  = math.ceil(instanceTime/numInst)
                 avgTime2 = math.ceil(instanceTime2/numInst)
 
-                str = f"{instanceSC/numInst:.2f}\t {avgTime:.0f}\t {avgTime2:.0f}\t {worstTime:.1f}\t {bestAV:.2f}\t {bestAT:.2f}\t {numOptDict['numOpt']:.1f}\t {beforeDict['value']:.1f} & {afterDict['value']:.1f} & {percent:.1f}\n"
+                str = f"{leastSC/numInst:.2f}\t {instanceSC/numInst:.2f}\t {avgTime:.0f}\t {avgTime2:.0f}\t {worstTime:.1f}\t {bestAV:.2f}\t {bestAT:.2f}\t {numOptDict['numOpt']:.1f}\t {beforeDict['value']:.1f} & {afterDict['value']:.1f} & {percent:.1f}\n"
                 # instances average
                 writeAvgResults(method, scenario, str, surplus)
                 print(f"\n{str}")
