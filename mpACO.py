@@ -16,30 +16,7 @@ import copy
 
 import common
 
-def copyPallets(pallets):
-    array = [None for _ in pallets]
-    for i, p in enumerate(pallets):
-        array[i] = common.Pallet(p.ID, p.D, p.V, p.W, 1)
-        array[i].Dest = p.Dest
-        array[i].PCW  = p.PCW 
-        array[i].PCV  = p.PCV
-        array[i].PCS  = p.PCS
-    return array
      
-def copySolDict(solDict):
-    N_M = len(solDict["solMatrix"])
-    solMatrix = mp.Array('i', [0 for _ in np.arange(N_M)] ) 
-    for pos, v in enumerate(solDict["solMatrix"]):
-        solMatrix[pos] = v
-    return dict(solMatrix=solMatrix)
-
-def copyItemsDict(itemsDict):
-    N = len(itemsDict["mpItems"])
-    mpItems = mp.Array('i', [0 for _ in np.arange(N)] ) 
-    for pos, v in enumerate(itemsDict["mpItems"]):
-        mpItems[pos] = v
-    return dict(mpItems=mpItems)
-
 # Process-based parallelism
 
 ALPHA = 1 # pheromone exponent
@@ -195,10 +172,10 @@ def Solve( pallets, items, cfg, k, limit, secBreak, mode, nodeTorque, solDict, i
         if abs(pallets[i].D) > maxD:
             maxD = abs(pallets[i].D)
     
-    initPallets   = copyPallets(pallets)              
+    initPallets   = common.copyPallets(pallets)              
     initTorque    = nodeTorque
-    initSolDict   = copySolDict(solDict) 
-    initItemsDict = copyItemsDict(itemsDict)
+    initSolDict   = common.copySolDict(solDict) 
+    initItemsDict = common.copyItemsDict(itemsDict)
     initScore    = bestScore
 
     print(f"Greedy initial score {initScore}")

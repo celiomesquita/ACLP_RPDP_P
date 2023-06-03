@@ -154,6 +154,30 @@ class Pallet(object):
 
         return feasible
 
+def copyPallets(pallets):
+    array = [None for _ in pallets]
+    for i, p in enumerate(pallets):
+        array[i] = Pallet(p.ID, p.D, p.V, p.W, 1)
+        array[i].Dest = p.Dest
+        array[i].PCW  = p.PCW 
+        array[i].PCV  = p.PCV
+        array[i].PCS  = p.PCS
+    return array
+
+def copySolDict(solDict):
+    N_M = len(solDict["solMatrix"])
+    solMatrix = mp.Array('i', [0 for _ in np.arange(N_M)] ) 
+    for pos, v in enumerate(solDict["solMatrix"]):
+        solMatrix[pos] = v
+    return dict(solMatrix=solMatrix)
+
+def copyItemsDict(itemsDict):
+    N = len(itemsDict["mpItems"])
+    mpItems = mp.Array('i', [0 for _ in np.arange(N)] ) 
+    for pos, v in enumerate(itemsDict["mpItems"]):
+        mpItems[pos] = v
+    return dict(mpItems=mpItems)
+
 def loadPallets(cfg):
     """
     Load pallets attributes based on aircraft size
@@ -184,6 +208,17 @@ def fillPallet(pallet, items, k, nodeTorque, solDict, cfg, threshold, itemsDict,
             pallet.putItem(  item,               nodeTorque, solDict,      N, itemsDict, lock)
             counter += 1
     return counter
+
+def transform(pallet, items, k, nodeTorque, solDict, cfg, threshold, itemsDict, lock, torqueSurplus=1.0):
+
+    N = len(items)
+
+    for item in items:
+
+        if pallet.isFeasible(item, threshold, k, nodeTorque,   cfg,           itemsDict, lock, torqueSurplus):
+
+            pallet.putItem( item, nodeTorque, solDict, N, itemsDict, lock)
+
 
 def loadDistances(fname):
 

@@ -1,0 +1,228 @@
+% !TeX spellcheck = en_US
+%\documentclass[preprint,authoryear]{elsarticle}
+\documentclass[preprint]{elsarticle}
+% sudo apt-get install -y texlive-publishers
+
+\usepackage[left]{lineno}
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{multirow}
+
+\usepackage{lineno,hyperref}
+\modulolinenumbers[5]
+
+\usepackage[none]{hyphenat}
+
+\usepackage{url}
+\usepackage{booktabs}
+
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usetikzlibrary{positioning}
+
+\usepackage{mathtools}
+\usepackage{amssymb}
+\usepackage{amsthm}
+
+\usepackage{caption}
+\captionsetup{labelfont=bf}
+\captionsetup{skip=0pt}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+\usepackage{algorithm}
+
+\usepackage[noend]{algpseudocode}
+
+\usepackage[margin=0.9in]{geometry}
+
+\usepackage[normalem]{ulem}
+%\usepackage{xcolor}
+
+\newcommand{\Comentar}[1]{\State {\cmmt{#1}}}
+\newcommand{\Break}{\State \textbf{break}}
+\renewcommand{\Return}{\State \textbf{return}~}
+\renewcommand{\algorithmicensure}{\textbf{Parameters:}}
+
+\renewcommand\algorithmicthen{}
+\renewcommand\algorithmicdo{}
+
+
+\algblock{ForEach}{EndFor}
+\algblock{ForDownTo}{EndFor}
+\algblock{ForTo}{EndFor}
+
+\newcommand{\Block}[1]{\State #1 \{}
+\newcommand{\EndBlock}{\State \}}
+
+\usepackage{scrextend}
+\newcommand{\boldm}[1] {\mathversion{bold}#1\mathversion{normal}}
+\newcommand{\round}[1]{\ensuremath{\lfloor#1\rceil}}
+\usepackage{setspace}
+\usepackage{array}
+\usepackage{color, colortbl}
+\definecolor{Gray}{gray}{0.9}
+\hyphenation{cost-ef-fec-tive-ness}
+
+\newcommand{\specialcell}[2][c]{%
+	\begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+
+
+%\journal{Computers \& Operations Research}
+
+
+\begin{document}
+
+
+\begin{frontmatter}
+
+\title{Air cargo load and route planning in pickup and delivery operations}
+
+\author{A.C.P.~Mesquita}
+\ead{celio@ita.br}
+
+\author{C.A.A.~Sanches\corref{cor1}}
+\ead{alonso@ita.br}
+\cortext[cor1]{Corresponding author.}
+
+\address {Instituto Tecnol\'{o}gico de Aeron\'{a}utica - DCTA/ITA/IEC\\
+Pra\c{c}a Mal. Eduardo Gomes, 50\\
+S\~{a}o Jos\'{e} dos Campos - SP - 12.228-900 - Brazil}
+
+
+
+\end{frontmatter}
+
+
+
+\section{The mathematical modeling}
+\label{sec4}
+
+Given the assumptions, scenarios and parameters described in the previous section, we are ready to present the mathematical modeling of ACLP+RPDP, which is one of the contributions of our work.
+
+The flight plan will be carried out by a {\bf single} aircraft, which has predefined values of $W_{max}$, $limit^{CG}_{long}$, $limit^{CG}_{lat }$, $d^{CG}_{pallet}$, $c_d$ and $c_g$. This aircraft has a set $M = \{p_1, p_2, \ldots, p_m \}$\/ of $m$\/ pallets, where each pallet $p_i$, $1 \leq i \leq m$, has weight capacity $wp_i$, volume capacity $vp_i$, and distance $dp_i$\/ to the CG of aircraft. Table ?? shows the data of the aircraft considered in this work.
+
+Let $L = \{ l_0, l_1, \ldots, l_K \}$ be the set of $K+1$\/ nodes (or destinations), where $l_0$\/ is the origin and the end of a tour. Let $d(l_i,l_j)$\/ be the distance from $l_i$\/ to $l_j$, where $0 \leq i,j \leq K$. By definition, $d(l_i,l_i)=0$. Let $C=\{c_{ij}\}$ be the cost matrix of the aircraft, where $c_{ij} = c_d*d(l_i,l_j), 0 \leq i,j \leq K$. 
+
+Let $S_K = \{s: \{1, \dots, K\} \rightarrow \{1, \dots, K\} \}$\/ be the set of the $K!$\/ permutations of the nodes, which correspond to all possible tours (or itineraries) that have $l_0$\/ as origin and end, passing through the others $K$\/ nodes. 
+
+The objective of ACLP+RPDP is to find the permutation $\pi \in S_K$, with the corresponding allocation of items on the pallets at each node, that maximizes the function $\tilde{s}_\pi/\tilde{c}_\pi$ \ref{eq1}, where $\tilde{s}_\pi$\/ is the total score of transported items, and  $\tilde{c}_\pi$\/ is the total cost of fuel consumed. In this way, the tour plan will be $l_0, l_{\pi(1)}, \ldots, l_{\pi(K)}, l_0$. Later, we will describe the calculations of $\tilde{s}_\pi$\/ and $\tilde{c}_\pi$.
+
+\begin{equation} \label{eq1}
+	\max_{\pi \in S_K} \tilde{s}_\pi/\tilde{c}_\pi
+\end{equation}
+
+Let us now describe the input and output data at each node $l_k$\/ of the flight plan, where $0 \leq k \leq K$. Let $L_k$ \ref{eq2} be the set of remaining nodes when the aircraft is in $l_k$, $0 \leq k \leq K$.
+
+\begin{equation} \label{eq2}
+	L_0 = L; L_{k} = L_{k-1} - \{l_{\pi(k)}\}; \ k \in \{1, 2, \ldots, K\}
+\end{equation}
+
+Let $N_k = \{t^k_1, t^k_2, \ldots, t^k_{n_k} \}$ be the input set of $n_k$\/ items to be loaded in node $l_k$, $0 \leq k \leq K$. Each item $t^k_j$, $1 \leq j \leq n_k$, has score $st^k_j$, weight $wt^k_j$, volume $vt^k_j$, and destination $lt^k_j \in L_k$. Let $N = \bigcup_{0 \leq k \leq K} N_k$\/ be the input set of items of all nodes along a tour.
+
+Let $X_{ij}^k$\/ be output binary variables, where $0 \leq k \leq K$, $1 \leq i \leq m$\/ and $1 \leq j \leq n_k$. $X_{ij}^k = 1$\/ if $t_j^k$\/ is assigned to $p_i$\/ in node $l_k$, and 0 otherwise \ref{eq3}. 
+
+\begin{equation} \label{eq3}
+	X_{ij}^k = 0;  \ i \in \{1, 2, \ldots, m\}; \ j \in \{1, 2, \ldots, n_k\}; \ k \in \{1,2, \ldots, K\}; \ lt_j^k \notin L_k
+\end{equation}
+
+In this way, we can consider $\tilde{s}_\pi$ as the sum of the scores of the items loaded on the aircraft throughout the flight plan \ref{eq4}.
+
+\begin{equation} \label{eq4}
+	\tilde{s}_\pi = \sum_{k=0}^{K} \sum_{i=1}^{m} \sum_{j=1}^{n_k} X_{ij}^k \times st_j^k
+\end{equation}
+
+Let $Q_k = \{a^k_1, a^k_2, \ldots, a^k_{m_k} \}$\/ be the input set of $m_k \leq m$\/ consolidated items at node $l_k$, $0 \leq k \leq K$. $a^k_i$, $1 \leq i \leq m_k$, is a package of items allocated in some of the previous nodes, with total weight $wa^k_i$, total volume $va^k_i$, and destination $la^k_i \in L_k$. By definition, $m_0=0$ \ref{eq5}. Consolidated items that were destined to node $l_k$\/ are unloaded, that is, they are not considered in $Q_k$.
+
+\begin{equation} \label{eq5}
+	m_0 = 0
+\end{equation}
+
+Let $Y_{iq}^k$\/ be output binary variables, where $0 \leq k \leq K$, $1 \leq i \leq m$\/ and $1 \leq q \leq m_k$. $Y_{iq}^k = 1$\/ if $a_q^k$\/ is assigned to $p_i$\/ in node $l_k$, and 0 otherwise \ref{eq6}.
+
+\begin{equation} \label{eq6}
+	Y_{iq}^k = 0; \ i \in \{1, 2, \ldots, m\}; \ q \in \{1, 2, \ldots, m_k\}; \ k \in \{ 1, 2, \ldots, K\}; \  la_i^k \notin L_k
+\end{equation}
+
+Therefore, allocations of items and consolidated items to pallets in node $l_k$ can be seen as a bipartite graph $G_k(V_k, E_k)$, where $V_k = M \cup N_k \cup Q_k$, $E_k = E^N_k \cup E^Q_k$, $(p_i, t_j^k) \in E^N_k$ if $X_{ij}^k = 1$, and $(p_i, a_q^k) \in E^Q_k$ if $Y_{iq}^k = 1$.
+
+Through the output binary variables $X_{ij}^k$\/ and $Y_{iq}^k$, we can calculate the lateral \ref{eq7}\ref{eq8} and the longitudinal \ref{eq9} torques, and the CG deviation \ref{eq10}, caused by shipped items at node $l_k$.
+
+\begin{equation} \label{eq7}
+	LatIt_k = \sum_{i=1}^{m} \sum_{j=1}^{n_k} ( X_{ij}^k \times wt_j^k \times (i\%2) - X_{ij}^k \times wt_j^k \times (i+1)\%2 ); \ k \in \{0, 1, \ldots, K\}
+\end{equation}
+
+\begin{equation} \label{eq8}
+	LatCons_k =  \sum_{i=1}^{m} \sum_{q=1}^{m_k}  ( Y_{iq}^k \times wa_q^k \times (i\%2) - Y_{iq}^k \times wa_q^k \times (i+1)\%2); \ k \in \{0, 1, \ldots, K\}
+\end{equation}
+
+\begin{equation} \label{eq9}
+	\tau_k = \sum_{i=1}^{m}[ dp_i \times (\sum_{j=1}^{n_k} X_{ij}^k \times wt_j^k +  \sum_{q=1}^{m} Y_{iq}^k \times wa_q^k)];\ k \in \{0, 1, \ldots, K\}
+\end{equation}
+
+\begin{equation} \label{eq10}
+	\epsilon_k = \frac{\tau_k}{W_{max} \times limit^{CG}_{long}};\ k \in \{0, 1, \ldots, K\}
+\end{equation}
+
+With the CG deviations, the distances covered and the cost matrix of the aircraft, we calculate the total fuel consumption $\tilde{c}_\pi$ \ref{eq11} along the flight plan.
+
+\begin{equation} \label{eq11}
+	\tilde{c}_\pi = c_{0,\pi(1)}\times(1+c_g\times|\epsilon_0|) + \sum_{k=1}^{K-1} [ c_{\pi(k), \pi(k+1)}\times(1+c_g\times|\epsilon_{\pi(k)}|) ] + c_{\pi(K),0}\times(1+c_g\times|\epsilon_{\pi(K)}|)
+\end{equation}
+
+Finally, we can consider the constraints on each node $l_k$:
+
+\begin{itemize}
+	\item The latitudinal \ref{eq12} and the longitudinal \ref{eq13} torques must be within the limits of the aircraft;
+	\item The items allocated to each pallet cannot exceed its weight \ref{eq14} and volume \ref{eq15} limits;
+	\item At most, each item is associated with a single pallet \ref{eq16};
+	\item Consolidated items that have not yet reached their destination must remain on board \ref{eq17};
+	\item Items allocated on the same pallet must have the same destinations. In this case, we need two constraints: \ref{eq18} and \ref{eq19}, where $B$\/ is a big value. If $X_{ij}^k = X_{iq}^k = 1$, both constraints require that $lt_j^k = lt_q^k$; otherwise these constraints have no effect.
+	\item If there is a consolidated item on the pallet, it must also have the same destination as the other items. Similarly, we use two constraints: \ref{eq20} and \ref{eq21}.
+\end{itemize}
+
+\begin{equation} \label{eq12}
+	s.t.: d^{CG}_{pallet} \times | LatIt_k + LatCons_k | \leq  W_{max} \times limit^{CG}_{lat}; \ k \in \{0, 1, \ldots, K\}
+\end{equation}
+
+\begin{equation} \label{eq13}
+	s.t.: |\tau_k| \leq W_{max} \times limit^{CG}_{long};\ k \in \{0, 1, \ldots, K\}
+\end{equation}
+
+\begin{equation} \label{eq14}
+	s.t.: \sum_{j=1}^{n_k} X_{ij}^k \times wt_j^k + \sum_{q=1}^{m_k} Y_{iq}^k \times wa_q^k  \leq wp_i; \ i \in \{1, 2, \ldots, m_k\}; \ k \in \{0, 1, \ldots, K\}
+\end{equation}
+
+\begin{equation} \label{eq15}
+	s.t.: \sum_{j=1}^{n_k} X_{ij}^k \times vt_j^k + \sum_{q=1}^{m_k} Y_{iq}^k \times va_q^k  \leq\ vp_i; \ i \in \{1, 2, \ldots, m_k\}; \ k \in \{0, 1, \ldots, K\}
+\end{equation}
+
+\begin{equation} \label{eq16}
+	s.t.: \sum_{i=1}^{m} X_{ij}^k \leq 1; \ j \in \{1, 2, \ldots, n_k\}; \ k \in \{0, 1, \ldots, K\}
+\end{equation}
+
+\begin{equation} \label{eq17}
+	s.t.:  Y_{iq}^k = 1; \ q \in \{1, 2, \ldots, m_k\}; \ k \in \{0, 1, \ldots, K\};  \ la^k_q \in L_k
+\end{equation}
+
+\begin{equation} \label{eq18}
+	s.t.: lt_j^k - lt_q^k \geq -B \times (1-X_{ij}^k \times X_{iq}^k); \ j,q \in \{1, 2, \ldots, n_k\}; \ k \in \{0, 1, \ldots, K\}
+\end{equation}
+
+\begin{equation} \label{eq19}
+	s.t.: lt_j^k - lt_q^k \leq B\times (1-X_{ij}^k \times X_{iq}^k); \ j,q \in \{1, 2, \ldots, n_k\}; \ k \in \{0, 1, \ldots, K\}
+\end{equation}
+
+\begin{equation} \label{eq20}
+	s.t.: lt_j^k - la_q^k \geq -B \times (1-X_{ij}^k \times Y_{iq}^k); \ j \in \{1, 2, \ldots, n_k\}; \ q \in \{1, 2, \ldots, m_k\}; \ k \in \{0, 1, \ldots, K\}
+\end{equation}
+
+\begin{equation} \label{eq21}
+	s.t.: lt_j^k - la_q^k \leq B\times (1-X_{ij}^k \times Y_{iq}^k); \ j \in \{1, 2, \ldots, n_k\}; \ q \in \{1, 2, \ldots, m_k\}; \ k \in \{0, 1, \ldots, K\}
+\end{equation}
+
+
+Thus, ACLP+RPDP is defined through the equations \ref{eq1} to \ref{eq11}, subject to constraints \ref{eq12} to \ref{eq21}.
+
+\end{document}

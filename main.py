@@ -10,6 +10,8 @@ import mpACO
 import optcgcons
 import mipGRB
 import mipCBC
+import tabu
+
 from plots import TTT
 
 # from py3Djanet import Packer, Item, Bin
@@ -140,13 +142,16 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
             mpACO.Solve(  pallets, items, cfg, k, volThreshold, secBreak, "p", nodeTorque, solDict, itemsDict) 
 
         if method == "ACO":       
-            mpACO.Solve(  pallets, items, cfg, k, volThreshold, secBreak, "s", nodeTorque, solDict, itemsDict) 
+            mpACO.Solve(  pallets, items, cfg, k, volThreshold, secBreak, "s", nodeTorque, solDict, itemsDict)
+
+        if method == "TS":       
+            tabu.Solve(  pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict)             
 
         if method == "GRB":
             modStatus, ObjBound = mipGRB.Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict) 
 
         if method == "CBC": # new formulation
-            modStatus, ObjBound = mipCBC.Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict, len(tour.nodes)) 
+            modStatus, ObjBound = mipCBC.Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict) 
 
         if modStatus == 2: # 2: optimal
             numOptDict["numOpt"] += 1
@@ -308,19 +313,20 @@ if __name__ == "__main__":
     plot = False
 
     scenarios = [2,3,4,5,6]
-    # scenarios = [6] # 
+    # scenarios = [2] # 
 
-    # surplus   = "data20"
+    surplus   = "data20"
     # surplus   = "data50"
-    surplus   = "data100"
+    # surplus   = "data100"
 
-    # methods = ["Shims","mpShims","CBC"]  
-    
-    # methods = ["Shims", "mpShims"]
     # methods = ["GRB"]
     # methods = ["CBC"]
-    methods = ["Shims"]
+    # methods = ["Shims"]
     # methods = ["mpShims"]
+    # methods = ["mpACO"]
+    # methods = ["ACO"]
+    methods = ["TS"]
+
 
     # tipo = "KP"
     tipo = "FFD"
@@ -349,7 +355,7 @@ if __name__ == "__main__":
         dists = common.loadDistances("params/distances.txt")
         costs = [[0.0 for _ in dists] for _ in dists]
 
-        secBreak     = 5.0 # second - limit for Gurobi or CBC
+        # secBreak     = 1.0 # second - limit for Gurobi or CBC
         volThreshold = 0.92 # 0.92 best for scenario 1
 
 
@@ -357,17 +363,12 @@ if __name__ == "__main__":
 
             for scenario in scenarios:
 
-                instances = [1,2,3,4,5,6,7]
-                if scenario == 4:
-                    instances = [1,2,3,4,5]                
-                if scenario == 5:
-                    instances = [1,2,3,4]
-                if scenario == 6:
-                    instances = [1,2,3] 
-
+                instances = [1,2,3,4,5]
                 # instances = [1]
 
                 cfg = common.Config(scenario)
+
+                secBreak = 3600/common.factorial(cfg.numNodes+1)
                 
                 for i, cols in enumerate(dists):
                     for j, dist in enumerate(cols):
