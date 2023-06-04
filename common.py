@@ -154,6 +154,18 @@ class Pallet(object):
 
         return feasible
 
+
+# Edge connecting a pallet and an item
+class Edge(object):
+    def __init__(self, id, pallet, item, cfg):
+        self.ID        = id
+        self.Pallet    = pallet
+        self.Item      = item
+        self.Torque    = float(item.W) * float(pallet.D)
+        self.Attract = item.S / item.V 
+        self.Attract *= 1 - abs(self.Torque) / ( 340 * 17.57) # 17.57m last pallet dist from CG
+
+
 def copyPallets(pallets):
     array = [None for _ in pallets]
     for i, p in enumerate(pallets):
@@ -208,16 +220,6 @@ def fillPallet(pallet, items, k, nodeTorque, solDict, cfg, threshold, itemsDict,
             pallet.putItem(  item,               nodeTorque, solDict,      N, itemsDict, lock)
             counter += 1
     return counter
-
-def transform(pallet, items, k, nodeTorque, solDict, cfg, threshold, itemsDict, lock, torqueSurplus=1.0):
-
-    N = len(items)
-
-    for item in items:
-
-        if pallet.isFeasible(item, threshold, k, nodeTorque,   cfg,           itemsDict, lock, torqueSurplus):
-
-            pallet.putItem( item, nodeTorque, solDict, N, itemsDict, lock)
 
 
 def loadDistances(fname):

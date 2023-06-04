@@ -1,75 +1,98 @@
 
 import common
-from time import time
+import time
 import math
 import numpy as np
-from multiprocessing import Queue, Process
+import multiprocessing as mp
 import common
 
 RNG = np.random.default_rng()
 
-def pickFirstEdge(vector):
-    e = vector[0]
-    vector.pop(0)
-    return e
-
-def pickRandomEdge(vector):
-    n = len(vector)
+def pickRandomEdge(edges):
+    n = len(edges)
     i = math.floor(RNG.random()*n)
-    e = vector[i]
-    vector.pop(i)
+    e = edges[i]
+    edges.pop(i)
     return e
 
 # RCL the Restricted Candidates List
 class RCL(object):
-    def __init__(self, size, nbhood): # nbhood is received sorted by eta
+    def __init__(self, size, edges): # edges is received sorted by eta
         self.size = size
         self.list = []
-        if len(nbhood) >= size:
+        if len(edges) >= size:
             for _ in range(size):
-                # greedilly assemble the RCL
-                e = pickFirstEdge(nbhood)
+                # greedily assemble the RCL.
+                e = edges[0]
+                edges.pop(0)
                 self.list.append(e)
 
+def Solve(pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
 
-def Solve( pallets, items, startTime, cfg, k):  # items include kept on board
+    startTime = time.perf_counter()
 
-    print("\nGRASP for ACLP+RPDP")
+    N = len(items)
+    M = len(pallets)
 
-    Gbest = common.Solution(pallets, items, 1.0, cfg, k, False) # False: greedy solution
+    print(f"\nGRASP for ACLP+RPDP\n")        
+
+    lock  = mp.Lock() # for use in parallel mode
+
+    print(f"{len(items)} items  {len(pallets)} pallets")
+
+    initScore = 0.0 # G
+
+    for i, _ in enumerate(pallets):               
+        common.fillPallet(pallets[i], items, k, nodeTorque, solDict, cfg, 0.9, itemsDict, lock)
+        initScore += pallets[i].PCS
+
+    print(f"Greedy initial score {initScore}")
+
+    bestScore = initScore # G*
+
 
     # initialize the edges between pallets and items
-    Ek = [None] * len(pallets) * len(items)
+    Ek = [None] * N * M
     id = 0
     for p in pallets:
         for it in items:
             Ek[id] = common.Edge(id, p, it, cfg)
             id += 1    
 
-    Ek.sort(key=lambda  x: x.Heuristic, reverse=True)
+    # the most attractive edges come first
+    Ek.sort(key=lambda  x: x.Attract, reverse=True)
 
-    L_rcl = math.floor( len(Ek) / (len(Gbest.Edges)) )
+    # RCL size: 2% the size of the problem
+    L_rcl = math.ceil( float(N * M) / 50 )
 
     Etemp  = []
     Eprime = [] 
 
-    stagnant = 0
-    while stagnant < 3 and (time() - startTime) < common.SEC_BREAK:
+    bestScore = initScore
 
-        Glocal = Gbest
+    stagnant = 0
+    while stagnant <= 3 and (time.perf_counter() - startTime) < secBreak:
+
+        localScore     = initScore
+        localSolDict   = common.copySolDict(solDict)
+        localItemsDict = common.copyItemsDict(itemsDict)
+
+        iterScore      = initScore
+        iterSolDict    = common.copySolDict(solDict)
+        iterItemsDict  = common.copyItemsDict(itemsDict)
 
         Eprime = Ek
         rcl = RCL(L_rcl, Eprime) # edges are drawed from Eprime
 
         while 1:
 
-            if ((time() - startTime) > common.SEC_BREAK):
-                break
+            if ((time.perf_counter() - startTime) > secBreak):
+                break 
 
             while 1:
 
-                if ((time() - startTime) > common.SEC_BREAK):
-                    break
+                if ((time.perf_counter() - startTime) > secBreak):
+                    break 
 
                 if len(rcl.list) < L_rcl:
                     break
@@ -79,10 +102,19 @@ def Solve( pallets, items, startTime, cfg, k):  # items include kept on board
                 for e in rcl.list:
                     Etemp.append(e)
 
-                if Glocal.isFeasible(ce, 1.0, cfg, k): # Check all constraints
-                    Glocal.AppendEdge(ce)
-                    if ce in Glocal.Nbhood:
-                        Glocal.Nbhood.remove(ce) 
+                # try to insert this candidate edge
+
+                if ce.Pallet.isFeasible(ce.Item, 1.0, k, nodeTorque, cfg, iterItemsDict, lock, torqueSurplus=1.0):
+
+                    ce.Pallet.putItem(ce.Item, nodeTorque, iterSolDict, N, iterItemsDict, lock)
+
+                    iterScore += ce.Pallet.PCS
+
+                if iterScore > localScore:
+
+                    localScore     = iterScore
+                    localSolDict   = common.copySolDict(iterSolDict)
+                    localItemsDict = common.copyItemsDict(iterItemsDict)
 
                 rcl = RCL(L_rcl, Eprime) 
 
@@ -92,18 +124,17 @@ def Solve( pallets, items, startTime, cfg, k):  # items include kept on board
             Eprime = Etemp
             rcl = RCL(L_rcl, Eprime)
 
-        if Glocal.S > Gbest.S:
-            Gbest = Glocal
+        if localScore > bestScore:
+
+            bestScore = localScore
+
+            solDict   = common.copySolDict(localSolDict)
+            itemsDict = common.copyItemsDict(localItemsDict)
+
             stagnant = 0
         else:
             stagnant += 1
 
-    # decision matrix for which items will be put in which pallet
-    X = [[0 for _ in np.arange(len(items))] for _ in np.arange(len(pallets))]
-    for e in Gbest.Edges:
-        X[e.Pallet.ID][e.Item.ID] = 1
-
-    return X
 
 
 if __name__ == "__main__":

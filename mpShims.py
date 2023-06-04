@@ -30,7 +30,7 @@ class Shims(object):
         if item.To != self.Pallet.Dest[k]:
             return False
 
-        if self.Pallet.PCV + self.SCV + item.V > self.Pallet.V * 1.02:
+        if self.Pallet.PCV + self.SCV + item.V > self.Pallet.V:
             return False
 
         if self.Pallet.PCW + self.SCW + item.W > self.Pallet.W:
@@ -45,22 +45,21 @@ class Shims(object):
         return ret
 
 # create a set of shims for this pallet and selects the best shims
-def getBestShims(pallet, items, k, nodeTorque, solDict, cfg, surplus, itemsDict, lock, tipo):
-
-    maxVol = pallet.V * surplus
+def getBestShims(pallet, items, k, nodeTorque, solDict, cfg, surplus, itemsDict, lock, tipo, startTime, secBreak):
 
     vol = 0.
     whip = []
     N = len(items)
     i = pallet.ID
    
+   # create the whip
     with lock:   
         for item in items:
             j = item.ID
             if itemsDict["mpItems"][j] == 0:
                 vol += item.V
                 whip.append(item)
-                if vol > maxVol:
+                if vol > pallet.V * surplus:
                     break
 
     # create the first shim
@@ -80,7 +79,7 @@ def getBestShims(pallet, items, k, nodeTorque, solDict, cfg, surplus, itemsDict,
 
             for i in indexes:
                 item = whip[i]
-                if pallet.isFeasible(item, 1.1, k, nodeTorque,  cfg, itemsDict, lock):
+                if pallet.isFeasible(item, 1.0, k, nodeTorque,  cfg, itemsDict, lock):
                     pallet.putItem(item, nodeTorque, solDict, N, itemsDict, lock)
 
     if tipo == "FFD":
@@ -88,6 +87,10 @@ def getBestShims(pallet, items, k, nodeTorque, solDict, cfg, surplus, itemsDict,
         whip.sort(key=lambda x: abs(x.V), reverse=True)
 
         for w, item in enumerate(whip):
+
+            if ((time.perf_counter() - startTime) > secBreak):
+                break 
+
             newShims = True
             for sh in Set:
                 if sh.isFeasible(item, k, nodeTorque, cfg, lock):
@@ -109,11 +112,13 @@ def getBestShims(pallet, items, k, nodeTorque, solDict, cfg, surplus, itemsDict,
                 bestIndex = i
         # put the best Shim in the solution
         for item in Set[bestIndex].Items:
-            if item != None and pallet.isFeasible(item, 1.02, k, nodeTorque,  cfg, itemsDict, lock):
+            if item != None and pallet.isFeasible(item, 1.0, k, nodeTorque,  cfg, itemsDict, lock):
                 pallet.putItem(item, nodeTorque, solDict, N, itemsDict, lock)
 
 
 def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict, itemsDict, tipo):
+
+    startTime = time.perf_counter()
 
     if mode == "p":
         mode = "Parallel"
@@ -144,7 +149,7 @@ def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict
         # parallel shims phase
         for i, p in enumerate(pallets):
             procs[i] = mp.Process( target=getBestShims, args=( pallets[i], items, k,\
-                 nodeTorque, solDict, cfg, surplus, itemsDict, lock, tipo) )
+                 nodeTorque, solDict, cfg, surplus, itemsDict, lock, tipo, startTime, secBreak) )
             time.sleep(0.001)                 
             procs[i].start()
                 
@@ -156,18 +161,19 @@ def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict
         # pallets.sort(key=lambda x: abs(x.D)) # deactivated because of torque surplus
         for i, _ in enumerate(pallets):
             # fill until the threshold                                                               torque surplus
-            common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, threshold, itemsDict, lock, 2.)
+            common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, threshold, itemsDict, lock, 1.1)
 
-            optcgcons.minCGdev(pallets, k, nodeTorque, cfg)
+            if ((time.perf_counter() - startTime) < secBreak):
+                optcgcons.minCGdev(pallets, k, nodeTorque, cfg)
            
             # get the best Shims for the pallet
-            getBestShims( pallets[i], items, k, nodeTorque, solDict, cfg, surplus,   itemsDict, lock, tipo)
+            getBestShims( pallets[i], items, k, nodeTorque, solDict, cfg, surplus,   itemsDict, lock, tipo, startTime, secBreak)
 
     # try to complete the pallet
     for i, _ in enumerate(pallets):
-        counter += common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, 1.02, itemsDict, lock)
+        counter += common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, 1.0, itemsDict, lock)
 
-    print(f"{mode}: {counter} items inserted in post local search.")
+    print(f"----->{mode}: {counter} items inserted in post local search.")
 
 
 if __name__ == "__main__":

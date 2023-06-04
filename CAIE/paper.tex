@@ -589,7 +589,7 @@ Once the assumptions of this work and the mathematical modeling of the problem a
 
 Throughout our research, we have thoughtfully described the ACLP+RPDP model in standard MIP format and found that no MIP solver can handle its practical cases in a feasible time. Thus, as ACLP+RPDP is highly complex, involving four intractable subproblems (APP, WBP, PDP and TSP), our strategy will be to focus only on real cases and to develop quick node-by-node solutions, not necessarily optimal, that allow to build a complete tour.
 
-The ACLP+RPDP solution defines a tour and a corresponding loading and unloading plan at each node. In this way, the loading and unloading time will be limited only by the use of the equipment at each node. Therefore, there will only be waiting time at the base node, corresponding to the runtime of ACLP+RPDP algorithm. For this reason, our method will also be parameterized by the maximum time that can be waited until the start of the load in the base node.
+The ACLP+RPDP solution defines a tour and a corresponding loading and unloading plan at each node. In this way, the loading and unloading time will be limited only by the use of the equipment at each node. Therefore, there will only be waiting time at the base node, corresponding to the run time of ACLP+RPDP algorithm. For this reason, our method will also be parameterized by the maximum time that can be waited until the start of the load in the base node.
 
 On the other hand, we know that transport aircraft generally have a few dozen pallets, the flight plan has less than $6$\/ nodes, and each node has hundreds of items to be shipped. Under these circumstances, we can adopt two more strategies:
 
@@ -657,7 +657,7 @@ The aircraft parameters are in Table \ref{tab:larger} (line \ref{main:M}). In th
 
 $surplus$\/ is a value in $\{1.2, 1.5, 2.0\}$, which corresponds, at each node $k$, to the ratio between the sum of the volumes of the items  and the load capacity of the pallets ($surplus = \sum_{j=1}^{n_k} v_j$/$\sum_{i=1}^{m} V_i$). This parameter allows us to verify the different behavior of each $method$, according to $scenario$\/ and the quantity of items available for shipment. It is passed to $ItemsGeneration$\/ (line \ref{main:items}), responsible for creating the items to be shipped, which will be presented in the next section (Algorithm \ref{alg:itemsgen}).
 
-$time$\/ is a runtime limit, which will be distributed among the node-by-node solutions (lines \ref{main:f1} and \ref{main:f2}). Each tour consists of $K+1$\/ trips, and the total number of tours is $K!$.
+$time$\/ is a run time limit, which will be distributed among the node-by-node solutions (lines \ref{main:f1} and \ref{main:f2}). Each tour consists of $K+1$\/ trips, and the total number of tours is $K!$.
 
 $method$\/ corresponds to a MIP solver or a heuristic that we will present in subsection \ref{methods}, where $SolveTour$\/ is the node-by-node solution.
 
@@ -673,7 +673,7 @@ Next, we will present two subsections: in the first we explain how $SolveTour$\/
 As we commented in the previous subsection, we will adopt the strategy of presetting the destinations of each pallet throughout the tour. This is feasible in practical cases, where $K<m$. For this, each pallet $i$\/ also has a field $T^k_i$, $0\leq k \leq K$, which stores its next destination after being loaded in node $k$. For this reason, $T^k_i \in L_k$, $1 \leq i \leq m$, $0\leq k \leq K$.
 
 
-$SolveTour$\/ is described in Algorithm \ref{alg:tour}, where $\pi$\/ is a permutation of the nodes (excluding the base) that defines the order of visits in this tour, $method$\/ corresponds to a MIP solver or a heuristic for solving the node-by-node problems, and $time$\/ is the runtime limit that will be distributed among the $K+1$\/ legs of the tour.
+$SolveTour$\/ is described in Algorithm \ref{alg:tour}, where $\pi$\/ is a permutation of the nodes (excluding the base) that defines the order of visits in this tour, $method$\/ corresponds to a MIP solver or a heuristic for solving the node-by-node problems, and $time$\/ is the run time limit that will be distributed among the $K+1$\/ legs of the tour.
 
 
 \begin{algorithm}[H]
@@ -1280,7 +1280,9 @@ We ran Algorithm \ref{alg:main} in the 5 scenarios described in Table \ref{tab:s
 The average values were presented for $f_{\pi}$\/ and, for the run time, the worst result obtained. To facilitate the comparison between the methods, we added a last column in these tables, where two values are indicated:
 \begin{itemize}
 	\item {\bf Normalized}: value between 0 and 1, which corresponds to the ratio between the sum of $f$\/ values obtained by the method in all scenarios and the sum of the best values obtained among all methods in all scenarios. The higher the value of {\bf Normalized}, the closer the method approached the best solutions found.
-	\item {\bf Speed-up}: ratio of the sums of the worst runtimes of all scenarios and the sum of the method runtimes in all scenarios. The method with the highest {\bf Speed-up}\/ is the fastest.
+	\item {\bf Speed-up}: ratio of the sums of the worst run times of all scenarios and the sum of the method run times in all scenarios. The method with the highest {\bf Speed-up}\/ is the fastest.
+	
+	\item {\bf run time (s)} is the average time to solve a problem instance.
 \end{itemize}
 
 In each $scenario$\/, we indicate in bold the best value of $f$\/ found. In each table, we also indicate in bold the best {\bf Normalized}\/ and {\bf Speed-up}\/ values.
@@ -1289,7 +1291,7 @@ In each $scenario$\/, we indicate in bold the best value of $f$\/ found. In each
 	
 As the MIP solver was not capable of solving all scenarios in polynomial time or reached the computer's RAM (16 GiB) too early, we decided to execute a relaxed model with the decision variables set to CONTINUOUS (a Gurobi parameter) to obtain the upper bound for the objective function. This approach is much faster than using binary decision variables.
 
-The upper bound is the objective function value of a linear programming relaxation of the problem, demonstrating that no integer viable solution can have an objective value greater (in maximization) than this.
+The upper bound (UB) is the objective function value of a linear programming relaxation of the problem, demonstrating that no integer viable solution can have an objective value greater (in maximization) than this.
 
 We solved all scenarios and instances with Gurobi in a relaxed linear model without a time limit. Although the solutions are not guaranteed to be feasible, it is good for the reader to have an idea of the possible upper bound for the metaheuristic solutions.
 
@@ -1303,25 +1305,24 @@ Note that, in Table \ref{tab:20} all $Gurobi\ f$\/ values are italicized to indi
 \footnotesize
 \begin{tabular}{c|c|ccccc|c}
 \toprule
-{$method$}      & {\bf Results}&{\bf 1}&{\bf 2} & {\bf 3}      & {\bf 4}      & {\bf 5}  & \specialcell{{\bf Normalized}\\{\bf Speed-up}}  \\
+$method$& {\bf Scenarios}                 &{\bf 1}&{\bf 2} & {\bf 3}      & {\bf 4}      & {\bf 5}  & \specialcell{{\bf Normalized}\\{\bf Speed-up}}  \\
 \midrule[.1pt]
-\multirow{2}{*}{{\it Gurobi}}     & Upper bound for $f$      & {\it 7.91} & {\it 11.92} & {\it 13.12} & {\it 14.29} & {\it 13.34} & -  \\ %51,84
-&{\bf run time (s)}                          & 14         & 19          & 73          & 188         & 1,097      & -  \\ 
+{\it Gurobi}     & UB for $f$           & {\it 7.91} & {\it 11.92} & {\it 13.12} & {\it 14.29} & {\it 13.34} & -  \\ %51,84
 \toprule
-\multirow{2}{*}{\textbf{TS}}      & $f$      & 5.37       &             &             &             &            &   \\ % 5.49	 901
-&{\bf run time (s)}                          & 659        &             &             &             &            &   \\ 
+\multirow{2}{*}{\it TS }      & $f$     & 5.37       & 5.86        & 5.25        & 4.62        & 3.60       &   \\ %  3.60	 86
+&{\bf run time (s)}                          & 659        & 361         & 251         & 105         & 86         &   \\ 
 \midrule[.1pt]		
-\multirow{2}{*}{\textbf{GRASP}}   & $f$      &            &             &             &             &            &   \\ 
-&{\bf run time (s)}                          &            &             &             &             &            &   \\ 
+\multirow{2}{*}{\it GRASP }   & $f$     & 8.35       & 11.94       & 12.89       & 14.10       & 12.98      &   \\ % 8.35	 97	
+&{\bf run time (s)}                          & 97         & 156         & 222         & 109         & 105        &   \\ 
 \midrule[.1pt]
-\multirow{2}{*}{\textbf{ACO}}     & $f$      & 5.25       & 5.75        & 5.06        & 4.84        &  4.20      &   \\ % 4.20	 1133
-&{\bf run time (s)}                          & 313        & 326         & 303         & 256         &  1,133     &   \\ 
+\multirow{2}{*}{\it ACO}     & $f$      & 5.25       & 5.75        & 5.06        & 4.84        &  4.20      &   \\ % 4.20	 1133
+&{\bf run time (s)}                          & 313        & 326         & 303         & 256         &  453       &   \\ 
 \midrule[.1pt]	
-\multirow{2}{*}{\textbf{NMO}}     & $f$      &            &             &             &             &            &   \\
-&{\bf run time (s)}                          &            &             &             &             &            &   \\ 
+\multirow{2}{*}{\it NMO}     & $f$      & 8.62       &             &             &             &            &   \\ 
+&{\bf run time (s)}                          & 901        &             &             &             &            &   \\ 
 \midrule[.1pt]	
-\multirow{2}{*}{\textbf{Shims}}   & $f$      & 7.91       & 11.55       & 12.62       &  13.82      &  14.85          &   \\ % 14.85	 563
-&{\bf run time (s)}                          & 4          &  8          &  33         &  94         &  563          &   \\ 
+\multirow{2}{*}{\it Shims}   & $f$      & 8.43       & 12.77       & 14.47       &  16.28      &  15.47          &   \\
+&{\bf run time (s)}                     & 4          &  8          &  33         &  93         &  570          &   \\ 
 
 \bottomrule
 \end{tabular}

@@ -11,6 +11,8 @@ import optcgcons
 import mipGRB
 import mipCBC
 import tabu
+import grasp
+import noise2
 
 from plots import TTT
 
@@ -147,6 +149,12 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
         if method == "TS":       
             tabu.Solve(  pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict)             
 
+        if method == "GRASP":       
+            grasp.Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict) 
+        
+        if method == "NMO":       
+            noise2.Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict) 
+
         if method == "GRB":
             modStatus, ObjBound = mipGRB.Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict) 
 
@@ -250,8 +258,9 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
         tour.AvgVol    += nodeVol
         tour.AvgTorque += epsilon
 
-        print(f"----- node {node.ICAO},", end='')
-        print(f" score {tour.score:.0f}, cost {tour.cost:.0f}, vol {nodeVol:.2f}, epsilon {epsilon:.2f} -----")
+        print(f"\tnode {node.ICAO},", end='')
+        print(f" score {tour.score:.0f}, cost {tour.cost:.0f}, vol {nodeVol:.2f}, epsilon {epsilon:.2f}")
+        
 
         if writeConsFile:
 
@@ -312,8 +321,13 @@ if __name__ == "__main__":
     # plot = True
     plot = False
 
+    testing = False
+    # testing = True
+
     scenarios = [2,3,4,5,6]
-    # scenarios = [2] # 
+
+    if testing:
+        scenarios = [2]
 
     surplus   = "data20"
     # surplus   = "data50"
@@ -321,11 +335,13 @@ if __name__ == "__main__":
 
     # methods = ["GRB"]
     # methods = ["CBC"]
-    # methods = ["Shims"]
+    methods = ["Shims"]
     # methods = ["mpShims"]
     # methods = ["mpACO"]
     # methods = ["ACO"]
-    methods = ["TS"]
+    # methods = ["TS"]
+    # methods = ["GRASP"]
+    # methods = ["NMO"]
 
 
     # tipo = "KP"
@@ -355,7 +371,6 @@ if __name__ == "__main__":
         dists = common.loadDistances("params/distances.txt")
         costs = [[0.0 for _ in dists] for _ in dists]
 
-        # secBreak     = 1.0 # second - limit for Gurobi or CBC
         volThreshold = 0.92 # 0.92 best for scenario 1
 
 
@@ -364,11 +379,13 @@ if __name__ == "__main__":
             for scenario in scenarios:
 
                 instances = [1,2,3,4,5]
-                # instances = [1]
+                
+                if testing:
+                    instances = [1]
 
                 cfg = common.Config(scenario)
 
-                secBreak = 3600/common.factorial(cfg.numNodes+1)
+                secBreak = 3600/common.factorial(cfg.numNodes)
                 
                 for i, cols in enumerate(dists):
                     for j, dist in enumerate(cols):
@@ -414,15 +431,14 @@ if __name__ == "__main__":
                     searchTime2 = 0 # with 3D packing
                     for pi, tour in enumerate(tours):
 
-                        # if pi > 0: # solve only the least cost tour
-                        #     break
-
                         tour.elapsed = 0
                         tour.elapsed2 = 0 # with 3D packing
                         tour.score   = 0.0
                         tour.AvgVol  = 0.0
 
                         solveTour(scenario, instance, pi, tour, method, pallets, cfg, secBreak, surplus, tipo, numOptDict, rampDistCG, afterDict, beforeDict)
+
+                        print(f"\tTour elapsed: {tour.elapsed:.1f}s")
 
                         # the tour cost is increased by the average torque deviation, limited to 5%
                         tour.AvgTorque /= cfg.numNodes
