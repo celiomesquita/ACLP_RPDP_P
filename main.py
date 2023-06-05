@@ -324,7 +324,7 @@ if __name__ == "__main__":
     testing = False
     # testing = True
 
-    scenarios = [2,3,4,5,6]
+    scenarios = [3,4,5,6]
 
     if testing:
         scenarios = [2]
@@ -335,13 +335,13 @@ if __name__ == "__main__":
 
     # methods = ["GRB"]
     # methods = ["CBC"]
-    methods = ["Shims"]
+    # methods = ["Shims"]
     # methods = ["mpShims"]
     # methods = ["mpACO"]
     # methods = ["ACO"]
     # methods = ["TS"]
     # methods = ["GRASP"]
-    # methods = ["NMO"]
+    methods = ["NMO"]
 
 
     # tipo = "KP"

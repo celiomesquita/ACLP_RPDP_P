@@ -5,20 +5,22 @@ import math
 import numpy as np
 import multiprocessing as mp
 import common
-# import random
 
 RNG = np.random.default_rng()
 
-def Transform(iterPallets, iterItemsDict, iterSolDict, iterScore, N, items, nodeTorque, k, cfg, lock):
+def Transform(iterPallets, iterItemsDict, iterSolDict, iterScore, N, items, nodeTorque, k, cfg, lock, startTime, secBreak):
 
     for i, _ in enumerate(iterPallets):
+
+        if ((time.perf_counter() - startTime) > secBreak):
+            break
+
+        iterScore -= iterPallets[i].PCS
 
         arr0 = [j for j, a in enumerate(iterItemsDict["mpItems"])                if a == 0]
         arr1 = [j for j, a in enumerate(iterSolDict["solMatrix"][N*i:N*i+(N-1)]) if a == 1]
 
         if len(arr0) > 0 and len(arr1) > 0:
-            # id0 = np.random.choice(arr0) # not in solution
-            # id1 = np.random.choice(arr1) # in this pallet
 
             id0 = RNG.choice(arr0) # not in solution
             id1 = RNG.choice(arr1) # in this pallet            
@@ -30,9 +32,7 @@ def Transform(iterPallets, iterItemsDict, iterSolDict, iterScore, N, items, node
             else:
                 iterPallets[i].putItem(items[id1], nodeTorque, iterSolDict, N, iterItemsDict, lock)
 
-
         iterScore += iterPallets[i].PCS
-
 
 
 # ProbAccept is the Noising Method acceptance method.
@@ -76,18 +76,12 @@ def Solve(pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
 
     r_max = 1 - (initScore - primeScore)/initScore # maximum initial noise
 
-    # initialize the edges between pallets and items
-    # Ek = [None] * N * M
-    # id = 0
-    # for p in pallets:
-    #     for it in items:
-    #         Ek[id] = common.Edge(id, p, it, cfg)
-    #         id += 1  
+    # the bigger the problem less iterations
+    numIter = int( 2_000_000.0 / float(N * M) )
 
-    numTrials = math.ceil(N * M / 50)
+    numTrials = int( float(numIter) / 2)
 
-
-    numIter = int(numTrials/2)
+    print(f"numTrials: {numTrials}\tnumIter: {numIter}")
 
     step = r_max/(numTrials/numIter-1)
     r = r_max  
@@ -96,6 +90,9 @@ def Solve(pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
     # Ek.sort(key=lambda  x: x.Attract, reverse=True)
 
     bestScore = initScore
+
+    # arrItems_0 = [j for j, a in enumerate(iterItemsDict["mpItems"])                ]
+    # arrItems_1 = [j for j, a in enumerate(iterSolDict["solMatrix"][N*i:N*i+(N-1)]) ]    
 
     trial = 0
     while trial < numTrials and (time.perf_counter() - startTime) < secBreak:
@@ -124,7 +121,7 @@ def Solve(pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
             oldScore = iterScore
 
             # Transform makes a random elementary transformation in each pallet
-            Transform(iterPallets, iterItemsDict, iterSolDict, iterScore, N, items, iterTorque, k, cfg, lock)
+            Transform(iterPallets, iterItemsDict, iterSolDict, iterScore, N, items, iterTorque, k, cfg, lock, startTime, secBreak)
 
             if ProbAccept(iterScore, oldScore, r):
 

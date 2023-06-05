@@ -19,6 +19,8 @@ def Transform(iterPallets, iterItemsDict, iterSolDict, iterScore, iterSolID, N, 
 
     for i, _ in enumerate(iterPallets):
 
+        iterScore -= iterPallets[i].PCS
+
         arr0 = [j for j, a in enumerate(iterItemsDict["mpItems"])                if a == 0]
         arr1 = [j for j, a in enumerate(iterSolDict["solMatrix"][N*i:N*i+(N-1)]) if a == 1]
 
