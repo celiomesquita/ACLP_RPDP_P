@@ -67,9 +67,9 @@ def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
 
         # Pallet weight constraint                      PCW: pallet current weight
         itemsWeights[i] = sum(X[i][j] * items[j].W  for j in set_N)
-        # mod.addConstr(
-        #     itemsWeights[i] + pallets[i].PCW <= pallets[i].W
-        # )
+        mod.addConstr(
+            itemsWeights[i] + pallets[i].PCW <= pallets[i].W
+        )
 
         # Pallet volume constraint
         itemsVolumes[i] = sum(X[i][j] * items[j].V  for j in set_N)

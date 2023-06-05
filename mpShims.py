@@ -2,6 +2,7 @@ import numpy as np
 import multiprocessing as mp
 import time
 import math
+import os
 
 import knapsack as kp
 import common
@@ -118,6 +119,10 @@ def getBestShims(pallet, items, k, nodeTorque, solDict, cfg, surplus, itemsDict,
 
 def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict, itemsDict, tipo):
 
+
+
+
+
     startTime = time.perf_counter()
 
     if mode == "p":
@@ -168,6 +173,11 @@ def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict
            
             # get the best Shims for the pallet
             getBestShims( pallets[i], items, k, nodeTorque, solDict, cfg, surplus,   itemsDict, lock, tipo, startTime, secBreak)
+
+            # total_memory, used_memory, free_memory = map(
+            #     int, os.popen('free -t -m').readlines()[-1].split()[1:])
+            
+            # print(f"RAM {round((used_memory/total_memory) * 100, 2)}% used:")            
 
     # try to complete the pallet
     for i, _ in enumerate(pallets):

@@ -2,9 +2,13 @@
 # include the MILP Solver: https://www.python-mip.com/
 from mip import Model, xsum, maximize, BINARY, CBC, CONTINUOUS, INTEGER
 
+from os import cpu_count
+import os
+
 def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
 
     # itemsDict to control items inclusion feasibility
+    relaxed = False
 
     score = 0
     for p in pallets:
@@ -19,15 +23,30 @@ def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
 
     mod = Model(solver_name=CBC)
     mod.verbose = 0 # hide messages
-    # mod.max_seconds = secBreak # deactivated in CONTINUOUS mode
+
+    print(f'Number of Logical CPU cores: {cpu_count()}')
+
+    mod.threads = cpu_count()
+
+    mod.max_mip_gap = 0.01
+
+    # relaxed = True
+
+    X = [ [ mod.add_var(name=f"X[{i}],[{j}]", var_type=CONTINUOUS) for j in set_N ] for i in set_M ]   
+
+    if not relaxed:
+        mod.max_seconds = secBreak
+        X = [ [ mod.add_var(name=f"X[{i}],[{j}]", var_type=BINARY) for j in set_N ] for i in set_M ] 
    
     # decision matrix for which items will be put in which pallet in node "k"         
-    X = [ [ mod.add_var(name=f"X[{i}],[{j}]", var_type=CONTINUOUS) for j in set_N ] for i in set_M ]   
-    # X = [ [ mod.add_var(name=f"X[{i}],[{j}]", var_type=BINARY) for j in set_N ] for i in set_M ] 
-
+    
     # Z = [ [ mod.add_var(name=f"Z[{a}],[{b}]", var_type=INTEGER) for b in set_N ] for a in set_N ] 
 
-    mod.objective = maximize( xsum( X[i][j] * items[j].S for i in set_M for j in set_N ) )
+    value1 = xsum( X[i][j] * items[j].S for i in set_M for j in set_N  )
+
+    # value2 = xsum( X[i][j] * ( items[j].S * ( pallets[i].PCV - pallets[i].V ) / (pallets[i].V) ) for i in set_M for j in set_N )  
+
+    mod.objective = maximize(value1)
 
     # CONSTRAINTS ----------------------------------------------------------------------------
     

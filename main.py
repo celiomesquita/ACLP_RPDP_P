@@ -253,6 +253,10 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
         # if method == "GRB":
         #     tour.score += max(ObjBound, nodeScore) # linear relaxation
         # else:
+
+        if nodeVol > 1.0:
+            nodeScore /= nodeVol
+
         tour.score += nodeScore
 
         tour.AvgVol    += nodeVol
@@ -318,13 +322,16 @@ if __name__ == "__main__":
     # import sys
     # plot = sys.argv[1]
 
-    # plot = True
-    plot = False
+    plot      = False
+    testing   = False
+    leastCost = False
 
-    testing = False
-    # testing = True
 
-    scenarios = [3,4,5,6]
+    # testing    = True
+    leastCost  = True
+    # plot = True 
+
+    scenarios = [2,3,4,5]
 
     if testing:
         scenarios = [2]
@@ -334,14 +341,14 @@ if __name__ == "__main__":
     # surplus   = "data100"
 
     # methods = ["GRB"]
-    # methods = ["CBC"]
+    methods = ["CBC"]
     # methods = ["Shims"]
     # methods = ["mpShims"]
     # methods = ["mpACO"]
     # methods = ["ACO"]
     # methods = ["TS"]
     # methods = ["GRASP"]
-    methods = ["NMO"]
+    # methods = ["NMO"]
 
 
     # tipo = "KP"
@@ -429,7 +436,14 @@ if __name__ == "__main__":
                     # selects the best tour
                     searchTime = 0
                     searchTime2 = 0 # with 3D packing
+                    bestTourID = -1
                     for pi, tour in enumerate(tours):
+
+                        if leastCost:
+                            secBreak = 3600/cfg.numNodes
+
+                            if pi >= 2:
+                                break
 
                         tour.elapsed = 0
                         tour.elapsed2 = 0 # with 3D packing
@@ -498,7 +512,7 @@ if __name__ == "__main__":
                 print(f"\n{str}")
                 print(f"{surplus}")
                 print(f"{len(tours)} tours")
-                print(f"secBreak: {secBreak}")
+                print(f"secBreak: {secBreak} \t leastCost = {leastCost}")
                 print(f"volThreshold: {volThreshold:.2f}")
                 print(f"Before:\t{beforeDict['value']:.1f}") 
                 print(f"After:\t{afterDict['value']:.1f}")

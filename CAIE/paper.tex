@@ -620,10 +620,16 @@ Our complete strategy is summarized in Algorithm \ref{alg:main}.
 		
 		\For {each $method$} \Comment{$method$ is a MIP solver or a heuristic}
 		
-			\State $f_{\pi_{TSP}} \gets SolveTour(\pi_{TSP}, L, M, C, N, method, time/(K+1))$ \label{main:f1}
-			\State $answer1[scenario,surplus,method] \gets f_{\pi_{TSP}}$ \label{main:a1} \Comment{Results corresponding to $\pi_{TSP}$}
+			\State {\color{blue} $f_{\pi_{dir}} \gets SolveTour(\pi_{dir}, L, M, C, N, method, time)$ } \label{main:fdirect} 
+
+		    \State {\color{blue} $f_{\pi_{rev}} \gets SolveTour(\pi_{rev}, L, M, C, N, method, time)$ } \label{main:freverse}
+		
+			\State {\color{blue} $answer1[scenario,surplus,method] \gets max( f_{\pi_{dir}}, f_{\pi_{rev}}  )$ } \label{main:a1}
+			
 			\For {each $\pi \in S_K$} \label{main:loop1} \Comment{$\pi$ is a permutation of nodes (a tour)}
-				\State $f_{\pi} \gets SolveTour(\pi, L, M, C, N, method, time/K!)$ \Comment{$f_{\pi}$\/ is a solution to the tour $\pi$} \label{main:f2}
+			
+				\State $f_{\pi} \gets SolveTour(\pi, L, M, C, N, method, time/(K+1)!)$ \Comment{$f_{\pi}$\/ is a solution to the tour $\pi$} \label{main:f2}
+				
 			\EndFor \label{main:loop2}
 			\State $answer2[scenario,surplus,method] \gets \max f_{\pi}$ \label{main:a2} \Comment{Best result among all permutations}
 		\EndFor
@@ -635,6 +641,7 @@ Our complete strategy is summarized in Algorithm \ref{alg:main}.
 	\end{algorithmic}
 \end{algorithm}
 
+{\color{blue} In line \ref{main:fdirect}, $SolveTour$ solves the lowest-cost tour, and in line 8, its reverse. }
 
 The aircraft parameters are in Table \ref{tab:larger} (line \ref{main:M}). In this algorithm, we use five values for $scenario$, according to Table \ref{tab:scenarios}, which defines $K$\/ and the set $L$\/ of nodes (line \ref{main:KLC}).
 
@@ -1287,17 +1294,40 @@ The average values were presented for $f_{\pi}$\/ and, for the run time, the wor
 
 In each $scenario$\/, we indicate in bold the best value of $f$\/ found. In each table, we also indicate in bold the best {\bf Normalized}\/ and {\bf Speed-up}\/ values.
 
-{\color{red}
+{\color{blue}
 	
 As the MIP solver was not capable of solving all scenarios in polynomial time or reached the computer's RAM (16 GiB) too early, we decided to execute a relaxed model with the decision variables set to CONTINUOUS (a Gurobi parameter) to obtain the upper bound for the objective function. This approach is much faster than using binary decision variables.
 
+{\color{red}
+Let $X_{ij}^k$\/ and $Y_{iq}^k$\/ be CONTINUOUS variables, where $1 \leq i \leq m$, $1 \leq j \leq n_k$, $1 \leq q \leq m_k$\/ and $0 \leq k \leq K$.
+}
 The upper bound (UB) is the objective function value of a linear programming relaxation of the problem, demonstrating that no integer viable solution can have an objective value greater (in maximization) than this.
 
-We solved all scenarios and instances with Gurobi in a relaxed linear model without a time limit. Although the solutions are not guaranteed to be feasible, it is good for the reader to have an idea of the possible upper bound for the metaheuristic solutions.
+We solved all scenarios and instances with Gurobi in a {\it MIPGap} parameter equal to 1\% to control the minimal quality of the returned solution, without a time limit.
 
-Note that, in Table \ref{tab:20} all $Gurobi\ f$\/ values are italicized to indicate that these values may not be optimal or feasible as the decision variables are not integer.
+Note that, in Table \ref{tab:20} all $Gurobi\ f$\/ values are italicized to indicate that these values are at most 1\% distant from the optimal solution.
 
 }
+
+\begin{table}[H]
+\centering
+\caption{Methods and scenarios with $surplus =1.2$ and the least cost tours criteria}  \label{tab:20leastcost}
+\footnotesize
+\begin{tabular}{c|c|cccc}
+\toprule
+$method$          & {\bf Scenarios} & {\bf 1} & {\bf 2} & {\bf 3} & {\bf 4}  \\
+\toprule
+\multirow{2}{*}{\it Gurobi* } & $f$ & 7.90    & 11.46   & 12.82   & 13.40     \\
+&               {\bf run time (s)}  & 10      & 8       & 11      & 11      \\ 
+\midrule[.1pt]	
+\multirow{2}{*}{\it Shims}    & $f$ & 7.83    & 11.34   & 12.77   & 13.20    \\
+&         {\bf run time (s)}        & 4       & 5       &  6      & 7        \\ 
+\bottomrule
+\multicolumn{6}{c}{*integer relaxed variables}
+\end{tabular}
+\normalsize
+\end{table}
+
 
 \begin{table}[H]
 \centering
@@ -1309,17 +1339,8 @@ $method$& {\bf Scenarios}                 &{\bf 1}&{\bf 2} & {\bf 3}      & {\bf
 \midrule[.1pt]
 {\it Gurobi}     & UB for $f$           & {\it 8.91} & {\it 12.92} & {\it 15.12} & {\it 16.29} & {\it 15.34} & -  \\ %51,84
 \toprule
-\multirow{2}{*}{\it TS }      & $f$     & 5.37       & 5.86        & 5.25        & 4.62        & 3.60       &   \\ %  3.60	 86
-&{\bf run time (s)}                     & 659        & 361         & 251         & 105         & 86         &   \\ 
-\midrule[.1pt]		
-\multirow{2}{*}{\it GRASP }   & $f$     & 8.35       & 11.94       & 12.89       & 14.10       & 12.98      &   \\ % 8.35	 97	
-&{\bf run time (s)}                     & 97         & 156         & 222         & 109         & 105        &   \\ 
-\midrule[.1pt]
-\multirow{2}{*}{\it ACO}     & $f$      & 5.25       & 5.75        & 5.06        & 4.84        & 4.20      &   \\ % 4.20	 1133
-&{\bf run time (s)}                     & 313        & 326         & 303         & 256         & 453       &   \\ 
-\midrule[.1pt]	
-\multirow{2}{*}{\it NMO}     & $f$      & 8.54       & 12.26       &             &             &            &   \\ 
-&{\bf run time (s)}                     & 514        & 1801        &             &             &            &   \\ 
+
+
 \midrule[.1pt]	
 \multirow{2}{*}{\it Shims}   & $f$      & 8.43       & 12.77       & 14.47       & 16.28       & 15.15          &   \\
 &{\bf run time (s)}                     & 4          &  8          &  33         & 93          & 560          &   \\ 
@@ -1331,77 +1352,13 @@ $method$& {\bf Scenarios}                 &{\bf 1}&{\bf 2} & {\bf 3}      & {\bf
 
 
 
-
-\begin{table}[H]
-	\centering
-	\caption{Methods and scenarios with $surplus =1.5$}  \label{tab:50}
-	\footnotesize
-	\begin{tabular}{c|c|ccccc|c}
-		\toprule
-		{$method$}                        & {\bf Results}   & {\bf 1}     &  {\bf 2}    & {\bf 3}      & {\bf 4}      & {\bf 5}    & \specialcell{{\bf Normalized}\\{\bf Speed-up}} \\
-		\toprule
-		\multirow{2}{*}{\textbf{Gurobi}}  & $f$     & 4.756       & 8.84        & 11.94       & 16.21       &{\bf 16.47} & 0.852  \\	% 6828 
-		&{\bf run time (s)}                         & 18        & 68         & 326        & 1,906      & 12,960    & 1.000  \\	 
-		\midrule[.1pt]
-		\multirow{2}{*}{\textbf{TS}}      & $f$     & 8.97       & 11.44       & 12.92       & 15.20       & 15.39      &  0.936 \\		
-		&{\bf run time (s)}                         & 4         & 18         & 88         & 525        & 3,660     &  3.555  \\		
-		\midrule[.1pt]		
-		\multirow{2}{*}{\textbf{GRASP}}   & $f$     & 9.36       & 12.34       & 13.63       & 16.18       & 15.44      &  0.981 \\ 
-		&{\bf run time (s)}                         & 4         & 17         & 86         & 515        & 3,564     &  3.651  \\
-		\midrule[.1pt]	
-		\multirow{2}{*}{\textbf{ACO}}     & $f$     & 9.36       & 12.34       & 13.63       & 16.18       & 15.44      &  0.981 \\
-		&{\bf run time (s)}                         & 5         & 19         & 90         & 539        & 3,720     &  3.492  \\	
-		\midrule[.1pt]	
-		\multirow{2}{*}{\textbf{NMO}}     & $f$     & 9.36       & 12.33       & 13.60       & 16.16       & 15.43      &  0.979 \\ 
-		&{\bf run time (s)}                         & 5         & 19         & 91         & 544        & 3,780     & 3.442  \\
-		\midrule[.1pt]	
-		\multirow{2}{*}{\textbf{Shims}}   & $f$     & {\bf 9.39} & {\bf 12.42} & {\bf 13.72} & {\bf 16.28} & 15.49      &  {\bf 0.986} \\	
-		&{\bf run time (s)}                         & 3         & 11         & 48         & 265        & 1,720     &  {\bf 7.470}  \\
-		\bottomrule
-	\end{tabular}
-	\normalsize
-\end{table}
-
-
-\begin{table}[H]
-	\centering
-	\caption{Methods and scenarios with $surplus = 2.0$}  \label{tab:100}
-	\footnotesize
-	\begin{tabular}{c|c|ccccc|c}
-		\toprule
-		{$method$}                        & {\bf Results}    & {\bf 1}     &  {\bf 2}   & {\bf 3}    & {\bf 4}    & {\bf 5}      & \specialcell{{\bf Normalized}\\{\bf Speed-up}} \\
-		\toprule
-		\multirow{2}{*}{\textbf{Gurobi}}  & $f$              & 4.92      & 6.58      & 6.34       & 7.24       & 8.15      &  0.334 \\ % 9951
-		                                  &{\bf run time (s)}& 29       & 106      & 493      & 2,833     & 19,380      &  1.000  \\ 
-		\midrule[.1pt]
-		\multirow{2}{*}{\textbf{TS}}      & $f$              & 13.72     & 17.53     & 19.28     & 21.78      & 22.35      &  0.951 \\		
-		&{\bf run time (s)}                                  & 5        & 19       & 93       & 556       & 3,900     &  4.992  \\	
-		\midrule[.1pt]		
-		\multirow{2}{*}{\textbf{GRASP}}   & $f$        & 13.99     & 19.39     & 19.86     & 23.50      & 22.57      &  0.998 \\
-		&{\bf run time (s)}                            & 6        & 21       & 97       & 571       & 3,960     &  4.906  \\	
-		\midrule[.1pt]
-		\multirow{2}{*}{\textbf{ACO}}     & $f$        & 13.99     & 19.39     & 19.86     & 23.50      & 22.57      &  0.998 \\
-		&{\bf run time (s)}                            & 6        & 23       & 105      & 597       & 4,080     &  4.745  \\	
-		\midrule[.1pt]	
-		\multirow{2}{*}{\textbf{NMO}}     & $f$        & 13.99     & 19.39     & 19.85     & 23.50      & 22.56      & 0.998 \\	
-		&{\bf run time (s)}                            & 9        & 27       & 120      & 681       & 4,620     & 4.184  \\	
-		\midrule[.1pt]	
-		\multirow{2}{*}{\textbf{Shims}}   & $f$        &{\bf 14.00} & {\bf 19.44} & {\bf 19.94} & {\bf 23.55} & {\bf 22.58} & {\bf 1.000} \\	
-		&{\bf run time (s)}                            & 7        & 20       & 84       & 450       & 2,918     & {\bf 6.570}  \\
-		\bottomrule
-	\end{tabular}
-	\normalsize
-\end{table}
-
 {\color{blue}
 It is important to note that the best tour found in each test was seldom the tour with the lowest cost (the minimal cost tour without considering the CG deviation), but any of the first 25\% of the best tours. This indicates that our strategy of enumerating and solving all tours was assertive, although it is possible to devise a more proactive strategy to discard most of the higher-cost tours and improve performance. This must be one of the next steps in this research.
 
 If a posterior application of this method requires 8, 9, or more nodes, it is possible to use this 25\% as a threshold to discard the higher-cost tours and keep the run time within an operational acceptable limit for the client.
 }
 
-In Tables \ref{tab:20}, \ref{tab:50} and \ref{tab:100}, $Gurobi$\/ was the slowest method and $Shims$\/ was the fastest. This was expected, as $Gurobi$\/ is a MIP solver, which seeks an optimal solution within the established constraints, usually reaching its time limit on each node, while {\it Shims} is a fast heuristic. This way, $Gurobi$\/ even demands prohibitive times (more than 5 hours in scenario 6 of Table \ref{tab:100}), while the maximum time required by $Shims$\/ did not reach one hour.
 
-Considering the {\bf Normalized}\/ values, in Table \ref{tab:20} $Gurobi$\/ was the best ($0.997$), followed closely by $Shims$\/ ($0.939$). In Tables \ref{tab:50} and \ref{tab:100}, $Shims$ was the best ($0.986$\/ and $1.000$). As expected, the performance of $Gurobi$\/ drops sharply as the volume of shipments at the nodes increases: $0.852$\/ in Table \ref{tab:50} and $0.334$\/ in Table \ref{tab:100}.
 
 It is worth noting that the other heuristics always obtained {\bf Normalized}\/ values greater than or equal to $0.9$, and were always faster than $Gurobi$.
 
