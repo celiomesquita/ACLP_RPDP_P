@@ -68,6 +68,10 @@
 \newcommand{\specialcell}[2][c]{%
 	\begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
 
+\usepackage{textcomp}
+\usepackage{graphicx} 
+\setlength{\fboxsep}{0.005pt}
+\newcommand{\tmpframe}[1]{\fbox{#1}}
 
 \journal{Computers \& Industrial Engineering}
 
@@ -649,15 +653,15 @@ The aircraft parameters are in Table \ref{tab:larger} (line \ref{main:M}). In th
 \begin{table}[H]
 	\centering
 	\caption{Testing scenarios}  \label{tab:scenarios}
-	\begin{tabular}{c c c }
+	\begin{tabular}{c c c c}
 		\toprule
-		{\bf Scenario} & {$K$} & {$L$} \\		
+		{\bf Scenario} & {$K$} & {$L$} & {Shortest tours} \\		
 		\midrule
-		1 & 2    & \{$1,2$\}           \\
-		2 & 3    & \{$1,2,3$\}         \\
-		3 & 4    & \{$1,2,3,4$\}       \\
-		4 & 5    & \{$1,2,3,4,5$\}     \\
-		5 & 6    & \{$1,2,3,4,5,6$\}   \\
+		1 & 2    & \{$1,2$\}           & 0 1 2 0 \\
+		2 & 3    & \{$1,2,3$\}         & 0 1 2 3 0 \\
+		3 & 4    & \{$1,2,3,4$\}       & 0 4 1 2 3 0 \\
+		4 & 5    & \{$1,2,3,4,5$\}     & 0 4 1 2 5 3 0 \\
+		5 & 6    & \{$1,2,3,4,5,6$\}   & 0 4 1 2 6 5 3 0 \\
 		\bottomrule
 	\end{tabular}
 \end{table}
@@ -1296,58 +1300,80 @@ In each $scenario$\/, we indicate in bold the best value of $f$\/ found. In each
 
 {\color{blue}
 	
-As the MIP solver was not capable of solving all scenarios in polynomial time or reached the computer's RAM (16 GiB) too early, we decided to execute a relaxed model with the decision variables set to CONTINUOUS (a Gurobi parameter) to obtain the upper bound for the objective function. This approach is much faster than using binary decision variables.
+As the MIP solver was not capable of solving all scenarios in polynomial time or reached the computer's RAM (16 GiB) too early, we decided to set the Gurobi {\it MIPgap} parameter to 1\% to control the minimal quality of the returned solutions and abbreviate the solution time.
 
-{\color{red}
-Let $X_{ij}^k$\/ and $Y_{iq}^k$\/ be CONTINUOUS variables, where $1 \leq i \leq m$, $1 \leq j \leq n_k$, $1 \leq q \leq m_k$\/ and $0 \leq k \leq K$.
-}
-The upper bound (UB) is the objective function value of a linear programming relaxation of the problem, demonstrating that no integer viable solution can have an objective value greater (in maximization) than this.
-
-We solved all scenarios and instances with Gurobi in a {\it MIPGap} parameter equal to 1\% to control the minimal quality of the returned solution, without a time limit.
-
-Note that, in Table \ref{tab:20} all $Gurobi\ f$\/ values are italicized to indicate that these values are at most 1\% distant from the optimal solution.
+More details on the Gurobi {\it MIPgap} refer to \cite{mipgap}.
 
 }
 
 \begin{table}[H]
 \centering
-\caption{Methods and scenarios with $surplus =1.2$ and the least cost tours criteria}  \label{tab:20leastcost}
+\caption{Solutions with $surplus =1.2$\/ with the direct and reverse least cost tours.}  \label{tab:20}
 \footnotesize
-\begin{tabular}{c|c|cccc}
+\begin{tabular}{c|c|ccccc|c}
 \toprule
-$method$          & {\bf Scenarios} & {\bf 1} & {\bf 2} & {\bf 3} & {\bf 4}  \\
+$method$          & {\bf Scenarios} & {\bf 1} & {\bf 2} & {\bf 3} & {\bf 4} & {\bf 5} & \specialcell{{\bf Normalized}\\{\bf Speed-up}}   \\
 \toprule
-\multirow{2}{*}{\it Gurobi* } & $f$ & 7.90    & 11.46   & 12.82   & 13.40     \\
-&               {\bf run time (s)}  & 10      & 8       & 11      & 11      \\ 
+\multirow{2}{*}{\it Gurobi* } & $f$ & 8.52    & 11.70   & 13.07   & 13.54 & 12.44     &  1.00\\ % 5927
+&               {\bf run time (s)}  & 17      & 17       & 16      & 17   & 26        &  1.0 \\ % 93
 \midrule[.1pt]	
-\multirow{2}{*}{\it Shims}    & $f$ & 7.83    & 11.34   & 12.77   & 13.20    \\
-&         {\bf run time (s)}        & 4       & 5       &  6      & 7        \\ 
+\multirow{2}{*}{\it Shims}    & $f$ & 7.83    & 11.34   & 12.77   & 13.20 & 12.22     &  0.97 \\ % 5736
+&         {\bf run time (s)}        & 4       & 5       &  6      & 7     & 10        &  2.9  \\ % 32
+
 \bottomrule
-\multicolumn{6}{c}{*integer relaxed variables}
+\multicolumn{8}{c}{Average $f$ and run time values of K! tours.}\\
+\toprule
+
+\multirow{2}{*}{\it Gurobi* } & $f$ & 8.51    & 12.25   & 13.32   & 14.61  & x     &  \\ % 5927
+&               {\bf run time (s)}  & 25      & 36      & 121     & 297    & x        &  1.0 \\ % 93
+\midrule[.1pt]	
+\multirow{2}{*}{\it Shims}    & $f$ & 8.11    & 12.18   & 13.25   & 14.57  & 14.33     &  0.97 \\ % 5736
+&         {\bf run time (s)}        & 4       & 8       & 33      & 95     & 572       &  2.9  \\ % 32
+\bottomrule
+\multicolumn{8}{c}{*{\it MIPgap} parameter set to 1\%. The $f$ values are \textpm 1\% distant from the optimal solution}\\
+
 \end{tabular}
 \normalsize
 \end{table}
 
 
+97\% of 16GiB was the Read-Only Memory (RAM) state before we aborted the Gurobi execution on solving scenario 5 in Table \ref{tab:20}.
+
+\begin{figure}[H]
+	\centering
+	\tmpframe{\includegraphics[scale=0.6]{Images/memory.png}}
+	\captionof{figure}{RAM usage on solving scenario 5 by Gurobi (Table \ref{tab:20}).}
+	\label{fig:memory}
+\end{figure}
+
 \begin{table}[H]
-\centering
-\caption{Methods and scenarios with $surplus =1.2$}  \label{tab:20}
-\footnotesize
-\begin{tabular}{c|c|ccccc|c}
-\toprule
-$method$& {\bf Scenarios}                 &{\bf 1}&{\bf 2} & {\bf 3}      & {\bf 4}      & {\bf 5}  & \specialcell{{\bf Normalized}\\{\bf Speed-up}}  \\
-\midrule[.1pt]
-{\it Gurobi}     & UB for $f$           & {\it 8.91} & {\it 12.92} & {\it 15.12} & {\it 16.29} & {\it 15.34} & -  \\ %51,84
-\toprule
-
-
-\midrule[.1pt]	
-\multirow{2}{*}{\it Shims}   & $f$      & 8.43       & 12.77       & 14.47       & 16.28       & 15.15          &   \\
-&{\bf run time (s)}                     & 4          &  8          &  33         & 93          & 560          &   \\ 
-
-\bottomrule
-\end{tabular}
-\normalsize
+	\centering
+	\caption{Solutions with $surplus=1.5$\/ with the direct and reverse least cost tours.}  \label{tab:50}
+	\footnotesize
+	\begin{tabular}{c|c|ccccc|c}
+		\toprule
+		$method$          & {\bf Scenarios} & {\bf 1} & {\bf 2} & {\bf 3} & {\bf 4} & {\bf 5} & \specialcell{{\bf Normalized}\\{\bf Speed-up}}   \\
+		\toprule
+		\multirow{2}{*}{\it Gurobi* } & $f$ &     &    &    &   &   &  \\ % 
+		&               {\bf run time (s)}  &     &    &    &   &   &   \\ % 
+		\midrule[.1pt]	
+		\multirow{2}{*}{\it Shims}    & $f$ &     &    &    &   &   &   \\ % 
+		&         {\bf run time (s)}        &     &    &    &   &   &    \\ % 
+		
+		\bottomrule
+		\multicolumn{8}{c}{Average $f$ and run time values of K! tours.}\\
+		\toprule
+		
+		\multirow{2}{*}{\it Gurobi* } & $f$ & 11.81 & 17.01 & 18.25 & 20.59 & 18.36   &  \\ % 
+		&               {\bf run time (s)}  & 53    & 61    & 193   & 470   & 2241    &   \\ % 
+		\midrule[.1pt]	
+		\multirow{2}{*}{\it Shims}    & $f$ & 11.33 & 16.97 & 17.56 & 20.43 & 17.94   &   \\ % 
+		&         {\bf run time (s)}        & 4     & 8     & 34    & 96    & 591     &   \\ % 
+		\bottomrule
+		\multicolumn{8}{c}{*{\it MIPgap} parameter set to 1\%. The $f$ values are \textpm 1\% distant from the optimal solution}\\
+		
+	\end{tabular}
+	\normalsize
 \end{table}
 
 
@@ -1370,6 +1396,8 @@ It is not possible to state how far these results are from the optimal solutions
 Another important test is to compare the best tour score/cost ratio with the least expensive tour score/cost ratio. This is important to see how far our solution strategy is from the simplest form, just solving a TSP.
 
 For this achievement, we ran {\it Shims} in 5 scenarios with 7 instances each, and 3 volume surpluses, collecting the averages of the best tour result and the least cost tour result.
+
+ESTA TABELA DEVERÁ REFEITA DEPOIS QUE AS ANTERIORES ESTIVEREM PRONTAS.
 
 \begin{table}[H]
 \centering
@@ -1502,6 +1530,8 @@ Vol. 56 (4), pp. 1581-1592, 2018.
 \bibitem{zhao2021} X. Zhao, Y. Yuan, Y. Dong and R. Zhao, Optimization approach to the aircraft weight and balance problem with the centre of gravity envelope constraints, {\it IET Intelligent Transport Systems}, Vol. 15 (10), pp. 1269-1286, 2021.
 
 \bibitem{LopezIbanezManuel2016} López-Ibáñez, Manuel and Dubois-Lacoste, Jérémie and Pérez Cáceres, Leslie and Birattari, Mauro and Stützle, Thomas. 2016. The irace package: Iterated racing for automatic algorithm configuration. Elsevier. pp. 43-58. Volume 3.
+
+\bibitem{mipgap} What is the MIPGap? \url{https://support.gurobi.com/hc/en-us/articles/8265539575953-What-is-the-MIPGap-}, 2023.
 
 
 \end{thebibliography}

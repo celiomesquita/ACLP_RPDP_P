@@ -26,9 +26,10 @@ def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
 
     print(f'Number of Logical CPU cores: {cpu_count()}')
 
-    mod.threads = cpu_count()
+    # mod.threads = cpu_count()
+    mod.threads = 1
 
-    mod.max_mip_gap = 0.01
+    mod.max_mip_gap = 0.005
 
     # relaxed = True
 

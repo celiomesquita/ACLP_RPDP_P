@@ -328,21 +328,22 @@ if __name__ == "__main__":
 
 
     # testing    = True
-    leastCost  = True
+    # leastCost  = True
     # plot = True 
 
-    scenarios = [2,3,4,5]
+    scenarios = [2,3,4,5,6]
+    # scenarios = [6]
 
     if testing:
         scenarios = [2]
 
-    surplus   = "data20"
-    # surplus   = "data50"
+    # surplus   = "data20"
+    surplus   = "data50"
     # surplus   = "data100"
 
     # methods = ["GRB"]
-    methods = ["CBC"]
-    # methods = ["Shims"]
+    # methods = ["CBC"]
+    methods = ["Shims"]
     # methods = ["mpShims"]
     # methods = ["mpACO"]
     # methods = ["ACO"]
@@ -509,6 +510,7 @@ if __name__ == "__main__":
                 str = f"{leastSC/numInst:.2f}\t {instanceSC/numInst:.2f}\t {avgTime:.0f}\t {avgTime2:.0f}\t {worstTime:.1f}\t {bestAV:.2f}\t {bestAT:.2f}\t {numOptDict['numOpt']:.1f}\t {beforeDict['value']:.1f} & {afterDict['value']:.1f} & {percent:.1f}\n"
                 # instances average
                 writeAvgResults(method, scenario, str, surplus)
+
                 print(f"\n{str}")
                 print(f"{surplus}")
                 print(f"{len(tours)} tours")
