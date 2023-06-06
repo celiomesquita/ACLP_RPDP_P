@@ -3,7 +3,7 @@
 from mip import Model, xsum, maximize, BINARY, CBC, CONTINUOUS, INTEGER
 
 from os import cpu_count
-import os
+# import os
 
 def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
 
@@ -24,7 +24,7 @@ def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
     mod = Model(solver_name=CBC)
     mod.verbose = 0 # hide messages
 
-    print(f'Number of Logical CPU cores: {cpu_count()}')
+    # print(f'Number of Logical CPU cores: {cpu_count()}')
 
     # mod.threads = cpu_count()
     mod.threads = 1
@@ -45,6 +45,7 @@ def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
 
     value1 = xsum( X[i][j] * items[j].S for i in set_M for j in set_N  )
 
+    # Lagrangian relaxation try
     # value2 = xsum( X[i][j] * ( items[j].S * ( pallets[i].PCV - pallets[i].V ) / (pallets[i].V) ) for i in set_M for j in set_N )  
 
     mod.objective = maximize(value1)

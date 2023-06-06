@@ -338,12 +338,12 @@ if __name__ == "__main__":
         scenarios = [2]
 
     # surplus   = "data20"
-    surplus   = "data50"
-    # surplus   = "data100"
+    # surplus   = "data50"
+    surplus   = "data100"
 
     # methods = ["GRB"]
-    # methods = ["CBC"]
-    methods = ["Shims"]
+    methods = ["CBC"]
+    # methods = ["Shims"]
     # methods = ["mpShims"]
     # methods = ["mpACO"]
     # methods = ["ACO"]

@@ -33,6 +33,7 @@ def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
     # initialize a model
     mod = gp.Model()
     mod = mod.relax()
+    mod.Params.TimeLimit = secBreak
     
     # decision matrix for which items will be put in which pallet in node "k"         
     # X = [ [ mod.addVar(name=f"X[{i}],[{j}]", vtype=GRB.BINARY) for j in set_N ] for i in set_M ]  

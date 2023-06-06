@@ -981,12 +981,17 @@ In Equation \ref{eq:costs2}, the first parcel denotes the fuel cost from the bas
 	\sum_{i=1}^{m} X_{ij} \leq 1; \ j \in \{1, \ldots, n_{\pi_k}\}
 \end{equation}
 
-\begin{equation} \label{eq:if1}
-	to_i^{\pi_k} = to_j;\ X_{ij} = 1; \ i \in \{1, \ldots, m\}; \ j \in \{1, \ldots, n_{\pi_k}\}
-\end{equation}
-
 \begin{equation} \label{eq:if2}
 	X_{ij}       = 0;\ to_j \notin L_{\pi_k}; \ i \in \{1, \ldots, m\}; \ j \in \{1, \ldots, n_{\pi_k}\}
+\end{equation}
+
+
+\begin{equation} \label{eq:ifA}
+  X_{ij} \leq X_{ij} \times (T_i^{\pi_k} - to_j + 1); \ i \in \{1, \ldots, m\}; \ j \in \{1, \ldots, n_{\pi_k}\}
+\end{equation}
+
+\begin{equation} \label{eq:ifB}
+	X_{ij} \leq X_{ij} \times (to_j - T_i^{\pi_k} + 1 ); \ i \in \{1, \ldots, m\}; \ j \in \{1, \ldots, n_{\pi_k}\}
 \end{equation}
 
 
@@ -1324,11 +1329,11 @@ $method$          & {\bf Scenarios} & {\bf 1} & {\bf 2} & {\bf 3} & {\bf 4} & {\
 \multicolumn{8}{c}{Average $f$ and run time values of K! tours.}\\
 \toprule
 
-\multirow{2}{*}{\it Gurobi* } & $f$ & 8.51    & 12.25   & 13.32   & 14.61  & x     &  \\ % 5927
-&               {\bf run time (s)}  & 25      & 36      & 121     & 297    & x        &  1.0 \\ % 93
+\multirow{2}{*}{\it Gurobi* } & $f$ & 8.51    & 12.25   & 13.32   & 14.61  & x        & 1.00 \\ % 4869
+&               {\bf run time (s)}  & 25      & 36      & 121     & 297    & x        &  1.0 \\ % 479
 \midrule[.1pt]	
-\multirow{2}{*}{\it Shims}    & $f$ & 8.11    & 12.18   & 13.25   & 14.57  & 14.33     &  0.97 \\ % 5736
-&         {\bf run time (s)}        & 4       & 8       & 33      & 95     & 572       &  2.9  \\ % 32
+\multirow{2}{*}{\it Shims}    & $f$ & 8.11    & 12.18   & 13.25   & 14.57  & 14.33    &  0.99 \\ % 4811
+&         {\bf run time (s)}        & 4       & 8       & 33      & 95     & 572      &  3.4  \\ % 140
 \bottomrule
 \multicolumn{8}{c}{*{\it MIPgap} parameter set to 1\%. The $f$ values are \textpm 1\% distant from the optimal solution}\\
 
@@ -1354,21 +1359,21 @@ $method$          & {\bf Scenarios} & {\bf 1} & {\bf 2} & {\bf 3} & {\bf 4} & {\
 		\toprule
 		$method$          & {\bf Scenarios} & {\bf 1} & {\bf 2} & {\bf 3} & {\bf 4} & {\bf 5} & \specialcell{{\bf Normalized}\\{\bf Speed-up}}   \\
 		\toprule
-		\multirow{2}{*}{\it Gurobi* } & $f$ &     &    &    &   &   &  \\ % 
-		&               {\bf run time (s)}  &     &    &    &   &   &   \\ % 
+		\multirow{2}{*}{\it Gurobi* } & $f$ & 11.80 & 16.74 & 18.04 & 18.86 & 16.92 & 1.00 \\ % 8236
+		&               {\bf run time (s)}  & 38    & 30    & 27    & 29    & 81    & 1.00  \\ % 205
 		\midrule[.1pt]	
-		\multirow{2}{*}{\it Shims}    & $f$ &     &    &    &   &   &   \\ % 
-		&         {\bf run time (s)}        &     &    &    &   &   &    \\ % 
+		\multirow{2}{*}{\it Shims}    & $f$ & 10.89 & 16.65 & 17.80 & 18.69 & 16.45 & 0.98  \\ % 8048
+		&         {\bf run time (s)}        & 4     & 5     & 6     & 7     & 8     & 7.1   \\ % 29
 		
 		\bottomrule
 		\multicolumn{8}{c}{Average $f$ and run time values of K! tours.}\\
 		\toprule
 		
-		\multirow{2}{*}{\it Gurobi* } & $f$ & 11.81 & 17.01 & 18.25 & 20.59 & 18.36   &  \\ % 
-		&               {\bf run time (s)}  & 53    & 61    & 193   & 470   & 2241    &   \\ % 
+		\multirow{2}{*}{\it Gurobi* } & $f$ & 11.81 & 17.01 & 18.25 & 20.59 & 18.36   & 1.00 \\ % 8602
+		&               {\bf run time (s)}  & 53    & 61    & 193   & 470   & 2241    & 1.0  \\ % 3018
 		\midrule[.1pt]	
-		\multirow{2}{*}{\it Shims}    & $f$ & 11.33 & 16.97 & 17.56 & 20.43 & 17.94   &   \\ % 
-		&         {\bf run time (s)}        & 4     & 8     & 34    & 96    & 591     &   \\ % 
+		\multirow{2}{*}{\it Shims}    & $f$ & 11.33 & 16.97 & 17.56 & 20.43 & 17.94   & 0.98  \\ % 8423
+		&         {\bf run time (s)}        & 4     & 8     & 34    & 96    & 591     & 4.1 \\ % 733
 		\bottomrule
 		\multicolumn{8}{c}{*{\it MIPgap} parameter set to 1\%. The $f$ values are \textpm 1\% distant from the optimal solution}\\
 		
@@ -1376,6 +1381,35 @@ $method$          & {\bf Scenarios} & {\bf 1} & {\bf 2} & {\bf 3} & {\bf 4} & {\
 	\normalsize
 \end{table}
 
+\begin{table}[H]
+	\centering
+	\caption{Solutions with $surplus=2.0$\/ with the direct and reverse least cost tours.}  \label{tab:100}
+	\footnotesize
+	\begin{tabular}{c|c|ccccc|c}
+		\toprule
+		$method$          & {\bf Scenarios} & {\bf 1} & {\bf 2} & {\bf 3} & {\bf 4} & {\bf 5} & \specialcell{{\bf Normalized}\\{\bf Speed-up}}   \\
+		\toprule
+		\multirow{2}{*}{\it Gurobi* } & $f$ &  &  &  &  &  &  \\ % 
+		&               {\bf run time (s)}  & 38    & 30    & 27    & 29    & 81    &   \\ % 
+		\midrule[.1pt]	
+		\multirow{2}{*}{\it Shims}    & $f$ &  &  &  &  &  &   \\ % 
+		&         {\bf run time (s)}        & 4     & 5     & 6     & 7     & 8     &    \\ % 
+		
+		\bottomrule
+		\multicolumn{8}{c}{Average $f$ and run time values of K! tours.}\\
+		\toprule
+		
+		\multirow{2}{*}{\it Gurobi* } & $f$ &  &  &  &  &    &  \\ % 
+		&               {\bf run time (s)}  & 53    & 61    & 193   & 470   & 2241    &   \\ % 
+		\midrule[.1pt]	
+		\multirow{2}{*}{\it Shims}    & $f$ &  &  &  &  &    &   \\ % 
+		&         {\bf run time (s)}        & 4     & 8     & 34    & 96    & 591     &   \\ % 
+		\bottomrule
+		\multicolumn{8}{c}{*{\it MIPgap} parameter set to 1\%. The $f$ values are \textpm 1\% distant from the optimal solution}\\
+		
+	\end{tabular}
+	\normalsize
+\end{table}
 
 
 {\color{blue}
