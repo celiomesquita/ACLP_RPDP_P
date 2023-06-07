@@ -1100,7 +1100,10 @@ In this heuristic, described in Algorithm \ref{alg:shims}, pallets $i$\/ are con
 			\For{$q \in \{1,\ldots,m_{\pi_k}\}$}
 			
 				\If{$(i, q) \in E_{Q_{\pi_k}}$} 
-					\State $volume_i \gets volume_i + v_q$ 
+					\State $volume_i \gets volume_i + v_q$
+					
+					\State {\color{blue} $\tau^{\pi_k} \gets \tau^{\pi_k} + w_q \times D_i$ }
+					
 				\EndIf		
 			\EndFor	
 			
