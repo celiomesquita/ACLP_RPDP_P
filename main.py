@@ -326,10 +326,16 @@ if __name__ == "__main__":
     testing   = False
     leastCost = False
 
+    # timeLimit = 1200
+    timeLimit = 2400
+    # timeLimit = 3600
+
 
     # testing    = True
     # leastCost  = True
     # plot = True 
+
+    # free -s 1 -h -c 3  memory
 
     scenarios = [2,3,4,5,6]
     # scenarios = [6]
@@ -337,9 +343,9 @@ if __name__ == "__main__":
     if testing:
         scenarios = [2]
 
-    # surplus   = "data20"
+    surplus   = "data20"
     # surplus   = "data50"
-    surplus   = "data100"
+    # surplus   = "data100"
 
     # methods = ["GRB"]
     methods = ["CBC"]
@@ -393,7 +399,7 @@ if __name__ == "__main__":
 
                 cfg = common.Config(scenario)
 
-                secBreak = 3600/common.factorial(cfg.numNodes)
+                secBreak = timeLimit/common.factorial(cfg.numNodes)
                 
                 for i, cols in enumerate(dists):
                     for j, dist in enumerate(cols):
@@ -441,7 +447,7 @@ if __name__ == "__main__":
                     for pi, tour in enumerate(tours):
 
                         if leastCost:
-                            secBreak = 3600/cfg.numNodes
+                            secBreak = timeLimit/cfg.numNodes
 
                             if pi >= 2:
                                 break
