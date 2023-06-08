@@ -1,0 +1,223 @@
+% !TeX spellcheck = en_US
+%\documentclass[preprint,authoryear]{elsarticle}
+\documentclass[preprint]{elsarticle}
+% sudo apt-get install -y texlive-publishers
+
+\usepackage[left]{lineno}
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{multirow}
+
+\usepackage{lineno,hyperref}
+\modulolinenumbers[5]
+
+\usepackage[none]{hyphenat}
+
+\usepackage{url}
+\usepackage{booktabs}
+
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usetikzlibrary{positioning}
+
+\usepackage{mathtools}
+\usepackage{amssymb}
+\usepackage{amsthm}
+
+\usepackage{caption}
+\captionsetup{labelfont=bf}
+\captionsetup{skip=0pt}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+\usepackage{algorithm}
+
+\usepackage[noend]{algpseudocode}
+
+\usepackage[margin=0.9in]{geometry}
+
+\usepackage[normalem]{ulem}
+%\usepackage{xcolor}
+
+\newcommand{\Comentar}[1]{\State {\cmmt{#1}}}
+\newcommand{\Break}{\State \textbf{break}}
+\renewcommand{\Return}{\State \textbf{return}~}
+\renewcommand{\algorithmicensure}{\textbf{Parameters:}}
+
+\renewcommand\algorithmicthen{}
+\renewcommand\algorithmicdo{}
+
+
+\algblock{ForEach}{EndFor}
+\algblock{ForDownTo}{EndFor}
+\algblock{ForTo}{EndFor}
+
+\newcommand{\Block}[1]{\State #1 \{}
+\newcommand{\EndBlock}{\State \}}
+
+\usepackage{scrextend}
+\newcommand{\boldm}[1] {\mathversion{bold}#1\mathversion{normal}}
+\newcommand{\round}[1]{\ensuremath{\lfloor#1\rceil}}
+\usepackage{setspace}
+\usepackage{array}
+\usepackage{color, colortbl}
+\definecolor{Gray}{gray}{0.9}
+\hyphenation{cost-ef-fec-tive-ness}
+
+\newcommand{\specialcell}[2][c]{%
+	\begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+
+\usepackage{textcomp}
+
+\journal{Computers \& Industrial Engineering}
+
+
+\begin{document}
+
+
+\begin{algorithm}[H]
+	\caption{$Shims$\/ heuristic at the node $\pi_k$}  \label{alg:shims}
+	\begin{algorithmic}[1]
+		
+		\Procedure{$SolveNode$}{$Shims, \pi_k, G, time$}
+	
+		\State $T_{begin} \gets$ current system time
+	
+		\State Let $G(M \cup N_{\pi_k} \cup Q_{\pi_k}, E_{Q_{\pi_k}})$   \label{shims:initQ}
+		
+		\State Sort $M$ by $|D_i^{long}|$ in non-descending order \label{shims:pallets}
+		
+		\State $E_{N_{\pi_k}} \gets \varnothing$  \Comment{An empty set of pallet-item edges}
+				
+		\State $\tau_{\pi_k} \gets 0$	 \Comment{Torque at the node $\pi_k$}	
+		\State $\tau_{max} \gets W_{max} \times limit^{CG}_{long}$ \Comment{Maximum aircraft torque}
+			
+		\State $vol_i \gets 0$, $1\leq i \leq m$
+			
+		\State $limit \gets 0.92$  \label{shims:limit}
+		
+		\For{$i \gets 1$ to $m$}  \label{shims:eta1_a}
+							
+			\For{$q \gets 1$ to $m_{\pi_k}$}
+			
+				\If{$(i, q) \in E_{Q_{\pi_k}}$} 
+					\State $vol_i \gets vol_i + v_q$ 
+					\State $\tau_{\pi_k} \gets \tau_{\pi_k} + w_q \times D_i^{long}$
+				\EndIf	
+			\EndFor	
+			\State Let $E$\/ be an array of $n_{\pi_k}$ possibles edges of the pallet $i$\/ sorted by $\theta_{ij}^{\pi_k}$ in non-ascending order \label{shims:possible}
+			\State $\eta_1 \gets 1$  
+			\Repeat
+				\State $e_{ij} \gets E_{\eta_1}$ \Comment{$e_{ij}$\/ is the allocation of the item $j$\/ to the pallet $i$}
+								
+				\If{ ($E_{N_{\pi_k}} \cup \{e_{ij}\}$ is feasible) {\bf and} ($vol_i \leq V_i \times limit$) {\bf and} ($| \tau_{\pi_k} + w_j \times D_i^{long} | \leq W_{max} \times limit^{CG}_{long}$)} 
+				
+					\State $E_{N_{\pi_k}} \gets E_{N_{\pi_k}} \cup \{e_{ij}\}$
+					
+					\State $vol_i \gets vol_i + v_j$
+					
+					\State $\tau_{\pi_k} \gets \tau_{\pi_k} + w_j \times D_i^{long}$
+					
+					\State $\eta_1 \gets \eta_1 + 1$ 
+				
+				\EndIf
+			\Until ($vol_i > V_i \times limit$) {\bf or} ($\eta_1>n_{\pi_k}$)		 \Comment{End of the first phase} \label{shims:endfirst}	
+				
+
+			\State $slack_i \gets V_i - vol_i$  \label{shims:beginsecond}
+			\State $\eta_2 \gets \eta_1$  \label{shims:eta2a}
+			\While{($\eta_2 \leq n_{\pi_k}$) {\bf and} ($ vol_i < (1 + 3 \times (1-limit)) \times V_i)$)}
+
+					\State $e_{ij} \gets E_{\eta_2}$
+			
+					\State $vol_i \gets vol_i + v_j$
+					\State $\eta_2 \gets \eta_2 + 1$  \label{shims:eta2} \label{shims:endsecond} \Comment{End of the second phase}
+			\EndWhile 
+				
+			
+			\State $vol \gets 0$, $b \gets 1$, $shims_b \gets \varnothing$, {\color{blue} $Set \gets \{ shims_b \}$ } \label{shims:beginthird} 
+			
+		
+			
+			\For{$x \gets \eta_1$ to $\eta_2$} \label{edges_indexes}
+				
+				\If{ $T_{current} - T_{begin} > time$}
+				\State {\bf break}  \Comment{Time limit exceeded}
+				\EndIf
+			
+				\State $NewShims \gets$ {\bf True} \label{new_shims}
+				\State $e_{ij} \gets E_x$
+				
+				\For{$shims \in Set$} \label{shims_set}
+				
+					\If {($e_{ij} \not\in (E_{N_{\pi_k}} \cup shims))$ {\bf and} ($e_{ij}$ is feasible)  {\bf and} ($(v_j + vol) \leq slack_i$)}
+					
+						\State $shims \gets shims \cup \{e_{ij}\}$
+						\State $vol \gets vol + v_j$
+						\State $NewShims \gets$ {\bf False} \label{new_shims_false}
+						
+						\State {\bf break}  
+					\EndIf
+				
+				\EndFor 
+			
+				\If{$NewShims$} \label{new_shims2}
+					\State $vol \gets 0$
+					\State $b \gets b + 1$
+					\State $shims_b \gets \{\ \}$
+					\State $shims_b \gets shims_b \cup \{e_{ij}\}$
+					\State $Set \gets Set \cup \{\ shims_b\ \}$
+				\EndIf
+			
+			\EndFor 
+			
+			\State $sh_w \gets shims$, where $shims \in Set$ and $\sum_{e_{ab} \in shims} w_b$ is maximum  \label{best_weight}		
+			\State $sh_v \gets shims$, where $shims \in Set$ and $\sum_{e_{ab} \in shims} v_b$ is maximum \label{best_volume}
+			\State $sh_{best} \gets shims$, where $shims \in \{sh_w, sh_v\}$ and $\sum_{e_{ab} \in x} s_b$ is maximum \label{best_score}
+			
+			\State $E_{N_{\pi_k}} \gets E_{N_{\pi_k}} \cup sh_{best}$ 	\label{shims:endthird}   \Comment{End of the third phase}
+
+		\EndFor
+		
+		\Return $G(M \cup N_{\pi_k} \cup Q_{\pi_k}, E_{Q_{\pi_k}} \cup E_{N_{\pi_k}})$
+		
+		\EndProcedure
+	\end{algorithmic}
+\end{algorithm}
+
+Initially, $Q_{\pi_k}$\/ (line \ref{shims:initQ}) corresponds to the packed contents that remain on board. It is important to remember that $E_{Q_{\pi_k}}$\/ and $M$\/ were modified by $UpdatePacked(M, Q_{\pi_k}, \pi_k)$ and $SetPalletsDestinations(M, \pi_k)$. Then, the pallets $i$\/ are considered in non-descending order of $|D_i^{long}|$. 
+
+For each pallet $i$, its $n_{\pi_k}$\/ possible edges $e_{ij}^{\pi_k}$\/ are considered in non-increasing order of $\theta_{ij}^{\pi_k}$:
+
+{\color{blue}
+	
+\begin{itemize}
+	
+
+	
+	\item In the {\it greedy phase}\/ (lines \ref{shims:pallets}-\ref{shims:endfirst}), a partial solution for each pallet $i$\/ is constructed by edges inclusion, until its volume $V_i \times limit$\/ is reached. The value $limit=0.92$\/ (line \ref{shims:limit}) was empirically determined by the {\it iRace} tool \cite{LopezIbanezManuel2016}.
+	
+	From lines \ref{shims:limit} to \ref{shims:endfirst}, as items are inserted, the value of $\eta_1$ is incremented and stops when the pallet volume reaches 92\% of its capacity.
+
+	When it stops, this is the initial value of $\eta_2$, line \ref{shims:eta2a}.
+	$\eta_2$, then it is incremented until the volume exceeds the pallet capacity with a factor of 1 + ( 2 x [1 - limit]).
+	This factor of was obtained empirically, through many test with different problem instances.
+	Higher values can improve the solution, but at the expense of performance. So we tried to keep it as low as possible, a trade-off between quality and performance.
+	
+	\item In the {\it composition phase}\/ (lines \ref{shims:beginsecond}-\ref{shims:endsecond}), a set of shims named $Set$\/ is created for each pallet $i$, where each shim is formed by a set of edges in the range $[\eta_1,\eta_2]$, whose total volume is limited by $slack_i$.
+		
+	After the $\eta_2$ index, there may be items with little probability of being in the optimal solution because their low value of $\theta^{\pi_k}_{ij}$, being not considered for inclusion.
+	
+	In line \ref{shims:beginthird} the initial $Shim$ and $Set$ are created.
+	
+	In this phase, the heuristic that provided the best results, both in terms of time and quality, is based on {\it First-Fit Decreasing}, which is an approximation algorithm for the {\it Bin Packing Problem}\/ \cite{JohnsonGarey1985}. Basically, shims are created by accumulating the following edges, taking $slack_i$\/ as a limit.
+	
+	\item In the {\it selection phase}\/ (lines \ref{shims:beginthird}-\ref{shims:endthird}), the best shim in $Set$\/ is chosen. Initially, two shims are found: $sh_w$\/ with larger weight, and $sh_v$\/ with larger volume. Between the two, the one with the highest score will be chosen and its edges are inserted into $E_{N_{\pi_k}}$.
+	
+\end{itemize}
+
+}
+
+\end{document}
+

@@ -262,8 +262,10 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
         tour.AvgVol    += nodeVol
         tour.AvgTorque += epsilon
 
-        print(f"\tnode {node.ICAO},", end='')
-        print(f" score {tour.score:.0f}, cost {tour.cost:.0f}, vol {nodeVol:.2f}, epsilon {epsilon:.2f}")
+        f = tour.score/tour.cost
+
+        print(f"\tnode {node.ICAO}")
+        print(f"f {f:.2f}  vol {nodeVol:.2f} epsilon {epsilon:.2f}")
         
 
         if writeConsFile:
@@ -326,9 +328,9 @@ if __name__ == "__main__":
     testing   = False
     leastCost = False
 
-    timeLimit = 1200
+    # timeLimit = 1200
     # timeLimit = 2400
-    # timeLimit = 3600
+    timeLimit = 3600
 
 
     # testing    = True
@@ -338,18 +340,18 @@ if __name__ == "__main__":
     # free -s 1 -h -c 3  memory
 
     # scenarios = [2,3,4,5,6]
-    scenarios = [5,6]
+    scenarios = [6]
 
     if testing:
         scenarios = [2]
 
-    surplus = "data20"  # 1.2
-    # surplus = "data50"  # 1.5
+    # surplus = "data20"  # 1.2
+    surplus = "data50"  # 1.5
     # surplus = "data100" # 2.0
 
     # methods = ["GRB"]
-    # methods = ["CBC"]
-    methods = ["Shims"]
+    methods = ["CBC"]
+    # methods = ["Shims"]
     # methods = ["mpShims"]
     # methods = ["mpACO"]
     # methods = ["ACO"]

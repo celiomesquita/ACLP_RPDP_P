@@ -168,8 +168,8 @@ def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict
             # fill until the threshold                                                               torque surplus
             common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, threshold, itemsDict, lock, 1.1)
 
-            if ((time.perf_counter() - startTime) < secBreak):
-                optcgcons.minCGdev(pallets, k, nodeTorque, cfg)
+            # if ((time.perf_counter() - startTime) < secBreak):
+            #     optcgcons.minCGdev(pallets, k, nodeTorque, cfg)
            
             # get the best Shims for the pallet
             getBestShims( pallets[i], items, k, nodeTorque, solDict, cfg, surplus,   itemsDict, lock, tipo, startTime, secBreak)

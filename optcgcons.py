@@ -64,23 +64,20 @@ def minCGdev(pallets, k, nodeTorque, cfg):
     # mod.setParam('OutputFlag', 0)
     mod.verbose = 0 # hide messages
 
-    # X = [ [ mod.addVar(name=f"X[{i}],[{j}]", vtype=GRB.BINARY) for j in ConsRange ] for i in PalletsRange ] 
-    X = [ [ mod.add_var(name=f"X[{i}],[{j}]", var_type=BINARY) for j in ConsRange ] for i in PalletsRange ] 
+    Y = [ [ mod.add_var(name=f"X[{i}],[{q}]", var_type=BINARY) for q in ConsRange ] for i in PalletsRange ] 
 
-    torque1 = xsum( X[i][j] * ((140+cons[j].W) * pallets[i].D) for i in PalletsRange for j in ConsRange if pallets[i].D > 0 ) 
-    torque2 = xsum( X[i][j] * ((140+cons[j].W) * pallets[i].D) for i in PalletsRange for j in ConsRange if pallets[i].D < 0 )
+    torque1 = xsum( Y[i][q] * ((140+cons[q].W) * pallets[i].D) for i in PalletsRange for q in ConsRange if pallets[i].D > 0 ) 
+    torque2 = xsum( Y[i][q] * ((140+cons[q].W) * pallets[i].D) for i in PalletsRange for q in ConsRange if pallets[i].D < 0 )
 
-    # mod.setObjective(torque1-torque2)
-    # mod.ModelSense = GRB.MINIMIZE
     mod.objective = minimize( torque1-torque2 )
 
-    for j in ConsRange:
+    for q in ConsRange:
         mod.add_constr(
-            xsum(X[i][j] for i in PalletsRange) == 1
+            xsum(Y[i][q] for i in PalletsRange) <= 1
         )        
     for i in PalletsRange:                
         mod.add_constr(
-            xsum(X[i][j] for j in ConsRange) == 1
+            xsum(Y[i][q] for q in ConsRange) == 1
         )
 
     mod.optimize() 
@@ -89,17 +86,15 @@ def minCGdev(pallets, k, nodeTorque, cfg):
 
     for i, _ in enumerate(pallets):
 
-        for j in ConsRange:
-            if X[i][j].x >= 0.99:
-                cons[j].P = i # put the consolidated in the best position to minimize torque                        
-                pallets[i].Dest[k] = cons[j].To                
-                pallets[i].PCW     = cons[j].W
-                pallets[i].PCV     = cons[j].V
-                pallets[i].PCS     = cons[j].S
+        for q in ConsRange:
+            if Y[i][q].x >= 0.99:
+                cons[q].P = i # put the consolidated in the best position to minimize torque                        
+                pallets[i].Dest[k] = cons[q].To                
+                pallets[i].PCW     = cons[q].W
+                pallets[i].PCV     = cons[q].V
+                pallets[i].PCS     = cons[q].S
 
-                nodeTorque.value += (140 + cons[j].W) * pallets[i].D
-
-                cons[j].P = i # put the consolidated in the best position to minimize torque                 
+                nodeTorque.value += (140 + cons[q].W) * pallets[i].D
 
 # After solved, minimize the sum of ramp door distances for the next node pallets
 def minRampDist(pallets, k, tour, rampDistCG, cfg, nodeTorque):
