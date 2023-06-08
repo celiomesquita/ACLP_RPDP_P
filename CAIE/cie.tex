@@ -1355,8 +1355,8 @@ The average values were presented for $f_{\pi}$\/ and, for the {\bf run time (s)
 		\multirow{6}{*}{\it Gurobi* }& \multirow{2}{*}{1200} & $f$ & 14.67   & x       &  20.64  &  x      & 27.97   & x \\ % 
 		&        &  {\bf run time (s)}                             & 217     & x       &  304    &  x      & 579     & x \\ % 
 		\cmidrule(lr){2-9}                              
-		& \multirow{2}{*}{2400}& $f$                               & 14.59   &         &  20.60  &  x      & 29.10   & x \\ % 
-		&        &  {\bf run time (s)}                             & 313     &         &  327    &  x      & 543     & x \\ % 
+		& \multirow{2}{*}{2400}& $f$                               & 14.59   & 13.59   &  20.60  &  x      & 29.10   & x \\ % 
+		&        &  {\bf run time (s)}                             & 313     & 1444    &  327    &  x      & 543     & x \\ % 
 		\cmidrule(lr){2-9}                              		
 		& \multirow{2}{*}{3600}& $f$                               & 14.61   & x       &  20.59  & 18.36   & 29.11   & x \\ % 
 		&        &  {\bf run time (s)}                             & 297     & x       &  470    & 2241    & 689     & x \\ % 		
@@ -1371,14 +1371,16 @@ The average values were presented for $f_{\pi}$\/ and, for the {\bf run time (s)
 		&        &  {\bf run time (s)}                             & 17      & 106     &  26     & 157     & 37      & 181   \\ %  
 		\bottomrule
 		
-		&                                       & {\bf Normalized} & 0.99    & x       & 0.99    & 0.98    & 1.00    & x\\
-		&                                       & {\bf Speed-up}   & 15.6    & x       & 14.3    & 14.3    & 16.3    & x\\
+		&                                       & {\bf Normalized} & 0.99    & 0.99    & 0.99    & 0.98    & 1.00    & x\\
+		&                                       & {\bf Speed-up}   & 15.6    & 13.5    & 14.3    & 14.3    & 16.3    & x\\
 		
 		\bottomrule
 		
 	\end{tabular}
 	\normalsize
 \end{table}
+
+According to the results in Table \ref{tab:100time}, {\it Shims} was 15 times faster than {\it Gurobi* } to solve the ACLP-RPDP, and {\it Gurobi* } was not fully capable of solving scenario 5.
 
 	
 \subsubsection{Proposed $S_K$ strategy assessment}
