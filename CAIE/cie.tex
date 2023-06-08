@@ -1358,8 +1358,8 @@ The average values were presented for $f_{\pi}$\/ and, for the {\bf run time (s)
 		& \multirow{2}{*}{2400}& $f$                               & 14.59   &         &  20.60  &  x      & 29.10   & x \\ % 
 		&        &  {\bf run time (s)}                             & 313     &         &  327    &  x      & 543     & x \\ % 
 		\cmidrule(lr){2-9}                              		
-		& \multirow{2}{*}{3600}& $f$                               & 14.61   & x       &  20.59  &         & 29.11   & x \\ % 
-		&        &  {\bf run time (s)}                             & 297     & x       &  470    &         & 689     & x \\ % 		
+		& \multirow{2}{*}{3600}& $f$                               & 14.61   & x       &  20.59  & 18.36   & 29.11   & x \\ % 
+		&        &  {\bf run time (s)}                             & 297     & x       &  470    & 2241    & 689     & x \\ % 		
 		\midrule
 		\multirow{6}{*}{\it Shims}   & \multirow{2}{*}{1200} & $f$ & 14.53   & 13.42   &  20.45  & 18.00   & 28.98   & 26.08 \\ % 
 		&        & {\bf run time (s)}                              & 18      & 109     &  26     & 160     & 37      & 203   \\ % 
@@ -1371,8 +1371,8 @@ The average values were presented for $f_{\pi}$\/ and, for the {\bf run time (s)
 		&        &  {\bf run time (s)}                             & 17      & 106     &  26     & 157     & 37      & 181   \\ %  
 		\bottomrule
 		
-		&                                       & {\bf Normalized} & 0.99    & x       & 0.99    & x       & 1.00    & x\\
-		&                                       & {\bf Speed-up}   & 15.6    & x       & 14.3    & x       & 16.3    & x\\
+		&                                       & {\bf Normalized} & 0.99    & x       & 0.99    & 0.98    & 1.00    & x\\
+		&                                       & {\bf Speed-up}   & 15.6    & x       & 14.3    & 14.3    & 16.3    & x\\
 		
 		\bottomrule
 		
@@ -1381,11 +1381,11 @@ The average values were presented for $f_{\pi}$\/ and, for the {\bf run time (s)
 \end{table}
 
 	
-\subsubsection{Proposed K! strategy assessment}
+\subsubsection{Proposed $S_K$ strategy assessment}
 	
 	Another important test is to compare the best tour score/cost ratio with the least expensive tour score/cost ratio. This is important to see how far our solution strategy is from the simplest form, just solving a TSP.
 	
-	For this achievement, we ran {\it Shims} in 5 scenarios with 7 instances each, and 3 volume surpluses, collecting the averages of the best tour result and the least cost tour result.
+	For this achievement, we collected {\it Shims} results from tables \ref{tab:20}, \ref{tab:50}, and \ref{tab:100}, gathering the best tour results and the least cost results to assemble Table \ref{tab:20least}.
 	
 	\begin{table}[H]
 		\centering
@@ -1397,15 +1397,15 @@ The average values were presented for $f_{\pi}$\/ and, for the {\bf run time (s)
 			\toprule
 			
 			\multirow{2}{*}{$1.2$}   & Least cost    & 8.54    & 11.63   & 12.97   & 13.43  & 12.36 & 58.93 &       \\ 
-			& Best in $K!$  & 8.54    & 12.26   & 13.23   & 14.53  & 13.42 & 61.98 & 5.2\%  \\ 
+			& Best in $S_K$  & 8.54    & 12.26   & 13.23   & 14.53  & 13.42 & 61.98 & 5.2\%  \\ 
 			\midrule[.1pt]	
 			\multirow{2}{*}{$1.5$}   & Least cost    & 10.89   & 11.83   & 16.74   & 18.01  & 18.89 & 76.36 & \\ 	
-			& Best in $K!$  & 11.33   & 11.83   & 17.00   & 18.21  & 20.45 & 78.82 &  3.2\%  \\ 
+			& Best in $S_K$  & 11.33   & 11.83   & 17.00   & 18.21  & 20.45 & 78.82 &  3.2\%  \\ 
 			\midrule[.1pt]	
 			\multirow{2}{*}{$2.0$}   & Least cost    & 17.78   & 24.40   & 26.36   & 27.01  & 23.94 & 119.49 &  \\ 
-			& Best in $K!$  & 17.78   & 25.25   & 26.38   & 28.98  & 26.08 & 124.47 & 4.2\%   \\ 		                         
+			& Best in $S_K$  & 17.78   & 25.25   & 26.38   & 28.98  & 26.08 & 124.47 & 4.2\%   \\ 		                         
 			\midrule[.1pt]
-			\multicolumn{8}{r}{{\bf K! strategy advantage}}                                              & {\bf 4.2}\% \\
+			\multicolumn{8}{r}{\boldm{$S_K$} {\bf strategy advantage}}                                              & {\bf 4.2}\% \\
 			
 			\bottomrule
 		\end{tabular}
@@ -1414,16 +1414,16 @@ The average values were presented for $f_{\pi}$\/ and, for the {\bf run time (s)
 	
 	As the selection of the best tour, considering what was collected and delivered in each node, and considering the cost increase due to CG deviation, was better than the option for a simple TSP solution (\textit{Least cost} results), this confirms that our solution strategy was adequate.
 	
-	It is important to report that the best tour found in each test was seldom the tour with the lowest cost (the minimal cost tour without considering the CG deviation), but any of the first 25\% of the best tours. This indicates that our strategy of enumerating and solving all tours was assertive, although it is possible to devise a more proactive strategy to discard most of the higher-cost tours and improve performance. This must be one of the next steps in this research.
 	
-	If a posterior application of this method requires 8, 9, or more nodes, it is possible to use this 25\% as a threshold to discard the higher-cost tours and keep the run time within an operational acceptable limit for the client.
-	
-	\subsubsection{Final considerations on the results}
-	
-	Most of the {\it Gurobi*} executions consumed over 12 GiB in total, and considering that the computer used in the experiments has a standard RAM consumption when idle of 3.5 GiB (with the Python Interface Development Environment (IDE), a PDF viewer, a system monitor, and a {\it LaTeX} IDE simultaneously open), the actual RAM consumption of {\it Gurobi*} was over 8.5 GiB.
-	
-	All {\it Shims} executions consumed at most 1.5 GiB, requiring 5 GiB of total memory.
-	These details are important for a future application to adequately dimension the computer to be used.
+\subsubsection{Final considerations on the results}
+
+
+It is important to report that the best tour found in each test was seldom the tour with the lowest cost (the minimal cost tour without considering the CG deviation), but any of the best tours. This indicates that our strategy of enumerating and solving all tours was assertive, although it is possible to devise a more proactive strategy to discard most of the higher-cost tours and improve performance. This must be one of the next steps in this research. If effective, this strategy may permit posterior applications for eight or more nodes.
+
+Most of the {\it Gurobi*} executions consumed over 12 GiB in total, and considering that the computer used in the experiments has a standard RAM consumption when idle of 3.5 GiB (with the Python Interface Development Environment (IDE), a PDF viewer, a system monitor, and a {\it LaTeX} IDE simultaneously open), the actual RAM consumption of {\it Gurobi*} was over 8.5 GiB.
+
+All {\it Shims} executions consumed at most 1.5 GiB, requiring 5 GiB of a computer total memory.
+These details are important for a future application to adequately dimension the machine to be used.
 	
 }
 

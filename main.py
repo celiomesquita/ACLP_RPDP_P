@@ -329,8 +329,8 @@ if __name__ == "__main__":
     leastCost = False
 
     # timeLimit = 1200
-    # timeLimit = 2400
-    timeLimit = 3600
+    timeLimit = 2400
+    # timeLimit = 3600
 
 
     # testing    = True
@@ -345,8 +345,8 @@ if __name__ == "__main__":
     if testing:
         scenarios = [2]
 
-    # surplus = "data20"  # 1.2
-    surplus = "data50"  # 1.5
+    surplus = "data20"  # 1.2
+    # surplus = "data50"  # 1.5
     # surplus = "data100" # 2.0
 
     # methods = ["GRB"]
