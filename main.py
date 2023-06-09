@@ -329,8 +329,9 @@ if __name__ == "__main__":
     leastCost = False
 
     # timeLimit = 1200
-    timeLimit = 2400
+    # timeLimit = 2400
     # timeLimit = 3600
+    timeLimit = 240
 
 
     # testing    = True

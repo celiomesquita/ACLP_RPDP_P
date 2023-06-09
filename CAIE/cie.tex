@@ -1343,24 +1343,24 @@ The average values were presented for $f_{\pi}$\/ and, for the {\bf run time (s)
 
 \begin{table}[H]
 	\centering
-	\caption{Solutions with different time limitations for $S_K$ tours.}  \label{tab:100time}
+	\caption{Solutions with different time limitations for $S_K$ tours.}  \label{tab:100time_2}
 	\footnotesize
 	\begin{tabular}{ccc|ccc|ccc|ccc}
 		\toprule
 		&             \multicolumn{2}{r}{\bf Volume $surplus$} &\multicolumn{3}{c}{$1.2$}&\multicolumn{3}{c}{$1.5$}&\multicolumn{3}{c}{$2.0$} \\
 		\midrule
-		$method$& {\bf \specialcell{Time\\limit (s)}} & {\bf Scenarios}&{\bf 3}&{\bf 4}&{\bf 5}&{\bf 3}&{\bf 4}&{\bf 5}&{\bf 3}&{\bf 4}&{\bf 5} \\
+		$method$& {\bf limit (s)} & {\bf Scenarios}&{\bf 3}&{\bf 4}&{\bf 5}&{\bf 3}&{\bf 4}&{\bf 5}&{\bf 3}&{\bf 4}&{\bf 5} \\
 		\toprule
 		
-		\multirow{8}{*}{\it Gurobi } & \multirow{2}{*}{240*} & $f$ &       &         &         &       &         &         &       &        &  \\ % 
-&               &  {\bf run time (s)}                              &       &         &         &       &         &         &       &        &  \\ % 
+		\multirow{8}{*}{\it Gurobi } & \multirow{2}{*}{240*} & $f$ & 13.34 &  x      &  x      & 18.31 &  x      &  x      & x     & x       & x \\ % 
+&               &  {\bf run time (s)}                              & 123   &  x      &  x      & 181   &  x      &  x      & x     & x       & x \\ % 
 \cmidrule(lr){2-12}		
 		
 		&                              \multirow{2}{*}{1200} & $f$ & 13.31 & 14.67   & x       & 18.25 &  20.64  &  x      & 26.49 & 27.97   & x \\ % 
 		&        &  {\bf run time (s)}                             & 129   & 217     & x       & 190   &  304    &  x      & 384   & 579     & x \\ % 
 		\cmidrule(lr){2-12}                              
-		& \multirow{2}{*}{2400}& $f$                               & 13.30 & 14.59   & 13.59   & 18.25 &  20.60  &  x      &       & 29.10   & x \\ % 
-		&        &  {\bf run time (s)}                             & 127   & 313     & 1444    & 188   &  327    &  x      &       & 543     & x \\ % 
+		& \multirow{2}{*}{2400}& $f$                               & 13.30 & 14.59   & 13.59   & 18.25 &  20.60  &  x      & 26.46 & 29.10   & x \\ % 
+		&        &  {\bf run time (s)}                             & 127   & 313     & 1444    & 188   &  327    &  x      & 381   & 543     & x \\ % 
 		\cmidrule(lr){2-12}                              		
 		
 		& \multirow{2}{*}{3600}& $f$                               & 13.32 & 14.61   & x       & 18.25 &  20.59  & 18.36   & 26.46 & 29.11   & x \\ % 
@@ -1368,13 +1368,13 @@ The average values were presented for $f_{\pi}$\/ and, for the {\bf run time (s)
 		
 		\midrule
 		
-		 \multirow{2}{*}{\it Shims} & \multirow{2}{*}{240*}  & $f$ & 13.23 & 14.53   & 13.42   &       &  20.45  & 18.00   &       & 28.98   & 26.08 \\ % 
-		&         & {\bf run time (s)}                             & 6     & 17      & 109     &       &  26     & 160     &       & 37      & 229   \\ % 
+		 \multirow{2}{*}{\it Shims} & \multirow{2}{*}{240*}  & $f$ & 13.23 & 14.53   & 13.42   & 18.21 &  20.45  & 18.00   & 26.38 & 28.98   & 26.08 \\ % 
+		&         & {\bf run time (s)}                             & 6     & 17      & 109     & 8     &  26     & 160     & 13    & 37      & 229   \\ % 
 				
 		\bottomrule
 		
-		&                                       & {\bf Normalized} & 0.99  & 0.99    & 0.99    &       & 0.99    & 0.98    & & 1.00    & x\\
-		&                                       & {\bf Speed-up}   & 20.9  & 15.6    & 13.5    &       & 14.3    & 14.3    & & 16.3    & x\\
+		&                                       & {\bf Normalized} & 0.99  & 0.99    & 0.99    & 1.00  & 0.99    & 0.98    & 1.00  & 1.00    & x\\
+		&                                       & {\bf Speed-up}   & 20.9  & 15.6    & 13.5    & 23.8  & 14.3    & 14.3    & 29.0  & 16.3    & x\\
 		
 		\bottomrule
 				\multicolumn{12}{c}{*4 minutes is the time {\it Shims} needs to solve a seven-node tour.}\\
