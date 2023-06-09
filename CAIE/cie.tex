@@ -1345,37 +1345,39 @@ The average values were presented for $f_{\pi}$\/ and, for the {\bf run time (s)
 	\centering
 	\caption{Solutions with different time limitations for $S_K$ tours.}  \label{tab:100time}
 	\footnotesize
-	\begin{tabular}{ccc|cc|cc|cc}
+	\begin{tabular}{ccc|ccc|ccc|ccc}
 		\toprule
-		&             \multicolumn{2}{r}{\bf Volume $surplus$} &\multicolumn{2}{c}{$1.2$}&\multicolumn{2}{c}{$1.5$}&\multicolumn{2}{c}{$2.0$} \\
+		&             \multicolumn{2}{r}{\bf Volume $surplus$} &\multicolumn{3}{c}{$1.2$}&\multicolumn{3}{c}{$1.5$}&\multicolumn{3}{c}{$2.0$} \\
 		\midrule
-		$method$& {\bf \specialcell{Time\\limit (s)}} & {\bf Scenarios}    & {\bf 4} & {\bf 5} & {\bf 4} & {\bf 5} & {\bf 4} & {\bf 5} \\
+		$method$& {\bf \specialcell{Time\\limit (s)}} & {\bf Scenarios}&{\bf 3}&{\bf 4}&{\bf 5}&{\bf 3}&{\bf 4}&{\bf 5}&{\bf 3}&{\bf 4}&{\bf 5} \\
 		\toprule
 		
-		\multirow{6}{*}{\it Gurobi* }& \multirow{2}{*}{1200} & $f$ & 14.67   & x       &  20.64  &  x      & 27.97   & x \\ % 
-		&        &  {\bf run time (s)}                             & 217     & x       &  304    &  x      & 579     & x \\ % 
-		\cmidrule(lr){2-9}                              
-		& \multirow{2}{*}{2400}& $f$                               & 14.59   & 13.59   &  20.60  &  x      & 29.10   & x \\ % 
-		&        &  {\bf run time (s)}                             & 313     & 1444    &  327    &  x      & 543     & x \\ % 
-		\cmidrule(lr){2-9}                              		
-		& \multirow{2}{*}{3600}& $f$                               & 14.61   & x       &  20.59  & 18.36   & 29.11   & x \\ % 
-		&        &  {\bf run time (s)}                             & 297     & x       &  470    & 2241    & 689     & x \\ % 		
+		\multirow{8}{*}{\it Gurobi } & \multirow{2}{*}{240*} & $f$ &       &         &         &       &         &         &       &        &  \\ % 
+&               &  {\bf run time (s)}                              &       &         &         &       &         &         &       &        &  \\ % 
+\cmidrule(lr){2-12}		
+		
+		&                              \multirow{2}{*}{1200} & $f$ & 13.31 & 14.67   & x       & 18.25 &  20.64  &  x      & 26.49 & 27.97   & x \\ % 
+		&        &  {\bf run time (s)}                             & 129   & 217     & x       & 190   &  304    &  x      & 384   & 579     & x \\ % 
+		\cmidrule(lr){2-12}                              
+		& \multirow{2}{*}{2400}& $f$                               & 13.30 & 14.59   & 13.59   & 18.25 &  20.60  &  x      &       & 29.10   & x \\ % 
+		&        &  {\bf run time (s)}                             & 127   & 313     & 1444    & 188   &  327    &  x      &       & 543     & x \\ % 
+		\cmidrule(lr){2-12}                              		
+		
+		& \multirow{2}{*}{3600}& $f$                               & 13.32 & 14.61   & x       & 18.25 &  20.59  & 18.36   & 26.46 & 29.11   & x \\ % 
+		&        &  {\bf run time (s)}                             & 121   & 297     & x       & 193   &  470    & 2241    & 319   & 689     & x \\ % 		
+		
 		\midrule
-		\multirow{6}{*}{\it Shims}   & \multirow{2}{*}{1200} & $f$ & 14.53   & 13.42   &  20.45  & 18.00   & 28.98   & 26.08 \\ % 
-		&        & {\bf run time (s)}                              & 18      & 109     &  26     & 160     & 37      & 203   \\ % 
-		\cmidrule(lr){2-9}                              
-		& \multirow{2}{*}{2400}& $f$                               & 14.53   & 13.42   &  20.45  & 18.00   & 28.98   & 26.08 \\ % 
-		&        &  {\bf run time (s)}                             & 18      & 107     &  25     & 159     & 37      & 192   \\ % 	
-		\cmidrule(lr){2-9}                              
-		& \multirow{2}{*}{3600} & $f$                              & 14.53   & 13.42   &  20.45  & 18.00   & 28.98   & 26.08 \\ %  
-		&        &  {\bf run time (s)}                             & 17      & 106     &  26     & 157     & 37      & 181   \\ %  
+		
+		 \multirow{2}{*}{\it Shims} & \multirow{2}{*}{240*}  & $f$ & 13.23 & 14.53   & 13.42   &       &  20.45  & 18.00   &       & 28.98   & 26.08 \\ % 
+		&         & {\bf run time (s)}                             & 6     & 17      & 109     &       &  26     & 160     &       & 37      & 229   \\ % 
+				
 		\bottomrule
 		
-		&                                       & {\bf Normalized} & 0.99    & 0.99    & 0.99    & 0.98    & 1.00    & x\\
-		&                                       & {\bf Speed-up}   & 15.6    & 13.5    & 14.3    & 14.3    & 16.3    & x\\
+		&                                       & {\bf Normalized} & 0.99  & 0.99    & 0.99    &       & 0.99    & 0.98    & & 1.00    & x\\
+		&                                       & {\bf Speed-up}   & 20.9  & 15.6    & 13.5    &       & 14.3    & 14.3    & & 16.3    & x\\
 		
 		\bottomrule
-		
+				\multicolumn{12}{c}{*4 minutes is the time {\it Shims} needs to solve a seven-node tour.}\\
 	\end{tabular}
 	\normalsize
 \end{table}
