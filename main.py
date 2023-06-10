@@ -341,7 +341,7 @@ if __name__ == "__main__":
     # free -s 1 -h -c 3  memory
 
     # scenarios = [2,3,4,5,6]
-    scenarios = [4]
+    scenarios = [2,3]
 
     if testing:
         scenarios = [2]
@@ -351,8 +351,8 @@ if __name__ == "__main__":
     surplus = "data100" # 2.0
 
     # methods = ["GRB"]
-    methods = ["CBC"]
-    # methods = ["Shims"]
+    # methods = ["CBC"]
+    methods = ["Shims"]
     # methods = ["mpShims"]
     # methods = ["mpACO"]
     # methods = ["ACO"]

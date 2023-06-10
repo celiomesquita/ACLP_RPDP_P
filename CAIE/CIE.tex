@@ -94,7 +94,7 @@ S\~{a}o Jos\'{e} dos Campos - SP - 12.228-900 - Brazil}
 
 \begin{abstract}
 
-In aerial pickup and delivery of goods in a distribution network, transport aviation faces risks of cargo unbalancing due to the urgency required for loading, for fast take-off, and mission accomplishment, especially in times of crisis, disaster relief missions, short deadlines for contracting customers, or any external pressure for immediate take-off. In addition, there are no commercially available systems that can assist the load and trip planners with the pallet building and aircraft loading and balancing demands for transport at each hub. This enables other risks, such as improper delivery, excessive fuel burn, and longer than necessary turn-around time. We defined and solved the problem of planning the loading and routing of a single aircraft according to a utility score, weight and balance principles, and fuel consumption in a tour of simultaneous pickup and delivery at intermediate hubs. This NP-hard problem, named {\it Air Cargo Load Planning with Routing, Pickup, and Delivery Problem (ACLP+RPDP)}, is mathematically modeled using standardized pallets in fixed positions, obeying center of gravity constraints, delivering each item to its destination, and minimizing fuel consumption costs. We performed multiple experiments with a commercial solver and four well-known meta-heuristics on data based on the transport history of the {\it Brazilian Air Force}. We also designed a new heuristic that quickly finds good solutions for a wide range of problem sizes: an essential contribution, which solved all test scenarios within an acceptable operational run time.
+In aerial pickup and delivery of goods in a distribution network, transport aviation faces risks of cargo unbalancing due to the urgency required for loading, for fast take-off, and mission accomplishment, especially in times of crisis, disaster relief missions, short deadlines for contracting customers, or any external pressure for immediate take-off. {\color{blue} In addition, there are no commercially available systems that can assist load and trip planners with pallet building and aircraft-balanced loading plans, with demands for transport at each hub.} This enables other risks, such as improper delivery, excessive fuel burn, and longer than necessary turn-around time. We defined and solved the problem of planning the loading and routing of a single aircraft according to a utility score, weight and balance principles, and fuel consumption in a tour of simultaneous pickup and delivery at intermediate hubs. This NP-hard problem, named {\it Air Cargo Load Planning with Routing, Pickup, and Delivery Problem (ACLP+RPDP)}, is mathematically modeled using standardized pallets in fixed positions, obeying center of gravity constraints, delivering each item to its destination, and minimizing fuel consumption costs. We performed multiple experiments with a commercial solver and four well-known meta-heuristics on data based on the transport history of the {\it Brazilian Air Force}. {\color{blue}We also designed a new heuristic that quickly finds practical solutions for a wide range of problem sizes, an essential contribution that solved all test scenarios within a much shorter time than is operationally acceptable.}
 
 
 \end{abstract}
@@ -954,7 +954,7 @@ In this way, the mathematical modeling for $SolveNode(MIP,\pi_k,G, time)$\/ beco
 The constraints \ref{eq:ifA} and \ref{eq:ifB} are equivalent to $X_{ij} =1$\/ if $to_j = T_i^{\pi_k}$, and $X_{ij} =0$\/ otherwise .
 
 
-\subsubsection{With Shims heuristic}
+\subsubsection{With the Shims heuristic}
 
 One of the main objectives of this work was to find a quick heuristic that offers a good-quality solution for the node-by-node problem. Taking this into account, we design algorithms based on known meta-heuristics: {\it Ant Colony Optimization} (ACO) \cite{Dorigo1992, DorigoManiezzoColorni1996}, {\it Noising Method Optimization} (NMO) \cite{CharonHudry1993,CharonHudry2001,Zhan2020}, {\it Tabu Search} (TS) \cite{Glover1986} and {\it Greedy Randomized Adaptive Search Procedure} (GRASP) \cite{FeoResende1989}. We considered several ideas from the literature \cite{NiarFreville1997,Fidanova2006,Laabadi2018,Alonso2019,Zhan2020}, and we were careful to use the same data structures and procedures in all implementations.
 
@@ -1055,7 +1055,7 @@ Considering only the items that can be shipped at the node $\pi_k$, Figure \ref{
 
 			\State $slack_i \gets V_i - vol_i$  \label{shims:beginsecond}
 			\State $\eta_2 \gets \eta_1$  \label{shims:eta2a}
-			\While{($\eta_2 \leq n_{\pi_k}$) {\bf and} ($ vol_i < (1 + 3 \times (1-limit)) \times V_i)$)}
+			\While{($\eta_2 \leq n_{\pi_k}$) {\bf and} ($ vol_i < (1 + 2 \times (1-limit)) \times V_i$)}
 
 					\State $e_{ij} \gets E_{\eta_2}$
 			
@@ -1064,7 +1064,7 @@ Considering only the items that can be shipped at the node $\pi_k$, Figure \ref{
 			\EndWhile 
 				
 			
-			\State $vol \gets 0$, $b \gets 1$, $shims_b \gets \varnothing$, $Set \gets \{ shims_b \}$  \label{shims:beginthird} 
+			\State $vol \gets 0$; $b \gets 1$; $shims_b \gets \varnothing$; $Set \gets \{ shims_b \}$  \label{shims:beginthird} 
 			
 		
 			
@@ -1091,20 +1091,16 @@ Considering only the items that can be shipped at the node $\pi_k$, Figure \ref{
 				\EndFor 
 			
 				\If{$NewShims$} \label{new_shims2}
-					\State $vol \gets 0$
-					\State $b \gets b + 1$
-					\State $shims_b \gets \{\ \}$
-					\State $shims_b \gets shims_b \cup \{e_{ij}\}$
-					\State $Set \gets Set \cup \{\ shims_b\ \}$
+					\State $vol \gets 0$; $b \gets b + 1$;  $shims_b \gets \{e_{ij}\}$
+					\State $Set \gets Set \cup \{ shims_b \}$
 				\EndIf
 			
 			\EndFor 
 			
-			\State $sh_w \gets shims$, where $shims \in Set$ and $\sum_{e_{ab} \in shims} w_b$ is maximum  \label{best_weight}		
-			\State $sh_v \gets shims$, where $shims \in Set$ and $\sum_{e_{ab} \in shims} v_b$ is maximum \label{best_volume}
-			\State $sh_{best} \gets shims$, where $shims \in \{sh_w, sh_v\}$ and $\sum_{e_{ab} \in x} s_b$ is maximum \label{best_score}
-			
-			\State $E_{N_{\pi_k}} \gets E_{N_{\pi_k}} \cup sh_{best}$ 	\label{shims:endthird}   \Comment{End of the third phase}
+			\State $sh_w \gets shims$, where $shims \in Set$ and $\sum_{e_{ij} \in shims} w_j$\/ is maximum  \label{best_weight}		
+			\State $sh_v \gets shims$, where $shims \in Set$ and $\sum_{e_{ij} \in shims} v_j$\/ is maximum \label{best_volume}
+			\State $sh_{best} \gets shims$, where $shims \in \{sh_w, sh_v\}$\/ and $\sum_{e_{ij} \in shims} s_j$\/ is maximum \label{best_score}
+			\State $E_{N_{\pi_k}} \gets E_{N_{\pi_k}} \cup sh_{best}$ \label{shims:endthird}  \Comment{End of the third phase}
 
 		\EndFor
 		
@@ -1121,11 +1117,9 @@ For each pallet $i$, its $n_{\pi_k}$\/ possible edges $e_{ij}$\/ are considered 
 	
 \begin{itemize}
 	
-	\item In {\it greedy phase}\/ (lines \ref{shims:pallets}-\ref{shims:endfirst}), a partial solution for each pallet $i$\/ is constructed by edges inclusion, until its volume $V_i \times limit$\/ is reached. The value $limit=0.92$\/ (line \ref{shims:limit}) was empirically determined by the {\it iRace} tool \cite{LopezIbanezManuel2016}. From lines \ref{shims:limit} to \ref{shims:endfirst}, as items are inserted, the value of $\eta_1$ is incremented and stops when the pallet volume reaches 92\% of its capacity. When it stops, this is the initial value of $\eta_2$, line \ref{shims:eta2a}.
-	$\eta_2$, then it is incremented until the volume exceeds the pallet capacity with a factor of 1 + ( 2 x [1 - limit]).
-	This factor of was obtained empirically, through many test with different problem instances. Higher values can improve the solution, but at the expense of performance. So we tried to keep it as low as possible, a trade-off between quality and performance.
+	\item In {\it greedy phase}\/ (lines \ref{shims:pallets}-\ref{shims:endfirst}), a partial solution for each pallet $i$\/ is constructed by adding edges following $\theta_{ij}$\/ order. The $\eta_1$\/ index corresponds to the accumulated volume equal to $V_i \times limit$. In $\eta_2$\/ index, this same accumulated volume reaches $(1 + 2\times(1 - limit))\times V_i$. The size of this range $[\eta_1,\eta_2]$\/ was defined empirically, and the value $limit=0.92$\/ (line \ref{shims:limit}) was determined by the {\it iRace} tool \cite{LopezIbanezManuel2016}.
 	
-	\item In {\it composition phase}\/ (lines \ref{shims:beginsecond}-\ref{shims:endsecond}), a set of shims named $Set$\/ is created for each pallet $i$, where each shim is formed by a set of edges in the range $[\eta_1,\eta_2]$, whose total volume is limited by $slack_i$. After the $\eta_2$ index, there may be items with little probability of being in the optimal solution because their low value of $\theta^{\pi_k}_{ij}$, being not considered for inclusion. In line \ref{shims:beginthird} the initial $Shim$ and $Set$ are created. In this phase, the heuristic that provided the best results, both in terms of time and quality, is based on {\it First-Fit Decreasing}, which is an approximation algorithm for the {\it Bin Packing Problem}\/ \cite{JohnsonGarey1985}. Basically, shims are created by accumulating the following edges, taking $slack_i$\/ as a limit.
+	\item In {\it composition phase}\/ (lines \ref{shims:beginsecond}-\ref{shims:endsecond}), a set of shims named $Set$\/ is created for each pallet $i$, where each shim is formed by a set of edges in the range $[\eta_1,\eta_2]$, whose total volume is limited by $slack_i$. In this phase, the heuristic that provided the best results, both in terms of time and quality, is based on {\it First-Fit Decreasing}, which is an approximation algorithm for the {\it Bin Packing Problem}\/ \cite{JohnsonGarey1985}. Basically, shims are created by accumulating the following edges, taking $slack_i$\/ as a limit.
 	
 	\item In {\it selection phase}\/ (lines \ref{shims:beginthird}-\ref{shims:endthird}), the best shim in $Set$\/ is chosen. Initially, two shims are found: $sh_w$\/ with larger weight, and $sh_v$\/ with larger volume. Between the two, the one with the highest score will be chosen and its edges are inserted into $E_{N_{\pi_k}}$.
 	
@@ -1148,10 +1142,10 @@ In the military airlift carried out in Brazil from 2008 to 2010, 23\% of the ite
 
 \begin{table}[H]
 	\centering
-	\caption{Items weight distribution ($kg$) in Brazil}  \label{tab:weights}
+	\caption{Items weight distribution}  \label{tab:weights}
 	\begin{tabular}{c c c c }
 		\toprule
-		$Group$ & $P$ & $low$ & $high$  \\		
+		$Group$ & $P$ & $low$ ($kg$) & $high$ ($kg$) \\		
 		\midrule
 		1              & 0.23           & 10  & 20  \\
 		2              & 0.22           & 21  & 40  \\
@@ -1169,6 +1163,8 @@ In the generation of test instances, we use three types of random selections:
 	\item $RandomInt(i_1,i_2)$: randomly selects a integer number in $[i_1,i_2]$, where $i_1$ and $i_2$ are integer numbers;
 	\item $Roulette(set)$ biased through $\phi$: selects an element from $set$, where the probability of each element is proportional to the value of a given function $\phi$\/ defined on $set$.
 \end{itemize}
+
+$ItemsGeneration$, which generates $N$, is described in Algorithm \ref{alg:itemsgen}.
 
 \begin{algorithm}[H]
 	\caption{Generating items}  \label{alg:itemsgen}
@@ -1214,93 +1210,81 @@ In the generation of test instances, we use three types of random selections:
 	\end{algorithmic}
 \end{algorithm}
 
-$ItemsGeneration$, which generates $N$, is described in Algorithm \ref{alg:itemsgen}. The parameter $scenario$\/ defines $L$\/ and $M$\/ (line \ref{ig:LM}), and the parameter $surplus$\/ sets a limit on the total volume of items at each node (line \ref{ig:extended}). To avoid simply loading all items, we use $surplus \in \{1.2, 1.5, 2.0\}$. This also represents more instances for tests in each scenario.
+$scenario$\/ defines $L$\/ and $M$\/ (line \ref{ig:LM}), and $surplus$\/ sets a limit on the total volume of items at each node (line \ref{ig:extended}). To avoid simply loading all items, we use $surplus \in \{1.2, 1.5, 2.0\}$. This also represents more instances for tests in each scenario.
 
 For each generated $t^k_j$\/ item, its destination is randomly selected (line \ref{ig:dest}), its weight has a distribution according to Table \ref{tab:weights} (lines \ref{ig:weight1}-\ref{ig:weight2}), its score varies $100$\/ (highest) and $5$\/ (lowest) according to a logarithmic scale (line \ref{ig:score}, and its volume is randomly defined from the density, where we allow a variation of 40\% more or less than the average density of $246 kg/m^3$\/ (line \ref{ig:volume}).
 
-{\color{blue}
+
 
 
 \subsection{Results obtained}
 
-In the tests performed, we used a 64-bit, 16GB, 3.6GHz, eight-core processor with {\it Linux Ubuntu 22.04.1 LTS 64-bit} as the operational system and {\it Python 3.10.4}\/ as the programming language. We also used the well-known solver {\it Gurobi}\/ (www.gurobi.com), version 9.5.2.
+In the tests performed, we used a 64-bit, 16GB, 3.6GHz, eight-core processor with {\it Linux Ubuntu 22.04.1 LTS 64-bit} as the operational system and {\it Python 3.10.4}\/ as the programming language. We also used the well-known solver $Gurobi$\/ ({\tt www.gurobi.com}), version 9.5.2.
 
-We ran Algorithm \ref{alg:main} in the 5 scenarios described in Table \ref{tab:scenarios}, considering 6 methods for node-by-node solution: Gurobi (see \ref{solver}), ACO, NMO, TS, GRASP, and {\it Shims} (Algorithm \ref{alg:shims}). In generating the items in each node, we consider 3 values for the parameter $surplus$. 3 values for the time limit (1200s, 2400s, and 3600s).
+We ran Algorithm \ref{alg:main} considering 5 values for $scenario$\/ from Table \ref{tab:scenarios}, 3 values for  $surplus$\/ from $\{1.2, 1.5, 2.0\}$, 3 values for $time$\/ from $\{1200s, 2400s, 3600s\}$, and 6 different $method$\/ for the node-by-node solution: $Gurobi$\/ (see \ref{solver}), ACO, NMO, TS, GRASP, and $Shims$\/ (Algorithm \ref{alg:shims}). 
 
-The results obtained for the function $f$, with the corresponding run time in seconds, are shown in Tables \ref{tab:20} ($surplus = 1.2$), \ref{tab:50} ($surplus = 1.5$), \ref{tab:100} ($surplus = 2.0$), and in Table \ref{tab:100time} (different time limit comparisons).
+In order for $Gurobi$\/ to be able to solve the largest possible number of tests without memory overflow, we set its parameter {\it MIPgap}\/ to 1\%. This shortens its runtime, in addition to ensuring that its objective function $f$\/ is at most 1\% of the optimal solution. For more details, see {\tt https://support.gurobi.com}.
 
-For each $method$, $scenario$\/ and $surplus$, 7 different instances were generated. Therefore, 315 tests (5 scenarios $\times$\/ 3 volumes $\times$\/ 3 time limits $\times$\/ 7 instances) were performed for each method. 
-
-The average values were presented for $f_{\pi}$\/ and, for the {\bf run time (s)}, the average result obtained. To facilitate the comparison between the methods, we added a last column in these tables, where two values are indicated:
+Among the heuristics, we will present only the results obtained by $Shims$, which had the best performance. For each $scenario$, $surplus$\/ and $time$, 7 different instances were generated. We will present the average of the objective function $f$\/ and the runtime of $Gurobi$\/ and $Shims$\/ in these instances. To facilitate the comparison between both, we added a last column in the tables, where two values are indicated:
 \begin{itemize}
-	\item {\bf Normalized}: value between 0 and 1, which corresponds to the ratio between the sum of $f$\/ values obtained by the method in all scenarios and the sum of the best values obtained among all methods in all scenarios. The higher the value of {\bf Normalized}, the closer the method approached the best solutions found.
-	\item {\bf Speed-up}: ratio of the sums of the run times of all scenarios and the sum of the method run times in all scenarios. The method with the highest {\bf Speed-up}\/ is the fastest.
+	\item {\bf Normalized}: value between 0 and 1, which corresponds to the ratio between the sum of $f$\/ values obtained by the method in all scenarios and the sum of the best values obtained by both methods in all scenarios. The higher the value of {\bf Normalized}, the closer the method approached the best solutions found.
+	\item {\bf Speed-up}: ratio of the sums of the runtimes of all scenarios and the sum of the method runtimes in all scenarios. The method with the highest {\bf Speed-up}\/ is the fastest.
 \end{itemize}
-	
-	As the MIP solver was not capable of solving all scenarios in polynomial time or reached the computer's Read-Access Memory (RAM, 16 GiB) too early, we decided to set the Gurobi {\it MIPgap} parameter to 1\% to control the minimal quality of the returned solutions and abbreviate the solution time.
-	From now on, we will refer to this Gurobi-specific model as {\it Gurobi* }.
-	For more details on the Gurobi {\it MIPgap}, refer to \cite{mipgap}.
-	
-	This decision hinders the MIP solver from reaching optimal solutions in favor of the possibility of result comparisons with the {\it Shims} heuristic.
-	
-	The parameter $\pi_{TSP_1}$ represents the least cost tour (through an optimal TSP solution), and $\pi_{TSP_2}$, the opposite direction of travel, beginning and ending in the base. The values of $f$ are the best in these to solutions.
+
+We also indicate the two adopted strategies: dedicating all the processing time to the two shortest tours, or distributing it among all the $K!$\/ tours.
+
+The results obtained with $time = 3600s$, which is the highest tested time limit, are in Tables \ref{tab:20}, \ref{tab:50} and \ref{tab:100}, with $surplus$\/ values $1.2$, $1.5$\/ and $2.0$, respectively. We indicate with an {\bf x} the cases where $Gurobi$\/ did not find a feasible solution within this time limit, or had to be aborted due to high RAM consumption.
 
 
 \begin{table}[H]
 	\centering
-	\caption{Solutions with volume {\it surplus} = {\bf 1.2} and 3600s as time limit.}  \label{tab:20}
+	\caption{Solutions with $surplus = 1.2$\/ and $time =  3600s$}  \label{tab:20}
 	\footnotesize
 	\begin{tabular}{ccccccccc}
 		\toprule
-		{\bf Tours}&$method$          & {\bf Scenarios} & {\bf 1} & {\bf 2} & {\bf 3} & {\bf 4} & {\bf 5} & \specialcell{{\bf Normalized}\\{\bf Speed-up}}   \\
+		{\specialcell{{\bf Tested}\\{\bf tours}}}&$method$          & {\bf Scenarios} & {\bf 1} & {\bf 2} & {\bf 3} & {\bf 4} & {\bf 5} & \specialcell{{\bf Normalized}\\{\bf Speed-up}}   \\
 		\toprule
-		\multirow{4}{*}{ \specialcell{$\pi_{TSP_1}$\\ $\pi_{TSP_2}$ }} &\multirow{2}{*}{\it Gurobi* } & $f$ & 8.52    & 11.70   & 13.07   & 13.54 & 12.44     &  1.00\\ % 5927
-		&                                                               &               {\bf run time (s)}  & 17      & 17      & 16      & 17    & 26        &  1.0 \\ % 93
+		\multirow{4}{*}{Shortest} &\multirow{2}{*}{\it Gurobi } & $f$ & 8.52    & 11.70   & 13.07   & 13.54 & 12.44     &  1.00\\ % 5927
+		&                                                               &               {time (s)}  & 17      & 17      & 16      & 17    & 26        &  1.0 \\ % 93
 		\cmidrule(lr){2-9}	
 		&                                                               \multirow{2}{*}{\it Shims}    & $f$ & 8.54    & 11.63   & 12.97   & 13.43 & 12.36     &  0.99 \\ % 5893
-		&                                                               &         {\bf run time (s)}        & 1       & 1       & 2       & 2     & 2         &  11.6 \\ % 8
+		&                                                               &         {time (s)}        & 1       & 1       & 2       & 2     & 2         &  11.6 \\ % 8
 		
 		\midrule
 		
-		\multirow{4}{*}{\it $S_{K}$ }&                                  \multirow{2}{*}{\it Gurobi* } & $f$ & 8.52    & 12.25   & 13.32   & 14.61  & x        & 1.00 \\ % 4869
-		&                                                               &               {\bf run time (s)}  & 25      & 36      & 121     & 297    & x        &  1.0 \\ % 479
+		\multirow{4}{*}{All $K!$}&                                  \multirow{2}{*}{\it Gurobi } & $f$ & 8.52    & 12.25   & 13.32   & 14.61  & x        & 1.00 \\ % 4869
+		&                                                               &               {time (s)}  & 25      & 36      & 121     & 297    & x        &  1.0 \\ % 479
 		\cmidrule(lr){2-9}	
 		&                                                               \multirow{2}{*}{\it Shims}    & $f$ & 8.54    & 12.26   & 13.23   & 14.53  & 13.42    & 0.99  \\ % 4813
-		&                                                               &         {\bf run time (s)}        & 1       & 2       & 6       & 17     & 106      & 18.4   \\ % 132
+		&                                                               &         {time (s)}        & 1       & 2       & 6       & 17     & 106      & 18.4   \\ % 132
 		\bottomrule
-		\multicolumn{9}{c}{*{\it MIPgap} parameter set to 1\%. The $f$ values are \textpm 1\% distant from the optimal solution}\\
 		
 	\end{tabular}
 	\normalsize
 \end{table}
 
-{\color{blue}
-	
-	97\% of 16GiB was the RAM state before we aborted the {\it Gurobi*} execution on solving scenario 5 in Table \ref{tab:20}.
-	
-}
 
 \begin{table}[H]
 	\centering
-	\caption{Solutions with volume {\it surplus} = {\bf 1.5} and 3600s as time limit.}  \label{tab:50}
+	\caption{Solutions with $surplus = 1.5$\/ and $time =  3600s$}  \label{tab:50}
 	\footnotesize
 	\begin{tabular}{ccccccccc}
 		\toprule
-		{\bf Tours} & $method$          & {\bf Scenarios} & {\bf 1} & {\bf 2} & {\bf 3} & {\bf 4} & {\bf 5} & \specialcell{{\bf Normalized}\\{\bf Speed-up}}   \\
+		{\specialcell{{\bf Tested}\\{\bf tours}}} & $method$          & {\bf Scenarios} & {\bf 1} & {\bf 2} & {\bf 3} & {\bf 4} & {\bf 5} & \specialcell{{\bf Normalized}\\{\bf Speed-up}}   \\
 		\toprule
-		\multirow{4}{*}{ \specialcell{$\pi_{TSP_1}$\\ $\pi_{TSP_2}$ }} & \multirow{2}{*}{\it Gurobi* } & $f$ & 11.80 & 16.74 & 18.04 & 18.86 & 16.92 & 1.00 \\ % 8236
-		&&               {\bf run time (s)}                                                                  & 38    & 30    & 27    & 29    & 81    & 1.00  \\ % 205
+		\multirow{4}{*}{ Shortest } & \multirow{2}{*}{\it Gurobi } & $f$ & 11.80 & 16.74 & 18.04 & 18.86 & 16.92 & 1.00 \\ % 8236
+		&&               {time (s)}                                                                  & 38    & 30    & 27    & 29    & 81    & 1.00  \\ % 205
 		\cmidrule(lr){2-9}	
 		&\multirow{2}{*}{\it Shims}                                                                    & $f$ & 11.83 & 16.74 & 18.01 & 18.89 & 16.91 & 1.00  \\ % 
-		&&         {\bf run time (s)}                                                                        & 1     & 2     & 2     & 3     & 3     & 20.5  \\ % 
+		&&         {time (s)}                                                                        & 1     & 2     & 2     & 3     & 3     & 20.5  \\ % 
 		
 		\midrule
 		
-		\multirow{4}{*}{\it $S_{K}$ } & \multirow{2}{*}{\it Gurobi* }                                  & $f$ & 11.81 & 17.01 & 18.25 & 20.59 & 18.36   & 1.00 \\ % 8602
-		&&               {\bf run time (s)}                                                                  & 53    & 61    & 193   & 470   & 2241    & 1.0  \\ % 3018
+		\multirow{4}{*}{All $K!$} & \multirow{2}{*}{\it Gurobi }                                  & $f$ & 11.81 & 17.01 & 18.25 & 20.59 & 18.36   & 1.00 \\ % 8602
+		&&               {time (s)}                                                                  & 53    & 61    & 193   & 470   & 2241    & 1.0  \\ % 3018
 		\cmidrule(lr){2-9}	
 		&\multirow{2}{*}{\it Shims}                                                                    & $f$ & 11.83 & 17.00 & 18.21 & 20.45 & 18.00   & 0.99  \\ % 8549
-		&&         {\bf run time (s)}                                                                        & 1     & 2     & 9     & 26    & 157     & 15.5 \\ % 195
+		&&         {time (s)}                                                                        & 1     & 2     & 9     & 26    & 157     & 15.5 \\ % 195
 		\bottomrule
 		
 	\end{tabular}
@@ -1310,155 +1294,142 @@ The average values were presented for $f_{\pi}$\/ and, for the {\bf run time (s)
 
 \begin{table}[H]
 	\centering
-	\caption{Solutions with volume {\it surplus} = {\bf 2.0} and 3600s as time limit.}  \label{tab:100}
+	\caption{Solutions with $surplus = 2.0$\/ and $time =  3600s$}  \label{tab:100}
 	\footnotesize
 	\begin{tabular}{ccccccccc}
 		\toprule
-		{\bf Tours} & $method$          & {\bf Scenarios} & {\bf 1} & {\bf 2} & {\bf 3} & {\bf 4} & {\bf 5} & \specialcell{{\bf Normalized}\\{\bf Speed-up}}   \\
+		{\specialcell{{\bf Tested}\\{\bf tours}}}& $method$          & {\bf Scenarios} & {\bf 1} & {\bf 2} & {\bf 3} & {\bf 4} & {\bf 5} & \specialcell{{\bf Normalized}\\{\bf Speed-up}}   \\
 		\toprule
-		\multirow{4}{*}{ \specialcell{$\pi_{TSP_1}$\\ $\pi_{TSP_2}$ }} & \multirow{2}{*}{\it Gurobi* } & $f$ & 17.75 & 24.39 & 26.46 & 27.09 & 24.00 & 1.00 \\ % 11969
-		&&                                                                               {\bf run time (s)}  & 162   & 95    & 74    & 68    & 67    & 1.0  \\ % 466
+		\multirow{4}{*}{ Shortest} & \multirow{2}{*}{\it Gurobi } & $f$ & 17.75 & 24.39 & 26.46 & 27.09 & 24.00 & 1.00 \\ % 11969
+		&&                                                                               {time (s)}  & 162   & 95    & 74    & 68    & 67    & 1.0  \\ % 466
 		\cmidrule(lr){2-9}	
 		&                                                                   \multirow{2}{*}{\it Shims} & $f$ & 17.78 & 24.40 & 26.36 & 27.01 & 23.94 & 0.99  \\ % 11949
-		&&                                                                                {\bf run time (s)} & 2     & 3     & 3     & 4     & 5     & 27.4  \\ % 17
+		&&                                                                                {time (s)} & 2     & 3     & 3     & 4     & 5     & 27.4  \\ % 17
 		
 		\midrule
 		
-		\multirow{4}{*}{\it $S_{K}$ } & \multirow{2}{*}{\it Gurobi* } & $f$ & 17.75 & 25.24 & 26.46 & 29.11 &  x   & 1.00 \\ % 9856
-		&&                                                                                {\bf run time (s)} & 151   & 123   & 319   & 689   &  x   & 1.0  \\ % 1282
+		\multirow{4}{*}{All $K!$} & \multirow{2}{*}{\it Gurobi } & $f$ & 17.75 & 25.24 & 26.46 & 29.11 &  x   & 1.00 \\ % 9856
+		&&                                                                                {time (s)} & 151   & 123   & 319   & 689   &  x   & 1.0  \\ % 1282
 		\cmidrule(lr){2-9}	
 		&                                                                \multirow{2}{*}{\it Shims}    & $f$ & 17.78 & 25.25 & 26.38 & 28.98 & 26.08 & 1.00  \\ % 9839
-		&&                                                                                {\bf run time (s)} & 2     & 3     & 13    & 37    & 229   & 23.3  \\ % 284
+		&&                                                                                {time (s)} & 2     & 3     & 13    & 37    & 229   & 23.3  \\ % 284
 		\bottomrule
 		
 	\end{tabular}
 	\normalsize
 \end{table}
 
-{\color{blue}
-	{\it Gurobi*} could not solve scenario 5 in Table \ref{tab:100} because $3600/K! = 0.71s$ is not enough time for {\it Gurobi*} to find a feasible node solution.
-}
 
-\subsubsection{Time limits comparisons}
+From these data, we can make some conclusions:
+\begin{itemize}
+\item The strategy of testing all $K!$\/ often gives a better quality solution.
+\item $Gurobi$\/ fails in some cases, when $scenario=5$\/ and the strategy is to check all $K!$\/ tours. This occurs because the time limit per node is smaller, and there tends to be more packed contents on the aircraft, reducing the space for allocating items and making the solution difficult.
+\item When $Gurobi$\/ finishes, it finds the best solution, but the one obtained by $Shims$\/ reaches $99\%$\/ of that value.
+\item $Shims$\/ always finds a solution, being 11 to 27 times faster.
+\item All runtimes are well under the time limit because the solution on many nodes can be fast. Anyway, in all the tests performed, the maximum time spent by $Shims$\/ did not reach 4 minutes, that is, it is practically instantaneous. On the other hand, when $scenario=5$\/ and $surplus=1.5$, Gurobi spent almost 40 minutes.
+\end{itemize}
+
+Table \ref{tab:100time} shows the results obtained with the strategy of testing the $K!$\/ tours in scenarios 4 and 5, with different time limits. We can observe more cases where $Gurobi$\/ fails. When $Gurobi$ finishes, $Shims$\/ finds a solution of similar quality in much less time.
+
+\begin{table}[H]
+	\centering
+	\caption{Solutions in scenarios 4 and 5 testing all $K!$\/ tours}  \label{tab:100time}
+	\footnotesize
+	\begin{tabular}{ccc|cc|cc|cc}
+		\toprule
+		&             \multicolumn{2}{c}{$surplus$} &\multicolumn{2}{c}{$1.2$}&\multicolumn{2}{c}{$1.5$}&\multicolumn{2}{c}{$2.0$} \\
+		\midrule
+		$method$& {\specialcell{$time$ (s)}} & {\bf Scenarios}    & {\bf 4} & {\bf 5} & {\bf 4} & {\bf 5} & {\bf 4} & {\bf 5} \\
+		\toprule
+		
+		\multirow{6}{*}{\it Gurobi }& \multirow{2}{*}{1200} & $f$ & 14.67   & x       &  20.64  &  x      & 27.97   & x \\ % 
+		&        &  {time (s)}                             & 217     & x       &  304    &  x      & 579     & x \\ % 
+		\cmidrule(lr){2-9}                              
+		& \multirow{2}{*}{2400}& $f$                               & 14.59   & 13.59   &  20.60  &  x      & 29.10   & x \\ % 
+		&        &  {time (s)}                             & 313     & 1444    &  327    &  x      & 543     & x \\ % 
+		\cmidrule(lr){2-9}                              		
+		& \multirow{2}{*}{3600}& $f$                               & 14.61   & x       &  20.59  & 18.36   & 29.11   & x \\ % 
+		&        &  {time (s)}                             & 297     & x       &  470    & 2241    & 689     & x \\ % 		
+		\midrule
+		\multirow{6}{*}{\it Shims}   & \multirow{2}{*}{1200} & $f$ & 14.53   & 13.42   &  20.45  & 18.00   & 28.98   & 26.08 \\ % 
+		&        & {time (s)}                              & 18      & 109     &  26     & 160     & 37      & 203   \\ % 
+		\cmidrule(lr){2-9}                              
+		& \multirow{2}{*}{2400}& $f$                               & 14.53   & 13.42   &  20.45  & 18.00   & 28.98   & 26.08 \\ % 
+		&        &  {time (s)}                             & 18      & 107     &  25     & 159     & 37      & 192   \\ % 	
+		\cmidrule(lr){2-9}                              
+		& \multirow{2}{*}{3600} & $f$                              & 14.53   & 13.42   &  20.45  & 18.00   & 28.98   & 26.08 \\ %  
+		&        &  {time (s)}                             & 17      & 106     &  26     & 157     & 37      & 181   \\ 
+		
+		\bottomrule
+		
+	\end{tabular}
+	\normalsize
+\end{table}
+
 
 \begin{table}[H]
 	\centering
 	\caption{Solutions with different time limitations for $S_K$ tours.}  \label{tab:100time_2}
-	%\footnotesize
-	\tiny
+%\footnotesize
+%	\tiny
+\scriptsize	
+	\setlength{\tabcolsep}{3.5pt}
+	
 	\begin{tabular}{ccc|ccccc|ccccc|ccccc}
 		\toprule
 		&             \multicolumn{2}{r}{\bf Volume $surplus$} &\multicolumn{5}{c}{$1.2$}&\multicolumn{5}{c}{$1.5$}&\multicolumn{5}{c}{$2.0$} \\
 		\midrule
-		$method$& {\bf limit (s)} & {\bf Scenarios}  &{\bf 1}&{\bf 2}&{\bf 3}&{\bf 4}&{\bf 5}&{\bf 1}&{\bf 2}&{\bf 3}&{\bf 4}&{\bf 5}&{\bf 1}&{\bf 2}&{\bf 3}&{\bf 4}&{\bf 5} \\
+		$method$& \specialcell{\bf limit\\ (s)} & {\bf Scenarios}  &{\bf 1}&{\bf 2}&{\bf 3}&{\bf 4}&{\bf 5}&{\bf 1}&{\bf 2}&{\bf 3}&{\bf 4}&{\bf 5}&{\bf 1}&{\bf 2}&{\bf 3}&{\bf 4}&{\bf 5} \\
 		\toprule
 		
-		\multirow{8}{*}{\it Gurobi } & \multirow{2}{*}{240*} & $f$ & 8.53 & 12.24 & 13.34 &  x      &  x      & 11.81 & 17.02 & 18.31 &  x      &  x      & 17.75 & 25.24 & x     & x       & x \\ % 
-&               &  {\bf run time (s)}                              & 41   & 43    & 123   &  x      &  x      & 50    & 62    & 181   &  x      &  x      & 166   & 140   & x     & x       & x \\ % 
-\cmidrule(lr){2-18}		
+		\multirow{10}{*}{\it Gurobi } & \multirow{2}{*}{240*} & $f$ & 8.53 & 12.24 & 13.34 &  x      &  x      & 11.81 & 17.02 & 18.31 &  x      &  x      & 17.75 & 25.24 & x     & x       & x \\ % 
+		&               &  {\bf time (s)}                              & 41   & 43    & 123   &  x      &  x      & 50    & 62    & 181   &  x      &  x      & 166   & 140   & x     & x       & x \\ % 
+		\cmidrule(lr){2-18}		
 		
 		&                              \multirow{2}{*}{1200} & $f$ & 8.52 & 12.25 & 13.31 & 14.67   & x       & 11.81 & 17.02 & 18.25 &  20.64  &  x      & 17.75 & 25.24 & 26.49 & 27.97   & x \\ % 
-		&        &  {\bf run time (s)}                             & 39   & 41    & 129   & 217     & x       & 52    & 61    & 190   &  304    &  x      & 161   & 139   & 384   & 579     & x \\ % 
+		&        &  {\bf time (s)}                             & 39   & 41    & 129   & 217     & x       & 52    & 61    & 190   &  304    &  x      & 161   & 139   & 384   & 579     & x \\ % 
 		\cmidrule(lr){2-18}                              
 		& \multirow{2}{*}{2400}& $f$                               & 8.53 & 12.25 & 13.30 & 14.59   & 13.59   & 11.80 & 17.02 & 18.25 &  20.60  &  x      & 17.75 & 25.24 & 26.46 & 29.10   & x \\ % 
-		&        &  {\bf run time (s)}                             & 33   & 39    & 127   & 313     & 1444    & 51    & 62    & 188   &  327    &  x      & 158   & 127   & 381   & 543     & x \\ % 
+		&        &  {\bf time (s)}                             & 33   & 39    & 127   & 313     & 1444    & 51    & 62    & 188   &  327    &  x      & 158   & 127   & 381   & 543     & x \\ % 
 		\cmidrule(lr){2-18}                              		
 		
 		& \multirow{2}{*}{3600}& $f$                               & 8.52 & 12.25 & 13.32 & 14.61   & x       & 11.81 & 17.01 & 18.25 &  20.59  & 18.36   & 17.75 & 25.24 & 26.46 & 29.11   & x \\ % 
-		&        &  {\bf run time (s)}                             & 25   & 36    & 121   & 297     & x       & 53    & 61    & 193   &  470    & 2241    & 151   & 123   & 319   & 689     & x \\ % 		
+		&        &  {\bf time (s)}                             & 25   & 36    & 121   & 297     & x       & 53    & 61    & 193   &  470    & 2241    & 151   & 123   & 319   & 689     & x \\ % 		
 		
 		\midrule
 		
-		 \multirow{2}{*}{\it Shims} & \multirow{2}{*}{240*}  & $f$ & 8.54 & 12.26 & 13.23 & 14.53   & 13.42   & 11.83 & 17.00 & 18.21 &  20.45  & 18.00   & 17.78 & 25.25 & 26.38 & 28.98   & 26.08 \\ % 
-		&         & {\bf run time (s)}                             & 1    & 2     & 6     & 17      & 109     & 1     & 2     & 8     &  26     & 160     & 2     & 3     & 13    & 37      & 229   \\ % 
-				
-		\bottomrule
+		\multirow{2}{*}{\it Shims} & \multirow{2}{*}{240*}  & $f$ & 8.54 & 12.26 & 13.23 & 14.53   & 13.42   & 11.83 & 17.00 & 18.21 &  20.45  & 18.00   & 17.78 & 25.25 & 26.38 & 28.98   & 26.08 \\ % 
+		&         & {\bf time (s)}                             & 1    & 2     & 6     & 17      & 109     & 1     & 2     & 8     &  26     & 160     & 2     & 3     & 13    & 37      & 229   \\ % 
 		
-		&                                       & {\bf Normalized} & 1.00 & 1.00  & 0.99  & 0.99    & 0.99    & 1.00  & 1.00  & 1.00  & 0.99    & 0.98    & 1.00  & 1.00 & 1.00  & 1.00    & x\\
-		&                                       & {\bf Speed-up}   & 34.5 & 19.9  & 20.9  & 15.6    & 13.5    & 50.0  & 30.0  & 23.8  & 14.3    & 14.3    & 75.0  & 43.0 & 29.0  & 16.3    & x\\
 		
 		\bottomrule
-				\multicolumn{16}{l}{*4 minutes is the time {\it Shims} needs to solve a seven-node tour.}\\
+		\multicolumn{16}{l}{*4 minutes is the time {\it Shims} needs to solve a seven-node tour.}\\
 	\end{tabular}
 	\normalsize
 \end{table}
 
-According to the results in Table \ref{tab:100time}, {\it Shims} was 28 times faster than {\it Gurobi* } to solve the ACLP-RPDP, and {\it Gurobi* } was not fully capable of solving scenario 5.
 
-	
-\subsubsection{Proposed $S_K$ strategy assessment}
-	
-	Another important test is to compare the best tour score/cost ratio with the least expensive tour score/cost ratio. This is important to see how far our solution strategy is from the simplest form, just solving a TSP.
-	
-	For this achievement, we collected {\it Shims} results from tables \ref{tab:20}, \ref{tab:50}, and \ref{tab:100}, gathering the best tour results and the least cost results to assemble Table \ref{tab:20least}.
-	
-	\begin{table}[H]
-		\centering
-		\caption{{\it Shims} best and least cost tour results}  \label{tab:20least}
-		\footnotesize
-		\begin{tabular}{ccccccccc}
-			\toprule
-			{$surplus$}              & {\bf Tour} & {\bf 1} & {\bf 2} & {\bf 3} & {\bf 4}  & {\bf 5}   & {\bf Sum} & {\bf Improvement}\\
-			\toprule
-			
-			\multirow{2}{*}{$1.2$}   & Least cost    & 8.54    & 11.63   & 12.97   & 13.43  & 12.36 & 58.93 &       \\ 
-			& Best in $S_K$  & 8.54    & 12.26   & 13.23   & 14.53  & 13.42 & 61.98 & 5.2\%  \\ 
-			\midrule[.1pt]	
-			\multirow{2}{*}{$1.5$}   & Least cost    & 10.89   & 11.83   & 16.74   & 18.01  & 18.89 & 76.36 & \\ 	
-			& Best in $S_K$  & 11.33   & 11.83   & 17.00   & 18.21  & 20.45 & 78.82 &  3.2\%  \\ 
-			\midrule[.1pt]	
-			\multirow{2}{*}{$2.0$}   & Least cost    & 17.78   & 24.40   & 26.36   & 27.01  & 23.94 & 119.49 &  \\ 
-			& Best in $S_K$  & 17.78   & 25.25   & 26.38   & 28.98  & 26.08 & 124.47 & 4.2\%   \\ 		                         
-			\midrule[.1pt]
-			\multicolumn{8}{r}{\boldm{$S_K$} {\bf strategy advantage}}                                              & {\bf 4.2}\% \\
-			
-			\bottomrule
-		\end{tabular}
-		\normalsize
-	\end{table}
-	
-	As the selection of the best tour, considering what was collected and delivered in each node, and considering the cost increase due to CG deviation, was better than the option for a simple TSP solution (\textit{Least cost} results), this confirms that our solution strategy was adequate.
-	
-	
-\subsubsection{Final considerations on the results}
+Most of $Gurobi$\/ executions consumed over 12 GB of RAM memory. Considering that the computer used in the experiments has a standard RAM consumption when idle of 3.5 GB (with {\it Python Interface Development Environment}, a PDF viewer, a system monitor, and a \LaTeX\/ IDE simultaneously open), the actual RAM consumption of $Gurobi$\/ was over 8.5 GB. On the other hand, all $Shims$\/ executions consumed at most 1.5 GB of RAM memory.
 
-
-It is important to report that the best tour found in each test was seldom the tour with the lowest cost (the minimal cost tour without considering the CG deviation), but any of the best tours. This indicates that our strategy of enumerating and solving all tours was assertive, although it is possible to devise a more proactive strategy to discard most of the higher-cost tours and improve performance. This must be one of the next steps in this research. If effective, this strategy may permit posterior applications for eight or more nodes.
-
-Most of the {\it Gurobi*} executions consumed over 12 GiB in total, and considering that the computer used in the experiments has a standard RAM consumption when idle of 3.5 GiB (with the Python Interface Development Environment (IDE), a PDF viewer, a system monitor, and a {\it LaTeX} IDE simultaneously open), the actual RAM consumption of {\it Gurobi*} was over 8.5 GiB.
-
-All {\it Shims} executions consumed at most 1.5 GiB, requiring 5 GiB of a computer total memory.
-These details are important for a future application to adequately dimension the machine to be used.
-	
-}
 
 \section{Conclusions}
 \label{sec7}
 
 In this work, we modeled and solved a real air transport problem, named {\it Air Cargo Load Planning with Routing, Pickup and Delivery Problem}\/ (ACLP+RPDP). For the first time in the literature, a {\it NP-hard}\/ problem that involves {\it simultaneously}\/ pallet assembly, load balancing and route planning is addressed, where the cost-effectiveness of transport is maximized. We adopted some simplifications that are not critical, but that allowed the unprecedented solution of this problem considering more than two nodes.
 
-We consider that, in practical cases, the number $K$\/ of nodes, excluding the base, is small ($K \leq 6$), each of them with hundreds of items to be shipped. Thus, considering real aircraft model, we developed some node-by-node heuristics, which allow us to enumerate all $K!$\/ tours and choose the best. The complete process can be executed quickly on a simple handheld computer, offering good results and reducing stress for the transport planners. As validation, we performed tests in several scenarios with real data from the {\it Brazilian Air Force}.
+We consider that, in practical cases, the number $K$\/ of nodes, excluding the base, is small ($K \leq 6$), each of them with hundreds of items to be shipped. Thus, considering a real aircraft, we have developed some node-by-node solutions, which are not necessarily optimal. This allows us to test two strategies: find a solution using the shortest tours, or enumerate all $K!$\/ tours and choose the best. The complete process can be executed quickly on a simple handheld computer, offering good results and reducing stress for the transport planners. As validation, we performed tests in several scenarios with real data from the {\it Brazilian Air Force}. At the moment, there is no {\color{blue}commercial} software available for this problem.
 
-{\color{blue} In less than 20 minutes}, this development can establish a good distribution of load on pallets to be put in the cargo bay, enforcing the loaded aircraft balance, maximizing the total score and minimizing fuel consumption for the airlift. The output, which includes the tour plan and the pallet building and arrangement plan, is an essential part of airlift: it improves flight safety, makes ground operations more efficient, and makes sure that each item gets to its right destination.
+We have developed a solution process that, in less than 4 minutes, can establish a flight plan for a single aircraft with a good distribution of load on pallets to be put in the cargo bay, enforcing the loaded aircraft balance, maximizing the total score and minimizing fuel consumption. The output, which includes the tour plan and the pallet building and arrangement plan, is an essential part of airlift: it improves flight safety, makes ground operations more efficient, and makes sure that each item gets to its right destination. In this way, at each node of the tour, the time required is restricted exclusively to handling the airport equipment.
 
-{\color{blue}
-	
-Our main contributions were the mathematical modeling (1) of this complex problem, which involves four {\it NP-hard}\/ sub-problems, a complete process (2), and a new heuristic (3) that offer fast and good-quality solutions to the ACLP+RPDP.
+Our main contributions were the mathematical modeling of ACLP+RPDP that involves four sub-problems {\it NP-hard}\/, a complete process to solve it on a simple handheld computer, and a new heuristic that offers fast node solutions with good quality. Finally, by focusing on the node-to-node solution, the method of this work is not exclusive to aircraft and airports: it can be adapted, for example, to ships and ports, or vehicles and warehouses, or wagons and railways, provided that their practical cases are similar to those considered here. In these situations, it would be necessary to make some changes in the modeling: for example, modify the load balancing constraints, and consider the available space in vehicles or wagons instead of pallets.
 
-
-As this is ongoing research, some improvements are possible, which are the next steps of the development:
-
-(1) This work addresses all possible tours, but we plan bounding schemes to allow for discarding most of the higher-cost tours. This is expected to reduce the running time.
-
-(2) We are also working on computer parallelism to accelerate {\it Shims}.
-
-(3) In the event that these gains in performance are achieved, we strongly believe that they will permit the application of a 3-dimensional packing procedure to maximize the occupancy rate of the items selected by {\it Shims}.
-
-The $Shims$\/ heuristic presented a solution with the best node-by-node results in a restricted time interval. Without it, it would not be possible to test all routes: after all, the greater the number of nodes, the shorter the run time limit for node-by-node solution. We also show that, as the shipment volume increases, the exact node-by-node solution becomes unfeasible, indicating the importance of a fast and good-quality heuristic.
-
-Finally, by focusing on node-by-node solution, the method of this work is not exclusive to aircraft and airports: it can be adapted, for example, to ships and ports, or vehicles and warehouses, or freight cars and railways. In these cases, it would be necessary to make some changes in the modeling: for example, modify the load balancing constraints, and consider the available space in vehicles or freight cars instead of pallets.
-
-}
+As this is an ongoing research, we thought about some possible future improvements:
+\begin{itemize}
+\item consider a fleet of planes, rather than a single one;
+\item model three-dimensional items;
+\item discard the highest cost tours, to reduce the runtime;
+\item implement parallel algorithms in some steps of the solution.
+\end{itemize}
 
 
 \section*{Acknowledgments}
@@ -1538,7 +1509,6 @@ Vol. 56 (4), pp. 1581-1592, 2018.
 
 \bibitem{LopezIbanezManuel2016} M. López-Ibáñez, J. Dubois-Lacoste, L.P. Cáceres, M. Birattari and T. Stützle, The irace package: Iterated racing for automatic algorithm configuration, {\it Operations Research Perspectives}, Vol. 3, pp. 43-58, 2016.
 
-	\bibitem{mipgap} Matthias Miltenberger. {\it What is the MIPGap?} \url{https://support.gurobi.com/hc/en-us/articles/8265539575953-What-is-the-MIPGap-}, 2023.
 
 \end{thebibliography}
 
