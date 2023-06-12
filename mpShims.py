@@ -120,9 +120,6 @@ def getBestShims(pallet, items, k, nodeTorque, solDict, cfg, surplus, itemsDict,
 def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict, itemsDict, tipo):
 
 
-
-
-
     startTime = time.perf_counter()
 
     if mode == "p":
@@ -132,24 +129,17 @@ def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict
 
     surplus = 1. + 3. *(1. - threshold)
 
+    torqueSurplus = 1.1
+
     lock  = mp.Lock()
     counter = 0
+
+    for i, _ in enumerate(pallets):
+        common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, threshold, itemsDict, lock, torqueSurplus)
 
     if mode == "Parallel":
     
         procs = [None for _ in pallets] # each pallets has its own process
-
-        # parallel greedy phase
-        for i, _ in enumerate(pallets):
-            procs[i] = mp.Process( target=common.fillPallet, args=( pallets[i], items, k,\
-                 nodeTorque, solDict, cfg, threshold, itemsDict, lock, 1.0) ) # torque surplus
-            time.sleep(0.001)
-            procs[i].start()
-        
-        for proc in procs:
-            proc.join()
-
-        optcgcons.minCGdev(pallets, k, nodeTorque, cfg) # made no significant difference
 
         # parallel shims phase
         for i, p in enumerate(pallets):
@@ -162,22 +152,11 @@ def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict
             p.join()
 
     else: # serial
-        # sort ascendent by CG distance
-        # pallets.sort(key=lambda x: abs(x.D)) # deactivated because of torque surplus
         for i, _ in enumerate(pallets):
-            # fill until the threshold                                                               torque surplus
-            common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, threshold, itemsDict, lock, 1.1)
 
-            # if ((time.perf_counter() - startTime) < secBreak):
-            #     optcgcons.minCGdev(pallets, k, nodeTorque, cfg)
-           
             # get the best Shims for the pallet
-            getBestShims( pallets[i], items, k, nodeTorque, solDict, cfg, surplus,   itemsDict, lock, tipo, startTime, secBreak)
+            getBestShims( pallets[i], items, k, nodeTorque, solDict, cfg, surplus, itemsDict, lock, tipo, startTime, secBreak)
 
-            # total_memory, used_memory, free_memory = map(
-            #     int, os.popen('free -t -m').readlines()[-1].split()[1:])
-            
-            # print(f"RAM {round((used_memory/total_memory) * 100, 2)}% used:")            
 
     # try to complete the pallet
     for i, _ in enumerate(pallets):
@@ -188,132 +167,7 @@ def Solve(pallets, items, cfg, k, threshold, secBreak, mode, nodeTorque, solDict
 
 if __name__ == "__main__":
 
-    import sys
-    seed         = sys.argv[1]
-    instance     = sys.argv[2] # /home/celio/Projects/ACLP_RPDP_P/data20/scenario_2/instance_3/items.txt'
-    volThreshold = float(sys.argv[3])
-    tipo         = sys.argv[4]
+    print("----- Please execute module main -----")
 
-    values = instance.split('/')
-
-    lenv = len(values)
-
-    # /home/celio/Projects/ACLP_RPDP_P/data20/scenario_2/instance_3/items.txt'
-    #                                  data20/scenario_2/instance_3/items.txt'
-
-    if lenv == 4:
-        surplus   = values[0]
-        scenario = int(values[1][-1:])
-        instance = int(values[2][-1:]) 
-
-    if lenv == 9:
-        surplus   = values[5]
-        scenario = int(values[6][-1:])
-        instance = int(values[7][-1:])         
-
-    # method = "mpShims" # best volThreshold =  data50(0.9781)
-    method = "Shims"  # best volThreshold: data20 (0.98)
-
-    secBreak = 1.8
-
-    # tipo = "FFD"
-
-    # --- distances and costs matrix ---
-    dists = common.loadDistances("params/distances.txt")
-
-    costs = [[0.0 for _ in dists] for _ in dists]
-
-    cfg = common.Config(scenario)                                      
-
-    for i, cols in enumerate(dists):
-        for j, dist in enumerate(cols):
-            costs[i][j] = cfg.kmCost*dist
-
-    pallets, rampDistCG = common.loadPallets(cfg)
-    lock = mp.Lock
-
-    # pallets capacities
-    cfg.weiCap = 0
-    cfg.volCap = 0
-    for p in pallets:
-        cfg.weiCap += p.W
-        cfg.volCap += p.V
-
-    # smaller aircrafts may have a payload lower than pallets capacity
-    if cfg.weiCap > cfg.payload:
-        cfg.weiCap = cfg.payload   
-
-    tours = common.getTours(cfg.numNodes-1, costs, 1.0)
-
-    pi = 0 # the first, not necessarily the best
-
-    tour = tours[pi]
-
-    # a matrix for all consolidated in the tour
-    consol = [
-                [ common.Item(-1, -2, 0, 0, 0., -1, -1)
-                for _ in tour.nodes ]
-                for _ in pallets # a consolidated for each pallet
-            ]
-
-    k = 0 # the base
-
-    for i, p in enumerate(pallets):
-        pallets[i].reset(cfg.numNodes)
-
-    node = tour.nodes[k]
-
-    # L_k destination nodes set
-    unattended = [n.ID for n in tour.nodes[k+1:]]
-
-    # load items parameters from this node and problem instance, that go to unnatended
-    items = common.loadNodeItems(scenario, instance, node, unattended, surplus)
-    N = len(items)
-
-
-    # solution global torque to be shared and changed by all pallets concurrently
-    nodeTorque = mp.Value('d', 0.0) # a multiprocessing double type variable
-
-    # initialize- the accumulated values
-    sNodeAccum = 0.
-    wNodeAccum = 0.
-    vNodeAccum = 0.
-
-    # set empty pallets (-1) destinations based on the items to embark
-    common.setPalletsDestinations(items, pallets, tour.nodes, k, unattended)
-
-    # to control solution items
-    M = len(pallets)
-    solMatrix = mp.Array('i', [0 for _ in np.arange(N*M)] )
-    mpItems   = mp.Array('i', [0 for _ in np.arange(N)] ) # to check items inclusions feasibility
-
-    solDict   = dict(solMatrix=solMatrix)
-    itemsDict = dict(mpItems=mpItems)
-
-    objValue = 0.0
-
-    if method == "mpShims":
-        Solve(pallets, items, cfg, k, volThreshold, secBreak, "p", nodeTorque, solDict, itemsDict, tipo)
-
-    if method == "Shims":            
-        Solve(pallets, items, cfg, k, volThreshold, secBreak, "s", nodeTorque, solDict, itemsDict, tipo)         
-
-    # Validate the solution for this node
-
-    Y = np.reshape(solDict["solMatrix"], (-1, N)) # N number of items (columns)
-
-    for i, row in enumerate(Y):
-        for j, X_ij in enumerate(row):
-            if X_ij:
-                consol[i][k].ID  = j+N
-                consol[i][k].Frm = node.ID
-                consol[i][k].To  = pallets[i].Dest[k]                   
-                consol[i][k].W += items[j].W
-                consol[i][k].V += items[j].V
-                consol[i][k].S += items[j].S
-
-                sNodeAccum += float(items[j].S)
-
-    # print(-1 * sNodeAccum) # to be captured by iRace. -1 because its maximization
 
 

@@ -340,8 +340,8 @@ if __name__ == "__main__":
 
     # free -s 1 -h -c 3  memory
 
-    # scenarios = [2,3,4,5,6]
-    scenarios = [2,3]
+    scenarios = [2,3,4,5,6]
+    # scenarios = [6]
 
     if testing:
         scenarios = [2]
@@ -352,8 +352,8 @@ if __name__ == "__main__":
 
     # methods = ["GRB"]
     # methods = ["CBC"]
-    methods = ["Shims"]
-    # methods = ["mpShims"]
+    # methods = ["Shims"]
+    methods = ["mpShims"]
     # methods = ["mpACO"]
     # methods = ["ACO"]
     # methods = ["TS"]
