@@ -1,7 +1,5 @@
 % !TeX spellcheck = en_US
-%\documentclass[preprint,authoryear]{elsarticle}
 \documentclass[preprint]{elsarticle}
-% sudo apt-get install -y texlive-publishers
 
 \usepackage[left]{lineno}
 \usepackage[latin1]{inputenc}
@@ -62,6 +60,7 @@
 \usepackage{setspace}
 \usepackage{array}
 \usepackage{color, colortbl}
+\usepackage{setspace} \doublespacing
 \definecolor{Gray}{gray}{0.9}
 \hyphenation{cost-ef-fec-tive-ness}
 
@@ -69,9 +68,6 @@
 	\begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
 
 \usepackage{textcomp}
-
- \setlength{\fboxsep}{0.005pt}
-\newcommand{\tmpframe}[1]{\fbox{#1}}
 
 \journal{Computers \& Industrial Engineering}
 
@@ -83,34 +79,22 @@
 
 \title{Air cargo load and route planning in pickup and delivery operations}
 
-\author{A.C.P.~Mesquita}
-\ead{celio@ita.br}
+%\author{A.C.P.~Mesquita}
+%\ead{celio@ita.br}
 
-\author{C.A.A.~Sanches\corref{cor1}}
-\ead{alonso@ita.br}
-\cortext[cor1]{Corresponding author.}
+%\author{C.A.A.~Sanches\corref{cor1}}
+%\ead{alonso@ita.br}
+%\cortext[cor1]{Corresponding author.}
 
-\address {Instituto Tecnol\'{o}gico de Aeron\'{a}utica - DCTA/ITA/IEC\\
-Pra\c{c}a Mal. Eduardo Gomes, 50\\
-S\~{a}o Jos\'{e} dos Campos - SP - 12.228-900 - Brazil}
+%\address {Instituto Tecnol\'{o}gico de Aeron\'{a}utica - DCTA/ITA/IEC\\
+%Pra\c{c}a Mal. Eduardo Gomes, 50\\
+%S\~{a}o Jos\'{e} dos Campos - SP - 12.228-900 - Brazil}
 
 
 \begin{abstract}
 
-In aerial pickup and delivery of goods in a distribution network, transport aviation faces risks of cargo unbalancing due to the urgency required for loading, immediate take-off, and mission accomplishment, especially in disaster relief, short deadlines, or any pressure for immediate take-off.
-
-In addition, there are no commercially available systems that can assist load and trip planners with pallet building and aircraft-balanced loading plans, with demands for transport at each hub.
-
-This enables other risks, such as improper delivery, excessive fuel burn, and longer than necessary turn-around time.
-
-We defined and solved the problem of planning the loading and routing of a single aircraft according to a utility score, weight and balance principles, and fuel consumption in a tour of simultaneous pickup and delivery at intermediate hubs.
-
-This NP-hard problem, named {\it Air Cargo Load Planning with Routing, Pickup, and Delivery Problem (ACLP+RPDP)}, is mathematically modeled using standardized pallets in fixed positions, obeying center of gravity constraints, delivering each item to its destination, and minimizing fuel consumption costs.
-
-We performed multiple experiments with a commercial solver and four well-known meta-heuristics on data based on the transport history of the {\it Brazilian Air Force}.
-
-We also designed a new heuristic that quickly finds practical solutions for a wide range of problem sizes, an essential contribution that solved all test scenarios within a much shorter time than is operationally acceptable.
-
+{\color{blue}In aerial pickup and delivery of goods in a distribution network, transport aviation faces risks of cargo unbalancing due to the urgency required for loading, immediate take-off, and mission accomplishment, especially in disaster relief, short deadlines, or any pressure for immediate take-off.}
+In addition, there are no commercially available systems that can assist load and trip planners with pallet building and aircraft-balanced loading plans, with demands for transport at each hub. This enables other risks, such as improper delivery, excessive fuel burn, and longer than necessary turn-around time. We defined and solved the problem of planning the loading and routing of a single aircraft according to a utility score, weight and balance principles, and fuel consumption in a tour of simultaneous pickup and delivery at intermediate hubs. This {\it NP-hard}\/ problem, named {\it Air Cargo Load Planning with Routing, Pickup, and Delivery Problem (ACLP+RPDP)}, is mathematically modeled using standardized pallets in fixed positions, obeying center of gravity constraints, delivering each item to its destination, and minimizing fuel consumption costs. We performed multiple experiments with a commercial solver and four well-known meta-heuristics on data based on the transport history of the {\it Brazilian Air Force}. We also designed a new heuristic that quickly finds practical solutions to a wide range of problem sizes, a key contribution that resolved all real scenarios in much less time than is operationally acceptable.
 
 \end{abstract}
 
@@ -128,48 +112,11 @@ Air cargo transport involves several sub-problems that are difficult to solve. R
 
 However, there are still other important challenges in air cargo transport that go beyond the definition of the ACLPP, especially with regard to the flight itinerary and the loading and unloading at each destination (or node) of this travel plan. In this context, at least two more important sub-problems can be considered: pickup and delivery operations at each node, called {\it Pickup and Delivery Problem} (PDP), and the search for the lowest cost route, which is the well-known {\it Traveling Salesman Problem} (TSP).
 
-Considering air cargo transport, Table \ref{tab:sa} lists the main works in the literature and the corresponding sub-problems addressed. We also indicate whether the dimensions of the items were taken into account ({\bf 3D} or {\bf 2D}) and which solution method was used: heuristic search methods ({\bf Heu}), integer programming ({\bf Int}), or linear programming ({\bf Lin}).
+{\color{blue} Lurkin and Schyns \cite{LurkinSchyns2015} show that this problem is NP-hard and therefore compare their results to current manually generated solutions vice optimal (or even near optimal) solutions. They have shown that the WBP is also NP-hard.}
 
-\begin{table}[H]
-	\centering
-	\caption{Air cargo transport: literature, problems and features}  \label{tab:sa}
-	\scriptsize
-	\renewcommand{\arraystretch}{1.1} 
-	\begin{tabular}{r|cccc|ccccc}
-		\toprule
-		 Work & {\bf APP}  & {\bf WBP}  &  {\bf PDP}   &{\bf TSP}   & {\bf 2D}  & {\bf 3D}  & {\bf Heu}  & {\bf Int}  & {\bf Lin} \\
-		\midrule
-		Larsen and Mikkelsen \cite{LarsenMikkelsen1979}  & $.$        & $\bigstar$ & $.$          & $.$        & $.$       & $.$       & $\bigstar$ & $.$        &  $.$ \\
-		Brosh \cite{Brosh1981}  & $.$ & $\bigstar$  & $.$   & $.$ & $.$ & $.$   & $.$  & $.$  &  $\bigstar$ \\
-		Ng \cite{Kevin1992}  & $.$ & $\bigstar$  & $.$ & $.$ & $.$ &$.$   & $.$  & $\bigstar$  &  $.$ \\
-		Heidelberg {\it et al.} \cite{Heidelberg1998}  & $.$ & $\bigstar$  & $.$ & $.$ & $\bigstar$ &$.$   & $\bigstar$  & $.$  &  $.$ \\
-		Mongeau and Bes \cite{MongeauBes2003}    & $\bigstar$ & $\bigstar$   & $.$ & $.$ & $.$ & $.$   & $.$  & $\bigstar$  &  $.$ \\
-		Fok and Chun \cite{fok2004optimizing} & $.$ & $\bigstar$   & $.$ & $.$ & $.$ & $.$   & $.$  & $\bigstar$  &  $.$ \\	
-		Chan {\it et al.} \cite{Chan2006}  & $\bigstar$ & $.$    & $.$ & $.$ & $.$ & $\bigstar$  & $\bigstar$  & $.$  &  $.$ \\
-		Kaluzny and Shaw \cite{KaluznyBohdanL2009Oalb}  & $.$ & $\bigstar$  & $.$  & $.$ & $\bigstar$ &$.$  & $.$  & $\bigstar$  &  $.$ \\
-		Verstichel {\it et al.} \cite{Verstichel2011}   & $.$ & $\bigstar$    & $.$ & $.$ & $.$ & $.$   & $.$  & $\bigstar$  &  $.$ \\
-		Mesquita and Cunha \cite{MesquitaCunha2011}   & $.$ & $.$    & $\bigstar$ & $.$ & $.$ & $.$   & $\bigstar$  & $.$  &  $.$ \\		
-		Limbourg {\it et al.} \cite{Limbourg2012} & $.$ & $\bigstar$  & $.$ & $.$ & $.$ & $.$   & $.$  & $\bigstar$  &  $.$ \\
-		Roesener and Hall \cite{RoesenerHall2014}  & $\bigstar$ & $\bigstar$  & $.$  & $.$ & $.$ & $\bigstar$   & $.$  & $\bigstar$  &  $.$ \\
-		Vancroonenburg {\it et al.} \cite{Vancroonenburg2014}  & $\bigstar$ & $\bigstar$   & $.$ & $.$ & $.$ & $.$   & $.$  & $\bigstar$  &  $.$ \\
-		Lurkin and Schyns \cite{LurkinSchyns2015} & $.$ & $\bigstar$  & $\bigstar$ & $.$  & $.$ & $.$   & $.$  & $\bigstar$  &  $.$ \\
-		Roesener and Barnes \cite{RoesenerBarnes2016}  & $.$ & $\bigstar$   & $.$ & $.$ & $.$ & $.$   & $\bigstar$  & $.$  &  $.$ \\
-		Paquay {\it et al} \cite{PaquaySchynsLimbourg2016,PaquayLimbourgSchynsOliveira2018}  & $\bigstar$ & $\bigstar$ & $.$ & $.$ & $.$ & $\bigstar$ & $\bigstar$  & $\bigstar$ & $.$ \\
-		Chenguang {\it el al.} \cite{YangLiuGao2018} & $.$ & $\bigstar$  & $.$  & $.$ & $\bigstar$  & $.$ & $\bigstar$ & $.$  & $.$ \\
-		Wong and Ling \cite{wong2020} & $\bigstar$  & $\bigstar$  & $.$  & $.$   & $.$  & $.$ & $.$ & $\bigstar$  & $.$  \\
-		Wong {\it et al.} \cite{eugene2021} & $\bigstar$ & $\bigstar$ & $.$  & $.$   & $.$ & $.$ & $.$ & $\bigstar$  & $.$  \\
-		Zhao {\it et al.} \cite{zhao2021} & $.$ & $\bigstar$ & $.$  & $.$  & $.$ & $.$ & $.$  & $\bigstar$ &  $.$ \\
-		
-		
-		
-		{\bf This article}   & $\bigstar$ & $\bigstar$  & $\bigstar$& $\bigstar$ & $.$ & $.$ & $\bigstar$ & $\bigstar$   &  $.$  \\
-		\bottomrule 
-	\end{tabular}
-	\normalsize 
-\end{table}
+{\color{blue} Karp \cite{Karp1972} previously proved the 0-1 Knapsack problems to be NP-Hard, as the pallets may be seen as multiple knapsacks, the APP is also NP-hard. }
 
-
-As can be seen, so far Lurkin and Schyns \cite{LurkinSchyns2015} is the only work that simultaneously addresses an air cargo (WBP) and a flight itinerary (PDP) sub-problem. Although it is innovative, strong simplifications were imposed by these authors: in relation to loading, APP was ignored; with regard to routing, it is assumed a predefined tour plan restricted to only two legs. It is important to note that these authors consider an aircraft with two doors, and the minimization of loading and unloading costs at the intermediate node was modeled through a container sequencing problem. Referring directly to this work, Brandt and Nickel \cite[p. 409]{BrandtStefan2019} comment: {\it However, not even these sub-problems are acceptably solved for real-world problem sizes or the models omit some practically relevant constraints}. 
+{\color{blue} Feng {\it et al.} (2015) \cite{Feng2015} presented a comprehensive literature assessment of commercial air cargo operations. They stated that the airplane loading problem is one of the fundamental issues in combinatorial optimization and described it as an NP-hard problem.}
 
 There are real situations that are much more complex. In this work, we consider a practical case in Brazil, which is the largest economy in Latin America. Due to its dimensions, this country has the largest air market on the continent with $2,499$\/ registered airports, of which $1,911$\/ are private and $588$\/ are public. Although it is an immense distribution network, the {\it Brazilian Air Force}\/ missions have always considered 3 to 5 nodes per flight plan.
 
@@ -212,20 +159,12 @@ It is important to emphasize that this data is not an imposed limitation, but a 
 		\centering
 		\includegraphics[scale=0.25]{Images/nodes.png}
 		\captionof{figure}{A route with 7 Brazilian airports}
-		\label{fig:nodes}		
+		\label{fig:nodes}
 	\end{minipage}
 \end{table}
 
 
-Cargo handling at modern airports usually involves powerful equipment such as dollies, motorized conveyors, elevator transfer vehicles, caster decking, scissor lifts, electrical controls, hydraulically adjustable heights, forklift trucks, and plenty of room in the airport cargo terminal (see Figure \ref{fig:handling}). These facilities, together with the use of standardized pallets with predefined positions on the aircraft, allow loading and unloading at each node to be carried out in about 30 minutes.
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[scale=0.2]{Images/handling.png}
-	\captionof{figure}{Cargo handling equipment}
-	\label{fig:handling}
-	\small\textsuperscript{Source: NARA \& DVIDS Public Domain Archive}	
-\end{figure}
+Cargo handling at modern airports usually involves powerful equipment such as dollies, motorized conveyors, elevator transfer vehicles, caster decking, scissor lifts, electrical controls, hydraulically adjustable heights, forklift trucks, and plenty of room in the airport cargo terminal. These facilities, together with the use of standardized pallets with predefined positions on the aircraft, allow loading and unloading at each node to be carried out in about 30 minutes.
 
 However, as reported by Fok and Chun, {\it load planning (...) is usually done in roughly 2 hours before departure, when all the details of the cargo are present.} \cite{fok2004optimizing}. We can infer that this is because adequate commercial software does not exist. In addition, there is still the necessary time to plan the route, in order to minimize fuel consumption and ensure the transport of priority items. In these circumstances, it is of great importance to find a method that speeds up the load planning and the definition of the flight itinerary.
 
@@ -238,7 +177,50 @@ This article is organized into six more sections. In Section \ref{sec2}, we give
 \section{Related literature}
 \label{sec2}
 
-In this section, we briefly describe the characteristics of the main works related to air cargo transport, following the chronological order of Table \ref{tab:sa}.
+{\color{blue} In this section, we briefly describe the characteristics of the main works related to air cargo transport, following the chronological order of Table \ref{tab:sa}, that lists the main works in the literature and the corresponding sub-problems addressed. We also indicate whether the dimensions of the items were taken into account ({\bf 3D} or {\bf 2D}) and which solution method was used: heuristic search methods ({\bf Heu}), integer programming ({\bf Int}), or linear programming ({\bf Lin}). }
+
+\begin{table}[H]
+	\centering
+	\caption{Air cargo transport: literature, problems and features}  \label{tab:sa}
+	\scriptsize
+	\renewcommand{\arraystretch}{1.1} 
+	\begin{tabular}{r|cccc|ccccc}
+		\toprule
+		Work & {\bf APP}  & {\bf WBP}  &  {\bf PDP}   &{\bf TSP}   & {\bf 2D}  & {\bf 3D}  & {\bf Heu}  & {\bf Int}  & {\bf Lin} \\
+		\midrule
+		Larsen and Mikkelsen \cite{LarsenMikkelsen1979}  & $.$        & $\bigstar$ & $.$          & $.$        & $.$       & $.$       & $\bigstar$ & $.$        &  $.$ \\
+		Brosh \cite{Brosh1981}  & $.$ & $\bigstar$  & $.$   & $.$ & $.$ & $.$   & $.$  & $.$  &  $\bigstar$ \\
+		Ng \cite{Kevin1992}  & $.$ & $\bigstar$  & $.$ & $.$ & $.$ &$.$   & $.$  & $\bigstar$  &  $.$ \\
+		Heidelberg {\it et al.} \cite{Heidelberg1998}  & $.$ & $\bigstar$  & $.$ & $.$ & $\bigstar$ &$.$   & $\bigstar$  & $.$  &  $.$ \\
+		Mongeau and Bes \cite{MongeauBes2003}    & $\bigstar$ & $\bigstar$   & $.$ & $.$ & $.$ & $.$   & $.$  & $\bigstar$  &  $.$ \\
+		Fok and Chun \cite{fok2004optimizing} & $.$ & $\bigstar$   & $.$ & $.$ & $.$ & $.$   & $.$  & $\bigstar$  &  $.$ \\	
+		Chan {\it et al.} \cite{Chan2006}  & $\bigstar$ & $.$    & $.$ & $.$ & $.$ & $\bigstar$  & $\bigstar$  & $.$  &  $.$ \\
+		Kaluzny and Shaw \cite{KaluznyBohdanL2009Oalb}  & $.$ & $\bigstar$  & $.$  & $.$ & $\bigstar$ &$.$  & $.$  & $\bigstar$  &  $.$ \\
+		Verstichel {\it et al.} \cite{Verstichel2011}   & $.$ & $\bigstar$    & $.$ & $.$ & $.$ & $.$   & $.$  & $\bigstar$  &  $.$ \\
+		Mesquita and Cunha \cite{MesquitaCunha2011}   & $.$ & $.$    & $\bigstar$ & $.$ & $.$ & $.$   & $\bigstar$  & $.$  &  $.$ \\		
+		Limbourg {\it et al.} \cite{Limbourg2012} & $.$ & $\bigstar$  & $.$ & $.$ & $.$ & $.$   & $.$  & $\bigstar$  &  $.$ \\
+		Roesener and Hall \cite{RoesenerHall2014}  & $\bigstar$ & $\bigstar$  & $.$  & $.$ & $.$ & $\bigstar$   & $.$  & $\bigstar$  &  $.$ \\
+		Vancroonenburg {\it et al.} \cite{Vancroonenburg2014}  & $\bigstar$ & $\bigstar$   & $.$ & $.$ & $.$ & $.$   & $.$  & $\bigstar$  &  $.$ \\
+		Lurkin and Schyns \cite{LurkinSchyns2015} & $.$ & $\bigstar$  & $\bigstar$ & $.$  & $.$ & $.$   & $.$  & $\bigstar$  &  $.$ \\
+		Roesener and Barnes \cite{RoesenerBarnes2016}  & $.$ & $\bigstar$   & $.$ & $.$ & $.$ & $.$   & $\bigstar$  & $.$  &  $.$ \\
+		Paquay {\it et al} \cite{PaquaySchynsLimbourg2016,PaquayLimbourgSchynsOliveira2018}  & $\bigstar$ & $\bigstar$ & $.$ & $.$ & $.$ & $\bigstar$ & $\bigstar$  & $\bigstar$ & $.$ \\
+		Chenguang {\it el al.} \cite{YangLiuGao2018} & $.$ & $\bigstar$  & $.$  & $.$ & $\bigstar$  & $.$ & $\bigstar$ & $.$  & $.$ \\
+		Wong and Ling \cite{wong2020} & $\bigstar$  & $\bigstar$  & $.$  & $.$   & $.$  & $.$ & $.$ & $\bigstar$  & $.$  \\
+		Wong {\it et al.} \cite{eugene2021} & $\bigstar$ & $\bigstar$ & $.$  & $.$   & $.$ & $.$ & $.$ & $\bigstar$  & $.$  \\
+		Zhao {\it et al.} \cite{zhao2021} & $.$ & $\bigstar$ & $.$  & $.$  & $.$ & $.$ & $.$  & $\bigstar$ &  $.$ \\
+		
+		{\color{blue}		Zhao {\it et al.} } \cite{zhao2023} & $\bigstar$ & $\bigstar$ & $.$  & $.$  & $.$ & $.$ & $.$  & $\bigstar$ &  $.$  \\
+		
+		{\bf This article}   & $\bigstar$ & $\bigstar$  & $\bigstar$& $\bigstar$ & $.$ & $.$ & $\bigstar$ & $\bigstar$   &  $.$  \\
+		\bottomrule 
+	\end{tabular}
+	\normalsize 
+\end{table}
+
+
+As can be seen, so far Lurkin and Schyns \cite{LurkinSchyns2015} is the only work that simultaneously addresses an air cargo (WBP) and a flight itinerary (PDP) sub-problem. Although it is innovative, strong simplifications were imposed by these authors: in relation to loading, APP was ignored; with regard to routing, it is assumed a predefined tour plan restricted to only two legs. It is important to note that these authors consider an aircraft with two doors, and the minimization of loading and unloading costs at the intermediate node was modeled through a container sequencing problem. Referring directly to this work, Brandt and Nickel \cite[p. 409]{BrandtStefan2019} comment: {\it However, not even these sub-problems are acceptably solved for real-world problem sizes or the models omit some practically relevant constraints}. 
+
+
 
 Larsen and Mikkelsen \cite{LarsenMikkelsen1979} developed an interactive procedure for loading 14 types of Boeing 747 into a two-leg transportation plan. Seven types of items were considered to be allocated in 17 to 42 positions. With non-linear programming and heuristics, they present a solution that minimizes positioning changes in the intermediate node, optimizing the load balancing in the aircraft.
 
@@ -270,6 +252,7 @@ Vancroonenburg {\it et al} \cite{Vancroonenburg2014} presented a mixed integer l
 
 As already mentioned, Lurkin and Schyns \cite{LurkinSchyns2015} was the first work that simultaneously modeled WBP and PDP in air cargo transport. The authors demonstrated that this problem is NP-hard and performed some experiments with real data, noting that their model offers better results than those obtained manually.
 
+
 Roesener and Barnes \cite{RoesenerBarnes2016} proposed a heuristic to solve the {\it Dynamic Airlift Loading Problem} (DALP). Given a set of palletized cargo items that require transport between two nodes in a time frame, the objective of this problem is to select an efficient subset of aircraft, partition the pallets into aircraft loads and assign them to allowable positions in those aircraft.
 
 Paquay {\it et al.} \cite{PaquaySchynsLimbourg2016} presented a mathematical modeling to optimize the loading of heterogeneous 3D boxes on pallets with a truncated parallelepipeds format. Its objective is to maximize the volume used in containers, considering load balancing constraints, the presence of fragile items and the possibility of rotating these boxes. Paquay {\it et al.} \cite{PaquayLimbourgSchynsOliveira2018} developed some heuristics to solve this problem.
@@ -279,6 +262,9 @@ Chenguang {\it et al.} \cite{YangLiuGao2018} modeled the air transport problem a
 Wong and Ling \cite{wong2020}A developed a mathematical model and a tool based on mixed integer programming for optimizing cargo in aircraft with different pallet configurations. Balance constraints and the presence of dangerous items were considered. Wong {\it et al.} \cite{eugene2021} integrated this tool to a digital simulation model, with a visualization and validation system, based on sensors that alert about load deviations.
 
 Zhao {\it et al.} \cite{zhao2021} proposed a new modeling for WBP based on mixed integer programming. Instead of focusing on the CG deviation, the authors consider the original CG envelope of the aircraft, with a linearization method for its non-linear constraints.
+
+{\color{blue} Zhao {\it et al.} \cite{zhao2023}  proposed three integer linear programming models: a Bi-objective Optimization Model (BOM), a Combinatorial Optimization Model (COM), and an Improved Combinatorial Optimization Model (IOM). The objectives of their solutions were the maximum loading capacity and the lowest CG deviation from a specified target CG. Four scenarios with various conditional metrics for three models are solved for the B777F aircraft using Gurobi. The results of the computations demonstrated that the BOM has the fastest solution speed, but the CG deviation is the largest, and in several cases, the CG deviation results are unacceptable. The COM has the longest solution time, which is difficult to tolerate in practice. Despite taking a little longer to solve computationally than the BOM, the IOM offers the best optimization solution.}
+
 
 As can be seen, none of these works address air cargo palletization and load balancing with route optimization in a multi-leg transportation plan for a single aircraft. This is the objective of our work: to model and elaborate heuristics for a real problem that simultaneously involves 4 intractable sub-problems: APP, WBP, PDP and TSP.
 
@@ -304,24 +290,21 @@ As we are dealing with an extremely complex and diverse problem, we decided to e
 
 \end{itemize}
 
-Throughout this text, we call {\it packed content}\/ a set of items of same destination stacked on a pallet and covered with a restraining net (see Figure \ref{fig:larger2}). It is considered a single item, having the same attributes of its components, whose values are the sum of individual scores, weights and volumes. To ensure accuracy in pickup and delivery operations, a packed content must remain on board until its destination.
-
-
-
-\subsection{Aircraft parameters and load balancing}
-
-
-We consider real scenarios with an single aircraft with payload of $75,000 kg$, with enough fuel for a range of $4,400km$. The aircraft layout is presented in Figure \ref{fig:larger}, where the pallets positions are identified by $p_i$, $1\leq i \leq 18$.
-
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.4]{Images/consolidated.jpg}
+	\includegraphics[scale=0.3]{Images/packed.jpg}
 	\caption{A packed content on a 463L pallet inside a {\it Boeing C-17}}
 	\small\textsuperscript{Source: From Wikimedia Commons, the free media repository}
 	\label{fig:larger2}
 \end{figure}
 
+Throughout this text, we call {\it packed content}\/ a set of items of same destination stacked on a pallet and covered with a restraining net (see Figure \ref{fig:larger2}). It is considered a single item, having the same attributes of its components, whose values are the sum of individual scores, weights and volumes. To ensure accuracy in pickup and delivery operations, a packed content must remain on board until its destination.
+
+
+\subsection{Aircraft parameters and load balancing}
+
+We consider real scenarios with an single aircraft with payload of $75,000 kg$, with enough fuel for a range of $4,400km$. The aircraft layout is presented in Figure \ref{fig:larger}, where the pallets positions are identified by $p_i$, $1\leq i \leq 18$.
 
 
 \begin{figure}[!h]
@@ -453,7 +436,7 @@ Let $M = \{1, 2, \ldots, m \}$\/ the set of $m$\/ empty pallets assigned to spec
 
 Let $N_k = \{1, \ldots, n_k \}$\/ be the set of $n_k$\/ items $t_j^k$\/ available for loading on the node $k$, $1 \leq j \leq n_k$, $0 \leq k \leq K$. For ease of notation, $t_j^k$\/ will be called item $j$\/ of the node $k$, with score $s_j$, weight $w_j$, volume $v_j$, and destination $to_j \in L_k$. Let $N = \bigcup_{0 \leq k \leq K} N_k$ be the set of items of all nodes along a tour.
 
-Let $Q_k = \{1, \ldots, m_k \}$\/ be the set of $m_k \leq m$\/ packed contents $a^k_q$\/ at the node $k$, $1 \leq q \leq m_k$, $0 \leq k \leq K$. For ease of notation, $a^k_q$\/ will be called packed content $q$\/ of the node $k$, with total weight $w_q$, total volume $v_q$, and destination $to_q \in L_k$. By definition, $m_0 = 0$, and therefore $Q_0 = \varnothing$. Packets contents that were destined to node $k$\/ are unloaded when the aircraft arrives at this node, that is, they are not considered in $Q_k$.
+Let $Q_k = \{1, \ldots, m_k \}$\/ be the set of $m_k \leq m$\/ packed contents $a^k_q$\/ at the node $k$, $1 \leq q \leq m_k$, $0 \leq k \leq K$. For ease of notation, $a^k_q$\/ will be called packed content $q$\/ of the node $k$, with total weight $w_q$, total volume $v_q$, and destination $to_q \in L_k$. By definition, $m_0 = 0$, and therefore $Q_0 = \varnothing$. Packed contents that were destined to node $k$\/ are unloaded when the aircraft arrives at this node, that is, they are not considered in $Q_k$.
 
 
 \subsection{The decision variables}
@@ -608,11 +591,13 @@ Constraints \ref{eq18} to \ref{eq21} are not within standard {\it Mixed-Integer 
 \section{Solution strategy}
 \label{sec5}
 
-Once the assumptions of this work and the mathematical modeling of the problem are presented, it is possible to see that ACLP+RPDP is {\it NP-hard}. In a similar way to Lurkin and Schyns \cite[p. 6]{LurkinSchyns2015}, consider the simple case where $K=1$\/ (one leg), $m=2$\/ (two pallets around the aircraft CG), $2n$\/ sufficiently light items with same scores in node 0, and no items in node 1. Under these conditions, through polynomial reductions for the {\it Set-Partition Problem}, it is possible to demonstrate that the decision problem associated with ACLP+RPDP is {\it NP-complete}.
+Once the assumptions of this work and the mathematical modeling of the problem are presented, it is possible to see that ACLP+RPDP is {\it NP-hard}.
+
+ {\color{red}  In a similar way to Lurkin and Schyns \cite[p. 6]{LurkinSchyns2015}, consider the simple case where $K=1$\/ (one leg), $m=2$\/ (two pallets around the aircraft CG), $2n$\/ sufficiently light items with same scores in node 0, and no items in node 1. Under these conditions, through polynomial reductions for the {\it Set-Partition Problem}, it is possible to demonstrate that the decision problem associated with ACLP+RPDP is {\it NP-complete}.}
 
 Throughout our research, we have thoughtfully described the ACLP+RPDP model in standard MIP format and found that no MIP solver can handle its practical cases in a feasible time. Thus, as ACLP+RPDP is highly complex, involving four intractable subproblems (APP, WBP, PDP and TSP), our strategy will be to focus only on {\it real cases}\/ and to develop quick node-by-node solutions, not necessarily optimal, that allow to build a complete tour.
 
-The ACLP+RPDP solution defines a tour and a corresponding loading and unloading plan at each node. In this way, the loading and unloading time will be limited only by the use of the equipment at each node. Therefore, there will only be waiting time at the base node, corresponding to the run time of ACLP+RPDP algorithm. For this reason, our method will also be parameterized by the maximum time that can be waited until the start of the load in the base node.
+The ACLP+RPDP solution defines a tour and a corresponding loading and unloading plan at each node. In this way, the loading and unloading time will be limited only by the use of the equipment at each node. Therefore, there will only be waiting time at the base node, corresponding to the runtime of ACLP+RPDP algorithm. For this reason, our method will also be parameterized by the maximum time that can be waited until the start of the load in the base node.
 
 On the other hand, we know that transport aircraft generally have a few dozen pallets, the flight plan has less than $6$\/ nodes, and each node has hundreds of items to be shipped. We also know that missions with fewer nodes are more frequent than longer missions. Under these circumstances, we can adopt two more strategies:
 
@@ -631,7 +616,7 @@ Our complete strategy is summarized in Algorithm \ref{alg:main}.
 	\caption{Solving ACLP+RPDP}  \label{alg:main}
 	\begin{algorithmic}[1]
 		
-		\Procedure{$ACLP+RPDP$}{$scenario, surplus, time$}
+		\Procedure{$ACLP+RPDP$}{$scenario, surplus, tmax$}
 
 		\State Let aircraft and $M$  \label{main:M} \Comment{Aircraft parameters from Table \ref{tab:larger}}
 		
@@ -643,15 +628,15 @@ Our complete strategy is summarized in Algorithm \ref{alg:main}.
 		
 		\For {each $method$} \Comment{$method$ is a MIP solver or a heuristic}
 		
-			\State $f_1 \gets SolveTour(\pi_{TSP1}, L, M, C, N, method, time)$  \label{main:f1} 
+			\State $f_1 \gets SolveTour(\pi_{TSP1}, L, M, C, N, method, tmax)$  \label{main:f1} 
 
-		    \State $f_2 \gets SolveTour(\pi_{TSP2}, L, M, C, N, method, time)$  \label{main:f2}
+		    \State $f_2 \gets SolveTour(\pi_{TSP2}, L, M, C, N, method, tmax)$  \label{main:f2}
 		
 			\State $answer1[scenario,surplus,method] \gets max( f_1, f_2  )$  \label{main:a1} \Comment{Best result between the shortest tours}
 			
 			\For {each $\pi \in S_K$} \label{main:loop1} \Comment{$\pi$ is a permutation of nodes (a tour)}
 			
-				\State $f_{\pi} \gets SolveTour(\pi, L, M, C, N, method, time/K!)$ \Comment{$f_{\pi}$\/ is a solution to the tour $\pi$} \label{main:fpi}
+				\State $f_{\pi} \gets SolveTour(\pi, L, M, C, N, method, tmax/K!)$ \Comment{$f_{\pi}$\/ is a solution to the tour $\pi$} \label{main:fpi}
 				
 			\EndFor \label{main:loop2}
 			\State $answer2[scenario,surplus,method] \gets \max f_{\pi}$ \label{main:a2} \Comment{Best result among all permutations}
@@ -686,7 +671,7 @@ The aircraft parameters and the set $M$\/ of pallets are in Table \ref{tab:large
 
 $surplus$\/ is a value in $\{1.2, 1.5, 2.0\}$, which corresponds, at each node $k$, to the ratio between the sum of the volumes of the items  and the load capacity of the pallets ($surplus = \sum_{j=1}^{n_k} v_j$/$\sum_{i=1}^{m} V_i$). This parameter allows us to verify the different behavior of each $method$, according to $scenario$\/ and the quantity of items available for shipment. It is passed to $ItemsGeneration$\/ (line \ref{main:items}), responsible for creating the items to be shipped, which will be presented in the next section (Algorithm \ref{alg:itemsgen}).
 
-$time$\/ is a run time limit, which will be distributed among the tours (lines \ref{main:f1}, \ref{main:f2} and \ref{main:fpi}). $method$\/ corresponds to a MIP solver or a heuristic to the node-by-node solution $SolveTour$, which will be presented in subsection \ref{methods}.
+$tmax$\/ is a runtime limit, which will be distributed among the tours (lines \ref{main:f1}, \ref{main:f2} and \ref{main:fpi}). $method$\/ corresponds to a MIP solver or a heuristic to the node-by-node solution $SolveTour$, which will be presented in subsection \ref{methods}.
 
 The best results corresponding to the shortest tours are stored in $answer1$\/ (line \ref{main:a1}), and those obtained by testing all $K!$\/ tours are stored in $answer2$\/ (line \ref{main:a2}).
 
@@ -700,14 +685,14 @@ Next, we will present two subsections: in the first we explain how $SolveTour$\/
 As we commented in the previous subsection, we will adopt the strategy of presetting the destinations of each pallet throughout the tour. This is feasible in practical cases, where $1<K<m$. For this, each pallet $i$\/ also has a field $T^k_i$, $0\leq k \leq K$, which stores its next destination after being loaded at node $k$. For this reason, $T^k_i \in L_k$, $1 \leq i \leq m$, $0\leq k \leq K$.
 
 
-$SolveTour$\/ is described in Algorithm \ref{alg:tour}, where $\pi$\/ is a permutation of the nodes (excluding the base) that defines the order of visits in this tour, $method$\/ corresponds to a MIP solver or a heuristic for solving the node-by-node problems, and $time$\/ is the runtime limit that will be distributed among the $K+1$\/ legs of the tour.
+$SolveTour$\/ is described in Algorithm \ref{alg:tour}, where $\pi$\/ is a permutation of the nodes (excluding the base) that defines the order of visits in this tour, $method$\/ corresponds to a MIP solver or a heuristic for solving the node-by-node problems, and $tmax$\/ is the runtime limit that will be distributed among the $K+1$\/ legs of the tour.
 
 
 \begin{algorithm}[H]
 	\caption{Solving the tour $\pi$ with $method$}  \label{alg:tour}
 	\begin{algorithmic}[1]
 		
-		\Procedure{$SolveTour$}{$\pi, L, M, C, N, method$, $time$}
+		\Procedure{$SolveTour$}{$\pi, L, M, C, N, method$, $tmax$}
 		
 		\State $\pi_0     \gets 0$ \label{tour:pi1} \Comment{Base $0$\/ is the first node}
 		\State $\pi_{K+1} \gets 0$ \label{tour:pi2} \Comment{Base $0$\/ is the last node}
@@ -729,7 +714,7 @@ $SolveTour$\/ is described in Algorithm \ref{alg:tour}, where $\pi$\/ is a permu
 		
 		\State $M \gets SetPalletsDestinations(M, \pi_k )$ \label{tour:dest2}
 		
-		\State $G_2 \gets SolveNode(method, \pi_k, G_1, time/(K+1))$ \Comment{Each tour has $K+1$\/ legs} \label{tour:node}
+		\State $G_2 \gets SolveNode(method, \pi_k, G_1, tmax/(K+1))$ \Comment{Each tour has $K+1$\/ legs} \label{tour:node}
 		
 		\State $s, \tau \gets ScoreAndDeviation(\pi_k, G_2)$ \label{tour:analyse}
 		
@@ -923,7 +908,7 @@ In this subsection we present two implementations of $SolveNode$\/ algorithm: wi
 
 Our strategy adopted in $SolveTour$\/ previously defines the values of some variables: the set of nodes to be visited is updated, the packed contents that remain on board are reallocated to minimize the CG deviation, and the pallets destinations are determined according to the volume of items available for shipment. 
 
-In this way, the mathematical modeling for $SolveNode(MIP,\pi_k,G, time)$\/ becomes simpler, which finds an allocation of available items at the node $\pi_k$\/ using previously defined values of $L_{\pi_k}$, $T_i^{\pi_k}$, and $a^{\pi_k}_q$. Thus, we use a MIP solver with runtime limit $time$\/ at the node $\pi_k$\/ to maximize the objective function \ref{eq:obj2}, with the calculus equations \ref{eq:newf} to \ref{eq:costs2}, subject to the constraints \ref{eq:tau2} to \ref{eq:ifB}. The binary variables $X_{ij}$\/ and $Y_{iq}$\/ define the sets of edges $E_{N_{\pi_k}}$\/ and $E_{Q_{\pi_k}}$, respectively, included in the graph $G$.
+In this way, the mathematical modeling for $SolveNode(MIP,\pi_k,G, tmax)$\/ becomes simpler, which finds an allocation of available items at the node $\pi_k$\/ using previously defined values of $L_{\pi_k}$, $T_i^{\pi_k}$, and $a^{\pi_k}_q$. Thus, we use a MIP solver with runtime limit $tmax$\/ at the node $\pi_k$\/ to maximize the objective function \ref{eq:obj2}, with the calculus equations \ref{eq:newf} to \ref{eq:costs2}, subject to the constraints \ref{eq:tau2} to \ref{eq:ifB}. The binary variables $X_{ij}$\/ and $Y_{iq}$\/ define the sets of edges $E_{N_{\pi_k}}$\/ and $E_{Q_{\pi_k}}$, respectively, included in the graph $G$.
 
 \begin{equation} \label{eq:obj2}
 	\max f= \tilde{s} / \tilde{c}
@@ -992,7 +977,7 @@ The selection of edges for $E_{ N_{\pi_k} }$ uses the {\it edge attractiveness}\
 	
 	\begin{minipage}{0.08\linewidth}
 		
-	\end{minipage}\hfill % these two lines must be close to each other
+	\end{minipage}\hfill
 	\begin{minipage}{0.34\linewidth}
 		
 		\includegraphics[scale=0.25]{Images/shims.png}
@@ -1000,7 +985,7 @@ The selection of edges for $E_{ N_{\pi_k} }$ uses the {\it edge attractiveness}\
 		\small\textsuperscript{Source: www.mscdirect.com/product/details/70475967}
 		\label{fig:shims}
 		
-	\end{minipage}\hfill % these two lines must be close to each other
+	\end{minipage}\hfill
 	\begin{minipage}{0.58\linewidth}
 		\scriptsize
 		\begin{tikzpicture}[scale=0.75, samples=100]
@@ -1033,7 +1018,7 @@ Considering only the items that can be shipped at the node $\pi_k$, Figure \ref{
 	\caption{$Shims$\/ heuristic at the node $\pi_k$}  \label{alg:shims}
 	\begin{algorithmic}[1]
 		
-		\Procedure{$SolveNode$}{$Shims, \pi_k, G, time$}
+		\Procedure{$SolveNode$}{$Shims, \pi_k, G, tmax$}
 	
 		\State $T_{begin} \gets$ current system time
 	
@@ -1088,8 +1073,8 @@ Considering only the items that can be shipped at the node $\pi_k$, Figure \ref{
 			
 			\For{$x \gets \eta_1$ to $\eta_2$} \label{edges_indexes}
 				
-				\If{ $T_{current} - T_{begin} > time$}
-				\State {\bf break}  \Comment{Time limit exceeded}
+				\If{ $T_{current} - T_{begin} > tmax$}
+				\State {\bf break}  \Comment{Runtime limit exceeded}
 				\EndIf
 			
 				\State $NewShims \gets$ {\bf True} \label{new_shims}
@@ -1239,11 +1224,11 @@ For each generated $t^k_j$\/ item, its destination is randomly selected (line \r
 
 In the tests performed, we used a 64-bit, 16GB, 3.6GHz, eight-core processor with {\it Linux Ubuntu 22.04.1 LTS 64-bit} as the operational system and {\it Python 3.10.4}\/ as the programming language. We also used the well-known solver $Gurobi$\/ ({\tt www.gurobi.com}), version 9.5.2.
 
-We ran Algorithm \ref{alg:main} considering 5 values for $scenario$\/ from Table \ref{tab:scenarios}, 3 values for  $surplus$\/ from $\{1.2, 1.5, 2.0\}$, 3 values for $time$\/ from $\{1200s, 2400s, 3600s\}$, and 6 different $method$\/ for the node-by-node solution: $Gurobi$\/ (see \ref{solver}), ACO, NMO, TS, GRASP, and $Shims$\/ (Algorithm \ref{alg:shims}). 
+We ran Algorithm \ref{alg:main} considering 5 values for $scenario$\/ from Table \ref{tab:scenarios}, 3 values for  $surplus$\/ from $\{1.2, 1.5, 2.0\}$, 4 values for $tmax$\/ from $\{240s, 1200s, 2400s, 3600s\}$, and 6 different $method$\/ for the node-by-node solution: $Gurobi$\/ (see \ref{solver}), ACO, NMO, TS, GRASP, and $Shims$\/ (Algorithm \ref{alg:shims}). 
 
 In order for $Gurobi$\/ to be able to solve the largest possible number of tests without memory overflow, we set its parameter {\it MIPgap}\/ to 1\%. This shortens its runtime, in addition to ensuring that its objective function $f$\/ is at most 1\% of the optimal solution. For more details, see {\tt https://support.gurobi.com}.
 
-Among the heuristics, we will present only the results obtained by $Shims$, which had the best performance. For each $scenario$, $surplus$\/ and $time$, 7 different instances were generated. We will present the average of the objective function $f$\/ and the runtime of $Gurobi$\/ and $Shims$\/ in these instances. To facilitate the comparison between both, we added a last column in the tables, where two values are indicated:
+Among the heuristics, we will present only the results obtained by $Shims$, which had the best performance. For each $scenario$, $surplus$\/ and $tmax$, 7 different instances were generated. We will present the average of the objective function $f$\/ and the runtime of $Gurobi$\/ and $Shims$\/ in these instances. To facilitate the comparison between both, we added a last column in the tables, where two values are indicated:
 \begin{itemize}
 	\item {\bf Normalized}: value between 0 and 1, which corresponds to the ratio between the sum of $f$\/ values obtained by the method in all scenarios and the sum of the best values obtained by both methods in all scenarios. The higher the value of {\bf Normalized}, the closer the method approached the best solutions found.
 	\item {\bf Speed-up}: ratio of the sums of the runtimes of all scenarios and the sum of the method runtimes in all scenarios. The method with the highest {\bf Speed-up}\/ is the fastest.
@@ -1251,30 +1236,30 @@ Among the heuristics, we will present only the results obtained by $Shims$, whic
 
 We also indicate the two adopted strategies: dedicating all the processing time to the two shortest tours, or distributing it among all the $K!$\/ tours.
 
-The results obtained with $time = 3600s$, which is the highest tested time limit, are in Tables \ref{tab:20}, \ref{tab:50} and \ref{tab:100}, with $surplus$\/ values $1.2$, $1.5$\/ and $2.0$, respectively. We indicate with an {\bf x} the cases where $Gurobi$\/ did not find a feasible solution within this time limit, or had to be aborted due to high RAM consumption.
+The results obtained with $tmax = 3600s$, which is the highest tested runtime limit, are in Tables \ref{tab:20}, \ref{tab:50} and \ref{tab:100}, with $surplus$\/ values $1.2$, $1.5$\/ and $2.0$, respectively. We indicate with an {\bf x} the cases where $Gurobi$\/ did not find a feasible solution within this runtime limit, or had to be aborted due to high RAM consumption.
 
 
 \begin{table}[H]
 	\centering
-	\caption{Solutions with $surplus = 1.2$\/ and $time =  3600s$}  \label{tab:20}
+	\caption{Solutions with $surplus = 1.2$\/ and $tmax =  3600s$}  \label{tab:20}
 	\footnotesize
 	\begin{tabular}{ccccccccc}
 		\toprule
-		{\specialcell{{\bf Tested}\\{\bf tours}}}&$method$          & {\bf Scenarios} & {\bf 1} & {\bf 2} & {\bf 3} & {\bf 4} & {\bf 5} & \specialcell{{\bf Normalized}\\{\bf Speed-up}}   \\
+		{\specialcell{{\bf Tested}\\{\bf tours}}}&$method$          & $scenario$ & {\bf 1} & {\bf 2} & {\bf 3} & {\bf 4} & {\bf 5} & \specialcell{{\bf Normalized}\\{\bf Speed-up}}   \\
 		\toprule
-		\multirow{4}{*}{Shortest} &\multirow{2}{*}{\it Gurobi } & $f$ & 8.52    & 11.70   & 13.07   & 13.54 & 12.44     &  1.00\\ % 5927
-		&                                                               &               {time (s)}  & 17      & 17      & 16      & 17    & 26        &  1.0 \\ % 93
-		\cmidrule(lr){2-9}	
-		&                                                               \multirow{2}{*}{\it Shims}    & $f$ & 8.54    & 11.63   & 12.97   & 13.43 & 12.36     &  0.99 \\ % 5893
-		&                                                               &         {time (s)}        & 1       & 1       & 2       & 2     & 2         &  11.6 \\ % 8
+		\multirow{4}{*}{Shortest} &\multirow{2}{*}{$Gurobi$} & $f$ & 8.52    & 11.70   & 13.07   & 13.54 & 12.44     &  1.00\\
+		&                                                               &               {time (s)}  & 17      & 17      & 16      & 17    & 26        &  1.0 \\
+		\cmidrule(lr){2-9}
+		&                                                               \multirow{2}{*}{$Shims$}    & $f$ & 8.54    & 11.63   & 12.97   & 13.43 & 12.36     &  0.99 \\
+		&                                                               &         {time (s)}        & 1       & 1       & 2       & 2     & 2         &  11.6 \\
 		
 		\midrule
 		
-		\multirow{4}{*}{All $K!$}&                                  \multirow{2}{*}{\it Gurobi } & $f$ & 8.52    & 12.25   & 13.32   & 14.61  & x        & 1.00 \\ % 4869
-		&                                                               &               {time (s)}  & 25      & 36      & 121     & 297    & x        &  1.0 \\ % 479
+		\multirow{4}{*}{All $K!$}&                                  \multirow{2}{*}{$Gurobi$} & $f$ & 8.52    & 12.25   & 13.32   & 14.61  & x        & 1.00 \\
+		&                                                               &               {time (s)}  & 25      & 36      & 121     & 297    & x        &  1.0 \\
 		\cmidrule(lr){2-9}	
-		&                                                               \multirow{2}{*}{\it Shims}    & $f$ & 8.54    & 12.26   & 13.23   & 14.53  & 13.42    & 0.99  \\ % 4813
-		&                                                               &         {time (s)}        & 1       & 2       & 6       & 17     & 106      & 18.4   \\ % 132
+		&                                                               \multirow{2}{*}{$Shims$}    & $f$ & 8.54    & 12.26   & 13.23   & 14.53  & 13.42    & 0.99  \\
+		&                                                               &         {time (s)}        & 1       & 2       & 6       & 17     & 106      & 18.4   \\
 		\bottomrule
 		
 	\end{tabular}
@@ -1284,25 +1269,25 @@ The results obtained with $time = 3600s$, which is the highest tested time limit
 
 \begin{table}[H]
 	\centering
-	\caption{Solutions with $surplus = 1.5$\/ and $time =  3600s$}  \label{tab:50}
+	\caption{Solutions with $surplus = 1.5$\/ and $tmax =  3600s$}  \label{tab:50}
 	\footnotesize
 	\begin{tabular}{ccccccccc}
 		\toprule
-		{\specialcell{{\bf Tested}\\{\bf tours}}} & $method$          & {\bf Scenarios} & {\bf 1} & {\bf 2} & {\bf 3} & {\bf 4} & {\bf 5} & \specialcell{{\bf Normalized}\\{\bf Speed-up}}   \\
+		{\specialcell{{\bf Tested}\\{\bf tours}}} & $method$          & $scenario$ & {\bf 1} & {\bf 2} & {\bf 3} & {\bf 4} & {\bf 5} & \specialcell{{\bf Normalized}\\{\bf Speed-up}}   \\
 		\toprule
-		\multirow{4}{*}{ Shortest } & \multirow{2}{*}{\it Gurobi } & $f$ & 11.80 & 16.74 & 18.04 & 18.86 & 16.92 & 1.00 \\ % 8236
-		&&               {time (s)}                                                                  & 38    & 30    & 27    & 29    & 81    & 1.00  \\ % 205
+		\multirow{4}{*}{ Shortest } & \multirow{2}{*}{$Gurobi$} & $f$ & 11.80 & 16.74 & 18.04 & 18.86 & 16.92 & 1.00 \\
+		&&               {time (s)}                                                                  & 38    & 30    & 27    & 29    & 81    & 1.00  \\
 		\cmidrule(lr){2-9}	
-		&\multirow{2}{*}{\it Shims}                                                                    & $f$ & 11.83 & 16.74 & 18.01 & 18.89 & 16.91 & 1.00  \\ % 
-		&&         {time (s)}                                                                        & 1     & 2     & 2     & 3     & 3     & 20.5  \\ % 
+		&\multirow{2}{*}{$Shims$}                                                                    & $f$ & 11.83 & 16.74 & 18.01 & 18.89 & 16.91 & 1.00  \\
+		&&         {time (s)}                                                                        & 1     & 2     & 2     & 3     & 3     & 20.5  \\
 		
 		\midrule
 		
-		\multirow{4}{*}{All $K!$} & \multirow{2}{*}{\it Gurobi }                                  & $f$ & 11.81 & 17.01 & 18.25 & 20.59 & 18.36   & 1.00 \\ % 8602
-		&&               {time (s)}                                                                  & 53    & 61    & 193   & 470   & 2241    & 1.0  \\ % 3018
+		\multirow{4}{*}{All $K!$} & \multirow{2}{*}{$Gurobi$}                                  & $f$ & 11.81 & 17.01 & 18.25 & 20.59 & 18.36   & 1.00 \\ 
+		&&               {time (s)}                                                                  & 53    & 61    & 193   & 470   & 2241    & 1.0  \\
 		\cmidrule(lr){2-9}	
-		&\multirow{2}{*}{\it Shims}                                                                    & $f$ & 11.83 & 17.00 & 18.21 & 20.45 & 18.00   & 0.99  \\ % 8549
-		&&         {time (s)}                                                                        & 1     & 2     & 9     & 26    & 157     & 15.5 \\ % 195
+		&\multirow{2}{*}{$Shims$}                                                                    & $f$ & 11.83 & 17.00 & 18.21 & 20.45 & 18.00   & 0.99  \\ 
+		&&         {time (s)}                                                                        & 1     & 2     & 9     & 26    & 157     & 15.5 \\
 		\bottomrule
 		
 	\end{tabular}
@@ -1312,25 +1297,25 @@ The results obtained with $time = 3600s$, which is the highest tested time limit
 
 \begin{table}[H]
 	\centering
-	\caption{Solutions with $surplus = 2.0$\/ and $time =  3600s$}  \label{tab:100}
+	\caption{Solutions with $surplus = 2.0$\/ and $tmax =  3600s$}  \label{tab:100}
 	\footnotesize
 	\begin{tabular}{ccccccccc}
 		\toprule
-		{\specialcell{{\bf Tested}\\{\bf tours}}}& $method$          & {\bf Scenarios} & {\bf 1} & {\bf 2} & {\bf 3} & {\bf 4} & {\bf 5} & \specialcell{{\bf Normalized}\\{\bf Speed-up}}   \\
+		{\specialcell{{\bf Tested}\\{\bf tours}}}& $method$          & $scenario$ & {\bf 1} & {\bf 2} & {\bf 3} & {\bf 4} & {\bf 5} & \specialcell{{\bf Normalized}\\{\bf Speed-up}}   \\
 		\toprule
-		\multirow{4}{*}{ Shortest} & \multirow{2}{*}{\it Gurobi } & $f$ & 17.75 & 24.39 & 26.46 & 27.09 & 24.00 & 1.00 \\ % 11969
-		&&                                                                               {time (s)}  & 162   & 95    & 74    & 68    & 67    & 1.0  \\ % 466
+		\multirow{4}{*}{Shortest} & \multirow{2}{*}{$Gurobi$} & $f$ & 17.75 & 24.39 & 26.46 & 27.09 & 24.00 & 1.00 \\ 
+		&&                                                                               {time (s)}  & 162   & 95    & 74    & 68    & 67    & 1.0  \\
 		\cmidrule(lr){2-9}	
-		&                                                                   \multirow{2}{*}{\it Shims} & $f$ & 17.78 & 24.40 & 26.36 & 27.01 & 23.94 & 0.99  \\ % 11949
-		&&                                                                                {time (s)} & 2     & 3     & 3     & 4     & 5     & 27.4  \\ % 17
+		&                                                                   \multirow{2}{*}{$Shims$} & $f$ & 17.78 & 24.40 & 26.36 & 27.01 & 23.94 & 0.99  \\
+		&&                                                                                {time (s)} & 2     & 3     & 3     & 4     & 5     & 27.4  \\
 		
 		\midrule
 		
-		\multirow{4}{*}{All $K!$} & \multirow{2}{*}{\it Gurobi } & $f$ & 17.75 & 25.24 & 26.46 & 29.11 &  x   & 1.00 \\ % 9856
-		&&                                                                                {time (s)} & 151   & 123   & 319   & 689   &  x   & 1.0  \\ % 1282
+		\multirow{4}{*}{All $K!$} & \multirow{2}{*}{$Gurobi$} & $f$ & 17.75 & 25.24 & 26.46 & 29.11 &  x   & 1.00 \\ 
+		&&                                                                                {time (s)} & 151   & 123   & 319   & 689   &  x   & 1.0  \\
 		\cmidrule(lr){2-9}	
-		&                                                                \multirow{2}{*}{\it Shims}    & $f$ & 17.78 & 25.25 & 26.38 & 28.98 & 26.08 & 1.00  \\ % 9839
-		&&                                                                                {time (s)} & 2     & 3     & 13    & 37    & 229   & 23.3  \\ % 284
+		&                                                                \multirow{2}{*}{$Shims$}    & $f$ & 17.78 & 25.25 & 26.38 & 28.98 & 26.08 & 1.00  \\
+		&&                                                                                {time (s)} & 2     & 3     & 13    & 37    & 229   & 23.3  \\
 		\bottomrule
 		
 	\end{tabular}
@@ -1340,101 +1325,52 @@ The results obtained with $time = 3600s$, which is the highest tested time limit
 
 From these data, we can make some conclusions:
 \begin{itemize}
-\item The strategy of testing all $K!$\/ often gives a better quality solution.
-\item $Gurobi$\/ fails in some cases, when $scenario=5$\/ and the strategy is to check all $K!$\/ tours. This occurs because the time limit per node is smaller, and there tends to be more packed contents on the aircraft, reducing the space for allocating items and making the solution difficult.
+\item The strategy of testing all $K!$\/ tours often gives a better quality solution.
+\item $Gurobi$\/ fails in some cases, when $scenario=5$\/ and the strategy is to check all $K!$\/ tours. This occurs because the runtime limit per node is smaller, and there tends to be more packed contents on the aircraft, reducing the space for allocating items and making the solution difficult.
 \item When $Gurobi$\/ finishes, it finds the best solution, but the one obtained by $Shims$\/ reaches $99\%$\/ of that value.
 \item $Shims$\/ always finds a solution, being 11 to 27 times faster.
-\item All runtimes are well under the time limit because the solution on many nodes can be fast. Anyway, in all the tests performed, the maximum time spent by $Shims$\/ did not reach 4 minutes, that is, it is practically instantaneous. On the other hand, when $scenario=5$\/ and $surplus=1.5$, Gurobi spent almost 40 minutes.
+\item All runtimes are much lower than the limit because the solution on many nodes can be fast. Anyway, in all the tests performed, the maximum time spent by $Shims$\/ did not reach 4 minutes, that is, it is practically instantaneous. On the other hand, when $scenario=5$\/ and $surplus=1.5$, Gurobi spent almost 40 minutes.
 \end{itemize}
 
-Table \ref{tab:100time} shows the results obtained with the strategy of testing the $K!$\/ tours in scenarios 4 and 5, with different time limits. We can observe more cases where $Gurobi$\/ fails. When $Gurobi$ finishes, $Shims$\/ finds a solution of similar quality in much less time.
-
-\begin{table}[H]
-	\centering
-	\caption{Solutions in scenarios 4 and 5 testing all $K!$\/ tours}  \label{tab:100time}
-	\footnotesize
-	\begin{tabular}{ccc|cc|cc|cc}
-		\toprule
-		&             \multicolumn{2}{c}{$surplus$} &\multicolumn{2}{c}{$1.2$}&\multicolumn{2}{c}{$1.5$}&\multicolumn{2}{c}{$2.0$} \\
-		\midrule
-		$method$& {\specialcell{$time$ (s)}} & {\bf Scenarios}    & {\bf 4} & {\bf 5} & {\bf 4} & {\bf 5} & {\bf 4} & {\bf 5} \\
-		\toprule
-		
-		\multirow{6}{*}{\it Gurobi }& \multirow{2}{*}{1200} & $f$ & 14.67   & x       &  20.64  &  x      & 27.97   & x \\ % 
-		&        &  {time (s)}                             & 217     & x       &  304    &  x      & 579     & x \\ % 
-		\cmidrule(lr){2-9}                              
-		& \multirow{2}{*}{2400}& $f$                               & 14.59   & 13.59   &  20.60  &  x      & 29.10   & x \\ % 
-		&        &  {time (s)}                             & 313     & 1444    &  327    &  x      & 543     & x \\ % 
-		\cmidrule(lr){2-9}                              		
-		& \multirow{2}{*}{3600}& $f$                               & 14.61   & x       &  20.59  & 18.36   & 29.11   & x \\ % 
-		&        &  {time (s)}                             & 297     & x       &  470    & 2241    & 689     & x \\ % 		
-		\midrule
-		\multirow{6}{*}{\it Shims}   & \multirow{2}{*}{1200} & $f$ & 14.53   & 13.42   &  20.45  & 18.00   & 28.98   & 26.08 \\ % 
-		&        & {time (s)}                              & 18      & 109     &  26     & 160     & 37      & 203   \\ % 
-		\cmidrule(lr){2-9}                              
-		& \multirow{2}{*}{2400}& $f$                               & 14.53   & 13.42   &  20.45  & 18.00   & 28.98   & 26.08 \\ % 
-		&        &  {time (s)}                             & 18      & 107     &  25     & 159     & 37      & 192   \\ % 	
-		\cmidrule(lr){2-9}                              
-		& \multirow{2}{*}{3600} & $f$                              & 14.53   & 13.42   &  20.45  & 18.00   & 28.98   & 26.08 \\ %  
-		&        &  {time (s)}                             & 17      & 106     &  26     & 157     & 37      & 181   \\ 
-		
-		\bottomrule
-		
-	\end{tabular}
-	\normalsize
-\end{table}
+Table \ref{tab:100time} shows the results obtained with the strategy of testing the $K!$\/ tours in all scenarios with different runtime limits. We can observe more cases where $Gurobi$\/ fails, even in smaller scenarios. When $Gurobi$\/ finishes, $Shims$\/ finds quickly a solution of similar quality ($98\%$\/ or better). In all cases, $Shims$\/ finds a good solution in less than 4 minutes.
 
 
 \begin{table}[H]
 	\centering
-	\caption{Solutions with different time limitations for $S_K$ tours.}  \label{tab:100time_2}
-%\footnotesize
-%	\tiny
-\scriptsize	
+	\caption{Solutions testing all $K!$\/ tours with different runtime limits}  \label{tab:100time}
+	\scriptsize
 	\setlength{\tabcolsep}{3.5pt}
-	
 	\begin{tabular}{ccc|ccccc|ccccc|ccccc}
 		\toprule
-		&             \multicolumn{2}{r}{\bf Volume $surplus$} &\multicolumn{5}{c}{$1.2$}&\multicolumn{5}{c}{$1.5$}&\multicolumn{5}{c}{$2.0$} \\
+		&             \multicolumn{2}{r}{$surplus$} &\multicolumn{5}{c}{\bf 1.2}&\multicolumn{5}{c}{\bf 1.5}&\multicolumn{5}{c}{\bf 2.0} \\
 		\midrule
-		$method$& \specialcell{\bf limit\\ (s)} & {\bf Scenarios}  &{\bf 1}&{\bf 2}&{\bf 3}&{\bf 4}&{\bf 5}&{\bf 1}&{\bf 2}&{\bf 3}&{\bf 4}&{\bf 5}&{\bf 1}&{\bf 2}&{\bf 3}&{\bf 4}&{\bf 5} \\
+		$method$& {$tmax$} & $scenario$  &{\bf 1}&{\bf 2}&{\bf 3}&{\bf 4}&{\bf 5}&{\bf 1}&{\bf 2}&{\bf 3}&{\bf 4}&{\bf 5}&{\bf 1}&{\bf 2}&{\bf 3}&{\bf 4}&{\bf 5} \\
 		\toprule
 		
-		\multirow{10}{*}{\it Gurobi } & \multirow{2}{*}{240*} & $f$ & 8.53 & 12.24 & 13.34 &  x      &  x      & 11.81 & 17.02 & 18.31 &  x      &  x      & 17.75 & 25.24 & x     & x       & x \\ % 
-		&               &  {\bf time (s)}                              & 41   & 43    & 123   &  x      &  x      & 50    & 62    & 181   &  x      &  x      & 166   & 140   & x     & x       & x \\ % 
+		\multirow{10}{*}{$Gurobi$} & \multirow{2}{*}{240s} & $f$ & 8.53 & 12.24 & 13.34 &  x      &  x      & 11.81 & 17.02 & 18.31 &  x      &  x      & 17.75 & 25.24 & x     & x       & x \\ 
+		&               &  {time (s)}                              & 41   & 43    & 123   &  x      &  x      & 50    & 62    & 181   &  x      &  x      & 166   & 140   & x     & x       & x \\ 
 		\cmidrule(lr){2-18}		
 		
-		&                              \multirow{2}{*}{1200} & $f$ & 8.52 & 12.25 & 13.31 & 14.67   & x       & 11.81 & 17.02 & 18.25 &  20.64  &  x      & 17.75 & 25.24 & 26.49 & 27.97   & x \\ % 
-		&        &  {\bf time (s)}                             & 39   & 41    & 129   & 217     & x       & 52    & 61    & 190   &  304    &  x      & 161   & 139   & 384   & 579     & x \\ % 
+		&                              \multirow{2}{*}{1200s} & $f$ & 8.52 & 12.25 & 13.31 & 14.67   & x       & 11.81 & 17.02 & 18.25 &  20.64  &  x      & 17.75 & 25.24 & 26.49 & 27.97   & x \\ 
+		&        &  {time (s)}                             & 39   & 41    & 129   & 217     & x       & 52    & 61    & 190   &  304    &  x      & 161   & 139   & 384   & 579     & x \\ 
 		\cmidrule(lr){2-18}                              
-		& \multirow{2}{*}{2400}& $f$                               & 8.53 & 12.25 & 13.30 & 14.59   & 13.59   & 11.80 & 17.02 & 18.25 &  20.60  &  x      & 17.75 & 25.24 & 26.46 & 29.10   & x \\ % 
-		&        &  {\bf time (s)}                             & 33   & 39    & 127   & 313     & 1444    & 51    & 62    & 188   &  327    &  x      & 158   & 127   & 381   & 543     & x \\ % 
+		& \multirow{2}{*}{2400s}& $f$                               & 8.53 & 12.25 & 13.30 & 14.59   & 13.59   & 11.80 & 17.02 & 18.25 &  20.60  &  x      & 17.75 & 25.24 & 26.46 & 29.10   & x \\
+		&        &  {time (s)}                             & 33   & 39    & 127   & 313     & 1444    & 51    & 62    & 188   &  327    &  x      & 158   & 127   & 381   & 543     & x \\
 		\cmidrule(lr){2-18}                              		
 		
-		& \multirow{2}{*}{3600}& $f$                               & 8.52 & 12.25 & 13.32 & 14.61   & x       & 11.81 & 17.01 & 18.25 &  20.59  & 18.36   & 17.75 & 25.24 & 26.46 & 29.11   & x \\ % 
-		&        &  {\bf time (s)}                             & 25   & 36    & 121   & 297     & x       & 53    & 61    & 193   &  470    & 2241    & 151   & 123   & 319   & 689     & x \\ % 		
+		& \multirow{2}{*}{3600s}& $f$                               & 8.52 & 12.25 & 13.32 & 14.61   & x       & 11.81 & 17.01 & 18.25 &  20.59  & 18.36   & 17.75 & 25.24 & 26.46 & 29.11   & x \\ 
+		&        &  {time (s)}                             & 25   & 36    & 121   & 297     & x       & 53    & 61    & 193   &  470    & 2241    & 151   & 123   & 319   & 689     & x \\ 
 		
 		\midrule
 		
-		\multirow{2}{*}{\it Shims} & \multirow{2}{*}{240*}    & $f$ & 8.54 & 12.26 & 13.23 & 14.53   & 13.42  & 11.83 & 17.00 & 18.21 &  20.45  & 18.00   & 17.78 & 25.25 & 26.38 & 28.98   & 26.08 \\ % 
-		&         & {\bf time (s)}                                  & 1    & 2     & 6     & 17      & 109    & 1     & 2     & 8     &  26     & 160     & 2     & 3     & 13    & 37      & 229   \\ % 
-		
-		\multirow{2}{*}{\it mpShims} & \multirow{2}{*}{240*}  & $f$ & 8.32 & 12.14 & 13.19 & 14.60   & 13.52  & 11.57 & 16.86 & 18.21 & 20.52   & 18.06  & 17.58 & 25.21 & 26.46 & 29.11   & 26.14 \\ % 
-&         & {\bf time (s)}                                          & 1    & 2     & 5     & 13      & 71     & 1     & 2     & 6     & 15      & 79     & 2     & 2     & 8     & 21      & 102   \\ % 
+		\multirow{2}{*}{$Shims$} & \multirow{2}{*}{240s}  & $f$ & 8.54 & 12.26 & 13.23 & 14.53   & 13.42   & 11.83 & 17.00 & 18.21 &  20.45  & 18.00   & 17.78 & 25.25 & 26.38 & 28.98   & 26.08 \\ % 
+		&         & {time (s)}                             & 1    & 2     & 6     & 17      & 109     & 1     & 2     & 8     &  26     & 160     & 2     & 3     & 13    & 37      & 229   \\ 
 		
 		\bottomrule
-		\multicolumn{16}{l}{*4 minutes is the time {\it Shims} needs to solve a seven-node tour.}\\
 	\end{tabular}
 	\normalsize
 \end{table}
 
-
-\begin{figure}[H]
-	\centering
-	\tmpframe{\includegraphics[scale=0.5]{Images/mpShimsResouces.png}}
-	\captionof{figure}{{\it mpShims} resources consumption}
-	\label{fig:mpShimsResouces}
-\end{figure}
 
 Most of $Gurobi$\/ executions consumed over 12 GB of RAM memory. Considering that the computer used in the experiments has a standard RAM consumption when idle of 3.5 GB (with {\it Python Interface Development Environment}, a PDF viewer, a system monitor, and a \LaTeX\/ IDE simultaneously open), the actual RAM consumption of $Gurobi$\/ was over 8.5 GB. On the other hand, all $Shims$\/ executions consumed at most 1.5 GB of RAM memory.
 
@@ -1444,7 +1380,7 @@ Most of $Gurobi$\/ executions consumed over 12 GB of RAM memory. Considering tha
 
 In this work, we modeled and solved a real air transport problem, named {\it Air Cargo Load Planning with Routing, Pickup and Delivery Problem}\/ (ACLP+RPDP). For the first time in the literature, a {\it NP-hard}\/ problem that involves {\it simultaneously}\/ pallet assembly, load balancing and route planning is addressed, where the cost-effectiveness of transport is maximized. We adopted some simplifications that are not critical, but that allowed the unprecedented solution of this problem considering more than two nodes.
 
-We consider that, in practical cases, the number $K$\/ of nodes, excluding the base, is small ($K \leq 6$), each of them with hundreds of items to be shipped. Thus, considering a real aircraft, we have developed some node-by-node solutions, which are not necessarily optimal. This allows us to test two strategies: find a solution using the shortest tours, or enumerate all $K!$\/ tours and choose the best. The complete process can be executed quickly on a simple handheld computer, offering good results and reducing stress for the transport planners. As validation, we performed tests in several scenarios with real data from the {\it Brazilian Air Force}. At the moment, there is no {\color{blue}commercial} software available for this problem.
+We consider that, in practical cases, the number $K$\/ of nodes, excluding the base, is small ($K \leq 6$), each of them with hundreds of items to be shipped. Thus, considering a real aircraft, we have developed some node-by-node solutions, which are not necessarily optimal. This allows us to test two strategies: find a solution using the shortest tours, or enumerate all $K!$\/ tours and choose the best. The complete process can be executed quickly on a simple handheld computer, offering good results and reducing stress for the transport planners. As validation, we performed tests in several scenarios with real data from the {\it Brazilian Air Force}. At the moment, there is no commercial software available for this problem.
 
 We have developed a solution process that, in less than 4 minutes, can establish a flight plan for a single aircraft with a good distribution of load on pallets to be put in the cargo bay, enforcing the loaded aircraft balance, maximizing the total score and minimizing fuel consumption. The output, which includes the tour plan and the pallet building and arrangement plan, is an essential part of airlift: it improves flight safety, makes ground operations more efficient, and makes sure that each item gets to its right destination. In this way, at each node of the tour, the time required is restricted exclusively to handling the airport equipment.
 
@@ -1452,18 +1388,17 @@ Our main contributions were the mathematical modeling of ACLP+RPDP that involves
 
 As this is an ongoing research, we thought about some possible future improvements:
 \begin{itemize}
-\item consider a fleet of planes, rather than a single one;
+\item consider a aircraft fleet, rather than a single one;
 \item model three-dimensional items;
 \item discard the highest cost tours, to reduce the runtime;
 \item implement parallel algorithms in some steps of the solution.
 \end{itemize}
 
-
-\section*{Acknowledgments}
-
-This research was partially supported by \textit{São Paulo Research Foundation} (FAPESP, grant 2016/01860-1).
+\section*{References}
 
 \begin{thebibliography}{00}
+
+\bibitem{Karp1972} R. Karp, {\it Reducibility among combinatorial problems. Complexity of Computer Computations.} (R.E. Miller and J.M. Thatcher, eds.), Plenum Press, 85-103 (1972).
 
 \bibitem{LarsenMikkelsen1979} O. Larsen and G. Mikkelsen, An interactive system for the loading of cargo aircraft, {\it European Journal of Operational Research}, Vol. 4 (6), pp. 367-373, 1980.
 
@@ -1510,6 +1445,8 @@ This research was partially supported by \textit{São Paulo Research Foundation} 
 \bibitem{Vancroonenburg2014} W. Vancroonenburg, J. Verstichel, K. Tavernier and G.V. Berghe, Automatic air cargo selection and weight balancing: a mixed integer programming approach, {\it Transportation Research Part E: Logistics and Transportation Review}, Vol. 65, pp. 70-83, 2014.
 
 \bibitem{LurkinSchyns2015} V. Lurkin and M. Schyns, The airline container loading problem with pickup and delivery, {\it European Journal of Operational Research}, Vol. 244 (3), pp. 955-965, 2015.
+
+\bibitem{Feng2015} Feng, B.; Li, Y.; Shen, Z.J.M. {\it Air cargo operations: Literature review and comparison with practices.} Transp. Res. Part C Emerg. Technol. 2015, 56, 263?280. 
 
 \bibitem{RoesenerBarnes2016} A.G. Roesener and J.W. Barnes, An advanced tabu search approach to the dynamic airlift loading problem, {\it Logistics Research}, Vol. 9 (1), pp. 1-18, 2016.
 
