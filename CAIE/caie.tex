@@ -93,8 +93,10 @@
 
 \begin{abstract}
 
-{\color{blue}In aerial pickup and delivery of goods in a distribution network, transport aviation faces risks of cargo unbalancing due to the urgency required for loading, immediate take-off, and mission accomplishment, especially in disaster relief, short deadlines, or any pressure for immediate take-off.}
-In addition, there are no commercially available systems that can assist load and trip planners with pallet building and aircraft-balanced loading plans, with demands for transport at each hub. This enables other risks, such as improper delivery, excessive fuel burn, and longer than necessary turn-around time. We defined and solved the problem of planning the loading and routing of a single aircraft according to a utility score, weight and balance principles, and fuel consumption in a tour of simultaneous pickup and delivery at intermediate hubs. This {\it NP-hard}\/ problem, named {\it Air Cargo Load Planning with Routing, Pickup, and Delivery Problem (ACLP+RPDP)}, is mathematically modeled using standardized pallets in fixed positions, obeying center of gravity constraints, delivering each item to its destination, and minimizing fuel consumption costs. We performed multiple experiments with a commercial solver and four well-known meta-heuristics on data based on the transport history of the {\it Brazilian Air Force}. We also designed a new heuristic that quickly finds practical solutions to a wide range of problem sizes, a key contribution that resolved all real scenarios in much less time than is operationally acceptable.
+{\color{blue}In the aerial pickup and delivery of goods in a distribution network, transport aviation faces risks of cargo unbalancing due to the urgency required for loading, immediate take-off, and mission accomplishment. It is especially critical for disaster relief, short deadlines, or any pressure for immediate takeoff. In addition, there are no commercially available systems that can assist load and trip planners with pallet building and aircraft-balanced loading plans, with demands for transport at each hub. This enables other risks, such as improper delivery, excessive fuel burn, and a longer than necessary turn-around time. We defined and solved the problem of planning the loading and routing of a single aircraft according to a utility score, weight and balance principles, and fuel consumption in a tour of simultaneous pickup and delivery.}
+This {\it NP-hard}\/ problem, named {\it Air Cargo Load Planning with Routing, Pickup, and Delivery Problem (ACLP+RPDP)}, is mathematically modeled using standardized pallets in fixed positions, obeying center of gravity constraints, delivering each item to its destination, and minimizing fuel consumption costs.
+We performed multiple experiments with a commercial solver and four well-known meta-heuristics on data based on the transport history of the {\it Brazilian Air Force}.
+We also designed a new heuristic that quickly finds practical solutions to a wide range of problem sizes, a key contribution that resolved all real scenarios in much less time than is operationally acceptable.
 
 \end{abstract}
 
@@ -108,9 +110,11 @@ Load Planning \sep Air Palletization \sep Weight and Balance \sep Pickup and Del
 \section{Introduction}
 
 
-Air cargo transport involves several sub-problems that are difficult to solve. Recently, Brandt and Nickel \cite[p. 401]{BrandtStefan2019} defined the {\it Air Cargo Load Planning Problem} (ACLPP) as four sub-problems: {\it Aircraft Configuration Problem} (ACP), {\it Build-up Scheduling Problem} (BSP), {\it Air Cargo Palletization Problem} (APP) and {\it Weight and Balance Problem} (WBP). Several aspects were considered in this modeling: characteristics of the items to be transported (dimensions, scores, dangerousness, etc.); types and quantities of {\it unit load devices} (ULDs), commonly called pallets; when these pallets are assembled; how items are allocated to pallets; in which positions these pallets are to be placed; how the total cargo weight is balanced; etc. They also presented a comprehensive bibliographic survey of solving methods that had been developed in different situations.
+Air cargo transport involves several sub-problems that are difficult to solve. Recently, Brandt and Nickel \cite[p. 401]{BrandtStefan2019} defined the {\it Air Cargo Load Planning Problem} (ACLPP) as four sub-problems: the {\it Aircraft Configuration Problem} (ACP), the {\it Build-up Scheduling Problem} (BSP), the {\it Air Cargo Palletization Problem} (APP), and the {\it Weight and Balance Problem} (WBP).
 
-However, there are still other important challenges in air cargo transport that go beyond the definition of the ACLPP, especially with regard to the flight itinerary and the loading and unloading at each destination (or node) of this travel plan. In this context, at least two more important sub-problems can be considered: pickup and delivery operations at each node, called {\it Pickup and Delivery Problem} (PDP), and the search for the lowest cost route, which is the well-known {\it Traveling Salesman Problem} (TSP).
+Several aspects were considered in these authors' model: characteristics of the items to be transported (dimensions, scores, dangerousness, etc.); types and quantities of {\it unit load devices} (ULDs), commonly called pallets; when these pallets are assembled; how items are allocated to pallets; in which positions these pallets are to be placed; how the total cargo weight is balanced; etc. They also presented a comprehensive bibliographic survey of solving methods that had been developed in different situations.
+
+However, there are still other important challenges in air cargo transport that go beyond the definition of the ACLPP, especially with regard to the flight itinerary and the loading and unloading at each destination (or node) of this travel plan. In this context, at least two more important sub-problems can be considered: pickup and delivery operations at each node, called {\it Pickup and Delivery Problem} (PDP), and the search for the lowest-cost route, which is the well-known {\it Traveling Salesman Problem} (TSP).
 
 {\color{blue} Lurkin and Schyns \cite{LurkinSchyns2015} show that this problem is NP-hard and therefore compare their results to current manually generated solutions vice optimal (or even near optimal) solutions. They have shown that the WBP is also NP-hard.}
 
@@ -118,9 +122,9 @@ However, there are still other important challenges in air cargo transport that 
 
 {\color{blue} Feng {\it et al.} (2015) \cite{Feng2015} presented a comprehensive literature assessment of commercial air cargo operations. They stated that the airplane loading problem is one of the fundamental issues in combinatorial optimization and described it as an NP-hard problem.}
 
-There are real situations that are much more complex. In this work, we consider a practical case in Brazil, which is the largest economy in Latin America. Due to its dimensions, this country has the largest air market on the continent with $2,499$\/ registered airports, of which $1,911$\/ are private and $588$\/ are public. Although it is an immense distribution network, the {\it Brazilian Air Force}\/ missions have always considered 3 to 5 nodes per flight plan.
+There are real situations that are much more complex. In this work, we consider a practical case in Brazil, which is the largest economy in Latin America. Due to its dimensions, this country has the largest air market on the continent, with 2,499 registered airports, of which 1,911 are private and 588 are public. Although it is an immense distribution network, the {\it Brazilian Air Force} missions have always considered 3 to 5 nodes per flight plan.
 
-It is important to emphasize that this data is not an imposed limitation, but a historical fact that we will explore in our solution method. Throughout this work we approach routes with up to 7 nodes, as can be seen in Table \ref{tab:costs} and in Figure \ref{fig:nodes}. Although there are many other airports of interest to {\it Brazilian Air Force}, these 7 nodes were chosen due to their high demand and short transport times. The other Brazilian airports tend to have a lower demand, which is usually met, in a less expensive way, by cabotage, rail or road transport.
+It is important to emphasize that this data is not an imposed limitation but a historical fact that we will explore in our solution method. Throughout this work, we approach routes with up to 7 nodes, as can be seen in Table \ref{tab:costs} and in Figure \ref{fig:nodes}. Although there are many other airports of interest to {\it Brazilian Air Force}, these seven nodes were chosen due to their high demand and short transport times. The other Brazilian airports tend to have lower demand, which is usually met in a less expensive way by cabotage, rail, or road transport.
 
 
 \begin{table}[H]
@@ -166,18 +170,18 @@ It is important to emphasize that this data is not an imposed limitation, but a 
 
 Cargo handling at modern airports usually involves powerful equipment such as dollies, motorized conveyors, elevator transfer vehicles, caster decking, scissor lifts, electrical controls, hydraulically adjustable heights, forklift trucks, and plenty of room in the airport cargo terminal. These facilities, together with the use of standardized pallets with predefined positions on the aircraft, allow loading and unloading at each node to be carried out in about 30 minutes.
 
-However, as reported by Fok and Chun, {\it load planning (...) is usually done in roughly 2 hours before departure, when all the details of the cargo are present.} \cite{fok2004optimizing}. We can infer that this is because adequate commercial software does not exist. In addition, there is still the necessary time to plan the route, in order to minimize fuel consumption and ensure the transport of priority items. In these circumstances, it is of great importance to find a method that speeds up the load planning and the definition of the flight itinerary.
+However, as reported by Fok and Chun, {\it load planning (...) is usually done roughly two hours before departure, when all the details of the cargo are present.} \cite{fok2004optimizing}. We can infer that this is because adequate commercial software does not exist. In addition, there is still the necessary time to plan the route to minimize fuel consumption and ensure the transport of priority items. In these circumstances, it is of great importance to find a method that speeds up load planning and the definition of the flight itinerary.
 
-Our work proposes a method that prioritizes the transport of the most relevant items at each node and the fuel economy along the tour. We developed a heuristic that can be run on a simple handheld computer (such as a laptop or a tablet) that previously defines a flight plan, and provides a quick solution for cargo handling. Consequently, this method reduces the stress that transport planners are subjected to, because they have to deal with a lot of information in planning the aircraft route, assembling the pallets (regarding their positions), and a pick up and delivery plan to each node.
+Our work proposes a method that prioritizes the transport of the most relevant items at each node and the fuel economy along the tour. We developed a heuristic that can be run on a simple handheld computer (such as a laptop or a tablet) that defines a flight plan and provides a quick solution for cargo handling. Consequently, this method reduces the stress that transport planners are subjected to because they have to deal with a lot of information in planning the aircraft route, assembling the pallets (regarding their positions), and a pick-up and delivery plan to each node.
 
-To the best of our knowledge, this is the first time that an air cargo transport problem that simultaneously involves APP, WBP, PDP and TSP has been addressed. This new problem is named {\it Air Cargo Load Planning with Routing, Pickup and Delivery Problem} (ACLP+RPDP).
+To the best of our knowledge, this is the first time that an air cargo transport problem that simultaneously involves APP, WBP, PDP, and TSP has been addressed. This new problem is named {\it Air Cargo Load Planning with Routing, Pickup, and Delivery Problem} (ACLP+RPDP).
 
 This article is organized into six more sections. In Section \ref{sec2}, we give a brief review of the literature. In Section \ref{sec3}, we present the problem context and assumptions, and in Section \ref{sec4}, we describe the mathematical model and how we dealt with its issues. In Section \ref{sec5}, we describe the elaborate algorithms, whose results are presented in Section \ref{sec6}. Finally, our conclusions are in Section \ref{sec7}.
 
 \section{Related literature}
 \label{sec2}
 
-{\color{blue} In this section, we briefly describe the characteristics of the main works related to air cargo transport, following the chronological order of Table \ref{tab:sa}, that lists the main works in the literature and the corresponding sub-problems addressed. We also indicate whether the dimensions of the items were taken into account ({\bf 3D} or {\bf 2D}) and which solution method was used: heuristic search methods ({\bf Heu}), integer programming ({\bf Int}), or linear programming ({\bf Lin}). }
+{\color{blue} In this section, we briefly describe the characteristics of the main works related to air cargo transport, following the chronological order of Table \ref{tab:sa}, which lists the main works in the literature and the corresponding sub-problems addressed. We also indicate whether the dimensions of the items were taken into account ({\bf 3D} or {\bf 2D}) and which solution method was used: heuristic search methods ({\bf Heu}), integer programming ({\bf Int}), or linear programming ({\bf Lin}). }
 
 \begin{table}[H]
 	\centering
@@ -218,27 +222,25 @@ This article is organized into six more sections. In Section \ref{sec2}, we give
 \end{table}
 
 
-As can be seen, so far Lurkin and Schyns \cite{LurkinSchyns2015} is the only work that simultaneously addresses an air cargo (WBP) and a flight itinerary (PDP) sub-problem. Although it is innovative, strong simplifications were imposed by these authors: in relation to loading, APP was ignored; with regard to routing, it is assumed a predefined tour plan restricted to only two legs. It is important to note that these authors consider an aircraft with two doors, and the minimization of loading and unloading costs at the intermediate node was modeled through a container sequencing problem. Referring directly to this work, Brandt and Nickel \cite[p. 409]{BrandtStefan2019} comment: {\it However, not even these sub-problems are acceptably solved for real-world problem sizes or the models omit some practically relevant constraints}. 
+As can be seen, so far Lurkin and Schyns \cite{LurkinSchyns2015} is the only work that simultaneously addresses an air cargo (WBP) and a flight itinerary (PDP) sub-problem. Although it is innovative, strong simplifications were imposed by these authors: in relation to loading, APP was ignored; with regard to routing, it is assumed that a predefined tour plan is restricted to only two legs. It is important to note that these authors consider an aircraft with two doors, and the minimization of loading and unloading costs at the intermediate node was modeled through a container sequencing problem. Referring directly to this work, Brandt and Nickel \cite[p. 409]{BrandtStefan2019} comment: {\it However, not even these sub-problems are acceptably solved for real-world problem sizes, or the models omit some practically relevant constraints}. 
 
+Larsen and Mikkelsen \cite{LarsenMikkelsen1979} developed an interactive procedure for loading 14 types of Boeing 747 into a two-leg transportation plan. Seven types of items were considered to be allocated from 17 to 42 positions. With non-linear programming and heuristics, they present a solution that minimizes positioning changes in the intermediate node, optimizing the load balancing in the aircraft.
 
+Brosh \cite{Brosh1981} addressed the problem of planning the allocation of cargo on an aircraft. Considering volume, weight, and structural constraints, the author finds the optimal load layout through a fractional programming problem.
 
-Larsen and Mikkelsen \cite{LarsenMikkelsen1979} developed an interactive procedure for loading 14 types of Boeing 747 into a two-leg transportation plan. Seven types of items were considered to be allocated in 17 to 42 positions. With non-linear programming and heuristics, they present a solution that minimizes positioning changes in the intermediate node, optimizing the load balancing in the aircraft.
+Ng \cite{Kevin1992} developed a multi-criteria optimization approach to load the {\it C-130} aircraft of the {\it Canadian Air Force}. Based on integer programming, this model provides timely planning and improves airlift support for combat operations by solving WBP with pallets in fixed positions and considering 20 different items.
 
-Brosh \cite{Brosh1981} addressed the problem of planning the allocation of cargo on an aircraft. Considering volume, weight and structural constraints, the author finds the optimal load layout through a fractional programming problem.
-
-Ng \cite{Kevin1992} developed a multi-criteria optimization approach to load the {\it C-130} aircraft of the {\it Canadian Air Force}. Based on integer programming, this model provides timely planning and improves airlift support for combat operations, solving WBP with pallets in fixed positions, and considering 20 different items.
-
-Heidelberg {\it et al.} \cite{Heidelberg1998} developed a heuristic for 2D packing in air loading, comparing it with methods for solving the {\it Bin Packing Problem}. These authors conclude that the classical algorithms are inadequate in this context, because they ignore the aircraft balancing constraints.
+Heidelberg {\it et al.} \cite{Heidelberg1998} developed a heuristic for 2D packing in air loading, comparing it with methods for solving the {\it Bin Packing Problem}. These authors conclude that the classical algorithms are inadequate in this context because they ignore the aircraft balancing constraints.
 
 Mongeau and Bes \cite{MongeauBes2003} presented a method based on linear integer programming to solve the problem of choosing and positioning containers in the {\it Airbus 340-300}. Safety and stability constraints were considered, with the objective of minimizing fuel consumption.
 
-Fok and Chun \cite{fok2004optimizing} developed a web-based application to make efficient use of space and load balancing for an air cargo company. Based on an analysis of historical data, an operational load planning with mathematical optimization is obtained. This container load planning is usually done in roughly 2 hours before departure, when all cargo details are in place.
+Fok and Chun \cite{fok2004optimizing} developed a web-based application to make efficient use of space and load balancing for an air cargo company. Based on an analysis of historical data, an operational load plan with mathematical optimization is obtained. This container load planning is usually done roughly 2 hours before departure, when all cargo details are in place.
 
-Chan {\it et al.} \cite{Chan2006} carried out a case study with heterogeneous pallets. To minimize the total cost of shipping, they developed a 3D packing heuristic, with a loading plan for each pallet. Although the authors do not consider load balancing or positioning of pallets in the cargo hold, this method is relevant in commercial and industrial applications, where cargo items tend to be less dense.
+Chan {\it et al.} \cite{Chan2006} carried out a case study with heterogeneous pallets. To minimize the total cost of shipping, they developed a 3D packing heuristic with a loading plan for each pallet. Although the authors do not consider load balancing or the positioning of pallets in the cargo hold, this method is relevant in commercial and industrial applications, where cargo items tend to be less dense.
 
 Kaluzny and Shaw \cite{KaluznyBohdanL2009Oalb} developed a mixed integer linear programming model to arrange a set of items in a military context that optimizes the load balance. The objective function can be chosen to minimize the deviation of the center of gravity (CG) from the target position or to maximize the function of the items loaded. This approach does not palletize items, which are arranged in the cargo bay by a 2D packing procedure.
 
-Verstichel {\it et al.} \cite{Verstichel2011} solved WBP by selecting the most profitable subset of containers to be loaded into an aircraft by the use of mixed-integer programming. Experimental results on real-life data showed significant improvements compared to those obtained manually by an experienced planner.
+Verstichel {\it et al.} \cite{Verstichel2011} solved WBP by selecting the most profitable subset of containers to be loaded into an aircraft by using mixed-integer programming. Experimental results on real-life data showed significant improvements compared to those obtained manually by an experienced planner.
 
 Mesquita and Cunha \cite{MesquitaCunha2011} presented a heuristic for a real problem of the {\it Brazilian Air Force}, which consists of defining transport routes with simultaneous collection and delivery from a central distribution terminal.
 
@@ -248,31 +250,29 @@ Roesener and Hall \cite{RoesenerHall2014} solved APP and WBP as an integer progr
 The pallets are then packed in a manner to optimize both the pallet and aircraft characteristics, such as item utility, pallet occupancy, and aircraft center of balance.
 This method groups items by destinations to be served by multiple aircraft.
 
-Vancroonenburg {\it et al} \cite{Vancroonenburg2014} presented a mixed integer linear programming model that selects the most profitable pallets, satisfying safety and load balancing constraints on the {\it Boeing 747-400}. Using a solver, these authors solved real problems in less than an hour.
+Vancroonenburg {\it et al} \cite{Vancroonenburg2014} presented a mixed integer linear programming model that selects the most profitable pallets while satisfying safety and load balancing constraints on the {\it Boeing 747-400}. Using a solver, these authors solved real problems in less than an hour.
 
-As already mentioned, Lurkin and Schyns \cite{LurkinSchyns2015} was the first work that simultaneously modeled WBP and PDP in air cargo transport. The authors demonstrated that this problem is NP-hard and performed some experiments with real data, noting that their model offers better results than those obtained manually.
+As already mentioned, Lurkin and Schyns \cite{LurkinSchyns2015} were the first to simultaneously model WBP and PDP in air cargo transport. The authors demonstrated that this problem is NP-hard and performed some experiments with real data, noting that their model offers better results than those obtained manually.
 
+Roesener and Barnes \cite{RoesenerBarnes2016} proposed a heuristic to solve the {\it Dynamic Airlift Loading Problem} (DALP). Given a set of palletized cargo items that require transport between two nodes in a given time frame, the objective of this problem is to select an efficient subset of aircraft, partition the pallets into aircraft loads, and assign them to allowable positions in those aircraft.
 
-Roesener and Barnes \cite{RoesenerBarnes2016} proposed a heuristic to solve the {\it Dynamic Airlift Loading Problem} (DALP). Given a set of palletized cargo items that require transport between two nodes in a time frame, the objective of this problem is to select an efficient subset of aircraft, partition the pallets into aircraft loads and assign them to allowable positions in those aircraft.
-
-Paquay {\it et al.} \cite{PaquaySchynsLimbourg2016} presented a mathematical modeling to optimize the loading of heterogeneous 3D boxes on pallets with a truncated parallelepipeds format. Its objective is to maximize the volume used in containers, considering load balancing constraints, the presence of fragile items and the possibility of rotating these boxes. Paquay {\it et al.} \cite{PaquayLimbourgSchynsOliveira2018} developed some heuristics to solve this problem.
+Paquay {\it et al.} \cite{PaquaySchynsLimbourg2016} presented a mathematical model to optimize the loading of heterogeneous 3D boxes on pallets with a truncated parallelepiped format. Its objective is to maximize the volume used in containers, considering load balancing constraints, the presence of fragile items, and the possibility of rotating these boxes. Paquay {\it et al.} \cite{PaquayLimbourgSchynsOliveira2018} developed some heuristics to solve this problem.
 
 Chenguang {\it et al.} \cite{YangLiuGao2018} modeled the air transport problem as a 2D packing problem, and presented a heuristic for its optimization in several aircraft, considering load balancing to minimize fuel consumption.
 
-Wong and Ling \cite{wong2020}A developed a mathematical model and a tool based on mixed integer programming for optimizing cargo in aircraft with different pallet configurations. Balance constraints and the presence of dangerous items were considered. Wong {\it et al.} \cite{eugene2021} integrated this tool to a digital simulation model, with a visualization and validation system, based on sensors that alert about load deviations.
+Wong and Ling \cite{wong2020}A developed a mathematical model and a tool based on mixed integer programming for optimizing cargo in aircraft with different pallet configurations. Balance constraints and the presence of dangerous items were considered. Wong {\it et al.} \cite{eugene2021} integrated this tool into a digital simulation model with a visualization and validation system based on sensors that alert about load deviations.
 
-Zhao {\it et al.} \cite{zhao2021} proposed a new modeling for WBP based on mixed integer programming. Instead of focusing on the CG deviation, the authors consider the original CG envelope of the aircraft, with a linearization method for its non-linear constraints.
+Zhao {\it et al.} \cite{zhao2021} proposed a new model for WBP based on mixed integer programming. Instead of focusing on the CG deviation, the authors consider the original CG envelope of the aircraft, with a linearization method for its non-linear constraints.
 
-{\color{blue} Zhao {\it et al.} \cite{zhao2023}  proposed three integer linear programming models: a Bi-objective Optimization Model (BOM), a Combinatorial Optimization Model (COM), and an Improved Combinatorial Optimization Model (IOM). The objectives of their solutions were the maximum loading capacity and the lowest CG deviation from a specified target CG. Four scenarios with various conditional metrics for three models are solved for the B777F aircraft using Gurobi. The results of the computations demonstrated that the BOM has the fastest solution speed, but the CG deviation is the largest, and in several cases, the CG deviation results are unacceptable. The COM has the longest solution time, which is difficult to tolerate in practice. Despite taking a little longer to solve computationally than the BOM, the IOM offers the best optimization solution.}
+{\color{blue} Zhao {\it et al.} \cite{zhao2023}  proposed three integer linear programming models: a Bi-objective Optimization Model (BOM), a Combinatorial Optimization Model (COM), and an Improved Combinatorial Optimization Model (IOM). The objectives of their solutions were the maximum loading possible and the lowest CG deviation from a specified target CG. Four scenarios with various metrics for three models are solved for the B777F aircraft using Gurobi. The results of the computations demonstrated that the BOM has the fastest solution speed, but the CG deviation is the worst, and in several cases, the CG deviation results are unacceptable. The COM has the longest solution time, which is difficult to tolerate in practice.}
 
-
-As can be seen, none of these works address air cargo palletization and load balancing with route optimization in a multi-leg transportation plan for a single aircraft. This is the objective of our work: to model and elaborate heuristics for a real problem that simultaneously involves 4 intractable sub-problems: APP, WBP, PDP and TSP.
+As can be seen, none of these works address air cargo palletization and load balancing with route optimization in a multi-leg transportation plan for a single aircraft. This is the objective of our work: to model and elaborate heuristics for a real problem that simultaneously involves four intractable sub-problems: APP, WBP, PDP, and TSP.
 
 
 \section{Problem context and assumptions}
 \label{sec3}
 
-In this section, we describe the context of the problem addressed in this work, as well as the assumptions considered.
+In this section, we describe the context of the problem addressed in this work as well as the assumptions considered.
 
 \subsection{Operational premises}
 
@@ -280,13 +280,13 @@ As we are dealing with an extremely complex and diverse problem, we decided to e
 
 \begin{itemize}
 	
-	\item At each node of the tour, the items to be allocated are characterized by weight, volume, scores, and previously known destinations. We leave the consideration of 2D or 3D items to a future work.
+	\item At each node of the tour, the items to be allocated are characterized by weight, volume, scores, and previously known destinations. We leave the consideration of 2D or 3D items for future work.
 		
-	\item We considered a unique pallet type: the {\it 463L Master Pallet}, a common size platform for bundling and moving air cargo. It is the primary air cargo pallet for more than 70 Air Forces and many air transport companies. This pallet has a capacity of $4,500 kg$ and $13.7 m^3$, which may be limited by its position along the cargo bay. It is equipped for locking into cargo aircraft rail systems, and includes tie-down rings to secure nets and cargo loads, which in total weighs $140 kg$. For more information, see {\tt www.463LPallet.com}.
+	\item We considered a unique pallet type: the {\it 463L Master Pallet}, a common-size platform for bundling and moving air cargo. It is the primary air cargo pallet for more than 70 Air Forces and many air transport companies. This pallet has a capacity of $4,500 kg$ and $13.7 m^3$, which may be limited by its position along the cargo bay. It is equipped for locking into cargo aircraft rail systems, and includes tie-down rings to secure nets and cargo loads, which in total weigh $140 kg$. For more information, see {\tt www.463LPallet.com}.
 	
-	\item All items allocated on a pallet must have the same destination. A pallet which has not yet reached its destination may receive more items, although it is known that these operations of removing restraining nets increase handling time and the risk of improper delivery. We do not consider oversized cargo in this work, but only cargo items that fit on these pallets.
+	\item All items allocated to a pallet must have the same destination. A pallet that has not yet reached its destination may receive more items, although it is known that these operations of removing restraining nets increase handling time and the risk of improper delivery. We do not consider oversized cargo in this work, but only cargo items that fit on these pallets.
 	
-	\item Finally, as we are interested in minimizing fuel costs, we disregarded others costs not directly associated with aircraft flight, such as handling.
+	\item Finally, as we are interested in minimizing fuel costs, we disregarded other costs not directly associated with aircraft flight, such as handling.
 
 \end{itemize}
 
@@ -299,12 +299,12 @@ As we are dealing with an extremely complex and diverse problem, we decided to e
 	\label{fig:larger2}
 \end{figure}
 
-Throughout this text, we call {\it packed content}\/ a set of items of same destination stacked on a pallet and covered with a restraining net (see Figure \ref{fig:larger2}). It is considered a single item, having the same attributes of its components, whose values are the sum of individual scores, weights and volumes. To ensure accuracy in pickup and delivery operations, a packed content must remain on board until its destination.
+Throughout this text, we call {\it packed content}\/ a set of items of the same destination stacked on a pallet and covered with a restraining net (see Figure \ref{fig:larger2}). It is considered a single item, having the same attributes as its components, whose values are the sum of individual scores, weights, and volumes. To ensure accuracy in pickup and delivery operations, packed content must remain on board until its destination.
 
 
 \subsection{Aircraft parameters and load balancing}
 
-We consider real scenarios with an single aircraft with payload of $75,000 kg$, with enough fuel for a range of $4,400km$. The aircraft layout is presented in Figure \ref{fig:larger}, where the pallets positions are identified by $p_i$, $1\leq i \leq 18$.
+We consider real-world scenarios with a single aircraft with a payload of $75,000 kg$, and enough fuel for a range of $4,400km$. The aircraft layout is presented in Figure \ref{fig:larger}, where the pallet positions are identified by $p_i$, $1\leq i \leq 18$.
 
 
 \begin{figure}[!h]
@@ -361,7 +361,7 @@ The torque applied to the aircraft must keep its CG in the operational range, wh
 	\label{fig:lateral}
 \end{figure}
 
-Table \ref{tab:larger} shows the parameters of this aircraft. $p_i$\/ are pallets, $1\leq i \leq 18$, with weight $W_i$\/ and $V_i$\/ volume limits, respectively. $D_i^{long}$\/ and $D_i^{lat}$\/ are, respectively, the longitudinal and lateral distances of each pallet centroids to the CG of aircraft along both axes. These distances will be used in the calculation of the torque referring to the items allocated on each pallet. In this aircraft, as the ramp have an inclination of $25^{\circ}$, we made the necessary corrections in $D_i^{long}$, $W_i$\/ and $V_i$\/ of the corresponding pallets.
+Table \ref{tab:larger} shows the parameters of this aircraft. $p_i$\/ are pallets, $1\leq i \leq 18$, with weight $W_i$\/ and $V_i$\/ volume limits, respectively. $D_i^{long}$\/ and $D_i^{lat}$\/ are, respectively, the longitudinal and lateral distances of each pallet centroids to the CG of aircraft along both axes. These distances will be used in the calculation of the torque, referring to the items allocated on each pallet. In this aircraft, as the ramp has an inclination of $25^{\circ}$, we made the necessary corrections in $D_i^{long}$, $W_i$\/ and $V_i$\/ of the corresponding pallets.
 
 \begin{table}[H]
 	\centering
@@ -401,28 +401,28 @@ Table \ref{tab:larger} shows the parameters of this aircraft. $p_i$\/ are pallet
 \end{table}
 
 
-This aircraft spends $c_d$\/ dollars per kilometer flown, and can carry up to $W_{max}$\/ of cargo distributed on the pallets. The {\it fuel consumption rate}\/ $c_g$\/ is the percentage limit of cost increase  due to the CG deviation on the longitudinal axis of the aircraft. $c_g$\/ depends on the characteristics of the aircraft, and is an arbitrated value that should be better evaluated in future research. It is important to consider that the $c_g$\/ tends to zero as the aircraft attitude tends to level. As the CG deviation varies from $0$\/ to $limit^{CG}_{long}$, the {\it fuel cost}\/ increase varies from $0$\/ to $c_g$.
+This aircraft spends $c_d$\/ dollars per kilometer flown and can carry up to $W_{max}$\/ of cargo distributed on the pallets. The {\it fuel consumption rate}\/ $c_g$\/ is the percentage limit of cost increase due to the CG deviation on the longitudinal axis of the aircraft. $c_g$\/ depends on the characteristics of the aircraft and is an arbitrated value that should be better evaluated in future research. It is important to consider that the $c_g$\/ tends to zero as the aircraft's attitude tends to be level. As the CG deviation varies from $0$\/ to $limit^{CG}_{long}$, the {\it fuel cost}\/ increase varies from $0$\/ to $c_g$.
 
 
 \vspace{3mm}
 We also make the following assumptions:
 \begin{itemize}
-	\item on each pallet, the items are distributed in such a way that their CG coincides with the centroid of the pallet;
-	\item the CG of the total load must be at a maximum longitudinal distance $limit^{CG}_{long}$\/ from the CG of the aircraft;
-	\item the CG of the total load must be at a maximum lateral distance $limit^{CG}_{lat}$\/ from the CG of the aircraft;
-	\item the pallets are distributed in two identical rows (with odd and even indices, respectively), and the centroid of $p_i$\/ is at distance $D^{lat}_{i}$\/ from the center-line of the aircraft.
+	\item On each pallet, the items are distributed in such a way that their CG coincides with the centroid of the pallet.
+	\item The CG of the total load must be at a maximum longitudinal distance of $limit^{CG}_{long}$\/ from the CG of the aircraft.
+	\item The CG of the total load must be at a maximum lateral distance of $limit^{CG}_{lat}$\/ from the CG of the aircraft.
+	\item The pallets are distributed in two identical rows (with odd and even indices, respectively), and the centroid of $p_i$\/ is at a distance $D^{lat}_{i}$\/ from the centerline of the aircraft.
 \end{itemize}
 
 
 
-\section{The mathematical modeling}
+\section{The mathematical model}
 \label{sec4}
 
-Given the assumptions and parameters described in the previous section, we are ready to present the mathematical modeling of ACLP+RPDP. 
+Given the assumptions and parameters described in the previous section, we are ready to present the mathematical model of ACLP+RPDP. 
 
 ACLP+RPDP has the objective function \ref{eq1}, and the calculus equations \ref{eq:scores} to \ref{eq:LatPacked} subject to constraints \ref{eq:torqlat} to \ref{eq21}, which will be described below. 
 
-\subsection{Problem structure and input data}
+\subsection{Problem structure}
 
 In the definitions below and in the tests of Section \ref{sec6}, we use the values assigned in Tables \ref{tab:costs} and \ref{tab:larger}. To simplify the notation throughout this text, $p_i$\/ will be called pallet $i$, and $l_k$\/ will be called node $k$.
 
@@ -484,7 +484,7 @@ We have the following calculation equations:
 \begin{itemize}
 	\item $\tilde{s}_\pi$\/ \ref{eq:scores} is the sum of the scores of the items loaded on the aircraft throughout the tour $\pi$.
 	\item $\tau_{\pi_k}$\/ \ref{eq:tau} is the longitudinal torque applied by the loaded pallets at the node ${\pi_k}$, in proportion relative to the highest torque supported by the aircraft.
-	\item $\tilde{c}_\pi$\/ \ref{eq:costs} is the cost of to the total fuel consumed in the tour $\pi$\/ due to the distances traveled and the CG longitudinal deviations \footnote{In our experiments, we found that the magnitude of the lateral torque was always very small, and therefore we decided to ignore it in the fuel consumption.} in each pallet.
+	\item $\tilde{c}_\pi$\/ \ref{eq:costs} is the cost of to the total fuel consumed in the tour $\pi$\/ due to the distances traveled and the CG longitudinal deviations \footnote{In our experiments, we found that the magnitude of the lateral torque was always very small, so we decided to ignore it in the fuel consumption calculation in each pallet.}
 	\item The sets of nodes not yet visited along the tour $\pi$\/ are defined in \ref{eq:pdp11} and \ref{eq:departing}.
 	\item At the beginning of the tour $\pi$, there are no packed contents \ref{eq:pdp13}. 
 	\item $\epsilon_{\pi_k}^t$\/ \ref{eq:LatItem} and $\epsilon_{\pi_k}^a$\/ \ref{eq:LatPacked} are the lateral torque applied by the loaded pallets at the node ${\pi_k}$, in proportion relative to the highest torque supported by the aircraft. For ease of notation, $\epsilon_{\pi_k}^t$\/ corresponds to the items, and $\epsilon_{\pi_k}^a$\/ to the packed contents.
@@ -591,21 +591,19 @@ Constraints \ref{eq18} to \ref{eq21} are not within standard {\it Mixed-Integer 
 \section{Solution strategy}
 \label{sec5}
 
-Once the assumptions of this work and the mathematical modeling of the problem are presented, it is possible to see that ACLP+RPDP is {\it NP-hard}.
+Once the assumptions of this work and the mathematical model of the problem are presented, it is possible to see that ACLP+RPDP is {\it NP-hard}.
 
- {\color{red}  In a similar way to Lurkin and Schyns \cite[p. 6]{LurkinSchyns2015}, consider the simple case where $K=1$\/ (one leg), $m=2$\/ (two pallets around the aircraft CG), $2n$\/ sufficiently light items with same scores in node 0, and no items in node 1. Under these conditions, through polynomial reductions for the {\it Set-Partition Problem}, it is possible to demonstrate that the decision problem associated with ACLP+RPDP is {\it NP-complete}.}
+Throughout our research, we have thoughtfully described the ACLP+RPDP model in standard MIP format and found that no MIP solver can handle its practical cases in a feasible time. Thus, as ACLP+RPDP is highly complex, involving four intractable subproblems (APP, WBP, PDP, and TSP), our strategy will be to focus only on {\it real cases}\/ and to develop quick node-by-node solutions, not necessarily optimal, that allow us to build a complete tour.
 
-Throughout our research, we have thoughtfully described the ACLP+RPDP model in standard MIP format and found that no MIP solver can handle its practical cases in a feasible time. Thus, as ACLP+RPDP is highly complex, involving four intractable subproblems (APP, WBP, PDP and TSP), our strategy will be to focus only on {\it real cases}\/ and to develop quick node-by-node solutions, not necessarily optimal, that allow to build a complete tour.
+The ACLP+RPDP solution defines a tour and a corresponding loading and unloading plan at each node. In this way, the loading and unloading time will be limited only by the use of the equipment at each node. Therefore, there will only be waiting time at the base node, corresponding to the runtime of the ACLP+RPDP algorithm. For this reason, our method will also be parameterized by the maximum time that can be waited until the start of the load in the base node.
 
-The ACLP+RPDP solution defines a tour and a corresponding loading and unloading plan at each node. In this way, the loading and unloading time will be limited only by the use of the equipment at each node. Therefore, there will only be waiting time at the base node, corresponding to the runtime of ACLP+RPDP algorithm. For this reason, our method will also be parameterized by the maximum time that can be waited until the start of the load in the base node.
-
-On the other hand, we know that transport aircraft generally have a few dozen pallets, the flight plan has less than $6$\/ nodes, and each node has hundreds of items to be shipped. We also know that missions with fewer nodes are more frequent than longer missions. Under these circumstances, we can adopt two more strategies:
+On the other hand, we know that transport aircraft generally have a few dozen pallets, the flight plan has fewer than six nodes, and each node has hundreds of items to be shipped. We also know that missions with fewer nodes are more frequent than longer missions. Under these circumstances, we can adopt two more strategies:
 
 \begin{itemize}
 	
 \item We will consider that the number of destinations is greater than 1, to avoid the case of a single and trivial tour, but less than the number of pallets, that is, $1 < K < m$. So we can preset the destinations of the pallets at each node. In this way, we will reserve a number of pallets proportional to the volume demanded by each destination at the shipping node. We could have used another criterion, but it was observed in the experiments that volume is more constrictive in airlift.
 	
-\item If we have quick node-by-node solutions, as the number of nodes is small we have the possibility to check the solution corresponding to the tour with the shortest total distance, and even test all possible tours, selecting the one that provides the best value for the objective function.
+\item If we have quick node-by-node solutions, as the number of nodes is small, we have the possibility to check the solution corresponding to the tour with the shortest total distance and even test all possible tours, selecting the one that provides the best value for the objective function.
 
 
 \end{itemize}
@@ -618,7 +616,7 @@ Our complete strategy is summarized in Algorithm \ref{alg:main}.
 		
 		\Procedure{$ACLP+RPDP$}{$scenario, surplus, tmax$}
 
-		\State Let aircraft and $M$  \label{main:M} \Comment{Aircraft parameters from Table \ref{tab:larger}}
+		\State {\color{blue} Let $M$ be the set of pallets }  \label{main:M} \Comment{parameters in Table \ref{tab:larger}}
 		
 		\State Let $K$, $L$\/ and $C$ be according to $scenario$ \label{main:KLC} \Comment{Nodes and costs from Tables \ref{tab:costs} and \ref{tab:scenarios}}
 		
@@ -675,14 +673,14 @@ $tmax$\/ is a runtime limit, which will be distributed among the tours (lines \r
 
 The best results corresponding to the shortest tours are stored in $answer1$\/ (line \ref{main:a1}), and those obtained by testing all $K!$\/ tours are stored in $answer2$\/ (line \ref{main:a2}).
 
-Next, we will present two subsections: in the first we explain how $SolveTour$\/ is executed, presetting the destinations of the pallets. In the second we will present the heuristics developed for node-by-node solutions.
+Next, we will present two subsections: in the first, we explain how $SolveTour$\/ is executed, presetting the destinations of the pallets. In the second, we will present the heuristics developed for node-by-node solutions.
 
 
 \subsection{SolveTour algorithm}
 \label{tour}
 
 
-As we commented in the previous subsection, we will adopt the strategy of presetting the destinations of each pallet throughout the tour. This is feasible in practical cases, where $1<K<m$. For this, each pallet $i$\/ also has a field $T^k_i$, $0\leq k \leq K$, which stores its next destination after being loaded at node $k$. For this reason, $T^k_i \in L_k$, $1 \leq i \leq m$, $0\leq k \leq K$.
+As we commented in the previous subsection, we will adopt the strategy of presetting the destinations of each pallet throughout the tour. This is feasible in practical cases where $1<K<m$. For this, each pallet $i$\/ also has a field $T^k_i$, $0\leq k \leq K$, which stores its next destination after being loaded at node $k$. For this reason, $T^k_i \in L_k$, $1 \leq i \leq m$, $0\leq k \leq K$.
 
 
 $SolveTour$\/ is described in Algorithm \ref{alg:tour}, where $\pi$\/ is a permutation of the nodes (excluding the base) that defines the order of visits in this tour, $method$\/ corresponds to a MIP solver or a heuristic for solving the node-by-node problems, and $tmax$\/ is the runtime limit that will be distributed among the $K+1$\/ legs of the tour.
@@ -733,9 +731,9 @@ $SolveTour$\/ is described in Algorithm \ref{alg:tour}, where $\pi$\/ is a permu
 
 As we mentioned in the previous section, all tours start and end at the base $0$\/ (lines \ref{tour:pi1}-\ref{tour:pi2}). After initializing the score and cost values (lines \ref{tour:score}-\ref{tour:cost}), there is a loop for the $K+1$\/ flights (lines \ref{tour:loop1}-\ref{tour:loop2}). Initially, the set $L_{\pi_k}$\/ of remaining nodes is updated (line \ref{tour:lk1}), and the pallet destinations are unset (line \ref{tour:-1}).
 
-When the aircraft is at the base, the initial graph $G_1$\/ is empty and there is no packed contents \ref{tour:g11}. Otherwise, $UpdatePacked$\/ (line \ref{tour:dest}) returns the set of packed contents that have not yet reached their destination and remain on board, rearranging them on the pallets to minimize CG deviation. This allocation is stored in graph $G_1$\/ (line \ref{tour:g12}).
+When the aircraft is at the base, the initial graph $G_1$\/ is empty, and there are no packed contents \ref{tour:g11}. Otherwise, $UpdatePacked$\/ (line \ref{tour:dest}) returns the set of packed contents that have not yet reached their destination and remain on board, rearranging them on the pallets to minimize CG deviation. This allocation is stored in graph $G_1$\/ (line \ref{tour:g12}).
 
-$SetPalletsDestinations$\/ (line \ref{tour:dest2}) presets the destination of each pallet based on the volume demands of the current node, without changing the pallets destination with packed contents.
+$SetPalletsDestinations$\/ (line \ref{tour:dest2}) presets the destination of each pallet based on the volume demands of the current node without changing the pallet's destination with packed contents.
 
 Finally, $SolveNode$\/ includes the edges corresponding to the items shipped at the current node, returning the graph $G_2$\/ (line \ref{tour:node}). The score and the CG deviation of $G_2$\/ are calculated (line \ref{tour:analyse}) and accumulated (lines \ref{tour:score2}-\ref{tour:cost2}), allowing the final result of this tour (line \ref{tour:f}).
 
@@ -770,7 +768,7 @@ $UpdatePacked$, described in Algorithm \ref{alg:cons}, finds the best packed-pal
 	\end{algorithmic}
 \end{algorithm}
 
-$MinCGDeviation$\/ (line \ref{cons:minCG}) relocates the packed contents on the pallets, minimizing torque and ensuring that they all remain on board, one packed content on each pallet. It is run through a MIP solver with objective function \ref{eq:torque} and constraints \ref{eq:embarked} and \ref{eq:one}. As there are few variables, $E_{Q_{\pi_k}}$\/ is obtained in less than $30$\/ milliseconds. Finally, the destination of each pallet with a packed content is updated (lines \ref{cons:Ybegin}-\ref{cons:Yend}).
+$MinCGDeviation$\/ (line \ref{cons:minCG}) relocates the packed contents on the pallets, minimizing torque and ensuring that they all remain on board, one packed content on each pallet. It is run through a MIP solver with the objective function \ref{eq:torque} and the constraints \ref{eq:embarked} and \ref{eq:one}. As there are few variables, $E_{Q_{\pi_k}}$\/ is obtained in less than $30$\/ milliseconds. Finally, the destination of each pallet with packed content is updated (lines \ref{cons:Ybegin}-\ref{cons:Yend}).
 
 \begin{equation} \label{eq:torque}
 	\min f =  \Big | \sum_{i=1}^{m} \sum_{q=1}^{m_{\pi_k}} Y^k_{iq} \times w_q \times D_i^{long}  \Big |
@@ -851,7 +849,7 @@ $SetPalletsDestinations$, which sets the pallets destination not yet defined, is
 \end{algorithm}
 
 
-$vol$\/ stores the demand volume of items destined to the non-visited nodes (line \ref{dest:vector1}). The destination of empty pallets is defined proportionally to the volume of items to be embarked (lines \ref{dest:propor1}-\ref{dest:propor2}). The destination with the maximum volume defines any remaining pallets (lines \ref{dest:max1}-\ref{dest:max2}).
+$vol$\/ stores the demand volume of items destined for the non-visited nodes (line \ref{dest:vector1}). The destination of empty pallets is defined proportionally to the volume of items to be embarked (lines \ref{dest:propor1}-\ref{dest:propor2}). The destination with the maximum volume defines any remaining pallets (lines \ref{dest:max1}-\ref{dest:max2}).
 
 
 $ScoreAndDeviation$, described in Algorithm \ref{alg:eval}, evaluates the allocation graph $G$\/ generated by $SolveNode$\/ at node $\pi_k$\/ and returns the corresponding score and CG deviation.
@@ -900,15 +898,16 @@ This algorithm consists of a loop that goes through all the pallets (lines \ref{
 \label{methods}
 
 
-In this subsection we present two implementations of $SolveNode$\/ algorithm: with a MIP solver and a heuristic.
+In this subsection, we present two implementations of $SolveNode$\/ algorithm: a MIP solver and a heuristic.
 
 
 \subsubsection{With a MIP solver}
 \label{solver}
 
-Our strategy adopted in $SolveTour$\/ previously defines the values of some variables: the set of nodes to be visited is updated, the packed contents that remain on board are reallocated to minimize the CG deviation, and the pallets destinations are determined according to the volume of items available for shipment. 
+Our strategy adopted in $SolveTour$\/ defines the values of some variables: the set of nodes to be visited is updated, the packed contents that remain on board are reallocated to minimize the CG deviation, and the pallet's destinations are determined according to the volume of items available for shipment. 
 
-In this way, the mathematical modeling for $SolveNode(MIP,\pi_k,G, tmax)$\/ becomes simpler, which finds an allocation of available items at the node $\pi_k$\/ using previously defined values of $L_{\pi_k}$, $T_i^{\pi_k}$, and $a^{\pi_k}_q$. Thus, we use a MIP solver with runtime limit $tmax$\/ at the node $\pi_k$\/ to maximize the objective function \ref{eq:obj2}, with the calculus equations \ref{eq:newf} to \ref{eq:costs2}, subject to the constraints \ref{eq:tau2} to \ref{eq:ifB}. The binary variables $X_{ij}$\/ and $Y_{iq}$\/ define the sets of edges $E_{N_{\pi_k}}$\/ and $E_{Q_{\pi_k}}$, respectively, included in the graph $G$.
+In this way, the mathematical model for $SolveNode(MIP,\pi_k,G, tmax)$\/ becomes simpler, which finds an allocation of available items at the node $\pi_k$\/ using previously defined values of $L_{\pi_k}$, $T_i^{\pi_k}$, and $a^{\pi_k}_q$. Thus, we use a MIP solver with a runtime limit $tmax$\/ at the node $\pi_k$\/ to maximize the objective function \ref{eq:obj2 with the calculus equations \ref{eq:newf} to \ref{eq:costs2}, subject to the constraints \ref{eq:tau2} to \ref{eq:ifB}. The binary variables $X_{ij}$\/ and $Y_{iq}$\/ define the sets of edges $E_{N_{\pi_k}}$\/ and $E_{Q_{\pi_k}}$, respectively, included in graph $G$.
+
 
 \begin{equation} \label{eq:obj2}
 	\max f= \tilde{s} / \tilde{c}
@@ -1124,7 +1123,7 @@ For each pallet $i$, its $n_{\pi_k}$\/ possible edges $e_{ij}$\/ are considered 
 	
 	\item In {\it composition phase}\/ (lines \ref{shims:beginsecond}-\ref{shims:endsecond}), a set of shims named $Set$\/ is created for each pallet $i$, where each shim is formed by a set of edges in the range $[\eta_1,\eta_2]$, whose total volume is limited by $slack_i$. In this phase, the heuristic that provided the best results, both in terms of time and quality, is based on {\it First-Fit Decreasing}, which is an approximation algorithm for the {\it Bin Packing Problem}\/ \cite{JohnsonGarey1985}. Basically, shims are created by accumulating the following edges, taking $slack_i$\/ as a limit.
 	
-	\item In {\it selection phase}\/ (lines \ref{shims:beginthird}-\ref{shims:endthird}), the best shim in $Set$\/ is chosen. Initially, two shims are found: $sh_w$\/ with larger weight, and $sh_v$\/ with larger volume. Between the two, the one with the highest score will be chosen and its edges are inserted into $E_{N_{\pi_k}}$.
+	\item In {\it selection phase}\/ (lines \ref{shims:beginthird}-\ref{shims:endthird}), the best shim in $Set$\/ is chosen. Initially, two shims are found: $sh_w$\/ with larger weight and $sh_v$\/ with larger volume. Between the two, the one with the highest score will be chosen, and its edges will be inserted into $E_{N_{\pi_k}}$.
 	
 \end{itemize}
 
@@ -1139,7 +1138,7 @@ This section is composed of two parts: the generation of test instances and the 
 \subsection{Instances generation}
 \label{items}
 
-As we are dealing with a new problem, which until now had not been modeled in the literature, we have to create our own benchmarks. For this, we based on the characteristics of real airlifts carried out by the {\it Brazilian Air Force}, as described below.
+As we are dealing with a new problem that until now had not been modeled in the literature, we have to create our own benchmarks. For this, we based it on the characteristics of real airlifts carried out by the {\it Brazilian Air Force}, as described below.
 
 In the military airlift carried out in Brazil from 2008 to 2010, 23\% of the items weighed between $10kg$ and $20kg$, 22\% from $21kg$ to $40kg$, 24\% from $41kg$ to $80kg$, 23\% from $81kg$ to $200kg$, and 8\% between $201kg$ and $340kg$. These five groups of items are described in Table \ref{tab:weights}, where $P$\/ represents the group probability. On the other hand, the average density of these items is approximately $246 kg/m^3$.
 
@@ -1226,17 +1225,17 @@ In the tests performed, we used a 64-bit, 16GB, 3.6GHz, eight-core processor wit
 
 We ran Algorithm \ref{alg:main} considering 5 values for $scenario$\/ from Table \ref{tab:scenarios}, 3 values for  $surplus$\/ from $\{1.2, 1.5, 2.0\}$, 4 values for $tmax$\/ from $\{240s, 1200s, 2400s, 3600s\}$, and 6 different $method$\/ for the node-by-node solution: $Gurobi$\/ (see \ref{solver}), ACO, NMO, TS, GRASP, and $Shims$\/ (Algorithm \ref{alg:shims}). 
 
-In order for $Gurobi$\/ to be able to solve the largest possible number of tests without memory overflow, we set its parameter {\it MIPgap}\/ to 1\%. This shortens its runtime, in addition to ensuring that its objective function $f$\/ is at most 1\% of the optimal solution. For more details, see {\tt https://support.gurobi.com}.
+For Gurobi to be able to solve the largest possible number of tests without memory overflow, we set its parameter {\it MIPgap}\/ to 1\%. This shortens its runtime, in addition to ensuring that its objective function $f$\/ is at most 1\% of the optimal solution. For more details, see {\tt https://support.gurobi.com}.
 
-Among the heuristics, we will present only the results obtained by $Shims$, which had the best performance. For each $scenario$, $surplus$\/ and $tmax$, 7 different instances were generated. We will present the average of the objective function $f$\/ and the runtime of $Gurobi$\/ and $Shims$\/ in these instances. To facilitate the comparison between both, we added a last column in the tables, where two values are indicated:
+Among the heuristics, we will present only the results obtained by $Shims$, which had the best performance. For each $scenario$, $surplus$\/ and $tmax$, 7 different instances were generated. We will present the average of the objective function $f$\/ and the runtime of $Gurobi$\/ and $Shims$\/ in these instances. To facilitate the comparison between both, we added a last column in the tables where two values are indicated:
 \begin{itemize}
 	\item {\bf Normalized}: value between 0 and 1, which corresponds to the ratio between the sum of $f$\/ values obtained by the method in all scenarios and the sum of the best values obtained by both methods in all scenarios. The higher the value of {\bf Normalized}, the closer the method approached the best solutions found.
 	\item {\bf Speed-up}: ratio of the sums of the runtimes of all scenarios and the sum of the method runtimes in all scenarios. The method with the highest {\bf Speed-up}\/ is the fastest.
 \end{itemize}
 
-We also indicate the two adopted strategies: dedicating all the processing time to the two shortest tours, or distributing it among all the $K!$\/ tours.
+We also indicate the two adopted strategies: dedicating all the processing time to the two shortest tours or distributing it among all the $K!$\/ tours.
 
-The results obtained with $tmax = 3600s$, which is the highest tested runtime limit, are in Tables \ref{tab:20}, \ref{tab:50} and \ref{tab:100}, with $surplus$\/ values $1.2$, $1.5$\/ and $2.0$, respectively. We indicate with an {\bf x} the cases where $Gurobi$\/ did not find a feasible solution within this runtime limit, or had to be aborted due to high RAM consumption.
+The results obtained with $tmax = 3600s$, which is the highest tested runtime limit, are in Tables \ref{tab:20}, \ref{tab:50} and \ref{tab:100}, with $surplus$\/ values $1.2$, $1.5$\/ and $2.0$, respectively. We indicate with an {\bf x} the cases where $Gurobi$\/ did not find a feasible solution within this runtime limit or had to be aborted due to high RAM consumption.
 
 
 \begin{table}[H]
@@ -1323,16 +1322,16 @@ The results obtained with $tmax = 3600s$, which is the highest tested runtime li
 \end{table}
 
 
-From these data, we can make some conclusions:
+From these data, we can draw some conclusions:
 \begin{itemize}
-\item The strategy of testing all $K!$\/ tours often gives a better quality solution.
-\item $Gurobi$\/ fails in some cases, when $scenario=5$\/ and the strategy is to check all $K!$\/ tours. This occurs because the runtime limit per node is smaller, and there tends to be more packed contents on the aircraft, reducing the space for allocating items and making the solution difficult.
+\item The strategy of testing all $K!$\/ tours often gives a better-quality solution.
+\item $Gurobi$\/ fails in some cases when $scenario=5$\/ and the strategy is to check all $K!$\/ tours. This occurs because the runtime limit per node is smaller and there tend to be more packed contents on the aircraft, reducing the space for allocating items and making the solution difficult.
 \item When $Gurobi$\/ finishes, it finds the best solution, but the one obtained by $Shims$\/ reaches $99\%$\/ of that value.
 \item $Shims$\/ always finds a solution, being 11 to 27 times faster.
-\item All runtimes are much lower than the limit because the solution on many nodes can be fast. Anyway, in all the tests performed, the maximum time spent by $Shims$\/ did not reach 4 minutes, that is, it is practically instantaneous. On the other hand, when $scenario=5$\/ and $surplus=1.5$, Gurobi spent almost 40 minutes.
+\item All runtimes are much lower than the limit because the solution on many nodes can be fast. Anyway, in all the tests performed, the maximum time spent by $Shims$\/ did not reach 4 minutes, i.e., it was practically instantaneous. On the other hand, when $scenario=5$\/ and $surplus=1.5$, Gurobi spent almost 40 minutes.
 \end{itemize}
 
-Table \ref{tab:100time} shows the results obtained with the strategy of testing the $K!$\/ tours in all scenarios with different runtime limits. We can observe more cases where $Gurobi$\/ fails, even in smaller scenarios. When $Gurobi$\/ finishes, $Shims$\/ finds quickly a solution of similar quality ($98\%$\/ or better). In all cases, $Shims$\/ finds a good solution in less than 4 minutes.
+Table \ref{tab:100time} shows the results obtained with the strategy of testing the $K!$\/ tours in all scenarios with different runtime limits. We can observe more cases where $Gurobi$\/ fails, even in smaller scenarios. When $Gurobi$\/ finishes, $Shims$\/ finds a solution of similar quality ($98\%$\/ or better). In all cases, $Shims$\/ finds a good solution in less than 4 minutes.
 
 
 \begin{table}[H]
@@ -1378,19 +1377,19 @@ Most of $Gurobi$\/ executions consumed over 12 GB of RAM memory. Considering tha
 \section{Conclusions}
 \label{sec7}
 
-In this work, we modeled and solved a real air transport problem, named {\it Air Cargo Load Planning with Routing, Pickup and Delivery Problem}\/ (ACLP+RPDP). For the first time in the literature, a {\it NP-hard}\/ problem that involves {\it simultaneously}\/ pallet assembly, load balancing and route planning is addressed, where the cost-effectiveness of transport is maximized. We adopted some simplifications that are not critical, but that allowed the unprecedented solution of this problem considering more than two nodes.
+In this work, we modeled and solved a real air transport problem named {\it Air Cargo Load Planning with Routing, Pickup, and Delivery Problem}\/ (ACLP+RPDP). For the first time in the literature, a {\it NP-hard}\/ problem that involves {\it simultaneously}\/ pallet assembly, load balancing, and route planning simultaneously is addressed, where the cost-effectiveness of transport is maximized. We adopted some simplifications that are not critical but that allowed for an unprecedented solution to this problem considering more than two nodes.
 
-We consider that, in practical cases, the number $K$\/ of nodes, excluding the base, is small ($K \leq 6$), each of them with hundreds of items to be shipped. Thus, considering a real aircraft, we have developed some node-by-node solutions, which are not necessarily optimal. This allows us to test two strategies: find a solution using the shortest tours, or enumerate all $K!$\/ tours and choose the best. The complete process can be executed quickly on a simple handheld computer, offering good results and reducing stress for the transport planners. As validation, we performed tests in several scenarios with real data from the {\it Brazilian Air Force}. At the moment, there is no commercial software available for this problem.
+We consider that, in practical cases, the number $K$\/ of nodes, excluding the base, is small ($K \leq 6$), each of them with hundreds of items to be shipped. Thus, considering a real aircraft, we have developed some node-by-node solutions that are not necessarily optimal. This allows us to test two strategies: find a solution using the shortest tours, or enumerate all $K!$\/ tours and choose the best. The complete process can be executed quickly on a simple handheld computer, offering good results and reducing stress for the transport planners. As validation, we performed tests in several scenarios with real data from the {\it Brazilian Air Force}. At the moment, there is no commercial software available for this problem.
 
-We have developed a solution process that, in less than 4 minutes, can establish a flight plan for a single aircraft with a good distribution of load on pallets to be put in the cargo bay, enforcing the loaded aircraft balance, maximizing the total score and minimizing fuel consumption. The output, which includes the tour plan and the pallet building and arrangement plan, is an essential part of airlift: it improves flight safety, makes ground operations more efficient, and makes sure that each item gets to its right destination. In this way, at each node of the tour, the time required is restricted exclusively to handling the airport equipment.
+We have developed a solution process that, in less than 4 minutes, can establish a flight plan for a single aircraft with a good distribution of load on pallets to be put in the cargo bay, enforcing the loaded aircraft balance, maximizing the total score, and minimizing fuel consumption. The output, which includes the tour plan and the pallet building and arrangement plan, is an essential part of airlift: it improves flight safety, makes ground operations more efficient, and makes sure that each item gets to its right destination. In this way, at each node of the tour, the time required is restricted exclusively to handling the airport equipment.
 
-Our main contributions were the mathematical modeling of ACLP+RPDP that involves four sub-problems {\it NP-hard}\/, a complete process to solve it on a simple handheld computer, and a new heuristic that offers fast node solutions with good quality. Finally, by focusing on the node-to-node solution, the method of this work is not exclusive to aircraft and airports: it can be adapted, for example, to ships and ports, or vehicles and warehouses, or wagons and railways, provided that their practical cases are similar to those considered here. In these situations, it would be necessary to make some changes in the modeling: for example, modify the load balancing constraints, and consider the available space in vehicles or wagons instead of pallets.
+Our main contributions were the mathematical model of ACLP+RPDP that involves four sub-problems {\it NP-hard}\/, a complete process to solve it on a simple handheld computer, and a new heuristic that offers fast node solutions with good quality. Finally, by focusing on the node-to-node solution, the method of this work is not exclusive to aircraft and airports; it can be adapted, for example, to ships and ports, vehicles and warehouses, or wagons and railways, provided that their practical cases are similar to those considered here. In these situations, it would be necessary to make some changes in the model: for example, modify the load balancing constraints and consider the available space in vehicles or wagons instead of pallets.
 
-As this is an ongoing research, we thought about some possible future improvements:
+As this is ongoing research, we thought about some possible future improvements:
 \begin{itemize}
-\item consider a aircraft fleet, rather than a single one;
+\item consider an aircraft fleet rather than a single one;
 \item model three-dimensional items;
-\item discard the highest cost tours, to reduce the runtime;
+\item discard the highest-cost tours to reduce the runtime;
 \item implement parallel algorithms in some steps of the solution.
 \end{itemize}
 
