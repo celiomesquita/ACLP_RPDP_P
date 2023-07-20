@@ -906,7 +906,9 @@ In this subsection, we present two implementations of $SolveNode$\/ algorithm: a
 
 Our strategy adopted in $SolveTour$\/ defines the values of some variables: the set of nodes to be visited is updated, the packed contents that remain on board are reallocated to minimize the CG deviation, and the pallet's destinations are determined according to the volume of items available for shipment. 
 
-In this way, the mathematical model for $SolveNode(MIP,\pi_k,G, tmax)$\/ becomes simpler, which finds an allocation of available items at the node $\pi_k$\/ using previously defined values of $L_{\pi_k}$, $T_i^{\pi_k}$, and $a^{\pi_k}_q$. Thus, we use a MIP solver with a runtime limit $tmax$\/ at the node $\pi_k$\/ to maximize the objective function \ref{eq:obj2 with the calculus equations \ref{eq:newf} to \ref{eq:costs2}, subject to the constraints \ref{eq:tau2} to \ref{eq:ifB}. The binary variables $X_{ij}$\/ and $Y_{iq}$\/ define the sets of edges $E_{N_{\pi_k}}$\/ and $E_{Q_{\pi_k}}$, respectively, included in graph $G$.
+In this way, the mathematical model for $SolveNode(MIP,\pi_k,G, tmax)$\/ becomes simpler, which finds an allocation of available items at the node $\pi_k$\/ using previously defined values of
+$L_{\pi_k}$, $T_i^{\pi_k}$, and $a^{\pi_k}_q$.
+Thus, we use a MIP solver with a runtime limit $tmax$\/ at the node $\pi_k$ to maximize the objective function \ref{eq:obj2} with the calculus equations \ref{eq:newf} to \ref{eq:costs2}, subject to the constraints \ref{eq:tau2} to \ref{eq:ifB}. The binary variables $X_{ij}$\/ and $Y_{iq}$\/ define the sets of edges $E_{N_{\pi_k}}$\/ and $E_{Q_{\pi_k}}$, respectively, included in graph $G$.
 	
 \begin{equation} \label{eq:obj2}
 	\max f= \tilde{s} / \tilde{c}
