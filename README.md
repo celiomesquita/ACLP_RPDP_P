@@ -14,7 +14,7 @@ Finally, by focusing on the node-to-node solution, the method of this work is no
 
 As this is ongoing research, we thought about some possible future improvements:
 
-### consider an aircraft fleet rather than a single one;
-### model three-dimensional items;
-### discard the highest-cost tours to reduce the runtime;
-### implement parallel algorithms in some steps of the solution.
+1. consider an aircraft fleet rather than a single one;
+2. model three-dimensional items;
+3. discard the highest-cost tours to reduce the runtime;
+4. implement parallel algorithms in some steps of the solution.
