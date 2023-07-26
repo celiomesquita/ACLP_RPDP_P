@@ -20,3 +20,19 @@ As this is ongoing research, we thought about some possible future improvements:
 4. implement parallel algorithms in some steps of the solution.
 
 *Preprint submitted to Computers & Industrial Engineering*
+
+## Execution instructions
+
+### Before testing, it is necessary to have a complete understanding of the paper's content.
+
+*Mesquita, A.C.P., Sanches, C.A.A., 2023. Air cargo load and route planning in pickup and delivery operations.
+omputers & Industrial Engineering , XX–XX.*
+
+1. Open the main.py file
+2. Choose a time limit for the solver to work on a node.
+3. Choose which scenarios you are going to run:
+    2 -> scenario 1, 3 -> scenario 2, and so on.
+4. Choose the volume surplus> 1.2, 1.5, or 2.0
+5. Choose a solution method
+6. Run the file.
+7. Check the results in folder **results**.
