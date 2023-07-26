@@ -26,7 +26,7 @@ As this is ongoing research, we thought about some possible future improvements:
 ### Before testing, it is necessary to have a complete understanding of the paper's content.
 
 *Mesquita, A.C.P., Sanches, C.A.A., 2023. Air cargo load and route planning in pickup and delivery operations.
-omputers & Industrial Engineering , XX–XX.*
+Computers & Industrial Engineering , XX–XX.*
 
 1. Open the main.py file
 2. Choose a time limit for the solver to work on a node.
