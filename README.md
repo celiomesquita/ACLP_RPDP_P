@@ -19,14 +19,14 @@ As this is ongoing research, we thought about some possible future improvements:
 3. discard the highest-cost tours to reduce the runtime;
 4. implement parallel algorithms in some steps of the solution.
 
-*Preprint submitted to Computers & Industrial Engineering*
+*Preprint submitted to Expert Systems with Applications*
 
 ## Execution instructions
 
 ### Before testing, it is necessary to have a complete understanding of the paper's content.
 
 *Mesquita, A.C.P., Sanches, C.A.A., 2023. Air cargo load and route planning in pickup and delivery operations.
-Computers & Industrial Engineering , XX–XX.*
+Expert Systems with Applications, XX–XX.*
 
 1. Open the main.py file
 2. Choose a time limit for the solver to work on a node.
