@@ -26,7 +26,7 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
     Solves one tour
     """
     writeConsFile = False
-    # writeConsFile = True
+    # writeConsFile = True  # write text files, 1 for packed each packed items
 
     print(f"----- Tour {pi},", end='')
     for node in tour.nodes:
@@ -56,7 +56,7 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
         nodeVol    = 0.0
         
         # initialize- the accumulated values
-        if writeConsFile:
+        if writeConsFile:  # write text files, 1 for packed each packed items
             wNodeAccum = 0.
             vNodeAccum = 0.
 
@@ -107,7 +107,7 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
                             consol[i][k].S  += c.S
 
                             # update the accumulated values
-                            if writeConsFile:
+                            if writeConsFile:  # write text files, 1 for packed each packed items
                                 wNodeAccum += c.W
                                 vNodeAccum += c.V
 
@@ -135,10 +135,10 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
         modStatus = 0
 
         if method == "mpShims":
-            mpShims.Solve(pallets, items, cfg, k, volThreshold, secBreak, "p", nodeTorque, solDict, itemsDict, tipo)
+            mpShims.Solve(pallets, items, cfg, k, volThreshold, secBreak, "p", nodeTorque, solDict, itemsDict, tipo) # p - parallel
 
         if method == "Shims":            
-            mpShims.Solve(pallets, items, cfg, k, volThreshold, secBreak, "s", nodeTorque, solDict, itemsDict, tipo)         
+            mpShims.Solve(pallets, items, cfg, k, volThreshold, secBreak, "s", nodeTorque, solDict, itemsDict, tipo)  # s - serial      
 
         if method == "mpACO":       
             mpACO.Solve(  pallets, items, cfg, k, volThreshold, secBreak, "p", nodeTorque, solDict, itemsDict) 
@@ -232,8 +232,9 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
                     consol[i][k].W += items[j].W
                     consol[i][k].V += items[j].V
                     consol[i][k].S += items[j].S
+
                     # totalize parameters of this solution
-                    if writeConsFile:
+                    if writeConsFile: # write text files, 1 for packed each packed items
                         wNodeAccum += float(items[j].W)
                         vNodeAccum += float(items[j].V)
 
@@ -268,7 +269,7 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplus,
         print(f"f {f:.2f}  vol {nodeVol:.2f} epsilon {epsilon:.2f}")
         
 
-        if writeConsFile:
+        if writeConsFile: # write text files, 1 for packed each packed items
 
             consNodeT = [None for _ in pallets]        
             for i, p in enumerate(pallets):
@@ -325,7 +326,7 @@ if __name__ == "__main__":
     # plot = sys.argv[1]
 
     plot      = False
-    testing   = False
+    testing   = True
     leastCost = False
 
     # timeLimit = 1200
@@ -340,20 +341,20 @@ if __name__ == "__main__":
 
     # free -s 1 -h -c 3  memory
 
-    scenarios = [2,3,4,5,6]
-    # scenarios = [6]
+    #scenarios = [2,3,4,5,6] # represent 1,2,3,4,5 in the article
+    scenarios = [6]
 
     if testing:
         scenarios = [2]
 
-    # surplus = "data20"  # 1.2
-    # surplus = "data50"  # 1.5
-    surplus = "data100" # 2.0
+    # surplus = "surplus20"  # 1.2
+    surplus = "surplus50"  # 1.5
+    # surplus = "surplus100" # 2.0
 
     # methods = ["GRB"]
     # methods = ["CBC"]
-    # methods = ["Shims"]
-    methods = ["mpShims"]
+    methods = ["Shims"]
+    # methods = ["mpShims"]
     # methods = ["mpACO"]
     # methods = ["ACO"]
     # methods = ["TS"]
@@ -388,7 +389,7 @@ if __name__ == "__main__":
         dists = common.loadDistances("params/distances.txt")
         costs = [[0.0 for _ in dists] for _ in dists]
 
-        volThreshold = 0.92 # 0.92 best for scenario 1
+        volThreshold = 0.92 # 0.92 overall best found by iRace
 
 
         for method in methods:

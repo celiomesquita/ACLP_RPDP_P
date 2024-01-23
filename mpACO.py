@@ -218,10 +218,10 @@ def Solve( pallets, items, cfg, k, limit, secBreak, mode, nodeTorque, solDict, i
         for a, _ in enumerate(ants): # ants
 
             # modified parameters from the greedy phase
-            antPallets[a]   = copyPallets(initPallets)              
+            antPallets[a]   = common.copyPallets(initPallets)              
             antTorque[a]    = initTorque
-            antSolDict[a]   = copySolDict(initSolDict)
-            antItemsDict[a] = copyItemsDict(initItemsDict)
+            antSolDict[a]   = common.copySolDict(initSolDict)
+            antItemsDict[a] = common.copyItemsDict(initItemsDict)
 
             # initialize accumulated scores
             accumsS[a]       = dict(score=initScore) # for serial   mode
@@ -278,8 +278,8 @@ def Solve( pallets, items, cfg, k, limit, secBreak, mode, nodeTorque, solDict, i
         if bestAntScore > bestIterScore:
             bestIterScore = bestAntScore
             print(f"Best iter score {bestIterScore} ({iter})")
-            iterSolDict[iter] = copySolDict( antSolDict[ba] ) 
-            iterItemsDict[iter] = copyItemsDict( antItemsDict[ba] )
+            iterSolDict[iter] = common.copySolDict( antSolDict[ba] ) 
+            iterItemsDict[iter] = common.copyItemsDict( antItemsDict[ba] )
             bi = iter
             stagnant = 0
         else:
@@ -293,8 +293,8 @@ def Solve( pallets, items, cfg, k, limit, secBreak, mode, nodeTorque, solDict, i
     print(f"{improvements} improvements ({numAnts*iter} total ants).")
 
     if iterSolDict[bi] != None:
-        solDict   = copySolDict( iterSolDict[bi] )
-        itemsDict = copyItemsDict( iterItemsDict[bi] )
+        solDict   = common.copySolDict( iterSolDict[bi] )
+        itemsDict = common.copyItemsDict( iterItemsDict[bi] )
                 
     # N = len(items)
     # Y = np.reshape(solDict["solMatrix"], (-1, N)) # N number of items (columns)
