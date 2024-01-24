@@ -1,0 +1,3 @@
+../surplus20/scenario_2/instance_2/items.txt
+../surplus20/scenario_2/instance_4/items.txt
+../surplus20/scenario_2/instance_6/items.txt

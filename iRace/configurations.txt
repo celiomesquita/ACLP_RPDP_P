@@ -1,2 +1,2 @@
-volThreshold tipo
-0.92         "FFD"
+eta1_vol eta2_vol
+0.92     1.20
