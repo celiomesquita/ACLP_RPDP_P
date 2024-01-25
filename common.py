@@ -43,9 +43,10 @@ class Config(object):
             
 class Node(object):
     def __init__(self, id, tau):
-        self.ID      = id
-        # self.next    = 0
-        self.tau     = tau # node sum of torques
+        self.ID   = id
+        self.tLim = 1 # 1s
+        self.Vol  = 0.0
+        self.tau  = tau # node sum of torques
         self.ICAO = CITIES[0]
         if id < len(CITIES):
             self.ICAO = CITIES[id]
@@ -227,7 +228,7 @@ def loadDistances(fname):
     fname = os.path.abspath(fname)
 
     output_string = ""
-    str_list = fname.split("iRace/")
+    str_list = fname.split("tunning/")
     for element in str_list:
         output_string += element
 
@@ -386,7 +387,7 @@ def loadNodeItems(scenario, instance, node, unatended, surplus): # unatended, fu
     fname = os.path.abspath(fname)
 
     output_string = ""
-    str_list = fname.split("iRace/")
+    str_list = fname.split("tunning/")
     for element in str_list:
         output_string += element
 
@@ -405,7 +406,8 @@ def loadNodeItems(scenario, instance, node, unatended, surplus): # unatended, fu
             v   = float(cols[2])
             frm =   int(cols[3])
             to  =   int(cols[4])
-            if frm == node.ID and to in unatended:          
+            if frm == node.ID and to in unatended:
+                node.Vol += v       
                 items.append( Item(id, -1, w, s, v, frm, to) ) # P:-1 item, -2: consolidated
                 id += 1
 
@@ -428,7 +430,7 @@ def loadNodeItems(scenario, instance, node, unatended, surplus): # unatended, fu
     # avgAttr /= len(items)
     # print(f"avgAttr = {avgAttr:.3f}")
 
-    return items
+    return items, node
 
 
 def setPalletsDestinations(items, pallets, nodes, k, L_k):

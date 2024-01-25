@@ -35,14 +35,14 @@ CONFIG_PARAMS=$*
 # BINDIR=$(dirname "$(readlink -f "$(type -P $0 || echo $0)")")
 
 # EDIT THIS: Path to your executable
-EXE="python3 ../mpShims.py"
+EXE="python ../main.py"
 
 # $IRACE_HOME/bin/irace
 
 # EDIT THIS: Specify how parameters are given to your executable  
-EXE_PARAMS="${SEED} ${INSTANCE} ${CONFIG_PARAMS}"
+EXE_PARAMS="${CONFIG_PARAMS} ${INSTANCE}"
 
-#echo "EXE_PARAMS: $EXE $EXE_PARAMS"
+echo "EXE_PARAMS: $EXE $EXE_PARAMS"
 
 if [ ! -x "$(command -v ${EXE})" ]; then
     error "${EXE}: not found or not executable (pwd: $(pwd))"
@@ -80,7 +80,7 @@ fi
 # objective value is the first number in the first column of the last line of
 # the output.
 COST=$(tail -n 1 ${STDOUT} | grep -e '^[[:space:]]*[+-]\?[0-9]' | cut -f1)
-echo "$COST"
+echo "-S/C = $COST"
 
 # Comment the following line if you wish to preserve temporary files
 rm -f "${STDOUT}" "${STDERR}"

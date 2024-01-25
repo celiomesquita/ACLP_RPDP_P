@@ -7,7 +7,6 @@
 ## value on the command line).
 
 ## Directory where the programs will be run.
-#execDir = "/home/celio/Projects/ACLP_RPDP_P/tsp_python/"
 execDir = "./"
 
 ## File that contains the description of the parameters of the target algorithm.
@@ -27,24 +26,30 @@ logFile = "./irace.Rdata"
 ## Directory where training instances are located; either absolute path or
 ## relative to current directory. If no trainInstancesFiles is provided, all
 ## the files in trainInstancesDir will be listed as instances.
-trainInstancesDir = "../"
+#trainInstancesDir = "./surplus20"
+#trainInstancesDir = "./surplus50"
+#trainInstancesDir = "./surplus100"
+trainInstancesDir = "./Instances"
 
 ## File that contains a list of training instances and optionally additional
 ## parameters for them. If trainInstancesDir is provided, irace will search
 ## for the files in this folder.
-trainInstancesFile = "./train_instances.txt"
+#trainInstancesFile = "./surplus20/train_instances.txt"
+trainInstancesFile = "./Instances/surplus20/train_instances.txt"
 
 
 ## Randomly sample the training instances or use them in the order given.
-sampleInstances = 1
+#sampleInstances = 1
 
 ## Directory where testing instances are located, either absolute or relative to current directory.
-testInstancesDir = "../"
-
-## http://comopt.ifi.uni-heidelberg.de/software/TSPLIB95/atsp/
+#testInstancesDir = "./surplus20"
+#testInstancesDir = "./surplus50"
+#testInstancesDir = "./surplus100"
+testInstancesDir = "./Instances"
 
 ## File containing a list of test instances and optionally additional parameters for them.
-testInstancesFile = "./test_instances.txt"
+#testInstancesFile = "./surplus20/test_instances.txt"
+testInstancesFile = "./Instances/surplus20/test_instances.txt"
 
 ## Number of elite configurations returned by irace that will be tested if
 ## test instances are provided.
@@ -103,7 +108,7 @@ targetRunner = "./target-runner"
 
 ## Maximum number of runs (invocations of targetRunner) that will be
 ## performed. It determines the maximum budget of experiments for the tuning.
-maxExperiments = 20000
+maxExperiments = 2000
 
 ## Maximum total execution time in seconds for the executions of targetRunner.
 ## targetRunner must return two values: cost and time.

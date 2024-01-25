@@ -14,14 +14,14 @@ import tabu
 import grasp
 import noise2
 
-from plots import TTT
+# from plots import TTT
 
 # from py3Djanet import Packer, Item, Bin
 
 # from py3Druiz import Packer, Item, Bin
 
 
-def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplusFolder, tipo, numOptDict, rampDistCG, afterDict, beforeDict, eta1_vol, eta2_vol):
+def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, folder, tipo, numOptDict, rampDistCG, afterDict, beforeDict, eta1_vol, eta2_vol):
     """
     Solves one tour
     """
@@ -42,7 +42,25 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplusF
 
     k0 = len(tour.nodes)-1 # the base index on return
 
+    # a first tour iteration to calculate the total volume to be tested for inclusion the tour nodes.
+    tourVol = 0.0
+    tourTime = 0
     for k, node in enumerate(tour.nodes):  # solve each node sequentialy
+
+        # L_k destination nodes set
+        unattended = [n.ID for n in tour.nodes[k+1:]]
+
+        # node max volume is updated
+        _, node = common.loadNodeItems(scenario, inst, node, unattended, folder)
+
+        tourVol += node.Vol
+        tourTime += secBreak
+
+    # a second tour iteration solving node-by-node
+    for k, node in enumerate(tour.nodes):  # solve each node sequentialy
+
+        # the solving node time is proportional to its relative sum of candidate items volumes
+        node.tLim = (node.Vol/tourVol) * tourTime
 
         next = tour.nodes[k0]
         if k < k0:
@@ -64,13 +82,14 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplusF
         unattended = [n.ID for n in tour.nodes[k+1:]]
 
         # load items parameters from this node and problem instance, that go to unnatended
-        items = common.loadNodeItems(scenario, inst, node, unattended, surplusFolder)
+        items, _ = common.loadNodeItems(scenario, inst, node, unattended, folder)
+
 
         if k > 0 and k < k0: # not in the base
 
             # load consolidated generated in the previous node
             # prevNode = tour.nodes[k-1]
-            # cons = common.loadNodeCons(surplusFolder, scenario, inst, pi, prevNode, numItems )
+            # cons = common.loadNodeCons(folder, scenario, inst, pi, prevNode, numItems )
 
             cons = []
             for i, _ in enumerate(pallets): # previous node consolidated
@@ -135,31 +154,31 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplusF
         modStatus = 0
 
         if method == "mpShims":
-            mpShims.Solve(pallets, items, cfg, k, eta1_vol, eta2_vol, secBreak, "p", nodeTorque, solDict, itemsDict, tipo) # p - parallel
+            mpShims.Solve(pallets, items, cfg, k, eta1_vol, eta2_vol, node.tLim, "p", nodeTorque, solDict, itemsDict, tipo) # p - parallel
 
         if method == "Shims":            
-            mpShims.Solve(pallets, items, cfg, k, eta1_vol, eta2_vol, secBreak, "s", nodeTorque, solDict, itemsDict, tipo)  # s - serial      
+            mpShims.Solve(pallets, items, cfg, k, eta1_vol, eta2_vol, node.tLim, "s", nodeTorque, solDict, itemsDict, tipo)  # s - serial      
 
         if method == "mpACO":       
-            mpACO.Solve(  pallets, items, cfg, k, eta1_vol, secBreak, "p", nodeTorque, solDict, itemsDict) 
+            mpACO.Solve(  pallets, items, cfg, k, eta1_vol, node.tLim, "p", nodeTorque, solDict, itemsDict) 
 
         if method == "ACO":       
-            mpACO.Solve(  pallets, items, cfg, k, eta1_vol, secBreak, "s", nodeTorque, solDict, itemsDict)
+            mpACO.Solve(  pallets, items, cfg, k, eta1_vol, node.tLim, "s", nodeTorque, solDict, itemsDict)
 
         if method == "TS":       
-            tabu.Solve(  pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict)             
+            tabu.Solve(  pallets, items, cfg, k, node.tLim, nodeTorque, solDict, itemsDict)             
 
         if method == "GRASP":       
-            grasp.Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict) 
+            grasp.Solve( pallets, items, cfg, k, node.tLim, nodeTorque, solDict, itemsDict) 
         
         if method == "NMO":       
-            noise2.Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict) 
+            noise2.Solve( pallets, items, cfg, k, node.tLim, nodeTorque, solDict, itemsDict) 
 
         if method == "GRB":
-            modStatus, ObjBound = mipGRB.Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict) 
+            modStatus, ObjBound = mipGRB.Solve( pallets, items, cfg, k, node.tLim, nodeTorque, solDict, itemsDict) 
 
         if method == "CBC": # new formulation
-            modStatus, ObjBound = mipCBC.Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict) 
+            modStatus, ObjBound = mipCBC.Solve( pallets, items, cfg, k, node.tLim, nodeTorque, solDict, itemsDict) 
 
         if modStatus == 2: # 2: optimal
             numOptDict["numOpt"] += 1
@@ -279,14 +298,14 @@ def solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, surplusF
             wei = wNodeAccum/cfg.weiCap
 
             #write consolidated contents from this node in file
-            common.writeNodeCons(scenario, instance, consNodeT, pi, node, surplusFolder, epsilon, wei, vol)
+            common.writeNodeCons(scenario, instance, consNodeT, pi, node, folder, epsilon, wei, vol)
 
 
 # end of solveTour 
 
-def writeAvgResults(method, scenario, line, surplusFolder):
+def writeAvgResults(method, scenario, line, folder):
 
-    dirname = f"./results/{surplusFolder}/"
+    dirname = f"./results/{folder}/"
     try:
         os.makedirs(dirname)
     except FileExistsError:
@@ -301,9 +320,9 @@ def writeAvgResults(method, scenario, line, surplusFolder):
     finally:
         writer.close()  
 
-def writeResults(method, scenario, surplusFolder, fvalue, elapsed):
+def writeResults(method, scenario, folder, fvalue, elapsed):
 
-    dirname = f"./results/{surplusFolder}/"
+    dirname = f"./results/{folder}/"
     try:
         os.makedirs(dirname)
     except FileExistsError:
@@ -323,9 +342,17 @@ def writeResults(method, scenario, surplusFolder, fvalue, elapsed):
 if __name__ == "__main__":
 
     import sys
-    eta1_vol  = float(sys.argv[1])
-    eta2_vol  = float(sys.argv[2])
-    surplusFolder = sys.argv[3]
+    eta1_vol = float(sys.argv[1])
+    eta2_vol = float(sys.argv[2])
+    path_items = sys.argv[3] # path to items.txt
+
+    folder   = path_items.split("/")[1]
+    scenario = path_items.split("/")[2][len(path_items.split("/")[2])-1]
+    instance = path_items.split("/")[3][len(path_items.split("/")[3])-1]
+
+    print(folder, scenario, instance)
+
+    # python main.py 0.9 1.2 ../surplus20/scenario_2/instance_3/items.txt
 
     plot      = False
     testing   = False
@@ -344,18 +371,18 @@ if __name__ == "__main__":
 
     # free -s 1 -h -c 3  memory
 
-    scenarios = [2,3,4,5,6] # represent 1,2,3,4,5 in the article
+    # scenarios = [2,3,4,5,6] # represent 1,2,3,4,5 in the article
     
-    if iRace_testing or testing:
-        scenarios = [2]
+    # if iRace_testing or testing:
+    #     scenarios = [2]
 
-    # surplusFolder = "surplus20"  # 1.2
-    # surplusFolder = "surplus50"  # 1.5
-    # surplusFolder = "surplus100" # 2.0
+    # folder = "surplus20"  # 1.2
+    # folder = "surplus50"  # 1.5
+    # folder = "surplus100" # 2.0
 
     # methods = ["GRB"]
     # methods = ["CBC"]
-    methods = ["Shims"]
+    method = "Shims"
     # methods = ["mpShims"]
     # methods = ["mpACO"]
     # methods = ["ACO"]
@@ -367,169 +394,158 @@ if __name__ == "__main__":
     # tipo = "KP"
     tipo = "FFD"
 
-    if plot:
-
-        name_list = []
-        for method in methods:
-            for s in scenarios:
-                name_list.append(f"{method}_{s}")
-
-        path_list = [None for _ in name_list]
-
-        for i, name in enumerate(name_list):
-            path_list[i] = f"./results/{surplusFolder}/{name_list[i]}.res" 
-
-        ttt = TTT(name_list, path_list)
-        ttt.Plot()
-
-    else:    
-
-        dists = common.loadDistances("params/distances.txt")
-        costs = [[0.0 for _ in dists] for _ in dists]
-
-        for method in methods:
-
-            for scenario in scenarios:
-
-                instances = [1,2,3,4,5,6,7]
-                
-                if testing:
-                    instances = [1]
-
-                cfg = common.Config(scenario)
-
-                secBreak = timeLimit/common.factorial(cfg.numNodes)
-                
-                for i, cols in enumerate(dists):
-                    for j, dist in enumerate(cols):
-                        costs[i][j] = cfg.kmCost*dist
-
-                pallets, rampDistCG = common.loadPallets(cfg)
-
-                # pallets capacity
-                cfg.weiCap = 0
-                cfg.volCap = 0
-                for p in pallets:
-                    cfg.weiCap += p.W
-                    cfg.volCap += p.V
-
-                # smaller aircrafts may have a payload lower than pallets capacity
-                if cfg.weiCap > cfg.payload:
-                    cfg.weiCap = cfg.payload
-
-                perc = 1.0
-                if cfg.numNodes > 3:
-                    perc = 0.25
-
-                instanceTime = 0.
-                instanceTime2 = 0. # with 3D packing
-                instanceSC   = 0. # minimum cost score/cost relation
-                leastSC      = 0.
-                worstTime    = 0
-
-                numOptDict = {"numOpt":0}
-                afterDict  = {"value":0.}
-                beforeDict = {"value":0.}
-
-                for instance in instances:
-
-                    bestSC = 0. # maximum score/cost relation
-                    # leastSC = 0. # minimum cost score/cost relation
-                    bestAV = 0.
-                    bestAT = 0.
-                    tours = common.getTours(cfg.numNodes-1, costs, perc)
-
-                    # selects the best tour
-                    searchTime = 0
-                    searchTime2 = 0 # with 3D packing
-                    bestTourID = -1
-                    for pi, tour in enumerate(tours):
-
-                        if leastCost:
-                            secBreak = timeLimit/cfg.numNodes
-
-                            if pi >= 2:
-                                break
-
-                        tour.elapsed = 0
-                        tour.elapsed2 = 0 # with 3D packing
-                        tour.score   = 0.0
-                        tour.AvgVol  = 0.0
-
-                        solveTour(scenario, instance, pi, tour, method, pallets, cfg, secBreak, surplusFolder, tipo, numOptDict, rampDistCG, afterDict, beforeDict, eta1_vol, eta2_vol)
-
-                        if not iRace_testing:
-                            print(f"\tTour elapsed: {tour.elapsed:.1f}s")
-
-                        # the tour cost is increased by the average torque deviation, limited to 5%
-                        tour.AvgTorque /= cfg.numNodes
-                        tour.cost *= ( 1.0 + abs(tour.AvgTorque)/20.0 )
-
-                        searchTime += tour.elapsed
-                        searchTime2 += tour.elapsed2
-
-                        tourSC = tour.score / tour.cost
-
-                        tour.AvgVol /= cfg.numNodes
-
-                        # best tour parameters
-                        if tourSC > bestSC:
-                            bestSC = tourSC
-                            bestAV = tour.AvgVol
-                            bestAT = tour.AvgTorque
-
-                        if tour.elapsed > worstTime:
-                            worstTime = tour.elapsed
-
-                        if pi == 0:
-                            leastSC += tourSC
-                    
-                    instanceTime  += searchTime
-                    instanceTime2 += searchTime2
-                    instanceSC    += bestSC
-
-                    # for plotting
-                    # writeResults(method, scenario, surplusFolder, f"{instanceSC:.2f}", f"{tour.elapsed:.2f}")
 
 
-                numInst = float(len(instances))
+    dists = common.loadDistances("params/distances.txt")
+    costs = [[0.0 for _ in dists] for _ in dists]
 
-                numOptDict["numOpt"] /= numInst
-                numOptDict["numOpt"] /= float(cfg.numNodes)
-                numOptDict["numOpt"] /= float(len(tours))
+    # for method in methods:
 
-                afterDict["value"] /= numInst
-                afterDict["value"] /= float(cfg.numNodes)
-                afterDict["value"] /= float(len(tours))
+        # for scenario in scenarios:
 
-                beforeDict["value"] /= numInst
-                beforeDict["value"] /= float(cfg.numNodes)
-                beforeDict["value"] /= float(len(tours))
+        #     instances = [1,2,3,4,5,6,7]
+            
+        #     if testing:
+        #         instances = [1]
 
-                percent = 0.0
-                if beforeDict["value"] > 0:
-                    percent = 100.0*( afterDict["value"] - beforeDict["value"]  ) / beforeDict["value"]   
+    cfg = common.Config(scenario)
 
-                avgTime  = math.ceil(instanceTime/numInst)
-                avgTime2 = math.ceil(instanceTime2/numInst)
+    # time limit per node
+    secBreak = timeLimit/common.factorial(cfg.numNodes)
+    
+    for i, cols in enumerate(dists):
+        for j, dist in enumerate(cols):
+            costs[i][j] = cfg.kmCost*dist
+
+    pallets, rampDistCG = common.loadPallets(cfg)
+
+    # pallets capacity
+    cfg.weiCap = 0
+    cfg.volCap = 0
+    for p in pallets:
+        cfg.weiCap += p.W
+        cfg.volCap += p.V
+
+    # smaller aircrafts may have a payload lower than pallets capacity
+    if cfg.weiCap > cfg.payload:
+        cfg.weiCap = cfg.payload
+
+    perc = 1.0
+    if cfg.numNodes > 3:
+        perc = 0.25
+
+    instanceTime = 0.
+    instanceTime2 = 0. # with 3D packing
+    instanceSC   = 0. # score/cost relation
+    leastSC      = 0.
+    worstTime    = 0
+
+    numOptDict = {"numOpt":0}
+    afterDict  = {"value":0.}
+    beforeDict = {"value":0.}
+
+    # for instance in instances:  
+
+    bestSC = 0. # maximum score/cost relation
+    # leastSC = 0. # minimum cost score/cost relation
+    bestAV = 0.
+    bestAT = 0.
+    tours = common.getTours(cfg.numNodes-1, costs, perc)
+
+    # selects the best tour
+    searchTime = 0
+    searchTime2 = 0 # with 3D packing
+    bestTourID = -1
+    for pi, tour in enumerate(tours):
+
+        if leastCost:
+            secBreak = timeLimit/cfg.numNodes
+
+            if pi >= 2:
+                break
+
+        tour.elapsed = 0
+        tour.elapsed2 = 0 # with 3D packing
+        tour.score   = 0.0
+        tour.AvgVol  = 0.0
+
+        solveTour(scenario, instance, pi, tour, method, pallets, cfg, secBreak, folder, tipo, numOptDict, rampDistCG, afterDict, beforeDict, eta1_vol, eta2_vol)
+
+        if not iRace_testing:
+            print(f"\tTour elapsed: {tour.elapsed:.1f}s")
+
+        # the tour cost is increased by the average torque deviation, limited to 5%
+        tour.AvgTorque /= cfg.numNodes
+        tour.cost *= ( 1.0 + abs(tour.AvgTorque)/20.0 )
+
+        searchTime += tour.elapsed
+        searchTime2 += tour.elapsed2
+
+        tourSC = tour.score / tour.cost
+
+        tour.AvgVol /= cfg.numNodes
+
+        # best tour parameters
+        if tourSC > bestSC:
+            bestSC = tourSC
+            bestAV = tour.AvgVol
+            bestAT = tour.AvgTorque
+
+        if tour.elapsed > worstTime:
+            worstTime = tour.elapsed
+
+        if pi == 0:
+            leastSC += tourSC
+    
+    instanceTime  += searchTime
+    instanceTime2 += searchTime2
+    instanceSC    += bestSC
+
+    # for plotting
+    # writeResults(method, scenario, folder, f"{instanceSC:.2f}", f"{tour.elapsed:.2f}")
 
 
-                if not iRace_testing:
+    # numInst = float(len(instances))
+    numInst = 1
 
-                    str = f"{leastSC/numInst:.2f}\t {instanceSC/numInst:.2f}\t {avgTime:.0f}\t {avgTime2:.0f}\t {worstTime:.1f}\t {bestAV:.2f}\t {bestAT:.2f}\t {numOptDict['numOpt']:.1f}\t {beforeDict['value']:.1f} & {afterDict['value']:.1f} & {percent:.1f}\n"
-                    # instances average
-                    writeAvgResults(method, scenario, str, surplusFolder)
+    numOptDict["numOpt"] /= numInst
+    numOptDict["numOpt"] /= float(cfg.numNodes)
+    numOptDict["numOpt"] /= float(len(tours))
 
-                    print(f"\n{str}")
-                    print(f"{surplusFolder}")
-                    print(f"{len(tours)} tours")
-                    print(f"secBreak: {secBreak} \t leastCost = {leastCost}")
-                    print(f"eta1_vol: {eta1_vol:.2f}")
-                    print(f"Before:\t{beforeDict['value']:.1f}") 
-                    print(f"After:\t{afterDict['value']:.1f}")
-                    print(f"% of optima: {numOptDict['numOpt']:.2f}")
-                    print(f"{method}")
+    afterDict["value"] /= numInst
+    afterDict["value"] /= float(cfg.numNodes)
+    afterDict["value"] /= float(len(tours))
 
-                else:
-                    print(-1*instanceSC/numInst) # -1: iRace minimizes a cost value
+    beforeDict["value"] /= numInst
+    beforeDict["value"] /= float(cfg.numNodes)
+    beforeDict["value"] /= float(len(tours))
 
+    percent = 0.0
+    if beforeDict["value"] > 0:
+        percent = 100.0*( afterDict["value"] - beforeDict["value"]  ) / beforeDict["value"]   
+
+    avgTime  = math.ceil(instanceTime/numInst)
+    avgTime2 = math.ceil(instanceTime2/numInst)
+
+
+    if not iRace_testing:
+
+        str = f"{leastSC/numInst:.2f}\t {instanceSC/numInst:.2f}\t {avgTime:.0f}\t {avgTime2:.0f}\t {worstTime:.1f}\t {bestAV:.2f}\t {bestAT:.2f}\t {numOptDict['numOpt']:.1f}\t {beforeDict['value']:.1f} & {afterDict['value']:.1f} & {percent:.1f}\n"
+        # instances average
+        writeAvgResults(method, scenario, str, folder)
+
+        print(f"\n{str}")
+        print(f"{folder}")
+        print(f"{len(tours)} tours")
+        print(f"secBreak: {secBreak} \t leastCost = {leastCost}")
+        print(f"eta1_vol: {eta1_vol:.2f}")
+        print(f"Before:\t{beforeDict['value']:.1f}") 
+        print(f"After:\t{afterDict['value']:.1f}")
+        print(f"% of optima: {numOptDict['numOpt']:.2f}")
+        print(f"{method}")
+
+    else:
+        print(-1*instanceSC/numInst) # -1: iRace minimizes a cost value
+
+    
+# irace -s scenario.txt --target-runner ./target-runner

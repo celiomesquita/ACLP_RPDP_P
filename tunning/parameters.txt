@@ -33,6 +33,7 @@
 #mutation        "--mutation="        o  ("none", "very low", "low", "medium", "high", "very high", "all")
 #unused          "-u "                c  (1, 2, 10, 20)
 
-# 1           2 3      4 
-volThreshold "" r (0.85,1.00)
-tipo         "" o ("FFD","KP")
+# 1      2  3     4 
+eta1_vol "" r (0.7, 1.0)
+eta2_vol "" r (1.0, 2.0)
+folder   "" c ("surplus20","surplus50","surplus100")
