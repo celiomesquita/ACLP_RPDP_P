@@ -26,30 +26,21 @@ logFile = "./irace.Rdata"
 ## Directory where training instances are located; either absolute path or
 ## relative to current directory. If no trainInstancesFiles is provided, all
 ## the files in trainInstancesDir will be listed as instances.
-#trainInstancesDir = "./surplus20"
-#trainInstancesDir = "./surplus50"
-#trainInstancesDir = "./surplus100"
 trainInstancesDir = "./Instances"
 
 ## File that contains a list of training instances and optionally additional
 ## parameters for them. If trainInstancesDir is provided, irace will search
 ## for the files in this folder.
-#trainInstancesFile = "./surplus20/train_instances.txt"
-trainInstancesFile = "./Instances/surplus20/train_instances.txt"
-
+trainInstancesFile = "./Instances/train_instances.txt"
 
 ## Randomly sample the training instances or use them in the order given.
 #sampleInstances = 1
 
 ## Directory where testing instances are located, either absolute or relative to current directory.
-#testInstancesDir = "./surplus20"
-#testInstancesDir = "./surplus50"
-#testInstancesDir = "./surplus100"
 testInstancesDir = "./Instances"
 
 ## File containing a list of test instances and optionally additional parameters for them.
-#testInstancesFile = "./surplus20/test_instances.txt"
-testInstancesFile = "./Instances/surplus20/test_instances.txt"
+testInstancesFile = "./Instances/test_instances.txt"
 
 ## Number of elite configurations returned by irace that will be tested if
 ## test instances are provided.

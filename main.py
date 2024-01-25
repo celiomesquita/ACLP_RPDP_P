@@ -346,14 +346,15 @@ if __name__ == "__main__":
     eta2_vol = float(sys.argv[2])
     path_items = sys.argv[3] # path to items.txt
 
-    folder   = path_items.split("/")[1]
-    scenario = path_items.split("/")[2][len(path_items.split("/")[2])-1]
-    instance = path_items.split("/")[3][len(path_items.split("/")[3])-1]
+    folder   = path_items.split("/")[8]
+    scenario = int(path_items.split("/")[9][len(path_items.split("/")[9])-1])
+    instance = int(path_items.split("/")[10][len(path_items.split("/")[10])-1])
 
-    print(folder, scenario, instance)
+    # print(folder, scenario, instance)
 
-    # python main.py 0.9 1.2 ../surplus20/scenario_2/instance_3/items.txt
+    # python3 main.py 0.92 1.2 /home/celio/Projects/ACLP_RPDP_P/tunning/Instances/../surplus50/scenario_2/instance_7/items.txt
 
+    #"""
     plot      = False
     testing   = False
     leastCost = False
@@ -547,5 +548,5 @@ if __name__ == "__main__":
     else:
         print(-1*instanceSC/numInst) # -1: iRace minimizes a cost value
 
-    
+    #"""
 # irace -s scenario.txt --target-runner ./target-runner

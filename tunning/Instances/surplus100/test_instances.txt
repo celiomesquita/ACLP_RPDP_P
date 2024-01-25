@@ -1,3 +1,0 @@
-../surplus100/scenario_1/instance_2/items.txt
-../surplus100/scenario_1/instance_4/items.txt
-../surplus100/scenario_1/instance_6/items.txt
