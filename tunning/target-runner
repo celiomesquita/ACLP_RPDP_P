@@ -44,6 +44,7 @@ EXE_PARAMS="${CONFIG_PARAMS} ${INSTANCE}"
 
 #echo "-----"
 #echo "EXE_PARAMS: $EXE $EXE_PARAMS"
+#echo "-----"
 
 if [ ! -x "$(command -v ${EXE})" ]; then
     error "${EXE}: not found or not executable (pwd: $(pwd))"
