@@ -193,6 +193,21 @@ As can be seen, none of these papers address air cargo palletization and load ba
 
 In this section, we describe the context of the problem addressed in this work as well as the assumptions considered.
 
+{\color{blue}
+
+As for the size of the problem dealt with in this work, addressing the scale of the Travelling Salesperson Problem (TSP) in practical, real-world air transport contexts indeed reveals a fascinating and complex challenge. In the realm of academic research, TSP problems often explore theoretical models that can scale to hundreds or even larger numbers of cities.
+
+In practical terms, especially within the air transport sector, the size and complexity of a TSP can vary significantly depending on several factors:
+
+\textbf{Fleet and Route Planning}: For airline operations, the problem isn't just about finding the shortest path through a set of points but also involves scheduling, aircraft assignment, crew scheduling, and maintenance planning. This multi-dimensional complexity transforms a standard TSP into a more intricate problem in our study, the Pickup and Delivery Problem (PDP).
+
+\textbf{Operational Constraints}: Factors like weather, air traffic control restrictions, and the availability of take-off and landing slots make real-world TSP scenarios in air transport even more challenging. These constraints add layers of complexity that significantly depart from the theoretical TSP model.
+
+\textbf{Dynamic Nature}: Unlike the static nature of classical TSP, real-world problems in air transport are highly dynamic. Routes need to be optimized continuously as conditions change, requiring algorithms that can adapt in real-time or near-real-time.
+
+In practical air transport scenarios, the size of a TSP can therefore be less about the sheer number of nodes and more about the complexity and dynamic nature of the problem, which in our case (a single aircraft in a single day) is rarely expected to be more than seven nodes, based on the experience of the first author when working on an operations control centre.
+}
+
 \subsection{Operational premises}
 
 As we are dealing with an extremely complex and diverse problem, we decided to establish some simplifying characteristics:
@@ -1101,7 +1116,6 @@ For each generated $t^k_j$ item, its destination is randomly selected (line \ref
 	\end{table}
 	
 	For these tests, we considered the odd instances (1, 3, 5, 7) as the \textbf{training} set and the even instances (2, 4, 6) as the \textbf{testing} set for the \textit{iRace} runs. We supplied \textit{iRace} for $threshold_1$ determination, the range [0.8, 1.0], and for $threshold_2$, the range [1.0, 2.0]. The number of iterations in each experiment was limited to 3000 executions for \textit{iRace} to have plenty of data for its statistical tests. More detail about these configurations may be found on the \textit{iRace} user guide in {\tt cran.r-project.org/web/packages/irace/irace.pdf}.
-	
 }
 
 
@@ -1112,6 +1126,32 @@ In the tests performed, we used a 64-bit, 16 GB, 3.6 GHz, eight-core processor w
 We ran Algorithm \ref{alg:main} considering the five scenarios from Table \ref{tab:scenarios}, three values for  $surplus$\/ from $\{1.2, 1.5, 2.0\}$, four values for $tmax$\/ from $\{240s, 1200s, 2400s, 3600s\}$, and six different $method$\/ for the node-by-node solution: $Gurobi$\/ (see \ref{solver}), ACO, NMO, TS, GRASP, and $Shims$\/ (Algorithm \ref{alg:shims}). 
 
 For $Gurobi$\/ to be able to solve the largest possible number of tests without memory overflow, we set its parameter {\it MIPgap}\/ to 1\%. This shortens its runtime, in addition to ensuring that its objective function $f$\/ is at most 1\% of the optimal solution. For more details, see {\tt www.support.gurobi.com}.
+
+	
+\begin{table}[H]
+{\color{blue}
+	\centering
+	\caption{Overall results}  \label{tab:mr}
+	\footnotesize
+	\begin{tabular}{cccc}	
+	\toprule
+	{\bf Method} & {\bf Best scenarios} & {\bf Worst scenarios} & {\bf Worst run times (min)}  \\
+	\midrule
+	NMO           & 4             & 5    & {\color{red}60}  \\
+	ACO           & 2, 3          & 4, 5 & {\color{red}25}, {\color{red}61}  \\
+	GRASP         & 1             & 4, 5 & {\color{red}28}, {\color{red}55}  \\
+	TS            & -             & 5    & {\color{red}44}  \\
+	\midrule
+	{\it Gurobi}  & 1, 2, 3, 4    & 5    & {\color{red}did not solve}  \\
+	{\it Shims}   & 1, 2, 3, 4, 5 & -    & {\bf 3.26} \\
+	\bottomrule
+	\end{tabular}
+\normalsize
+}
+\end{table}
+
+
+\subsubsection{Shims results}
 
 Among the heuristics, we will present only the results obtained by $Shims$, which had the best performance. For each $scenario$, $surplus$\/ and $tmax$, seven different instances were generated. We will present the average of the objective function $f$\/ and the runtime of $Gurobi$\/ and $Shims$\/ in these instances. To facilitate the comparison between both, we added a last column in the tables where two values are indicated:
 
@@ -1223,7 +1263,7 @@ From these data, we can draw some conclusions:
 	\item All runtimes are much lower than the limit because the solution on many nodes can be fast. Anyway, in all the tests performed, the maximum time spent by $Shims$\/ did not reach 4 minutes. On the other hand, when $scenario=5$\/ and $surplus=1.5$, $Gurobi$\/ spent almost 40 minutes.
 \end{itemize}
 
-Table \ref{tab:100time} shows the results obtained with the strategy of testing the $K!$\/ tours in all scenarios with different $tmax$. We can observe more cases where $Gurobi$\/ fails, even in smaller scenarios. When $Gurobi$\/ finishes, $Shims$\/ finds a solution of similar quality ($98\%$\/ or better). In all cases, $Shims$\/ finds a good solution in less than 4 minutes.
+Table \ref{tab:100time} shows the results obtained with the strategy of testing the $K!$\/ tours in all scenarios with different $tmax$. We can observe more cases where $Gurobi$\/ fails, even in smaller scenarios. When $Gurobi$\/ finishes, $Shims$\/ finds a solution of similar quality ($99\%$\/ or better). In all cases, $Shims$\/ finds a good solution in less than 4 minutes.
 
 
 \begin{table}[H]
@@ -1238,24 +1278,24 @@ Table \ref{tab:100time} shows the results obtained with the strategy of testing 
 		$method$& {$tmax$} & $scenario$  &{\bf 1}&{\bf 2}&{\bf 3}&{\bf 4}&{\bf 5}&{\bf 1}&{\bf 2}&{\bf 3}&{\bf 4}&{\bf 5}&{\bf 1}&{\bf 2}&{\bf 3}&{\bf 4}&{\bf 5} \\
 		\toprule
 		
-		\multirow{10}{*}{$Gurobi$} & \multirow{2}{*}{240s} & $f$ & 8.53 & 12.24 & 13.34 &  x      &  x      & 11.81 & 17.02 & 18.31 &  x      &  x      & 17.75 & 25.24 & x     & x       & x \\ 
-		&               &  {time (s)}                              & 41   & 43    & 123   &  x      &  x      & 50    & 62    & 181   &  x      &  x      & 166   & 140   & x     & x       & x \\ 
+		\multirow{10}{*}{$Gurobi$} & \multirow{2}{*}{240s} & $f$ & 8.53 & 12.24 & 13.34 &  {\bf x}& {\bf x} & 11.81 & 17.02 & 18.31 & {\bf x} & {\bf x} & 17.75 & 25.24 & {\bf x} & {\bf x} & {\bf x} \\ 
+		&               &  {time (s)}                            & 41   & 43    & 123   &  {\bf x}& {\bf x} & 50    & 62    & 181   & {\bf x} & {\bf x} & 166   & 140   & {\bf x} & {\bf x} & {\bf x} \\ 
 		\cmidrule(lr){2-18}		
 		
-		&                              \multirow{2}{*}{1200s} & $f$ & 8.52 & 12.25 & 13.31 & 14.67   & x       & 11.81 & 17.02 & 18.25 &  20.64  &  x      & 17.75 & 25.24 & 26.49 & 27.97   & x \\ 
-		&        &  {time (s)}                             & 39   & 41    & 129   & 217     & x       & 52    & 61    & 190   &  304    &  x      & 161   & 139   & 384   & 579     & x \\ 
+		&                           \multirow{2}{*}{1200s} & $f$ & 8.52 & 12.25 & 13.31 & 14.67   & {\bf x} & 11.81 & 17.02 & 18.25 &  20.64  & {\bf x} & 17.75 & 25.24 & 26.49 & 27.97   & {\bf x} \\ 
+		&        &  {time (s)}                                   & 39   & 41    & 129   & 217     & {\bf x} & 52    & 61    & 190   &  304    & {\bf x} & 161   & 139   & 384   & 579     & {\bf x} \\ 
 		\cmidrule(lr){2-18}                              
-		& \multirow{2}{*}{2400s}& $f$                               & 8.53 & 12.25 & 13.30 & 14.59   & 13.59   & 11.80 & 17.02 & 18.25 &  20.60  &  x      & 17.75 & 25.24 & 26.46 & 29.10   & x \\
-		&        &  {time (s)}                             & 33   & 39    & 127   & 313     & 1444    & 51    & 62    & 188   &  327    &  x      & 158   & 127   & 381   & 543     & x \\
+		&                           \multirow{2}{*}{2400s} & $f$ & 8.60 & 12.21 & 13.67 & 15.00   & 13.41   & 11.77 & 16.38 & 18.02 & 20.94   & {\bf x} & 17.75 & 25.24 & 26.46 & 29.10   & {\bf x} \\
+		&        &  {time (s)}                                   & 26   & 38    & 134   & 310     & 1520    & 46    & 60    & 206   & 474     & {\bf x} & 158   & 127   & 381   & 543     & {\bf x} \\
 		\cmidrule(lr){2-18}                              		
 		
-		& \multirow{2}{*}{3600s}& $f$                               & 8.52 & 12.25 & 13.32 & 14.61   & x       & 11.81 & 17.01 & 18.25 &  20.59  & 18.36   & 17.75 & 25.24 & 26.46 & 29.11   & x \\ 
-		&        &  {time (s)}                             & 25   & 36    & 121   & 297     & x       & 53    & 61    & 193   &  470    & 2241    & 151   & 123   & 319   & 689     & x \\ 
+		&                           \multirow{2}{*}{3600s} & $f$ & 8.60 & 12.20 & 13.66 & 15.00   & {\bf x} & 11.76 & 16.37 & 18.01 &  20.95  & 17.60   & 17.90 & 25.44 & 26.15 & 29.13   & {\bf x} \\ 
+		&        &  {time (s)}                                   & 30   & 35    & 123   & 314     & {\bf x} & 64    & 58    & 195   &  472    & 2258    & 178   & 143   & 378   & 862     & {\bf x} \\ 
 		
 		\midrule
 		
-		\multirow{2}{*}{$Shims$} & \multirow{2}{*}{240s}  & $f$ & 8.54 & 12.26 & 13.23 & 14.53   & 13.42   & 11.83 & 17.00 & 18.21 &  20.45  & 18.00   & 17.78 & 25.25 & 26.38 & 28.98   & 26.08 \\ % 
-		&         & {time (s)}                             & 1    & 2     & 6     & 17      & 109     & 1     & 2     & 8     &  26     & 160     & 2     & 3     & 13    & 37      & 229   \\ 
+		\multirow{2}{*}{$Shims$} &  \multirow{2}{*}{240s}  & $f$ & 8.61 & 12.20 & 13.46 & 14.99   & 13.35   & 11.78 & 16.29 & 17.99 &  20.93  & 17.50   & 17.94 & 25.45 & 26.14 & 28.84   & 26.22 \\ % 
+		&         & {time (s)}                                   & 1    & 2     & 4     & 10      & 51      & 1     & 2     & 5     &  15     & 100     & 1     & 3     & 10    & 31      & 196   \\ 
 		
 		\bottomrule
 	\end{tabular}
@@ -1264,6 +1304,13 @@ Table \ref{tab:100time} shows the results obtained with the strategy of testing 
 
 The actual RAM consumption of $Gurobi$\/ was over 8.5 GB, and all of $Shims$\/'s executions consumed at most 1.5 GB of RAM.
 
+{\color{blue}
+\subsection{{\it Shims} validation with more nodes}
+
+To validate the effectiveness of the {\it Shims} heuristic, we solve a 15-node TSP containing the 15 main Brazilian airports.
+For this task, we implemented a TSP solution method based on the Genetic Algorithm (GA) that returns the 20\% best tours as input to the ACLP-RPDP solved by {\it Shims}.
+
+}
 
 \section{Conclusions}
 \label{conclusions}

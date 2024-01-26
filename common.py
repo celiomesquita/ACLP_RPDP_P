@@ -9,6 +9,9 @@ import random
 
 CITIES = ["GRU", "GIG", "SSA", "CNF", "CWB", "BSB", "REC"]
 
+# 15 cities for Shims validation
+#CITIES = ["GRU", "GIG", "CGH", "BSB", "CNF", "POA", "REC", "SSA", "FOR", "CWB", "MAO", "BEL", "FLN", "VIX", "GYN"]
+
 # tour is pi in the mathematical formulation
 class Tour(object):
     def __init__(self, nodes, cost):
