@@ -348,13 +348,13 @@ if __name__ == "__main__":
     iRace_testing = False
 
     # scenarios = [2,3,4,5,6] # represent 1,2,3,4,5 in the article
+    scenarios = [2]
 
-    # folder = "surplus20"  # 1.2
+    folder = "surplus20"  # 1.2
     
     # folder = "surplus50"  # 1.5
-    scenarios = [2,3,4,5]
 
-    folder = "surplus100" # 2.0
+    # folder = "surplus100" # 2.0
 
     iRace_scenario = 2
     iRace_instance = 1
@@ -383,14 +383,14 @@ if __name__ == "__main__":
     if folder == "surplus100":
         eta1_vol, eta2_vol = 0.9617, 1.5706
 
-    # timeLimit = 240
+    timeLimit = 240
     # timeLimit = 1200
-    timeLimit = 2400
+    # timeLimit = 2400
     # timeLimit = 3600
 
     # method = "GRB"
-    method = "CBC"
-    # method = "Shims"
+    # method = "CBC"
+    method = "Shims"
     # method = "mpShims"
     # method = "mpACO"
     # method = "ACO"
@@ -401,7 +401,7 @@ if __name__ == "__main__":
     # tipo = "KP"
     tipo = "FFD"
 
-    dists = common.loadDistances("params/distances.txt")
+    dists = common.loadDistances("params/distances7.txt")
     costs = [[0.0 for _ in dists] for _ in dists]
 
     for scenario in scenarios:

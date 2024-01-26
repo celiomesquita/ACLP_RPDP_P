@@ -6,6 +6,7 @@ import multiprocessing as mp
 import os.path
 from time import time
 import random
+import pandas as pd
 
 CITIES = ["GRU", "GIG", "SSA", "CNF", "CWB", "BSB", "REC"]
 
@@ -236,9 +237,13 @@ def loadDistances(fname):
         output_string += element
 
     fname = output_string
-    
-    with open(fname, 'r') as f:
-        distances = [ [ float(num) for num in line.split(' ') ] for line in f ] 
+
+    df = pd.read_csv(fname, sep=' ', index_col=0)
+
+    distances = df.values.tolist()
+     
+    # with open(fname, 'r') as f:
+    #     distances = [ [ float(num) for num in line.split(' ') ] for line in f ] 
     return distances 
 
 def factorial(x):

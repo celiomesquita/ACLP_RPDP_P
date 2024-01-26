@@ -2,48 +2,52 @@ This is BibTeX, Version 0.99d (TeX Live 2022/dev/Debian)
 Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: eswa.aux
 The style file: elsarticle-harv.bst
+Illegal, another \bibstyle command---line 243 of file eswa.aux
+ : \bibstyle
+ :          {apalike}
+I'm skipping whatever remains of this command
 Database file #1: bib.bib
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Warning--empty booktitle in MiguelOptimalAP
-You've used 35 entries,
+You've used 37 entries,
             2990 wiz_defined-function locations,
-            893 strings with 11716 characters,
-and the built_in function-call counts, 23165 in all, are:
-= -- 1790
-> -- 790
-< -- 24
-+ -- 341
-- -- 270
-* -- 2456
-:= -- 3311
-add.period$ -- 104
-call.type$ -- 35
-change.case$ -- 263
-chr.to.int$ -- 35
-cite$ -- 36
-duplicate$ -- 1774
-empty$ -- 1768
-format.name$ -- 393
-if$ -- 4399
+            906 strings with 12179 characters,
+and the built_in function-call counts, 24687 in all, are:
+= -- 1910
+> -- 850
+< -- 26
++ -- 364
+- -- 291
+* -- 2625
+:= -- 3524
+add.period$ -- 109
+call.type$ -- 37
+change.case$ -- 280
+chr.to.int$ -- 37
+cite$ -- 38
+duplicate$ -- 1887
+empty$ -- 1879
+format.name$ -- 422
+if$ -- 4690
 int.to.chr$ -- 1
 int.to.str$ -- 1
-missing$ -- 334
-newline$ -- 189
-num.names$ -- 140
-pop$ -- 628
+missing$ -- 356
+newline$ -- 198
+num.names$ -- 148
+pop$ -- 670
 preamble$ -- 1
-purify$ -- 230
+purify$ -- 245
 quote$ -- 0
-skip$ -- 526
+skip$ -- 560
 stack$ -- 0
-substring$ -- 1106
-swap$ -- 1252
-text.length$ -- 5
+substring$ -- 1175
+swap$ -- 1337
+text.length$ -- 6
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 312
+type$ -- 330
 warning$ -- 1
-while$ -- 145
+while$ -- 156
 width$ -- 0
-write$ -- 505
-(There was 1 warning)
+write$ -- 533
+(There was 1 error message)

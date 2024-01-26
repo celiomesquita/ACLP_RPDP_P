@@ -1278,15 +1278,15 @@ Table \ref{tab:100time} shows the results obtained with the strategy of testing 
 		$method$& {$tmax$} & $scenario$  &{\bf 1}&{\bf 2}&{\bf 3}&{\bf 4}&{\bf 5}&{\bf 1}&{\bf 2}&{\bf 3}&{\bf 4}&{\bf 5}&{\bf 1}&{\bf 2}&{\bf 3}&{\bf 4}&{\bf 5} \\
 		\toprule
 		
-		\multirow{10}{*}{$Gurobi$} & \multirow{2}{*}{240s} & $f$ & 8.53 & 12.24 & 13.34 &  {\bf x}& {\bf x} & 11.81 & 17.02 & 18.31 & {\bf x} & {\bf x} & 17.75 & 25.24 & {\bf x} & {\bf x} & {\bf x} \\ 
-		&               &  {time (s)}                            & 41   & 43    & 123   &  {\bf x}& {\bf x} & 50    & 62    & 181   & {\bf x} & {\bf x} & 166   & 140   & {\bf x} & {\bf x} & {\bf x} \\ 
+		\multirow{10}{*}{$Gurobi$} & \multirow{2}{*}{240s} & $f$ & 8.60 & 12.20 & 13.67 & {\bf x} & {\bf x} & 11.77 & 16.38 & 18.10 & {\bf x} & {\bf x} & 17.89 & 25.42 & {\bf x} & {\bf x} & {\bf x} \\ 
+		&               &  {time (s)}                            & 31   & 35    & 124   & {\bf x} & {\bf x} & 52    & 59    & 200   & {\bf x} & {\bf x} & 188   & 145   & {\bf x} & {\bf x} & {\bf x} \\ 
 		\cmidrule(lr){2-18}		
 		
-		&                           \multirow{2}{*}{1200s} & $f$ & 8.52 & 12.25 & 13.31 & 14.67   & {\bf x} & 11.81 & 17.02 & 18.25 &  20.64  & {\bf x} & 17.75 & 25.24 & 26.49 & 27.97   & {\bf x} \\ 
-		&        &  {time (s)}                                   & 39   & 41    & 129   & 217     & {\bf x} & 52    & 61    & 190   &  304    & {\bf x} & 161   & 139   & 384   & 579     & {\bf x} \\ 
+		&                           \multirow{2}{*}{1200s} & $f$ & 8.61 & 12.20 & 13.31 & 10.00   & {\bf x} & 11.77 & 17.02 & 18.25 &  20.64  & {\bf x} & 17.75 & 25.24 & 26.49 & 27.97   & {\bf x} \\ 
+		&        &  {time (s)}                                   & 28   & 37    & 129   & 320     & {\bf x} & 46    & 61    & 190   &  304    & {\bf x} & 161   & 139   & 384   & 579     & {\bf x} \\ 
 		\cmidrule(lr){2-18}                              
-		&                           \multirow{2}{*}{2400s} & $f$ & 8.60 & 12.21 & 13.67 & 15.00   & 13.41   & 11.77 & 16.38 & 18.02 & 20.94   & {\bf x} & 17.75 & 25.24 & 26.46 & 29.10   & {\bf x} \\
-		&        &  {time (s)}                                   & 26   & 38    & 134   & 310     & 1520    & 46    & 60    & 206   & 474     & {\bf x} & 158   & 127   & 381   & 543     & {\bf x} \\
+		&                           \multirow{2}{*}{2400s} & $f$ & 8.60 & 12.21 & 13.67 & 15.00   & 13.41   & 11.77 & 16.37 & 18.03 & 20.95   & {\bf x} & 17.89 & 25.44 & 26.15 & 29.13   & {\bf x} \\
+		&        &  {time (s)}                                   & 26   & 38    & 134   & 310     & 1520    & 46    & 60    & 199   & 461     & {\bf x} & 164   & 140   & 383   & 786     & {\bf x} \\
 		\cmidrule(lr){2-18}                              		
 		
 		&                           \multirow{2}{*}{3600s} & $f$ & 8.60 & 12.20 & 13.66 & 15.00   & {\bf x} & 11.76 & 16.37 & 18.01 &  20.95  & 17.60   & 17.90 & 25.44 & 26.15 & 29.13   & {\bf x} \\ 
@@ -1309,6 +1309,12 @@ The actual RAM consumption of $Gurobi$\/ was over 8.5 GB, and all of $Shims$\/'s
 
 To validate the effectiveness of the {\it Shims} heuristic, we solve a 15-node TSP containing the 15 main Brazilian airports.
 For this task, we implemented a TSP solution method based on the Genetic Algorithm (GA) that returns the 20\% best tours as input to the ACLP-RPDP solved by {\it Shims}.
+
+We implemented the GA with DEAP (Distributed Evolutionary Algorithms in Python) , a evolutionary computation framework available in {\tt github.com/deap/deap}. More details can be found in \citep{DEAP_JMLR2012}.
+
+DEAP took 3 seconds to solve a 15-node TSP.
+
+\citep{PeerlinckAmy2022MFEO} applied DEAP to solve a Multi-Objective Knapsack Problem. This algorithm is adapted to solve the ACLPP in each node of this work's solution.
 
 }
 
