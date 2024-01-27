@@ -13,6 +13,7 @@ import mipCBC
 import tabu
 import grasp
 import noise2
+import tsp_deap
 
 # from plots import TTT
 
@@ -350,9 +351,9 @@ if __name__ == "__main__":
     # scenarios = [2,3,4,5,6] # represent 1,2,3,4,5 in the article
     scenarios = [2]
 
-    folder = "surplus20"  # 1.2
+    # folder = "surplus20"  # 1.2
     
-    # folder = "surplus50"  # 1.5
+    folder = "surplus50"  # 1.5
 
     # folder = "surplus100" # 2.0
 
@@ -401,7 +402,7 @@ if __name__ == "__main__":
     # tipo = "KP"
     tipo = "FFD"
 
-    dists = common.loadDistances("params/distances7.txt")
+    dists, _ = common.loadDistances("./params/distances7.txt") # dists, cities
     costs = [[0.0 for _ in dists] for _ in dists]
 
     for scenario in scenarios:
@@ -437,8 +438,8 @@ if __name__ == "__main__":
             cfg.weiCap = cfg.payload
 
         perc = 1.0
-        if cfg.numNodes > 3:
-            perc = 0.25
+        # if cfg.numNodes > 3:
+            # perc = 0.25
 
         instanceTime = 0.
         instanceTime2 = 0. # with 3D packing
@@ -456,7 +457,10 @@ if __name__ == "__main__":
             # leastSC = 0. # minimum cost score/cost relation
             bestAV = 0.
             bestAT = 0.
-            tours = common.getTours(cfg.numNodes-1, costs, perc)
+            # tours = common.getTours(cfg.numNodes-1, costs, perc)
+            tours = tsp_deap.getTours("./params/distances7.txt", cfg.numNodes)
+
+            print( len(tours), len(tours[0].nodes) )
 
             # selects the best tour
             searchTime = 0

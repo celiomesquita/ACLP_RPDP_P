@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2023.5.31)  26 JAN 2024 16:04
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2023.5.31)  26 JAN 2024 22:24
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -869,33 +869,33 @@ Overfull \hbox (12.59494pt too wide) in paragraph at lines 507--508
  pre-sented, it is pos-si-ble to see that ACLP+RPDP
  []
 
-[7] [8] [9] [10] [11]
-<shims.png, id=75, 602.25pt x 377.41pt>
+[7] [8] [9] [10] [11] [12]
+<shims.png, id=78, 602.25pt x 377.41pt>
 File: shims.png Graphic file (type png)
 <use shims.png>
-Package pdftex.def Info: shims.png  used on input line 872.
+Package pdftex.def Info: shims.png  used on input line 879.
 (pdftex.def)             Requested size: 150.56212pt x 94.35226pt.
 
-Overfull \hbox (18.41138pt too wide) in paragraph at lines 874--876
+Overfull \hbox (18.41138pt too wide) in paragraph at lines 881--883
 []$[]$
  []
 
-[12 <./shims.png (PNG copy)>]
-Overfull \hbox (9.30414pt too wide) in paragraph at lines 998--999
+[13 <./shims.png (PNG copy)>]
+Overfull \hbox (9.30414pt too wide) in paragraph at lines 1005--1006
 []\T1/cmr/m/n/10 The ar-gu-ments $\OML/cmm/m/it/10 threshold[]$ \T1/cmr/m/n/10 
 and $\OML/cmm/m/it/10 threshold[]$ \T1/cmr/m/n/10 are the vol-ume thresh-olds f
 or $\OML/cmm/m/it/10 ^^Q[]$ \T1/cmr/m/n/10 and $\OML/cmm/m/it/10 ^^Q[]$ \T1/cmr
 /m/n/10 cal-cu-la-tions, re-spec-tively. 
  []
 
-[13]
-Overfull \hbox (21.64462pt too wide) in paragraph at lines 1022--1024
+[14]
+Overfull \hbox (21.64462pt too wide) in paragraph at lines 1029--1031
 \T1/cmr/m/n/10 al-go-rithms by it-er-a-tively test-ing and elim-i-nat-ing weake
 r pa-ram-e-ter con-fig-u-ra-tions through sta-tis-ti-cal com-par-isons.
  []
 
-[14]
-Overfull \hbox (6.11086pt too wide) in paragraph at lines 1126--1127
+[15]
+Overfull \hbox (6.11086pt too wide) in paragraph at lines 1133--1134
 []\T1/cmr/m/n/10 We ran Al-go-rithm 1[] con-sid-er-ing the five sce-nar-ios fro
 m Ta-ble 8[], three val-ues for $\OML/cmm/m/it/10 surplus$ \T1/cmr/m/n/10 from 
 $\OMS/cmsy/m/n/10 f\OT1/cmr/m/n/10 1\OML/cmm/m/it/10 :\OT1/cmr/m/n/10 2\OML/cmm
@@ -904,38 +904,38 @@ $\OMS/cmsy/m/n/10 f\OT1/cmr/m/n/10 1\OML/cmm/m/it/10 :\OT1/cmr/m/n/10 2\OML/cmm
 mr/m/n/10 ,
  []
 
-[15]
-Overfull \hbox (3.57031pt too wide) in paragraph at lines 1156--1157
+[16]
+Overfull \hbox (3.57031pt too wide) in paragraph at lines 1163--1164
 []\T1/cmr/m/n/10 Among the heuris-tics, we will present only the re-sults ob-ta
 ined by $\OML/cmm/m/it/10 Shims$\T1/cmr/m/n/10 , which had the best per-for-man
 ce.
  []
 
-[16]
-Overfull \hbox (6.58679pt too wide) in paragraph at lines 1274--1303
+[17]
+Overfull \hbox (6.58679pt too wide) in paragraph at lines 1281--1310
  [][] 
  []
 
-[17]
-Overfull \hbox (28.32541pt too wide) in paragraph at lines 1339--1340
+[18]
+Overfull \hbox (28.32541pt too wide) in paragraph at lines 1346--1347
 \T1/cmr/m/n/10 draft prepa-ra-tion, In-ves-ti-ga-tion, Val-i-da-tion. \T1/cmr/b
 x/n/10 Car-los Al-berto Alonso Sanches: \T1/cmr/m/n/10 Con-cep-tu-al-iza-tion, 
 Method-ol-ogy,
  []
 
 
-Overfull \hbox (15.5109pt too wide) in paragraph at lines 1351--1352
+Overfull \hbox (15.5109pt too wide) in paragraph at lines 1358--1359
 []\T1/cmr/m/n/10 This re-search was par-tially sup-ported by the São Paulo Re-s
 earch Foun-da-tion (FAPESP), grant 2022/05803-3. 
  []
 
-(./eswa.bbl [18] [19]
+(./eswa.bbl [19] [20]
 Underfull \hbox (badness 1910) in paragraph at lines 275--283
 []\T1/cmr/m/n/10 Wong, E.Y.C., Mo, D.Y., So, S., 2021.  Closed-loop dig-i-tal t
 win sys-tem for air cargo load
  []
 
-) [20] (./eswa.aux) ) 
+) [21] (./eswa.aux) ) 
 Here is how much of TeX's memory you used:
  28136 strings out of 480171
  688186 string characters out of 5894489
@@ -979,10 +979,10 @@ pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></u
 sr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/shar
 e/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb></usr/share
 /texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on eswa.pdf (20 pages, 843834 bytes).
+Output written on eswa.pdf (21 pages, 844697 bytes).
 PDF statistics:
- 736 PDF objects out of 1000 (max. 8388607)
- 171 compressed objects within 2 object streams
+ 739 PDF objects out of 1000 (max. 8388607)
+ 173 compressed objects within 2 object streams
  0 named destinations out of 1000 (max. 500000)
  28 words of extra memory for PDF output out of 10000 (max. 10000000)
 

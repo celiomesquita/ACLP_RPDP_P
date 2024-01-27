@@ -205,7 +205,7 @@ In practical terms, especially within the air transport sector, the size and com
 
 \textbf{Dynamic Nature}: Unlike the static nature of classical TSP, real-world problems in air transport are highly dynamic. Routes need to be optimized continuously as conditions change, requiring algorithms that can adapt in real-time or near-real-time.
 
-In practical air transport scenarios, the size of a TSP can therefore be less about the sheer number of nodes and more about the complexity and dynamic nature of the problem, which in our case (a single aircraft in a single day) is rarely expected to be more than seven nodes, based on the experience of the first author when working on an operations control centre.
+In practical air transport scenarios, the size of a TSP can be less about the sheer number of nodes and more about the complexity and dynamic nature of the problem, which in our case (a single aircraft in a single day) is rarely expected to be more than seven nodes. Despite this, at the end of this work, we intend to submit the best method found to a more challenging 15-node problem as a validation test.
 }
 
 \subsection{Operational premises}
@@ -527,6 +527,8 @@ In practical cases, we know that a common aircraft has $m=18$\/ pallets, flight 
 	
 	\item Just for speculation, we will especially test the two tours with the shortest distance, corresponding to the TSP solutions at the nodes considered. In these cases, the runtime limit per node will be $tmax/(K+1)$.
 	
+	\item {\color{blue} Lately, the time limit to solve a node will be adjusted to be proportional to the sum of volumes of the candidate items of the node. }
+	
 \end{itemize}
 
 
@@ -568,7 +570,11 @@ Our complete strategy is summarized in Algorithm \ref{alg:main}.
 \end{algorithm}
 
 
-In this algorithm, we use five values for $scenario$, according to Tables \ref{tab:costs} and \ref{tab:scenarios}, which define the number $K$ of destinations, the set $L$\/ of nodes, the costs $C$\/, and the shortest tours $\pi_{TSP1}$\/ and $\pi_{TSP2}$.
+In this algorithm, we use {\color{blue}six} values for $scenario$, according to Tables \ref{tab:costs} and \ref{tab:scenarios}, which define the number $K$ of destinations, the set $L$\/ of nodes, the costs $C$\/, and the shortest tours $\pi_{TSP1}$\/ and $\pi_{TSP2}$.
+
+{\color{blue}
+Scenario 6 will be used only for the best method validation.	
+}
 
 \begin{table}[h]
 	\centering
@@ -582,6 +588,7 @@ In this algorithm, we use five values for $scenario$, according to Tables \ref{t
 		3 & 4    & \{$0,1,2,3,4$\}       & 0 4 1 2 3 0 & 0 3 2 1 4 0 \\
 		4 & 5    & \{$0,1,2,3,4,5$\}     & 0 4 1 2 5 3 0 & 0 3 5 2 1 4 0 \\
 		5 & 6    & \{$0,1,2,3,4,5,6$\}   & 0 4 1 2 6 5 3 0 & 0 3 5 6 2 1 4 0 \\
+		6 & 15   & \{$0,1,2,3,4,5,6,7,8,9,10,11,12,13,14$\}   & not known & not known \\
 		\bottomrule
 	\end{tabular}
 \end{table}

@@ -21,32 +21,19 @@ Florianópolis-Hercílio Luz International Airport (FLN)
 Vitória-Eurico de Aguiar Salles Airport (VIX)
 Goiânia-Santa Genoveva Airport (GYN)
 """
-# 15 cities for Shims validation
-CITIES = ["GRU", "GIG", "CGH", "BSB", "CNF", "POA", "REC", "SSA", "FOR", "CWB", "MAO", "BEL", "FLN", "VIX", "GYN"]
 
-class Node(object):
-    def __init__(self, id, icao):
-        self.ID   = id
-        self.ICAO = icao
-
-# tour is pi in the mathematical formulation
-class Tour(object):
-    def __init__(self, nodes, cost):
-        self.nodes = nodes
-        self.cost  = cost # sum of legs costs plus CG deviation costs
-        self.score   = 0.0 # sum of nodes scores
-        self.elapsed  = 0 # seconds no 3D packing
-        self.elapsed2 = 0 # seconds with 3D packing
-        self.numOpts = 0 # sum of nodes eventual optima solutions
-        self.AvgVol  = 0.0 # average ocupation rate
-        self.AvgTorque  = 0.0
-
-def getTours():
-
-    distances_file = './params/distances15.txt'
+def getTours(distances_file, numNodes):   
 
     # Load the distance matrix from the file
     distance_matrix = pd.read_csv(distances_file, sep=' ', index_col=0)
+
+    cities = distance_matrix.columns.to_list()[:numNodes]
+
+    distance_matrix = distance_matrix.head(numNodes)
+
+    distance_matrix = pd.DataFrame(distance_matrix, columns = cities)
+
+    # print(cities)
 
     # Convert the DataFrame to a numpy array for easier manipulation
     distance_matrix_np = distance_matrix.to_numpy()
@@ -78,12 +65,9 @@ def getTours():
     # Solve the TSP
     population = toolbox.population(n=population_size)
 
-    percent = int(len(population) * 0.2)
+    ntours = common.factorial(numNodes-1)
 
-    ntours = 20
-
-    if len(population) < 20:
-        ntours = len(population)
+    percent = int(ntours * 0.2)
     
     if percent >= 20: 
         ntours = percent
@@ -103,27 +87,30 @@ def getTours():
     best_distances = [ind.fitness.values[0] for ind in best_tours]
 
     nodes = []
-    for id, icao in enumerate(CITIES):
-        nodes.append(Node(id, icao))
+    for id, icao in enumerate(cities):
+        nodes.append(common.Node(id, icao))
 
     tours = []
 
     for i, tour in enumerate(best_tours):
+         
+        tnodes = []
+
+        for nid in tour:
+            tnodes.append(nodes[nid])
             
-            tnodes = []
+        tours.append( common.Tour(tnodes, best_distances[i]) )
 
-            for nid in tour:
-                tnodes.append(nodes[nid])
-              
-            tours.append( Tour(tnodes, best_distances[i]) )
-
-    return tours
+    return tours # list of tours
 
 if __name__ == "__main__":
 
     startTime = time.perf_counter()
 
-    tours = getTours()
+    # distances_file = './params/distances15.txt'
+    distances_file = './params/distances7.txt'
+
+    tours = getTours(distances_file, 3)
 
     for tour in tours:
         origin = tour.nodes[0]

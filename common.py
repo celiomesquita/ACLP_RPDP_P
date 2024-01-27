@@ -8,7 +8,7 @@ from time import time
 import random
 import pandas as pd
 
-CITIES = ["GRU", "GIG", "SSA", "CNF", "CWB", "BSB", "REC"]
+# CITIES = ["GRU", "GIG", "SSA", "CNF", "CWB", "BSB", "REC"]
 
 # 15 cities for Shims validation
 #CITIES = ["GRU", "GIG", "CGH", "BSB", "CNF", "POA", "REC", "SSA", "FOR", "CWB", "MAO", "BEL", "FLN", "VIX", "GYN"]
@@ -30,8 +30,8 @@ class Config(object):
     def __init__(self, scenario):
         self.weiCap = 0
         self.volCap = 0
-        self.numNodes = {0:3,  1:3,  2:3,    3:4,    4:5,    5:6,    6:7    }[scenario]
-        self.Sce      = {0:1,  1:1,  2:2,    3:3,    4:4,    5:5,    6:6    }[scenario]
+        self.numNodes = {0:3, 1:3, 2:3, 3:4, 4:5, 5:6, 6:7, 7:15 }[scenario]
+        self.Sce      = {0:1, 1:1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7  }[scenario]
 
         self.size       = "smaller"
         self.numPallets = 7
@@ -46,14 +46,14 @@ class Config(object):
             self.kmCost     = 4.9 
             
 class Node(object):
-    def __init__(self, id, tau):
+    def __init__(self, id, icao):
         self.ID   = id
         self.tLim = 1 # 1s
         self.Vol  = 0.0
-        self.tau  = tau # node sum of torques
-        self.ICAO = CITIES[0]
-        if id < len(CITIES):
-            self.ICAO = CITIES[id]
+        # self.tau  = tau # node sum of torques
+        self.ICAO = icao
+        # if id < len(CITIES):
+        #     self.ICAO = CITIES[id]
 
 class Item(object):
     """
@@ -241,10 +241,10 @@ def loadDistances(fname):
     df = pd.read_csv(fname, sep=' ', index_col=0)
 
     distances = df.values.tolist()
+
+    cities = df.columns.to_list()
      
-    # with open(fname, 'r') as f:
-    #     distances = [ [ float(num) for num in line.split(' ') ] for line in f ] 
-    return distances 
+    return distances, cities
 
 def factorial(x):
     result = 1
