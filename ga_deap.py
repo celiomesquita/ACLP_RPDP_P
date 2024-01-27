@@ -3,13 +3,15 @@ from deap import base, creator, tools, algorithms
 
 # Example MKP data
 # Values of items
-values = np.array([60, 100, 120])
+values = np.array([60, 100, 120]) # scores
+
 # Weights of items in each dimension
-weights = np.array([[10, 20, 30],  # Dimension 1 weights (volumes)
-                    [20, 15, 25]]) # Dimension 2 weights (weights)
+weights = np.array([[10, 20, 30],  # Dimension Volume)
+                    [20, 15, 25]]) # Dimension Weight)
+
 # Capacities of the knapsack in each dimension
 #                      m3   kg
-capacities = np.array([50, 50])
+capacities = np.array([50, 50]) # pallets capacities
 
 # Genetic Algorithm setup                          (volumes, weights)
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
@@ -23,9 +25,11 @@ toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 def evalMKP(individual):
     weight_tot = np.dot(weights, individual)
     value_tot = np.dot(values, individual)
+
     # Check if the weight is greater than the capacity for any dimension
     if any(weight_tot > capacities):
         return 0,  # Return 0 if the individual exceeds capacity constraints
+
     return value_tot,
 
 toolbox.register("evaluate", evalMKP)
@@ -49,7 +53,7 @@ stats.register("max", np.max)
 best = tools.HallOfFame(1)
 
 algorithms.eaSimple(population, toolbox, cxpb=crossover_probability, mutpb=mutation_probability, 
-                    ngen=number_of_generations, stats=stats, halloffame=best, verbose=True)
+                    ngen=number_of_generations, stats=stats, halloffame=best, verbose=False)
 
 # Best solution
 print(f"Best Individual = {best[0]}, Value = {best[0].fitness.values[0]}")

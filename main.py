@@ -448,7 +448,7 @@ if __name__ == "__main__":
             cfg.weiCap = cfg.payload
 
         perc = 1.0
-        if cfg.numNodes > 3:
+        if cfg.numNodes > 3 and cfg.numNodes <= 7:
             perc = 0.25 # discard the worst tours
 
         instanceTime = 0.
@@ -555,26 +555,32 @@ if __name__ == "__main__":
             avgTime  = math.ceil(instanceTime/numInst)
             avgTime2 = math.ceil(instanceTime2/numInst)
 
+        icaos = []
+        for n in bestTour:
+            icaos.append(n.ICAO)
+
+        icaos = tsp_deap.rotate(icaos, "GRU")
+
+        sbest_tour = tsp_deap.list_to_string(icaos)
 
         # list the Shims best tour as an ICAO list
-        origin = bestTour[0]
-        sbest_tour = f"{origin.ICAO} "
-        prev = bestTour[0]
-        for j, node in enumerate(bestTour):
-            if j > 0:
-                sbest_tour += f"{node.ICAO} "
-                prev = node
-        sbest_tour += f"{origin.ICAO}"
+        # origin = icaos[0]
+        # sbest_tour = f"{origin} "
+        # prev = icaos[0]
+        # for j, icao in enumerate(icaos):
+        #     if j > 0:
+        #         sbest_tour += f"{icao} "
+        #         prev = icao
 
-        # list the GA best tour as an ICAO list
-        origin = tours[0].nodes[0]
-        shortestTour = f"{origin.ICAO} "
-        prev = tours[0].nodes[0]
-        for j, node in enumerate(tours[0].nodes):
-            if j > 0:
-                shortestTour += f"{node.ICAO} "
-                prev = node
-        shortestTour += f"{origin.ICAO}"
+        # # list the GA best tour as an ICAO list
+        # origin = tours[0].nodes[0]
+        # shortestTour = f"{origin.ICAO} "
+        # prev = tours[0].nodes[0]
+        # for j, node in enumerate(tours[0].nodes):
+        #     if j > 0:
+        #         shortestTour += f"{node.ICAO} "
+        #         prev = node
+        # shortestTour += f"{origin.ICAO}"
 
         if not iRace_testing:
 
@@ -592,7 +598,7 @@ if __name__ == "__main__":
             # print(f"% of optima: {numOptDict['numOpt']:.2f}")
             print(f"{method}")
             print(f"    best: {sbest_tour}")
-            print(f"shortest: {shortestTour}")
+            # print(f"shortest: {shortestTour}")
 
         else:
             print(-1*instanceSC/numInst) # -1: iRace minimizes a cost value

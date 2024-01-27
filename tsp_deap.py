@@ -22,6 +22,20 @@ Vitória-Eurico de Aguiar Salles Airport (VIX)
 Goiânia-Santa Genoveva Airport (GYN)
 """
 
+def rotate(tour_nodes, base_node):
+    """
+    Shifts the elements of the list such that the specified base_node becomes the first element.
+    The rest of the list follows in the original order.
+    If the base_node is not found in the list, the original list is returned.
+    """
+    if base_node in tour_nodes:
+        index = tour_nodes.index(base_node)
+        return tour_nodes[index:] + tour_nodes[:index]
+    else:
+        return tour_nodes
+
+
+
 def getTours(distances_file, numNodes):   
 
     # Load the distance matrix from the file
@@ -32,8 +46,6 @@ def getTours(distances_file, numNodes):
     distance_matrix = distance_matrix.head(numNodes)
 
     distance_matrix = pd.DataFrame(distance_matrix, columns = cities)
-
-    # print(cities)
 
     # Convert the DataFrame to a numpy array for easier manipulation
     distance_matrix_np = distance_matrix.to_numpy()
@@ -102,10 +114,16 @@ def getTours(distances_file, numNodes):
 
         for nid in tour:
             tnodes.append(nodes[nid])
-            
+
         tours.append( common.Tour(tnodes, best_distances[i]) )
 
     return tours # list of tours
+
+def list_to_string(lst):
+    """
+    Converts a list into a string with elements separated by spaces.
+    """
+    return ' '.join(map(str, lst))
 
 if __name__ == "__main__":
 
@@ -114,19 +132,29 @@ if __name__ == "__main__":
     # distances_file = './params/distances15.txt'
     distances_file = './params/distances7.txt'
 
-    tours = getTours(distances_file, 3)
+    tours = getTours(distances_file, 7)
+
+    base_node = "GRU"
 
     for tour in tours:
-        origin = tour.nodes[0]
-        print(f"{origin.ICAO} ", end='')
-        prev = tour.nodes[0]
-        for j, node in enumerate(tour.nodes):
-            if j > 0:
-                print(f"{node.ICAO} ", end='')
-                prev = node
+
+        icaos = []
+        for n in tour.nodes:
+            icaos.append(n.ICAO)
+
+        icaos = rotate(icaos, base_node)
+
+        print(icaos)
+
+        # origin = tour.nodes[0]
+        # stour = f"{origin.ICAO} "
+        # prev = tour.nodes[0]
+        # for j, node in enumerate(tour.nodes):
+        #     if j > 0:
+        #         stour += f"{node.ICAO} "
+        #         prev = node
         
-        print(f"{origin.ICAO}", end='')
-        print()
+        # print(stour)
 
 
     elapsed = time.perf_counter() - startTime
