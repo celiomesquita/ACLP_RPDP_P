@@ -1,0 +1,52 @@
+This is BibTeX, Version 0.99d (TeX Live 2022/dev/Debian)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: responses.aux
+The style file: elsarticle-harv.bst
+Illegal, another \bibstyle command---line 52 of file responses.aux
+ : \bibstyle
+ :          {apalike}
+I'm skipping whatever remains of this command
+Database file #1: bib.bib
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+You've used 2 entries,
+            2990 wiz_defined-function locations,
+            642 strings with 5554 characters,
+and the built_in function-call counts, 1571 in all, are:
+= -- 120
+> -- 60
+< -- 2
++ -- 23
+- -- 21
+* -- 171
+:= -- 225
+add.period$ -- 5
+call.type$ -- 2
+change.case$ -- 17
+chr.to.int$ -- 2
+cite$ -- 2
+duplicate$ -- 113
+empty$ -- 112
+format.name$ -- 29
+if$ -- 292
+int.to.chr$ -- 1
+int.to.str$ -- 1
+missing$ -- 22
+newline$ -- 24
+num.names$ -- 8
+pop$ -- 42
+preamble$ -- 1
+purify$ -- 15
+quote$ -- 0
+skip$ -- 35
+stack$ -- 0
+substring$ -- 69
+swap$ -- 85
+text.length$ -- 1
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 18
+warning$ -- 0
+while$ -- 11
+width$ -- 0
+write$ -- 42
+(There was 1 error message)
