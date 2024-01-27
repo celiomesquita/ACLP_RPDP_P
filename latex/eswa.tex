@@ -1315,14 +1315,20 @@ The actual RAM consumption of $Gurobi$\/ was over 8.5 GB, and all of $Shims$\/'s
 \subsection{{\it Shims} validation with more nodes}
 
 To validate the effectiveness of the {\it Shims} heuristic, we solve a 15-node TSP containing the 15 main Brazilian airports.
-For this task, we implemented a TSP solution method based on the Genetic Algorithm (GA) that returns the 20\% best tours as input to the ACLP-RPDP solved by {\it Shims}.
+For this task, we implemented a TSP solution method based on the Genetic Algorithm (GA) that returns a population of 100 tours as input to the ACLP-RPDP solved by {\it Shims}. The GA run time was around three seconds, and the total run time was around 33 seconds.
 
 We implemented the GA with DEAP (Distributed Evolutionary Algorithms in Python) , a evolutionary computation framework available in {\tt github.com/deap/deap}. More details can be found in \citep{DEAP_JMLR2012}.
 
-DEAP took 3 seconds to solve a 15-node TSP.
 
 \citep{PeerlinckAmy2022MFEO} applied DEAP to solve a Multi-Objective Knapsack Problem. This algorithm is adapted to solve the ACLPP in each node of this work's solution.
 
+
+\begin{figure}
+	\centering
+	\includegraphics[scale=0.25]{brazil.png}
+	\caption{ {\it Shims/GA} best tour (may not be optimal)}
+	\label{fig:brazil}
+\end{figure}
 }
 
 \section{Conclusions}

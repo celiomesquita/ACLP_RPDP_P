@@ -349,11 +349,12 @@ if __name__ == "__main__":
     iRace_testing = False
 
     # scenarios = [2,3,4,5,6] # represent 1,2,3,4,5 in the article
-    scenarios = [2]
+    scenarios = [7] # 7: 15-node problem
+    # scenarios = [2]
 
-    # folder = "surplus20"  # 1.2
+    folder = "surplus20"  # 1.2
     
-    folder = "surplus50"  # 1.5
+    # folder = "surplus50"  # 1.5
 
     # folder = "surplus100" # 2.0
 
@@ -402,13 +403,15 @@ if __name__ == "__main__":
     # tipo = "KP"
     tipo = "FFD"
 
-    dists, _ = common.loadDistances("./params/distances7.txt") # dists, cities
+    distances_file = "./params/distances7.txt"
+    if scenarios[0] == 7:
+        distances_file = "./params/distances15.txt"
+
+    dists, _ = common.loadDistances(distances_file) # dists, cities
     costs = [[0.0 for _ in dists] for _ in dists]
 
     for scenario in scenarios:
 
-        instances = [1,2,3,4,5,6,7]
-        
         if testing:
             instances = [1]
 
@@ -416,6 +419,13 @@ if __name__ == "__main__":
             instances = [iRace_instance]
 
         cfg = common.Config(scenario)
+
+        instances = [1,2,3,4,5,6,7]
+
+        print(f"{cfg.numNodes} nodes")
+
+        if cfg.numNodes > 7: # Shims validation
+            instances = [1]
 
         # time limit per node
         secBreak = timeLimit/common.factorial(cfg.numNodes)
@@ -438,8 +448,8 @@ if __name__ == "__main__":
             cfg.weiCap = cfg.payload
 
         perc = 1.0
-        # if cfg.numNodes > 3:
-            # perc = 0.25
+        if cfg.numNodes > 3:
+            perc = 0.25 # discard the worst tours
 
         instanceTime = 0.
         instanceTime2 = 0. # with 3D packing
@@ -457,15 +467,22 @@ if __name__ == "__main__":
             # leastSC = 0. # minimum cost score/cost relation
             bestAV = 0.
             bestAT = 0.
-            # tours = common.getTours(cfg.numNodes-1, costs, perc)
-            tours = tsp_deap.getTours("./params/distances7.txt", cfg.numNodes)
 
-            print( len(tours), len(tours[0].nodes) )
+
+            if cfg.numNodes <= 7:
+                # permutation of nodes - TSP solution with all tours
+                tours = common.getTours(cfg.numNodes-1, costs, perc)
+            else:
+                # TSP solution with heuristics
+                tours = tsp_deap.getTours(distances_file, cfg.numNodes)
+
+            # print( len(tours), len(tours[0].nodes) )
 
             # selects the best tour
             searchTime = 0
             searchTime2 = 0 # with 3D packing
             bestTourID = -1
+            bestTour = []
             for pi, tour in enumerate(tours):
 
                 if leastCost:
@@ -500,6 +517,8 @@ if __name__ == "__main__":
                     bestSC = tourSC
                     bestAV = tour.AvgVol
                     bestAT = tour.AvgTorque
+                    bestTourID = pi
+                    bestTour = tour.nodes
 
                 if tour.elapsed > worstTime:
                     worstTime = tour.elapsed
@@ -537,23 +556,45 @@ if __name__ == "__main__":
             avgTime2 = math.ceil(instanceTime2/numInst)
 
 
-            if not iRace_testing:
+        # list the Shims best tour as an ICAO list
+        origin = bestTour[0]
+        sbest_tour = f"{origin.ICAO} "
+        prev = bestTour[0]
+        for j, node in enumerate(bestTour):
+            if j > 0:
+                sbest_tour += f"{node.ICAO} "
+                prev = node
+        sbest_tour += f"{origin.ICAO}"
 
-                str = f"{leastSC/numInst:.2f}\t {instanceSC/numInst:.2f}\t {avgTime:.0f}\t {avgTime2:.0f}\t {worstTime:.1f}\t {bestAV:.2f}\t {bestAT:.2f}\t {numOptDict['numOpt']:.1f}\t {beforeDict['value']:.1f} & {afterDict['value']:.1f} & {percent:.1f}\n"
-                # instances average
-                writeAvgResults(method, scenario, str, folder)
+        # list the GA best tour as an ICAO list
+        origin = tours[0].nodes[0]
+        shortestTour = f"{origin.ICAO} "
+        prev = tours[0].nodes[0]
+        for j, node in enumerate(tours[0].nodes):
+            if j > 0:
+                shortestTour += f"{node.ICAO} "
+                prev = node
+        shortestTour += f"{origin.ICAO}"
 
-                print(f"\n{str}")
-                print(f"{folder}")
-                print(f"{len(tours)} tours")
-                # print(f"secBreak: {secBreak} \t leastCost = {leastCost}")
-                # print(f"eta1_vol: {eta1_vol:.2f}")
-                # print(f"Before:\t{beforeDict['value']:.1f}") 
-                # print(f"After:\t{afterDict['value']:.1f}")
-                # print(f"% of optima: {numOptDict['numOpt']:.2f}")
-                # print(f"{method}")
+        if not iRace_testing:
 
-            else:
-                print(-1*instanceSC/numInst) # -1: iRace minimizes a cost value
+            str = f"{leastSC/numInst:.2f}\t {instanceSC/numInst:.2f}\t {avgTime:.0f}\t {avgTime2:.0f}\t {worstTime:.1f}\t {bestAV:.2f}\t {bestAT:.2f}\t {numOptDict['numOpt']:.1f}\t {beforeDict['value']:.1f} & {afterDict['value']:.1f} & {percent:.1f}\n"
+            # instances average
+            writeAvgResults(method, scenario, str, folder)
+
+            print(f"{str}")
+            print(f"{folder}")
+            print(f"{len(tours)} tours")
+            # print(f"secBreak: {secBreak} \t leastCost = {leastCost}")
+            # print(f"eta1_vol: {eta1_vol:.2f}")
+            # print(f"Before:\t{beforeDict['value']:.1f}") 
+            # print(f"After:\t{afterDict['value']:.1f}")
+            # print(f"% of optima: {numOptDict['numOpt']:.2f}")
+            print(f"{method}")
+            print(f"    best: {sbest_tour}")
+            print(f"shortest: {shortestTour}")
+
+        else:
+            print(-1*instanceSC/numInst) # -1: iRace minimizes a cost value
 
     #"""

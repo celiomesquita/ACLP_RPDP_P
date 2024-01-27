@@ -65,14 +65,18 @@ def getTours(distances_file, numNodes):
     # Solve the TSP
     population = toolbox.population(n=population_size)
 
-    ntours = common.factorial(numNodes-1)
+    # ntours = len(population)
 
-    percent = int(ntours * 0.2)
+    # percent = int(ntours * 0.3)
     
-    if percent >= 20: 
-        ntours = percent
-    
-    hall_of_fame = tools.HallOfFame(ntours)
+    # if percent >= 20: 
+    #     ntours = percent
+
+    # print(f"DEAP: The hall of fame has {ntours} tours.")
+        
+    # hall_of_fame = tools.HallOfFame(ntours)
+
+    hall_of_fame = tools.HallOfFame(len(population))
 
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("avg", np.mean)
