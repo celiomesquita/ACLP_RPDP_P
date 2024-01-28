@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2023.5.31)  28 JAN 2024 10:22
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2023.5.31)  28 JAN 2024 11:24
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -263,25 +263,25 @@ File: l3backend-pdftex.def 2022-01-12 L3 backend support: PDF output (pdfTeX)
 (./responses.aux)
 \openout1 = `responses.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 18.
-LaTeX Font Info:    ... okay on input line 18.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 18.
-LaTeX Font Info:    ... okay on input line 18.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 18.
-LaTeX Font Info:    ... okay on input line 18.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 18.
-LaTeX Font Info:    ... okay on input line 18.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 18.
-LaTeX Font Info:    ... okay on input line 18.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 18.
-LaTeX Font Info:    ... okay on input line 18.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 18.
-LaTeX Font Info:    ... okay on input line 18.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 18.
-LaTeX Font Info:    ... okay on input line 18.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 18.
-LaTeX Font Info:    ... okay on input line 18.
-Package hyperref Info: Link coloring OFF on input line 18.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 19.
+LaTeX Font Info:    ... okay on input line 19.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 19.
+LaTeX Font Info:    ... okay on input line 19.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 19.
+LaTeX Font Info:    ... okay on input line 19.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 19.
+LaTeX Font Info:    ... okay on input line 19.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 19.
+LaTeX Font Info:    ... okay on input line 19.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 19.
+LaTeX Font Info:    ... okay on input line 19.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 19.
+LaTeX Font Info:    ... okay on input line 19.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 19.
+LaTeX Font Info:    ... okay on input line 19.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 19.
+LaTeX Font Info:    ... okay on input line 19.
+Package hyperref Info: Link coloring OFF on input line 19.
  (/usr/share/texlive/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2021-04-02 v2.47 Cross-referencing by name of section
 (/usr/share/texlive/texmf-dist/tex/latex/refcount/refcount.sty
@@ -292,9 +292,9 @@ Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 )
 \c@section@level=\count276
 )
-LaTeX Info: Redefining \ref on input line 18.
-LaTeX Info: Redefining \pageref on input line 18.
-LaTeX Info: Redefining \nameref on input line 18.
+LaTeX Info: Redefining \ref on input line 19.
+LaTeX Info: Redefining \pageref on input line 19.
+LaTeX Info: Redefining \nameref on input line 19.
 
 (./responses.out) (./responses.out)
 \@outlinefile=\write3
@@ -323,53 +323,53 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
-Underfull \hbox (badness 10000) in paragraph at lines 41--44
+Underfull \hbox (badness 10000) in paragraph at lines 42--45
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 45--46
+Underfull \hbox (badness 10000) in paragraph at lines 46--47
 
  []
 
-LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 6
-9.
+LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 7
+0.
 (/usr/share/texlive/texmf-dist/tex/latex/base/t1cmtt.fd
 File: t1cmtt.fd 2019/12/16 v2.5j Standard LaTeX font definitions
 )
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 69.
+(Font)              <8> on input line 70.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 69.
+(Font)              <6> on input line 70.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 69.
+(Font)              <5> on input line 70.
  [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
-Overfull \hbox (13.55916pt too wide) in paragraph at lines 93--94
+Overfull \hbox (13.55916pt too wide) in paragraph at lines 94--95
 []\T1/cmr/m/n/8 To sub-mit a Com-plete and Com-pli-ance re-vi-sion, please go t
 o []$\T1/cmtt/m/n/8 https : / / www . editorialmanager .
  []
 
 [2]
-Overfull \hbox (7.77545pt too wide) in paragraph at lines 109--112
+Overfull \hbox (7.77545pt too wide) in paragraph at lines 110--113
 \T1/cmtt/m/n/8 tools-[]and-[]resources / research-[]elements-[]journals ? dgcid
  = ec _ em _ research _ elements _ email$[]\T1/cmr/m/n/8 . 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 109--112
+Underfull \hbox (badness 10000) in paragraph at lines 110--113
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 113--114
+Underfull \hbox (badness 10000) in paragraph at lines 114--115
 
  []
 
 [3]
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 157.
+(Font)              <7> on input line 162.
  [4]
 Overfull \hbox (10.27435pt too wide) in paragraph at lines 219--220
 \T1/cmr/m/n/10 Cargo Load Plan-ning with Rout-ing Pickup and De-liv-ery Prob-le
@@ -387,43 +387,22 @@ Underfull \hbox (badness 10000) in paragraph at lines 361--362
 []\T1/cmr/m/it/10 Acrescentamos no-vas mo-ti-vações para a res-olução do
  []
 
-[8]
-Underfull \hbox (badness 10000) in paragraph at lines 468--469
-[]\T1/cmr/m/n/10 The code im-ple-mented is avail-able in
- []
-
-
-Overfull \hbox (54.16751pt too wide) in paragraph at lines 468--469
-\T1/cmtt/m/n/10 //github.com/celiomesquita/ACLP_RPDP_P/blob/main/ga_deap_mmkp.p
-y\T1/cmr/m/n/10 . 
- []
-
-[9pdfTeX warning (ext4): destination with the same identifier (name{table.1}) h
-as been already used, duplicate ignored
+[8] [9pdfTeX warning (ext4): destination with the same identifier (name{table.1
+}) has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.486 \end{center}
+l.488 \end{center}
                   ]
-Overfull \vbox (24.51024pt too high) has occurred while \output is active []
+Overfull \vbox (23.3994pt too high) has occurred while \output is active []
 
 
 [10]
-Underfull \hbox (badness 10000) in paragraph at lines 504--505
-[]\T1/cmr/m/n/10 The code im-ple-mented is avail-able in
- []
-
-
-Overfull \hbox (33.17264pt too wide) in paragraph at lines 504--505
-\T1/cmtt/m/n/10 //github.com/celiomesquita/ACLP_RPDP_P/blob/main/tsp_deap.py\T1
-/cmr/m/n/10 . 
- []
-
-<brazil.png, id=146, 785.93625pt x 780.9175pt>
+<brazil.png, id=156, 785.93625pt x 780.9175pt>
 File: brazil.png Graphic file (type png)
 <use brazil.png>
-Package pdftex.def Info: brazil.png  used on input line 511.
+Package pdftex.def Info: brazil.png  used on input line 513.
 (pdftex.def)             Requested size: 235.78268pt x 234.27705pt.
-[11]
+ [11]
 Overfull \vbox (25.9349pt too high) has occurred while \output is active []
 
 
@@ -431,16 +410,16 @@ Overfull \vbox (25.9349pt too high) has occurred while \output is active []
  has been already used, duplicate ignored
 <argument> ...shipout:D \box_use:N \l_shipout_box 
                                                   \__shipout_drop_firstpage_...
-l.519 \end{center}
+l.522 \end{center}
                    <./brazil.png>] (./responses.bbl) [13] (./responses.aux)
 Package rerunfilecheck Info: File `responses.out' has not changed.
 (rerunfilecheck)             Checksum: 548769B66B61123A7455F8AE24DAA520;2503.
  ) 
 Here is how much of TeX's memory you used:
- 9223 strings out of 480171
- 143854 string characters out of 5894489
- 432795 words of memory out of 5000000
- 26993 multiletter control sequences out of 15000+600000
+ 9222 strings out of 480171
+ 143830 string characters out of 5894489
+ 432787 words of memory out of 5000000
+ 26992 multiletter control sequences out of 15000+600000
  482680 words of font info for 57 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
  60i,12n,63p,1758b,434s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -458,12 +437,14 @@ m1000.600pk> </home/celio/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ec
 ti1000.600pk> </home/celio/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/e
 cbx1440.600pk></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmb
 x6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb
-></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cmextra/cmmib8.pfb>
-</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb>
-Output written on responses.pdf (13 pages, 263472 bytes).
+></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/
+share/texlive/texmf-dist/fonts/type1/public/amsfonts/cmextra/cmmib8.pfb></usr/s
+hare/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/tex
+live/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb>
+Output written on responses.pdf (13 pages, 279401 bytes).
 PDF statistics:
- 622 PDF objects out of 1000 (max. 8388607)
- 209 compressed objects within 3 object streams
+ 636 PDF objects out of 1000 (max. 8388607)
+ 223 compressed objects within 3 object streams
  50 named destinations out of 1000 (max. 500000)
  102 words of extra memory for PDF output out of 10000 (max. 10000000)
 

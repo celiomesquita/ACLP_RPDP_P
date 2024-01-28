@@ -1105,20 +1105,22 @@ For each generated $t^k_j$ item, its destination is randomly selected (line \ref
 	After the items were generated, some experiments with the \textit{iRace} tool were executed to determine the values for parameters $threshold_1$ and $threshold_2$ used in \textit{Shims}, whose results are presented in Table \ref{tab:irace}.
 	
 	\begin{table}[H]
-		\centering
-		\caption{\textit{iRace} testing results}  \label{tab:irace}
-		\footnotesize
-		\begin{tabular}{cccc}
-			\toprule
-			\textbf{surplus} & \boldm{$threshold_1$} & \boldm{$threshold_2$} & \textbf{time (min)}\\
-			\midrule
-			1.2& 0.8621 & 1.0539 & 47 \\
-			1.5& 0.9199 & 1.1399 & 59 \\
-			2.0& 0.9617 & 1.5706 & 63 \\						
-			\bottomrule
-		\end{tabular}
-		\normalsize
-	\end{table}
+	\centering
+	\caption{\textit{iRace} testing results}  \label{tab:irace}
+	\footnotesize
+	\begin{tabular}{cccc}
+		\toprule
+		
+		\boldm{$surplus$} & \boldm{$threshold_1$} & \boldm{$threshold_2$} & \textbf{run time}\\
+		& for $\eta_1$          & for $\eta_2$          & (min) \\
+		\midrule
+		1.2& 0.8621 & 1.0539 & 47 \\
+		1.5& 0.9199 & 1.1399 & 59 \\
+		2.0& 0.9617 & 1.5706 & 63 \\						
+		\bottomrule
+	\end{tabular}
+	\normalsize
+\end{table}
 	
 	For these tests, we considered the odd instances (1, 3, 5, 7) as the \textbf{training} set and the even instances (2, 4, 6) as the \textbf{testing} set for the \textit{iRace} runs. We supplied \textit{iRace} for $threshold_1$ determination, the range [0.8, 1.0], and for $threshold_2$, the range [1.0, 2.0]. The number of iterations in each experiment was limited to 3000 executions for \textit{iRace} to have plenty of data for its statistical tests. More detail about these configurations may be found on the \textit{iRace} user guide in {\tt cran.r-project.org/web/packages/irace/irace.pdf}.
 }
@@ -1329,7 +1331,7 @@ We implemented the GA with DEAP (Distributed Evolutionary Algorithms in Python) 
 	\end{figure}
 
 
-The airports cited in Figure \ref{fig:brazil} are: São Paulo (GRU), Congonhas (CGH), Curitiba (CWB), Porto Alegre (POA), Florianópolis (FLN),  Vitória (VIX), Salvador (SSA), Recife (REC), Fortaleza (FOR), Belém (BEL), Manaus (MAO), Brasília (BSB), Goiânia (GYN), Confins (CNF), and Rio de Janeiro (GIG), returning to GRU.
+The airports cited in Figure \ref{fig:brazil} are: São Paulo (GRU), Congonhas (CGH), Curitiba (CWB), Porto Alegre (POA), Florianópolis (FLN), Vitória (VIX), Salvador (SSA), Recife (REC), Fortaleza (FOR), Belém (BEL), Manaus (MAO), Brasília (BSB), Goiânia (GYN), Confins (CNF), and Rio de Janeiro (GIG), returning to GRU.
 
 It is important to remember that this is not the shortest tour, but the one with the best relationship with score, cost, and fuel consumption.
 

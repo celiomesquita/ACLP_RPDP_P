@@ -6,7 +6,8 @@
 \usepackage{color, colortbl}
 
 \usepackage{natbib}
-\bibliographystyle{elsarticle-harv}
+%\bibliographystyle{elsarticle-harv}
+\bibliographystyle{apalike} 
 
 \usepackage{graphicx}
 \usepackage{float} % to position figures and tables
@@ -149,15 +150,6 @@ Reviewers' comments:
 \item [3.] More experiments hope to be added to support the conclusion.
 \end{itemize}
 
-{\color{blue}
-New experiments were conducted due to two changes suggested by the reviewers:
-
-\begin{itemize}
-\item [1.] Node solution times depended on the total volume of candidate items to be loaded in each node in relation to the total items volume to be loaded in the tour.
-\item [2.] A new process of determining the {\it Shims} volume thresholds for $eta_1$ and $eta_2$.
-\end{itemize}
-}
-
 
 \section{\#2-b: Our Point-to-Point responses to the Associate Editor}
 
@@ -189,7 +181,15 @@ More experiments hope to be added to support the conclusion.
 		\textit{Incluímos novos resultados experimentais (novas figuras, testes, etc.). Concretamente: desempenhos obtidos com outras metaheurísticas; definição empírica de $\eta_1$\/ and $\eta_2$\/ no algoritmo {\it Shims}; limite de tempo variável em cada nó, de acordo com o volume de carga previsto em cada nó; resolução de casos com um maior número de nós}.
 		
 {\color{blue}
-We included Table 10 with the results of the {\it iRace} tool, a software package that helps to automatically fine-tune algorithm parameters. We fine-tuned parameters $threshold_1$\/ and $threshold_2$\/, the relative volumes of each pallet used to determine the indexes  $\eta_1$\/ and $\eta_2$ for the {\it Shims} heuristic.
+	New experiments were conducted due to two changes suggested by the reviewers:
+	
+	\begin{itemize}
+		\item [1.] Node solution times depended on the total volume of candidate items to be loaded in each node in relation to the total items volume to be loaded in the tour.
+		\item [2.] A new process of determining the {\it Shims} volume thresholds for $eta_1$ and $eta_2$.
+	\end{itemize}
+
+
+	We included Table 10 with the results of the {\it iRace} tool, a software package that helps to automatically fine-tune algorithm parameters. We fine-tuned parameters $threshold_1$\/ and $threshold_2$\/, the relative volumes of each pallet used to determine the indexes  $\eta_1$\/ and $\eta_2$ for the {\it Shims} heuristic.
 }
 	\end{minipage}
 \end{center}
@@ -381,7 +381,7 @@ In section 5, the running time at each node is fixed. Whether different nodes ha
 			
 An important experiment inclusion was regarding the time limit to solve a node. This was adjusted to be proportional to the sum of the volumes of the candidate items in the node, as each node has a different number of items to be embarked.
 
-This inclusion may have contributed to the slight improvement in the \textit{Shims} results.
+This inclusion certainly contributed to the slight improvement observed in the results.
 			
 		}
 		
@@ -396,7 +396,7 @@ In section 5.2.2, $\eta_1$\/ and $\eta_2$\/ are set by authors. It is better to 
 		\textit{Estudamos a viabilidade de definir empiricamente os valores dessas constantes do algoritmo Shims. Explicar...}
 		
 {\color{blue}
-	After the items were generated, some experiments with the \textit{iRace} tool were executed to determine the values for parameters $threshold_1$ and $threshold_2$ used in \textit{Shims}, whose results are presented in Table \ref{tab:irace}.
+	After the items were generated, some experiments with the \textit{iRace} tool were executed to determine the values for volume limits $threshold_1$ and $threshold_2$ used in \textit{Shims}, whose results are presented in Table \ref{tab:irace}.
 	
 	\begin{table}[H]
 		\centering
@@ -404,7 +404,9 @@ In section 5.2.2, $\eta_1$\/ and $\eta_2$\/ are set by authors. It is better to 
 		\footnotesize
 		\begin{tabular}{cccc}
 			\toprule
-			\textbf{surplus} & \boldm{$threshold_1$} & \boldm{$threshold_2$} & \textbf{time (min)}\\
+			                  
+			\boldm{$surplus$} & \boldm{$threshold_1$} & \boldm{$threshold_2$} & \textbf{run time}\\
+			                 & for $\eta_1$          & for $\eta_2$          & (min) \\
 			\midrule
 			1.2& 0.8621 & 1.0539 & 47 \\
 			1.5& 0.9199 & 1.1399 & 59 \\
@@ -414,7 +416,7 @@ In section 5.2.2, $\eta_1$\/ and $\eta_2$\/ are set by authors. It is better to 
 		\normalsize
 	\end{table}
 	
-	For these tests, we considered the odd instances (1, 3, 5, 7) as the \textbf{training} set and the even instances (2, 4, 6) as the \textbf{testing} set for the \textit{iRace} runs. We supplied \textit{iRace} for $threshold_1$ determination, the range [0.8, 1.0], and for $threshold_2$, the range [1.0, 2.0]. The number of iterations in each experiment was limited to 3000 executions for \textit{iRace} to have plenty of data for its statistical tests. More detail about these configurations may be found on the \textit{iRace} user guide in {\tt cran.r-project.org/web/packages/irace/irace.pdf}.
+	For these tests, we considered the odd instances (1, 3, 5, 7) as the \textbf{training} set and the even instances (2, 4, 6) as the \textbf{testing} set for the \textit{iRace} runs. We supplied \textit{iRace} for $threshold_1$ determination, the range [0.8, 1.0], and for $threshold_2$, the range [1.0, 2.0]. The number of iterations in each experiment was limited to 3000 executions for \textit{iRace} to have plenty of data for its statistical tests. More detail about these configurations may be found on the \textit{iRace} user guide in \url{https://cran.r-project.org/web/packages/irace/irace.pdf}.
 }
 		
 	\end{minipage}
@@ -444,32 +446,32 @@ To the best of our knowledge, the genetic algorithm is a good method for solving
 		\textit{Analisamos as resoluções do ACLPP através de algoritmos genéticos. Explicar...}
 		
 		{\color{blue}
-	We implemented the genetic algorithm with DEAP (Distributed Evolutionary Algorithms in Python), an evolutionary computation framework available at {\tt github.com/deap/deap}. More details can be found in \citep{DEAP_JMLR2012}.
-	
-	We used this package to solve a 15-node TSP with success, whose run time was less than 3s, and generated near-optimal solutions.
-	
+	We implemented the genetic algorithm with DEAP (Distributed Evolutionary Algorithms in Python), an evolutionary computation framework available at \url{https://github.com/deap/deap}. More details can be found in \citep{DEAP_JMLR2012}.
+		
 	\vspace{3mm}
 
 	\citep{PeerlinckAmy2022MFEO} applied DEAP to solve a multi-objective knapsack problem.
 	
 	\vspace{3mm}
 		
-	Our GA implementation is not complete. Due to performance issues, we did not include the constraints regarding the Weight and Balance Problem or the Pickup and Delivery Problem.
+	Our GA implementation is not complete. Due to performance issues, we did not include the constraints regarding the Weight and Balance (WBP) or the Pickup and Delivery (PDP) problems.
 	
 	In the first attempt, considering only the weight and volume constraints, our implementation of DEAP managed to solve problems up to 100 items to be allocated to 18 pallets in less than 10 seconds.	
 	When we included the item count constraint to prevent each item from being allocated to more than one pallet, it was able to solve only small problems (20 items on 2 pallets).
 	
-	We increased the number of items to 100, and the number of pallets to 18, but, even adjusting the GA parameters to more generations (2400) and more individuals (1200), DEAP did not generate any feasible solution. The run time of this attempt was around 5 minutes.
+	We increased the number of items to 150, and the number of pallets to 18, but, even adjusting the GA parameters to more generations (2400) and more individuals (1200), DEAP did not generate any feasible solution. The run time of this attempt was around 10 minutes.
 	
 	For the crossover probability, we tested the range [0.6 - 0.8], and for the mutation probability, we tested from 0.01 to 0.1 with no success.
 	
 	\vspace{3mm}
 	
-	The code implemented is available in {\tt //github.com/celiomesquita/ACLP\_RPDP\_P/blob/main/ga\_deap\_mmkp.py}.
+	The code implemented is available in \url{https://github.com/celiomesquita/ACLP\_RPDP\_P/blob/main/ga\_deap\_mmkp.py}.
 	
 	\vspace{3mm}
 	
-Large chromosome sizes, like 18,000-dimension arrays, can pose significant challenges in using Genetic Algorithms (GA).
+	The palletization planning of 200 to 1000 items per node in a set of 18 aircraft pallets may be an inadequate problem to be solved with GA.	
+		
+Large chromosome sizes, like 18,000-dimension arrays, can pose significant challenges in using genetic algorithms.
 
 The computational complexity is significant, as each generation requires evaluating individual fitness, which can be resource-intensive.
 
@@ -480,7 +482,7 @@ Also, the design of the fitness function becomes more critical as chromosome siz
 
 \vspace{3mm}
 
-Up to this point in time, we had no success solving the ACLPP with DEAP because it included the palletization planning of 200 to 1000 items per node in a set of 18 aircraft pallets.
+We hope that these considerations help justify why we did not include GA as a candidate method to solve the ACLP+RPDP.
 		}
 	\end{minipage}
 \end{center}
@@ -492,16 +494,16 @@ With the increase of nodes, what impact will be brought in solving the problem. 
 	\begin{minipage}{10cm}
 		\textit{Agradecemos esta sugestão. Incluímos resultados da resolução de casos com um maior número $K$\/ de nós, mantendo a suposição $K < m$, necessária para a definição prévia da destinação dos pallets. Para isso, utilizamos uma heurística conhecida para o TSP, aplicando nosso algoritmo apenas nesse tour.}
 		
-		{\color{blue}
+{\color{blue}
 			
 To validate the effectiveness of the {\it Shims} heuristic, we solve a 15-node TSP containing the 15 main Brazilian airports.
 For this task, we implemented a TSP solution method based on the Genetic Algorithm (GA) that returns a population of 100 tours as input to the ACLP-RPDP solved by {\it Shims}. The GA run time was around three seconds, and the total run time was around 33 seconds.
 
-We implemented the GA with DEAP (Distributed Evolutionary Algorithms in Python), an evolutionary computation framework available in {\tt github.com/deap/deap}. More details can be found in \citep{DEAP_JMLR2012}.
+We implemented the GA with DEAP (Distributed Evolutionary Algorithms in Python), an evolutionary computation framework available in \url{https://github.com/deap/deap}. More details can be found in \citep{DEAP_JMLR2012}.
 
 \vspace{3mm}
 
-The code implemented is available in {\tt //github.com/celiomesquita/ACLP\_RPDP\_P/blob/main/tsp\_deap.py}.
+The code implemented is available in \url{https://github.com/celiomesquita/ACLP\_RPDP\_P/blob/main/tsp\_deap.py}.
 
 \vspace{3mm}
 
@@ -513,12 +515,11 @@ The code implemented is available in {\tt //github.com/celiomesquita/ACLP\_RPDP\
 
 \vspace{3mm}
 
-The airports cited in Figure \ref{fig:brazil}  are: São Paulo (GRU), Congonhas (CGH), Curitiba (CWB), Porto Alegre (POA), Florianópolis (FLN),  Vitória (VIX), Salvador (SSA), Recife (REC), Fortaleza (FOR), Belém (BEL), Manaus (MAO), Brasília (BSB), Goiânia (GYN), Confins (CNF), and Rio de Janeiro (GIG), returning to GRU.			
-		}
+The airports cited in Figure \ref{fig:brazil}  are: São Paulo (GRU), Congonhas (CGH), Curitiba (CWB), Porto Alegre (POA), Florianópolis (FLN), Vitória (VIX), Salvador (SSA), Recife (REC), Fortaleza (FOR), Belém (BEL), Manaus (MAO), Brasília (BSB), Goiânia (GYN), Confins (CNF), and Rio de Janeiro (GIG), returning to GRU.			
+
+}
 	\end{minipage}
 \end{center}
-
-\bibliographystyle{apalike} 
 
 \bibliography{bib}
 
