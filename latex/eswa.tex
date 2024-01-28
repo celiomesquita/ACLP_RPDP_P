@@ -22,6 +22,7 @@
 \usepackage{tikz}
 \usetikzlibrary{calc}
 \usetikzlibrary{positioning}
+\usetikzlibrary{shapes.arrows}
 
 \usepackage{caption}
 \captionsetup{labelfont=bf}
@@ -45,6 +46,36 @@
 
 \usepackage[margin=2.3cm]{geometry}
 \geometry{a4paper}
+
+% lets get the exact color
+\usepackage{xcolor}
+\definecolor{myblue}{HTML}{B0D7FF}
+
+\tikzset{
+	mybox/.style={rectangle,
+		draw,
+		fill= myblue,
+		rounded corners,
+		minimum width=2cm,
+		inner sep=5pt,
+		align=left,
+		minimum height=1cm
+	},
+	myarrow/.style={draw=black,
+		fill=white,
+		minimum width=0.6cm,
+		single arrow
+	},
+	longarrow/.style={draw=none,
+		shading=axis,
+		left color=white,
+		right color=myblue,
+		minimum width=0.6cm,
+		single arrow,
+		anchor=east
+	}
+}
+
 
 
 \journal{Expert Systems with Applications}
@@ -589,8 +620,33 @@ Our complete strategy is summarized in Algorithm \ref{alg:main}.
 In this algorithm, we use {\color{blue}six} values for $scenario$, according to Tables \ref{tab:costs} and \ref{tab:scenarios}, which define the number $K$ of destinations, the set $L$\/ of nodes, the costs $C$\/, and the shortest tours $\pi_{TSP1}$\/ and $\pi_{TSP2}$.
 
 {\color{blue}
-Scenario 6 will be used only for the best method validation.	
+Scenario 6 will be used only for the best method validation.
+
+Figure \ref{fig:flow} depicts the Algorithm \ref{alg:main} for easy understanding of the main flow.
+	
 }
+
+
+\begin{figure}[htp]
+	
+	\centering
+	\begin{tikzpicture}
+		
+		%% Make the boxes
+		\node [mybox] (first)                        {Select:\\ 1. scenario\\2. surplus\\3. time limit};
+		\node [mybox, right=0.7cm of first] (second) {Config:\\4. parameters\\5. cost matrix\\6. pallets\\7. items};
+		\node [mybox, right=0.7cm of second] (third) {8. Define tour\\     schema:\\- All tours\\ \ \ \ (K-1)!\\ \ \ \ or\\- Solve a TSP\\ \ \ \ (set of tours))};
+		\node [mybox, right=0.7cm of third] (fourth) {Solve ACLPP+RPDP:\\9. Many tours\\ \ \ \ (node-by-node)\\10. Select best tour};
+		
+		%% Draw arrows between them
+		\node[myarrow] at ([xshift=8pt]first.east) {\phantom{\tiny{aaa}}};
+		\node[myarrow] at ([xshift=8pt]second.east) {\phantom{\tiny{aaa}}};
+		\node[myarrow] at ([xshift=8pt]third.east) {\phantom{\tiny{aaa}}};
+		
+	\end{tikzpicture} 
+	\caption{Solution main flow}
+	\label{fig:flow}
+\end{figure}
 
 \begin{table}[h]
 	\centering

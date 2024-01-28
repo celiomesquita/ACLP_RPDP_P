@@ -16,6 +16,40 @@
 
 \usepackage{booktabs}
 
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usetikzlibrary{positioning}
+\usetikzlibrary{shapes.arrows}
+% lets get the exact color
+\usepackage{xcolor}
+\definecolor{myblue}{HTML}{B0D7FF}
+
+\tikzset{
+	mybox/.style={rectangle,
+		draw,
+		fill= myblue,
+		rounded corners,
+		minimum width=2cm,
+		inner sep=5pt,
+		align=left,
+		minimum height=1cm
+	},
+	myarrow/.style={draw=black,
+		fill=white,
+		minimum width=0.6cm,
+		single arrow
+	},
+	longarrow/.style={draw=none,
+		shading=axis,
+		left color=white,
+		right color=myblue,
+		minimum width=0.6cm,
+		single arrow,
+		anchor=east
+	}
+}
+
+
 \begin{document}
 \thispagestyle{empty}
 
@@ -389,6 +423,34 @@ The inclusion of more figures to illustrate the flow, principle, and results of 
 \begin{center}
 	\begin{minipage}{10cm}
 		\textit{Agradecemos esta sugestão. Acrescentamos novas figuras e tabelas que ilustram melhor nossos resultados. Citar quais são...}
+		
+		
+		{\color{blue}
+		We included the figure below to depict the main algorithm for easy understanding of the main flow.
+		}
+		
+
+		\begin{tikzpicture}
+			
+			\centering
+			
+		%% Make the boxes
+\node [mybox] (first)                        {Select:\\ 1. scenario\\2. surplus\\3. time limit};
+\node [mybox, right=0.7cm of first] (second) {Config:\\4. parameters\\5. cost matrix\\6. pallets\\7. items};
+\node [mybox, right=0.7cm of second] (third) {8. Define tour\\     schema:\\- All tours\\ \ \ \ (K-1)!\\ \ \ \ or\\- Solve a TSP\\ \ \ \ (set of tours))};
+\node [mybox, right=0.7cm of third] (fourth) {Solve ACLPP+RPDP:\\9. Many tours\\ \ \ \ (node-by-node)\\10. Select best tour};
+
+%% Draw arrows between them
+\node[myarrow] at ([xshift=8pt]first.east) {\phantom{\tiny{aaa}}};
+\node[myarrow] at ([xshift=8pt]second.east) {\phantom{\tiny{aaa}}};
+\node[myarrow] at ([xshift=8pt]third.east) {\phantom{\tiny{aaa}}};
+			
+		\end{tikzpicture} 
+
+		{\color{blue}
+		We also included a map of Brazil with the 15 main busy airports and a tour for the reader to get an idea of how close to optimal the solution may be.
+		}
+		
 	\end{minipage}
 \end{center}
 
