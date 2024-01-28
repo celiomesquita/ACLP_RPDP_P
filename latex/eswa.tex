@@ -99,7 +99,7 @@ To the best of our knowledge, this is the first time that an air cargo problem i
 
 As a real case study, we consider a crucial network for the {\it Brazilian Air Force}, as can be seen in Table \ref{tab:costs} and Figure \ref{fig:nodes}. Although there are other airports of interest, these nodes were chosen due to their high demand. Other Brazilian airports tend to have smaller transport requests, which are generally met less expensively by cabotage, rail, or road transport.
 
-\begin{table}[htb]
+\begin{table}[htp]
 	
 	\begin{minipage}{0.58\linewidth}
 		
@@ -151,7 +151,7 @@ In all these works, there is a great diversity of scenarios and solutions: some 
 
 Table \ref{tab:sa} lists this literature and the involved sub-problems. We also indicate whether the dimensions of the items were considered ({\bf 2D} or {\bf 3D}) and which solution method was used: heuristic search methods ({\bf Heu}), integer programming ({\bf Int}), or linear programming ({\bf Lin}).
 
-\begin{table}[h]
+\begin{table}[htp]
 	\centering
 	\caption{Air cargo transport: literature, sub-problems and features}  \label{tab:sa}
 	\footnotesize
@@ -233,9 +233,7 @@ Throughout this text, we call {\it packed content}\/ a set of items of the same 
 We consider real-world scenarios, where Table \ref{tab:larger} shows the aircraft parameters. $p_i$\/ are pallets, $1\leq i \leq 18$, whose weight and volume limits are $W_i$\/ and $V_i$, respectively. $D_i^{long}$\/ and $D_i^{lat}$\/ are, respectively, the longitudinal and lateral distances of each pallet centroids to the aircraft centre of gravity (CG) along both axes. These distances will be used in the calculation of the torque, referring to the items allocated on each pallet. In this aircraft, as the ramp has an inclination of $25^{\circ}$, we made the necessary corrections in $D_i^{long}$, $W_i$\/ and $V_i$\/ of the corresponding pallets ($p_1$, $p_2$, $p_3$, and $p_4$).
 
 
-
-
-\begin{table}[h]
+\begin{table}[htp]
 	\centering
 	\caption{Aircraft parameters}  \label{tab:larger}
 	\footnotesize
@@ -272,7 +270,7 @@ This aircraft spends $c_d$\/ dollars per kilometre flown and can carry up to $W_
 The torque applied to the aircraft must keep its CG in the operational range, which corresponds to a fixed percentage of the {\it Mean Aerodynamic Chord} \footnote{Chord is the distance between the leading and trailing edges of the wing, measured parallel to the normal airflow over the wing. The average length of the chord is known as the {\it Mean Aerodynamic Chord} (MAC).} which is considered $1.17m$ for the aircraft of this work (see Figure \ref{fig:lateral}).
 
 
-\begin{figure}[h]
+\begin{figure}[htp]
 	\centering
 	\includegraphics[scale=0.22]{lateral.png}
 	\caption{Aircraft longitudinal cut, where red lines are pallets positions}
@@ -300,7 +298,7 @@ In this section, we present the mathematical modelling of ACLP+RPDP in Tables \r
 
 In Table \ref{tab:struc}, we describe the problem structure: nodes and their permutations, distances and associated costs, pallets characteristics, items available for shipment at each node, and packed contents shipped. The item $j$\/ in node $k$\/ has score $s_j$, weight $w_j$, volume $v_j$, and destination $to_j \in L_k$. Similarly, the packed content $q$, that remains on board at node $k$, has total weight $w_q$, total volume $v_q$, and destination $to_q \in L_k$. Packed contents that were destined to node $k$\/ are unloaded when the aircraft arrives there; that is, they are not considered in $Q_k$.
 
-\begin{table}[ht]
+\begin{table}[htp]
 	\centering
 	\footnotesize
 	\caption{Problem structure}  \label{tab:struc}
@@ -344,7 +342,7 @@ In Table \ref{tab:struc}, we describe the problem structure: nodes and their per
 
 Table \ref{tab:graph} contains decision variables and the ACLP+RPDP allocation graph.
 
-\begin{table}[H]
+\begin{table}[htp]
 	\centering
 	\footnotesize
 	\caption{Decision variables and allocation graph}  \label{tab:graph}
@@ -381,7 +379,7 @@ Table \ref{tab:graph} contains decision variables and the ACLP+RPDP allocation g
 
 The calculus functions of ACLP+RPDP are described in Table \ref{tab:functions}.
 
-\begin{table}[H]
+\begin{table}[htp]
 	\centering
 	\footnotesize
 	\caption{Calculus functions} \label{tab:functions}
@@ -439,7 +437,7 @@ Longitudinal (\ref{eq:tau}) and lateral torques (\ref{eq:LatItem}, \ref{eq:LatPa
 
 Finally, ACLP+RPDP constraints related to each node ${\pi_k}$\/ are described in Table \ref{tab:constraints}.
 
-\begin{table}[H]
+\begin{table}[htp]
 	\centering
 	\footnotesize
 	\caption{Constraints} \label{tab:constraints}
@@ -534,7 +532,7 @@ In practical cases, we know that a common aircraft has $m=18$\/ pallets, flight 
 
 Our complete strategy is summarized in Algorithm \ref{alg:main}.
 
-\begin{algorithm}[H]
+\begin{algorithm}[htp]
 	
 	\caption{Solving the ACLP+RPDP}  \label{alg:main}
 		
@@ -1136,9 +1134,9 @@ For $Gurobi$\/ to be able to solve the largest possible number of tests without 
 
 	
 \begin{table}[H]
-{\color{blue}
+
 	\centering
-	\caption{Overall results}  \label{tab:mr}
+	\caption{ \color{blue}Overall results}  \label{tab:mr}
 	\footnotesize
 	\begin{tabular}{cccc}	
 	\toprule
@@ -1154,7 +1152,7 @@ For $Gurobi$\/ to be able to solve the largest possible number of tests without 
 	\bottomrule
 	\end{tabular}
 \normalsize
-}
+
 \end{table}
 
 
@@ -1325,12 +1323,15 @@ We implemented the GA with DEAP (Distributed Evolutionary Algorithms in Python) 
 
 	\begin{figure}[H]
 		\centering
-		\caption{\label{fig:brazil} {\it Shims/GA} best tour (may not be optimal)}
-		\includegraphics[scale=0.30]{brazil.png}
+		\caption{\label{fig:brazil} {\it Shims/GA} best ACLP+RPDP tour \\
+			\tiny{Solution for scenario 7, instance 1}}
+		\fbox{\includegraphics[scale=0.30]{brazil.png}}
 	\end{figure}
 
 
 The airports cited in Figure \ref{fig:brazil} are: São Paulo (GRU), Congonhas (CGH), Curitiba (CWB), Porto Alegre (POA), Florianópolis (FLN),  Vitória (VIX), Salvador (SSA), Recife (REC), Fortaleza (FOR), Belém (BEL), Manaus (MAO), Brasília (BSB), Goiânia (GYN), Confins (CNF), and Rio de Janeiro (GIG), returning to GRU.
+
+It is important to remember that this is not the shortest tour, but the one with the best relationship with score, cost, and fuel consumption.
 
 }
 

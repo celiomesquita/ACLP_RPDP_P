@@ -448,22 +448,39 @@ To the best of our knowledge, the genetic algorithm is a good method for solving
 	
 	We used this package to solve a 15-node TSP with success, whose run time was less than 3s, and generated near-optimal solutions.
 	
-	\citep{PeerlinckAmy2022MFEO} applied DEAP to solve a multi-objective knapsack problem. We adapted their algorithm to solve the ACLPP in each node of this work's solution.
+	\vspace{3mm}
+
+	\citep{PeerlinckAmy2022MFEO} applied DEAP to solve a multi-objective knapsack problem.
+	
+	\vspace{3mm}
 		
-Our algorithm is not complete, as we did not include the constraints regarding the weight and balance problem or the pickup and delivery problem.
+	Our GA implementation is not complete. Due to performance issues, we did not include the constraints regarding the Weight and Balance Problem or the Pickup and Delivery Problem.
+	
+	In the first attempt, considering only the weight and volume constraints, our implementation of DEAP managed to solve problems up to 100 items to be allocated to 18 pallets in less than 10 seconds.	
+	When we included the item count constraint to prevent each item from being allocated to more than one pallet, it was able to solve only small problems (20 items on 2 pallets).
+	
+	We increased the number of items to 100, and the number of pallets to 18, but, even adjusting the GA parameters to more generations (2400) and more individuals (1200), DEAP did not generate any feasible solution. The run time of this attempt was around 5 minutes.
+	
+	For the crossover probability, we tested the range [0.6 - 0.8], and for the mutation probability, we tested from 0.01 to 0.1 with no success.
+	
+	\vspace{3mm}
+	
+	The code implemented is available in {\tt //github.com/celiomesquita/ACLP\_RPDP\_P/blob/main/ga\_deap\_mmkp.py}.
+	
+	\vspace{3mm}
+	
+Large chromosome sizes, like 18,000-dimension arrays, can pose significant challenges in using Genetic Algorithms (GA).
 
-In the first attempt, considering only the weight and volume constraints, our implementation of DEAP managed to solve problems up to 100 items to be allocated to 18 pallets in less than 10 seconds.
+The computational complexity is significant, as each generation requires evaluating individual fitness, which can be resource-intensive.
 
-When we included the item count constraint to prevent each item from being allocated to more than one pallet, it was able to solve only small problems (20 items on 2 pallets).
+Large chromosomes can slow GA convergence due to the vast search space, potentially requiring more generations to find optimal solutions.
 
-We increased the number of items to 100, and the number of pallets to 18, but, even adjusting the GA parameters to more generations (2400) and more individuals (1200), DEAP did not generate any feasible solution. The run time of this attempt was around 5 minutes.
+Efficient encoding and decoding of the problem into the chromosome and decoding solutions is crucial for a 18,000-dimension array. 
+Also, the design of the fitness function becomes more critical as chromosome size increases, as it needs to guide the evolutionary process without being overly computationally demanding.
 
-For the crossover probability, we tested the range [0.6 ? 0.8], and for the mutation probability, we tested from 0.01 to 0.1 with no success.
+\vspace{3mm}
 
-Up to this point in time, we had no success solving the ACLPP with DEAP.
-
-The code implemented is available in {\tt //github.com/celiomesquita/ACLP\_RPDP\_P/blob/main/ga\_deap\_mmkp.py}.
-
+Up to this point in time, we had no success solving the ACLPP with DEAP because it included the palletization planning of 200 to 1000 items per node in a set of 18 aircraft pallets.
 		}
 	\end{minipage}
 \end{center}
@@ -482,11 +499,15 @@ For this task, we implemented a TSP solution method based on the Genetic Algorit
 
 We implemented the GA with DEAP (Distributed Evolutionary Algorithms in Python), an evolutionary computation framework available in {\tt github.com/deap/deap}. More details can be found in \citep{DEAP_JMLR2012}.
 
+\vspace{3mm}
+
 The code implemented is available in {\tt //github.com/celiomesquita/ACLP\_RPDP\_P/blob/main/tsp\_deap.py}.
+
+\vspace{3mm}
 
 	\begin{figure}[H]
 		\centering
-		\caption{\label{fig:brazil} {\it Shims/GA} best tour (may not be optimal)}
+		\caption{\label{fig:brazil} {\it Shims/GA} best ACLP+RPDP tour}
 		\includegraphics[scale=0.3]{brazil.png}
 	\end{figure}
 

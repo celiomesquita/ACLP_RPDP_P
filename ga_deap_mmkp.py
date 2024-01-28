@@ -17,7 +17,8 @@ def Solve(items_file, node_ID):
     # filter items on the base
     items_matrix_np = items_matrix_np[((items_matrix_np[:,3] == node_ID))]
 
-    items_matrix_np = items_matrix_np[:100,:]
+    # num_items_test = 250
+    # items_matrix_np = items_matrix_np[:num_items_test,:]
 
     #  w    s    v  from to
     items_weights = items_matrix_np[ :,0]
@@ -25,6 +26,10 @@ def Solve(items_file, node_ID):
     items_volumes = items_matrix_np[ :,2]
 
     #               CG     Vol   Weight TO
+    # capacities = [( 14.89, 14.8, 4500, -1), # pallet 0
+    #               ( 14.89, 14.8, 4500, -1), # pallet 1
+    #               (-17.57,  7.0, 3000, -1)] # pallet 17
+
     capacities = [( 14.89, 14.8, 4500, -1), # pallet 0
                   ( 14.89, 14.8, 4500, -1), # pallet 1
                   ( 11.47, 14.8, 4500, -1),
@@ -43,7 +48,7 @@ def Solve(items_file, node_ID):
                   (-13.17, 14.8, 4500, -1),
                   (-17.57, 10.0, 3000, -1),
                   (-17.57,  7.0, 3000, -1)] # pallet 17
-
+    
     n_items     = len(items_scores)
     n_pallets = len(capacities)
 
@@ -56,6 +61,7 @@ def Solve(items_file, node_ID):
         volume_used = [0] * n_pallets
         item_count  = [0] * n_items
 
+        penalty = 0
         for i in range(n_items):
             for j in range(n_pallets):
                 if individual[i * n_pallets + j] == 1: # if item "i" is selected for pallet "j"
@@ -66,14 +72,24 @@ def Solve(items_file, node_ID):
         
                 # Check if an item is placed in more than one pallet
                 if item_count[i] > 1:
-                    return 0,  # Penalize if an item is in more than one pallet
+                    penalty += 200*(1 - item_count[i])
+
+        if penalty < 0:
+            return score_sum + penalty,  # Penalize if are items in more than one pallet, returns a tuple
             
         # Check if the weights and volumes are within the capacities for each pallet
+        # returns a penalty (negative score) proportional to the exceed value
         for j in range(n_pallets):
-            if volume_used[j] > capacities[j][1] or weight_used[j] > capacities[j][2]:
-                return 0,  # Penalize if over capacity in any pallet
+
+            if volume_used[j] > capacities[j][1]:
+                p = capacities[j][1] - volume_used[j]
+                return score_sum + 100*p/capacities[j][1], # returns a tuple
+    
+            if weight_used[j] > capacities[j][2]:
+                p = capacities[j][2] - weight_used[j]
+                return score_sum + 100*p/capacities[j][2], # returns a tuple
         
-        return score_sum,
+        return (score_sum), # returns a tuple
 
     # Create classes
     creator.create("FitnessMax", base.Fitness, weights=(1.0,))
@@ -89,12 +105,13 @@ def Solve(items_file, node_ID):
     toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
     toolbox.register("select", tools.selTournament, tournsize=3)
  
+    box = 300
 
     # Genetic Algorithm parameters
     crossover_probability = 0.7
     mutation_probability = 0.05
-    n_generations = 2400
-    population = toolbox.population(n=1200)
+    n_generations = box
+    population = toolbox.population(n=box)
 
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("avg", np.mean)
@@ -131,6 +148,9 @@ if __name__ == "__main__":
     ind_size     = len(hall_of_fame[0])
 
     print(f"\nScenario {scenario}:\nSelected {num_selected} items among {ind_size} positions\nScores sum: {best_score}")
+
+    if best_score <= 0:
+        print("INFEASIBLE SOLUTION!")
 
     elapsed = time.perf_counter() - startTime
     print(f"{elapsed:.1f} seconds ")
