@@ -85,7 +85,18 @@ The aviation industry adapts during global crises to keep supply chains moving. 
 
 Air cargo services are specially designed for organisations that require customised transportation, handle sensitive goods, or serve remote locations with limited routes. Air carriers typically use high-capacity cargo planes for economies of scale. Many cargo airlines have worldwide networks spread across destinations around the world.
 
-Recently, \citep{BrandtStefan2019} defined the {\it Air Cargo Load Planning Problem} (ACLPP) as four sub-problems: {\it Aircraft Configuration Problem} (ACP), {\it Build-up Scheduling Problem} (BSP), {\it Air Cargo Palletization Problem} (APP), and {\it Weight and Balance Problem} (WBP). Several aspects were considered: item characteristics to be transported (dimensions, scores, dangerousness, etc.); types and quantities of {\it unit load devices} (ULDs); when these pallets are assembled; how items are allocated to pallets; in which positions these pallets are to be placed; how total cargo weight is balanced; etc.
+A few years ago, \citep{BrandtStefan2019} defined the {\it Air Cargo Load Planning Problem} (ACLPP) as four sub-problems: {\it Aircraft Configuration Problem} (ACP), {\it Build-up Scheduling Problem} (BSP), {\it Air Cargo Palletization Problem} (APP), and {\it Weight and Balance Problem} (WBP). Several aspects were considered: item characteristics to be transported (dimensions, scores, dangerousness, etc.); types and quantities of {\it unit load devices} (ULDs); when these pallets are assembled; how items are allocated to pallets; in which positions these pallets are to be placed; how total cargo weight is balanced; etc.
+
+{\color{blue}
+
+Recently, \citep{zhao2023} developed integer programming solution that address ACLPP and WBP separately, impacting payload optimization and aircraft centre of gravity (CG).
+The authors argue that, with improvements in computer processing power, joint combinatorial optimization of ACPP and WBP is now feasible. They propose three integer linear programming models: a bi-objective optimization model (BOM), a combinatorial optimization model (COM), and an improved combinatorial optimization model (IOM). The models aim to determine the maximum loading capacity and lowest CG deviation from a specified target CG.
+
+The study uses Gurobi to solve four scenarios with various conditional metrics for three models. Results show that the BOM has the fastest solution speed, but the CG deviation is the largest, making the results unacceptable in some cases. The COM has the longest solution time, making it difficult to tolerate in practice. The IOM offers the best optimization solution, despite taking a little longer to solve computationally than the BOM.
+
+Using a Boeing 777F, four scenarios and 25 cases were tested, finding that the BOM's variable feasible domain is limited, the optimization result is insufficient, and the CG deviation is sometimes too large. The COM takes too long to solve, making it difficult to meet the needs of the actual scene. The IOM accelerates the solving process compared to the COM, but some scenarios still require significant computation time.
+
+}
 
 However, it is crucial to highlight that there are still other important challenges in air cargo transport that go beyond the definition of ACLPP, especially with regard to routes, and pickup and delivery at each destination. In this context, at least two more important sub-problems can be considered: simultaneous pickup and delivery at each node, called the {\it Pickup and Delivery Problem} (PDP), and searching for the best benefit-cost route, which is a special case of the {\it Travelling Salesman Problem} (TSP).
 
@@ -212,6 +223,8 @@ In practical air transport scenarios, the size of a TSP can be less about the sh
 
 As we are dealing with an extremely complex and diverse problem, we decided to establish some simplifying characteristics:
 
+\vspace{-2mm}
+
 \begin{itemize}
 	\setlength\itemsep{-0.3em}
 	
@@ -279,6 +292,8 @@ The torque applied to the aircraft must keep its CG in the operational range, wh
 
 
 We also make the following assumptions:
+
+\vspace{-2mm}
 
 \begin{itemize}
 	\setlength\itemsep{-0.3em}
@@ -515,7 +530,10 @@ Throughout our research, we have thoughtfully described ACLP+RPDP in standard MI
 
 In practical cases, we know that a common aircraft has $m=18$\/ pallets, flight itineraries have $K \leq 6$\/ nodes plus the base, and each node has hundreds of items to be shipped. We also know that missions with fewer nodes are more frequent than longer ones. Under these circumstances, we can adopt some important strategies:
 
+\vspace{-2mm}
+
 \begin{itemize}
+	\setlength\itemsep{-0.3em}
 	
 	\item We consider that the number of destinations is smaller than the number of pallets, that is, $K < m$. We also avoid the trivial case where $K=1$. With this premise, we can preset the destinations of the pallets at each shipping node, reserving for each destination a number of pallets proportional to the volume available. We could have used another criterion, but it was observed in the experiments that the volume is more constrictive in airlift.
 	
@@ -1010,6 +1028,8 @@ Initially, $Q_{\pi_k}$\/ (line \ref{shims:initQ}) corresponds to the packed cont
 
 For each pallet $i$, its $n_{\pi_k}$\/ possible edges $e_{ij}$\/ are considered in non-increasing order of $\theta_{ij}$:
 
+\vspace{-2mm}
+
 \begin{itemize}
 	
 	\setlength\itemsep{-0.3em}
@@ -1059,6 +1079,9 @@ In the delivery of supplies carried out in Brazil from 2008 to 2010, 23\% of the
 
 
 In the generation of test instances, we use two types of random selections:
+
+\vspace{-2mm}
+
 \begin{itemize}
 	\setlength\itemsep{-0.3em}
 	\item $RandomInt(i_1,i_2)$: randomly selects a integer number in $[i_1,i_2]$, where $i_1$ and $i_2$ are integer numbers;
@@ -1162,6 +1185,8 @@ For $Gurobi$\/ to be able to solve the largest possible number of tests without 
 
 Among the heuristics, we will present only the results obtained by $Shims$, which had the best performance. For each $scenario$, $surplus$\/ and $tmax$, seven different instances were generated. We will present the average of the objective function $f$\/ and the runtime of $Gurobi$\/ and $Shims$\/ in these instances. To facilitate the comparison between both, we added a last column in the tables where two values are indicated:
 
+\vspace{-2mm}
+
 \begin{itemize}
 	\setlength\itemsep{-0.3em}
 	\item {\bf Normalized}: value between 0 and 1, which corresponds to the ratio between the sum of $f$\/ values obtained by the method in all scenarios and the sum of the best values obtained by both methods in all scenarios. The higher the value of {\bf Normalized}, the closer the method approached the best solutions found.
@@ -1261,6 +1286,8 @@ The results obtained with $tmax = 3600s$, which is the highest tested runtime li
 
 From these data, we can draw some conclusions:
 
+\vspace{-2mm}
+
 \begin{itemize}
 	\setlength\itemsep{-0.3em}
 	\item The strategy of testing all $K!$\/ tours often provide a better-quality solution, even with less time on each node. This shows that the four sub-problems are interconnected in such a way that it is not enough to solve them separately.
@@ -1335,6 +1362,24 @@ The airports cited in Figure \ref{fig:brazil} are: São Paulo (GRU), Congonhas (C
 
 It is important to remember that this is not the shortest tour, but the one with the best relationship with score, cost, and fuel consumption.
 
+}
+
+{\color{purple}
+	
+	It is also important to highlight that three strategies were essential for us to obtain a solution in the instances created:
+	
+	\vspace{-2mm}
+	
+	\begin{itemize}
+		\setlength\itemsep{-0.3em}
+		\item[(1)] consider $K<m$\ so that each pallet received a predefined destination;
+		\item[(2)] on each tour, calculate a node-by-node solution; and
+		\item[(3)] at each intermediate node of the considered tour, relocate the packed contents, minimizing the torque on the aircraft.
+	\end{itemize}
+	
+	\vspace{-2mm}
+	
+	Without adopting these three strategies, we were unable to carry out any experiments, even in smaller instances.
 }
 
 \section{Conclusions}

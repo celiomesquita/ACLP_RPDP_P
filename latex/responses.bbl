@@ -1,32 +1,22 @@
-\begin{thebibliography}{2}
-\expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
-\providecommand{\url}[1]{\texttt{#1}}
-\providecommand{\href}[2]{#2}
-\providecommand{\path}[1]{#1}
-\providecommand{\DOIprefix}{doi:}
-\providecommand{\ArXivprefix}{arXiv:}
-\providecommand{\URLprefix}{URL: }
-\providecommand{\Pubmedprefix}{pmid:}
-\providecommand{\doi}[1]{\href{http://dx.doi.org/#1}{\path{#1}}}
-\providecommand{\Pubmed}[1]{\href{pmid:#1}{\path{#1}}}
-\providecommand{\bibinfo}[2]{#2}
-\ifx\xfnm\relax \def\xfnm[#1]{\unskip,\space#1}\fi
-%Type = Article
-\bibitem[{Fortin et~al.(2012)Fortin, {De Rainville}, Gardner, Parizeau and
-  Gagn\'e}]{DEAP_JMLR2012}
-\bibinfo{author}{Fortin, F.A.}, \bibinfo{author}{{De Rainville}, F.M.},
-  \bibinfo{author}{Gardner, M.A.}, \bibinfo{author}{Parizeau, M.},
-  \bibinfo{author}{Gagn\'e, C.}, \bibinfo{year}{2012}.
-\newblock \bibinfo{title}{{DEAP}: Evolutionary algorithms made easy}.
-\newblock \bibinfo{journal}{Journal of Machine Learning Research}
-  \bibinfo{volume}{13}, \bibinfo{pages}{2171--2175}.
-%Type = Inproceedings
-\bibitem[{Peerlinck and Sheppard(2022)}]{PeerlinckAmy2022MFEO}
-\bibinfo{author}{Peerlinck, A.}, \bibinfo{author}{Sheppard, J.},
-  \bibinfo{year}{2022}.
-\newblock \bibinfo{title}{Multi-objective factored evolutionary optimization
-  and the multi-objective knapsack problem}, in: \bibinfo{booktitle}{2022 IEEE
-  Congress on Evolutionary Computation (CEC)}, \bibinfo{publisher}{IEEE}. pp.
-  \bibinfo{pages}{1--8}.
+\begin{thebibliography}{}
+
+\bibitem[Fortin et~al., 2012]{DEAP_JMLR2012}
+Fortin, F.-A., {De Rainville}, F.-M., Gardner, M.-A., Parizeau, M., and
+  Gagn\'e, C. (2012).
+\newblock {DEAP}: Evolutionary algorithms made easy.
+\newblock {\em Journal of Machine Learning Research}, 13:2171--2175.
+
+\bibitem[Peerlinck and Sheppard, 2022]{PeerlinckAmy2022MFEO}
+Peerlinck, A. and Sheppard, J. (2022).
+\newblock Multi-objective factored evolutionary optimization and the
+  multi-objective knapsack problem.
+\newblock In {\em 2022 IEEE Congress on Evolutionary Computation (CEC)}, pages
+  1--8. IEEE.
+
+\bibitem[Zhao et~al., 2023]{zhao2023}
+Zhao, X., Dong, Y., and Zuo, L. (2023).
+\newblock A combinatorial optimization approach for air cargo palletization and
+  aircraft loading.
+\newblock {\em Mathematics}, 11(13):1--16.
 
 \end{thebibliography}

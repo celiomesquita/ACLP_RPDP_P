@@ -1,52 +1,46 @@
 This is BibTeX, Version 0.99d (TeX Live 2022/dev/Debian)
 Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: responses.aux
-The style file: elsarticle-harv.bst
-Illegal, another \bibstyle command---line 52 of file responses.aux
- : \bibstyle
- :          {apalike}
-I'm skipping whatever remains of this command
+The style file: apalike.bst
 Database file #1: bib.bib
-Reallocated singl_function (elt_size=4) to 100 items from 50.
-You've used 2 entries,
-            2990 wiz_defined-function locations,
-            642 strings with 5554 characters,
-and the built_in function-call counts, 1571 in all, are:
-= -- 120
-> -- 60
+You've used 3 entries,
+            1935 wiz_defined-function locations,
+            494 strings with 4291 characters,
+and the built_in function-call counts, 1373 in all, are:
+= -- 135
+> -- 59
 < -- 2
-+ -- 23
-- -- 21
-* -- 171
-:= -- 225
-add.period$ -- 5
-call.type$ -- 2
-change.case$ -- 17
-chr.to.int$ -- 2
-cite$ -- 2
-duplicate$ -- 113
-empty$ -- 112
-format.name$ -- 29
-if$ -- 292
++ -- 22
+- -- 20
+* -- 117
+:= -- 236
+add.period$ -- 10
+call.type$ -- 3
+change.case$ -- 25
+chr.to.int$ -- 3
+cite$ -- 3
+duplicate$ -- 51
+empty$ -- 95
+format.name$ -- 25
+if$ -- 272
 int.to.chr$ -- 1
-int.to.str$ -- 1
-missing$ -- 22
-newline$ -- 24
-num.names$ -- 8
-pop$ -- 42
+int.to.str$ -- 0
+missing$ -- 3
+newline$ -- 18
+num.names$ -- 9
+pop$ -- 23
 preamble$ -- 1
-purify$ -- 15
+purify$ -- 25
 quote$ -- 0
-skip$ -- 35
+skip$ -- 37
 stack$ -- 0
-substring$ -- 69
-swap$ -- 85
+substring$ -- 97
+swap$ -- 8
 text.length$ -- 1
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 18
 warning$ -- 0
-while$ -- 11
+while$ -- 12
 width$ -- 0
 write$ -- 42
-(There was 1 error message)

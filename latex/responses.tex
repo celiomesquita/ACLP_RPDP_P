@@ -159,6 +159,9 @@ More analysis shall be given to discuss the experimental results.
 \begin{center}
 	\begin{minipage}{10cm}
 		\textit{Como pode ser observado logo abaixo, aumentamos substancialmente os dados experimentais apresentados. Consequentemente, houve também um sensível aumento na discussão sobre eles.}
+		
+		{\color{blue}As can be seen below, we have substantially increased the experimental data presented. Consequently, there was also a noticeable increase in discussion about them. Especially about the overall improvement caused by the run time limit proportional to the volumes of items in each node and the additional experiments to validate the best method found.
+		}
 	\end{minipage}
 \end{center}
 
@@ -169,6 +172,13 @@ More newly-published related references shall be cited and dicussed in Introduct
 \begin{center}
 	\begin{minipage}{10cm}
 		\textit{Incluímos e comentamos novas referências (procurar trabalhos recentes sobre TSP e PDP em aeronaves).}
+		
+		{\color{blue}
+		We included the work of \citep{zhao2023}, that developed an air cargo loading plan that addresses the Air Cargo Palletization Problem (ACPP) and the Aircraft Weight and Balance Problem (WBP) separately, impacting payload optimization and aircraft center of gravity (CG). The authors propose three integer linear programming models: a bi-objective optimization model (BOM), a combinatorial optimization model (COM), and an improved combinatorial optimization model (IOM). The models aim to determine the maximum loading capacity and lowest CG deviation from a specified target CG.
+		
+		The study uses Gurobi to solve four scenarios with various conditional metrics for the three models. Results show that the BOM has the fastest solution speed, but the CG deviation is the largest, making the results unacceptable in some cases. The COM takes too long to solve, making it difficult to meet the needs of the actual scene. The IOM accelerates the solving process, but some scenarios still require significant computation time.	
+		}
+		
 	\end{minipage}
 \end{center}
 
@@ -271,6 +281,13 @@ In section 2, Literature review in the first and second paragraphs is too simple
 \begin{center}
 	\begin{minipage}{10cm}
 		\textit{Aumentamos a revisão da literatura, descrevendo os trabalhos com maior detalhe. Acrescentamos também alguns trabalhos mais recentes. Citar quais são esses trabalhos...}
+		
+		{\color{blue}
+	We included the work of \citep{zhao2023}, that developed an air cargo loading plan that addresses the Air Cargo Palletization Problem (ACPP) and the Aircraft Weight and Balance Problem (WBP) separately, impacting payload optimization and aircraft center of gravity (CG). The authors propose three integer linear programming models: a bi-objective optimization model (BOM), a combinatorial optimization model (COM), and an improved combinatorial optimization model (IOM). The models aim to determine the maximum loading capacity and lowest CG deviation from a specified target CG.
+	
+	The study uses Gurobi to solve four scenarios with various conditional metrics for the three models. Results show that the BOM has the fastest solution speed, but the CG deviation is the largest, making the results unacceptable in some cases. The COM takes too long to solve, making it difficult to meet the needs of the actual scene. The IOM accelerates the solving process, but some scenarios still require significant computation time.	
+}
+		
 	\end{minipage}
 \end{center}
 
@@ -280,6 +297,11 @@ In the manuscript, any figures about algorithm simulation results cannot be foun
 \begin{center}
 	\begin{minipage}{10cm}
 		\textit{Incluímos figuras comparativas, mostrando o melhor desempenho da heurística {\it Shims}. Citar quais são essas figuras...}
+		
+		{\color{blue}
+		We included a map showing a 15-node tour as to validate the effectiveness of the {\it Shims} heuristic, we solve a 15-node TSP containing the 15 main Brazilian airports.
+		For this task, we implemented a TSP solution method based on the Genetic Algorithm (GA) that returns a population of 100 tours as input to the ACLP-RPDP solved by {\it Shims}.
+		}
 	\end{minipage}
 \end{center}
 
@@ -289,6 +311,12 @@ Also, any figures about experiments are not given in the manuscript. "By using a
 \begin{center}
 	\begin{minipage}{10cm}
 		\textit{Nas novas figuras incluídas no artigo, mostramos o desempenho dos algoritmos desenvolvidos. Citar quais são essas figuras...}
+		
+		{\color{blue}
+The GA run time to solve a 15-node TSP was around three seconds, and the total run time (including the ACLP+RPDP solution by Shims) was around 33 seconds, which we believe is adequate for an operational scenario and using a common hand-held computer.
+
+A figure was included showing the solution tour.
+	}
 	\end{minipage}
 \end{center}
 
@@ -298,6 +326,12 @@ Too many old references are cited.
 \begin{center}
 	\begin{minipage}{10cm}
 		\textit{Incluímos referências mais recentes (citá-las). De qualquer modo, preferimos manter as antigas, para assim termos um levantamento histórico da evolução da pesquisa neste campo.}
+		
+		{\color{blue}
+		We included a more recent reference, \citep{zhao2023}, that demonstrates how hard it is to solve the ACLP and WBP, separately or together.
+		
+		In any case, we prefer to keep the old ones so that we have a historical survey of the evolution of research in this field.	
+		}
 	\end{minipage}
 \end{center}
 
@@ -310,6 +344,20 @@ The experimental section lacks effectiveness analysis, where the specific contri
 \begin{center}
 	\begin{minipage}{10cm}
 		\textit{Talvez não tenha ficado claro no texto original, mas três estratégias foram imprescindíveis para que pudéssemos obter alguma solução nas instâncias criadas: (1) considerar $K<m$\ para que cada pallet recebesse uma destinação predefinida; (2) em cada tour, calcular uma solução nó a nó; (3) em cada nó intermediário do tour considerado, realocar os packed contents minimizando o torque na aeronave. Sem a adoção destas três estratégias, não conseguimos realizar nenhum experimento, mesmo em instâncias menores. A única estratégia que permitiu diferentes experimentos e comparações foi a heurística utilizada na solução nó a nó. Procuramos deixar isto mais claro na nossa conclusão.}
+		
+		{\color{blue}
+		It may not have been clear in the original text, but three strategies were essential for us to obtain a solution in the instances created:
+		
+		\begin{itemize}
+		\item[(1)] consider $K<m$\ so that each pallet received a predefined destination;
+		
+		\item[(2)] on each tour, calculate a node-by-node solution; and
+		
+		\item[(3)] at each intermediate node of the considered tour, relocate the packed contents, minimizing the torque on the aircraft.
+		\end{itemize}
+		
+		Without adopting these three strategies, we were unable to carry out any experiments, even in smaller instances. The only strategy that allowed different experiments and comparisons was the heuristic used in the node-by-node solution. We seek to make this clearer in the discussion of the results and in our conclusion.	
+		}
 	\end{minipage}
 \end{center}
 
@@ -319,6 +367,10 @@ The comparative experiment should include both well-known and novel algorithms f
 \begin{center}
 	\begin{minipage}{10cm}
 		\textit{Como estamos lidando com um novo problema, não dispomos de outras resoluções disponíveis na literatura. Na verdade, temos apenas meta-heurísticas bem conhecidas para a solução nó a nó, no qual o torque da aeronave é minimizado. Por este motivo, incluímos novas tabelas comparativas com os resultados obtidos nesses casos.}
+		
+		{\color{blue}
+		As we are dealing with a new problem, we do not have other solutions available in the literature. In fact, we only have well-known meta-heuristics for the node-to-node solution, in which the aircraft torque is minimized. For this reason, we have included new comparative tables with the results obtained in these cases.	
+		}
 	\end{minipage}
 \end{center}
 
@@ -465,7 +517,7 @@ To the best of our knowledge, the genetic algorithm is a good method for solving
 	
 	\vspace{3mm}
 	
-	The code implemented is available in \url{https://github.com/celiomesquita/ACLP\_RPDP\_P/blob/main/ga\_deap\_mmkp.py}.
+	The implemented code is available in \url{https://github.com/celiomesquita/ACLP\_RPDP\_P/blob/main/ga\_deap\_mmkp.py}.
 	
 	\vspace{3mm}
 	
@@ -503,7 +555,7 @@ We implemented the GA with DEAP (Distributed Evolutionary Algorithms in Python),
 
 \vspace{3mm}
 
-The code implemented is available in \url{https://github.com/celiomesquita/ACLP\_RPDP\_P/blob/main/tsp\_deap.py}.
+The implemented code is available in \url{https://github.com/celiomesquita/ACLP\_RPDP\_P/blob/main/tsp\_deap.py}.
 
 \vspace{3mm}
 
