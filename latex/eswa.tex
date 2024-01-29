@@ -568,13 +568,13 @@ In practical cases, we know that a common aircraft has $m=18$\/ pallets, flight 
 	
 	\item We consider that the number of destinations is smaller than the number of pallets, that is, $K < m$. We also avoid the trivial case where $K=1$. With this premise, we can preset the destinations of the pallets at each shipping node, reserving for each destination a number of pallets proportional to the volume available. We could have used another criterion, but it was observed in the experiments that the volume is more constrictive in airlift.
 	
-	\item As the number of nodes is small, we have the possibility to check all possible tours, selecting the one that provides the best value for the objective function. For this reason, a maximum runtime $tmax$\/ per tour is established. In the tests carried out in this work, {\color{blue} $tmax \leq [240s, 1200s, 2400s, 3600s]$}.
-	
-	\item At each node, we will use a MIP solver or heuristics to check which method offers the best result within the runtime limit. As there are $K!$ tours, each of them with $K+1$\/ legs, each solution per node will have a runtime limit equal to $tmax/(K+1)!$.
-	
-	\item Just for speculation, we will especially test the two tours with the shortest distance, corresponding to the TSP solutions at the nodes considered. In these cases, the runtime limit per node will be $tmax/(K+1)$.
-	
-	\item {\color{blue} Lately, the time limit to solve a node will be adjusted to be proportional to the sum of volumes of the candidate items of the node in relation to the sum of volumes of the entire tour. }
+{\color{violet}
+	\item As the number of nodes is small, we have the possibility to check all possible tours, selecting the one that provides the best value for the objective function. For this reason, a maximum time per solution ($tmax$) is established. In the tests carried out in this work, these times were in the range [240s, 1200s, 2400s, 3600s].
+
+	\item At each node, we will use a MIP solver or heuristics to check which method offers the best result within the time limit for each node.
+
+	\item The time limit to solve a node will be adjusted to be proportional to the sum of volumes of the candidate items of the node in relation to the sum of volumes of the entire tour.
+}
 	
 \end{itemize}
 
@@ -586,31 +586,34 @@ Our complete strategy is summarized in Algorithm \ref{alg:main}.
 	\caption{Solving the ACLP+RPDP}  \label{alg:main}
 		
 	\begin{algorithmic}[1]
-			\State {\bf ACLP+RPDP} \,\, {\it in:}~$scenario, surplus, tmax$ \, \, {\it out:}~$answer1, answer2$
+			\State {\bf ACLP+RPDP} \,\, {\it in:}~$scenario, surplus, tmax, tsp, ntours$ \, \, {\it out:}~$answer$
 			
 			\State Let $M$ be the set of pallets ({\it cfr.} Table \ref{tab:larger}) \label{main:M} 
 			
 			\State Let $K$, $L$\/ and $C$ be according to the $scenario$ ({\it cfr.} Tables \ref{tab:costs}, \ref{tab:larger} and \ref{tab:scenarios}) \label{main:KLC} 
+						
+			\State $N \gets ItemsGeneration(scenario, surplus)$ \label{main:items}
 			
-			\State Let $\pi_{TSP1}$\/ and $\pi_{TSP2}$ be the shortest tours ({\it cfr.} Table \ref{tab:scenarios})  \label{main:shortest} 
+		{\color{violet}
+			\If {$tsp$ = True}
 			
-			\State $N \gets ItemsGeneration(scenario, surplus)$ \label{main:items} 
+				\State $tmax \gets tmax/ntours$ \Comment{max. tour time to solve the number of tours from the TSP heuristic}
 			
+			\Else
+			
+				\State $tmax \gets tmax/K!$
+			
+			\EndIf
+		}
 			\For {each $method$}  \label{main:method} 
 			
-				\State $f_1 \gets SolveTour(\pi_{TSP1}, L, M, C, N, method, tmax)$  \label{main:f1} 
-				
-				\State $f_2 \gets SolveTour(\pi_{TSP2}, L, M, C, N, method, tmax)$  \label{main:f2}
-				
-				\State $answer1[scenario,surplus,method] \gets max( f_1, f_2  )$  \label{main:a1}
-				
 				\For {each $\pi \in S_K$} \label{main:loop1}
 				
-					\State $f_{\pi} \gets SolveTour(\pi, L, M, C, N, method, tmax/K!)$ \label{main:fpi}
+					\State $f_{\pi} \gets SolveTour(\pi, L, M, C, N, method, tmax)$ \label{main:fpi}
 				
 				\EndFor \label{main:loop2}
 				
-				\State $answer2[scenario,surplus,method] \gets \max f_{\pi}$ \label{main:a2}
+				\State $answer[scenario,surplus,method] \gets \max f_{\pi}$ \label{main:a2}
 			\EndFor
 	\end{algorithmic}
 
@@ -652,16 +655,16 @@ Figure \ref{fig:flow} depicts the Algorithm \ref{alg:main} for easy understandin
 \begin{table}[h]
 	\centering
 	\caption{Testing scenarios}  \label{tab:scenarios}
-	\begin{tabular}{c c c c c}
+	\begin{tabular}{c c c }
 		\toprule
-		{\bf Scenario} & $K$ & $L$ & $\pi_{TSP1}$ & $\pi_{TSP2}$ \\		
+		{\bf Scenario} & $K$ & $L$  \\		
 		\midrule
-		1 & 2    & \{$0,1,2$\}           & 0 1 2 0  & 0 2 1 0 \\
-		2 & 3    & \{$0,1,2,3$\}         & 0 1 2 3 0 & 0 3 2 1 0\\
-		3 & 4    & \{$0,1,2,3,4$\}       & 0 4 1 2 3 0 & 0 3 2 1 4 0 \\
-		4 & 5    & \{$0,1,2,3,4,5$\}     & 0 4 1 2 5 3 0 & 0 3 5 2 1 4 0 \\
-		5 & 6    & \{$0,1,2,3,4,5,6$\}   & 0 4 1 2 6 5 3 0 & 0 3 5 6 2 1 4 0 \\
-		6 & 15   & \{$0,1,2,3,4,5,6,7,8,9,10,11,12,13,14$\}   & not known & not known \\
+		1 & 2    & \{$0,1,2$\}            \\
+		2 & 3    & \{$0,1,2,3$\}         \\
+		3 & 4    & \{$0,1,2,3,4$\}        \\
+		4 & 5    & \{$0,1,2,3,4,5$\}      \\
+		5 & 6    & \{$0,1,2,3,4,5,6$\}    \\
+		6 & 15   & \{$0,1,2,3,4,5,6,7,8,9,10,11,12,13,14$\}    \\
 		\bottomrule
 	\end{tabular}
 \end{table}
@@ -670,7 +673,7 @@ $surplus$\/ is a value in $\{1.2, 1.5, 2.0\}$, which corresponds, at each node $
 
 $tmax$\/ is the runtime limit, which will be distributed among the tours (lines \ref{main:f1}, \ref{main:f2} and \ref{main:fpi}). $method$\/ corresponds to a MIP solver or a heuristic to the node-by-node solution $SolveTour$, which will be presented in subsection \ref{methods}.
 
-The best results corresponding to the shortest tours are stored in $answer1$\/ (line \ref{main:a1}), and those obtained by testing all $K!$\/ tours are stored in $answer2$\/ (line \ref{main:a2}).
+The best results obtained by testing all tours are stored in $answer$\/ (line \ref{main:a2}).
 
 Next, we will present two subsections: in the first we explain how $SolveTour$\/ is executed, presetting the destinations of the pallets. In the second we will present the heuristics developed for node-by-node solutions.
 
@@ -679,7 +682,7 @@ Next, we will present two subsections: in the first we explain how $SolveTour$\/
 
 As we commented in the previous subsection, we will adopt the strategy of presetting the destinations of each pallet throughout the tour. This is feasible in practical cases where $1<K<m$. For this, each pallet $i$\/ also has a field $T^k_i$, $0\leq k \leq K$, which stores its next destination after being loaded at node $k$. For this reason, $T^k_i \in L_k$, $1 \leq i \leq m$, $0\leq k \leq K$.
 
-$SolveTour$\/ is described in Algorithm \ref{alg:tour}, where $\pi$\/ is a permutation of the nodes (excluding the base) that defines the order of visits in this tour, $method$\/ corresponds to a MIP solver or a heuristic for solving the node-by-node problems, and $tmax$\/ is the runtime limit that will be distributed among the $K+1$\/ legs of the tour.
+$SolveTour$\/ is described in Algorithm \ref{alg:tour}, where $\pi$\/ is a permutation of the nodes (excluding the base) that defines the order of visits in this tour, $method$\/ corresponds to a MIP solver or a heuristic for solving the node-by-node problems, and $tmax$\/ is the {\color{blue}runtime limit of the tour.}
 
 \begin{algorithm}[H]
 	\caption{Solving the tour $\pi$ with $method$}  \label{alg:tour}
@@ -693,7 +696,25 @@ $SolveTour$\/ is described in Algorithm \ref{alg:tour}, where $\pi$\/ is a permu
 		\State $score \gets 0$ \label{tour:score}
 		\State $cost  \gets 0$ \label{tour:cost}
 		
-		\For {$k \gets 0$ to $K$} \label{tour:loop1}	
+		{\color{violet}
+			
+		\State $V_{\pi}  \gets 0$ \label{tour:Vol} \Comment{tour volume}
+		
+		\For {$k \gets 0$ to $K$} \label{tour:loop0}
+		
+			\State $v_{\pi_k}  \gets \sum_{j=1}^{n_k} v_j$
+			\State $V_{k} \gets V_{k} + v_{\pi_k}$
+		
+		\EndFor
+		
+	}
+
+		\For {$k \gets 0$ to $K$} \label{tour:loop1}
+		
+		
+		\State $tnode_{\pi_k} = (v_{\pi_k}/V_{\pi}) * tmax$ \Comment{{\color{blue} node time limit calculation}}
+			
+	
 		\State $L_{\pi_k} \gets L - \{\pi_0,\pi_1,\ldots,\pi_k\}$  \label{tour:lk1}	 \Comment{the set of remaining nodes is updated}	
 		\State $T_i^{\pi_k} \gets -1$, $1 \leq i \leq m$ \label{tour:-1}             \Comment{the pallet destination is unset}
 		
@@ -706,7 +727,7 @@ $SolveTour$\/ is described in Algorithm \ref{alg:tour}, where $\pi$\/ is a permu
 		
 		\State $M \gets SetPalletsDestinations(M, \pi_k )$ \label{tour:dest2}
 		
-		\State $G_2 \gets SolveNode(method, \pi_k, G_1, tmax/(K+1))$  \label{tour:SolveNode}
+		\State $G_2 \gets SolveNode(method, \pi_k, G_1, tnode_{\pi_k})$  \label{tour:SolveNode}
 		
 		\State $s, \tau \gets ScoreAndTorque(\pi_k, G_2)$ \label{tour:analyse}
 		
@@ -930,7 +951,7 @@ The constraints (\ref{eq:ifA}) and (\ref{eq:ifB}) are equivalent to $X_{ij} =1$\
 
 \subsubsection{Node-by-node solutions with heuristics}
 
-One of the main objectives of this work was to find a quick heuristic that offers a good-quality solution for the node-by-node problem. Taking this into account, we design algorithms based on four known meta-heuristics: {\it Ant Colony Optimization} (ACO) \citep{Dorigo1992,DorigoManiezzoColorni1996}, {\it Noising Method Optimization} (NMO) \citep{CharonHudry1993,CharonHudry2001,Zhan2020}, {\it Tabu Search} (TS) \citep{Glover1986}, and {\it Greedy Randomized Adaptive Search Procedure} (GRASP) \citep{FeoResende1989}. We considered several ideas from the literature \citep{NiarFreville1997,Fidanova2006,Alonso2019, Zhan2020}, and we were careful to use the same data structures and procedures in all implementations to enforce fair results comparison.
+One of the main objectives of this work was to find a quick heuristic that offers a good-quality solution for the node-by-node problem. Taking this into account, we design algorithms based on four known meta-heuristics: {\it Ant Colony Optimization} (ACO) \citep{Dorigo1992,DorigoManiezzoColorni1996}, {\it Noising Method Optimization} (NMO) \citep{CharonHudry1993,CharonHudry2001,Zhan2020}, {\it Tabu Search} (TS) \citep{Glover1986}, {\it Greedy Randomized Adaptive Search Procedure} (GRASP) \citep{FeoResende1989}, and the Genetic Algorithm (GA) \citep{holland1992adaptation}. We considered several ideas from the literature \citep{NiarFreville1997, Fidanova2006, Alonso2019, Zhan2020, shah2020genetic}, and we were careful to use the same data structures and procedures in all implementations to enforce fair results comparison.
 
 However, the heuristic that presented better solutions was none of the previous ones. In this subsection, we will present a new heuristic for the node-by-node problem, called $Shims$. Like in mechanics, shims are collections of spacers to fill gaps, which may be composed of parts with different thicknesses (see Figure \ref{fig:shims}). This strategy is based on a practical observation: usually, subsets of smaller and lighter items are saved for later adjustments to the remaining available space.
 
@@ -1075,9 +1096,11 @@ Considering only the items that can be shipped at the node $\pi_k$, Figure \ref{
 	\end{algorithmic}
 \end{algorithm}
 
-{\color{blue}The arguments $threshold_1$ and $threshold_2$ are the volume thresholds for $\eta_1$ and $\eta_2$ calculations, respectively.
+{\color{violet}
+	
+	The arguments $threshold_1$ and $threshold_2$ are the volume thresholds for $\eta_1$ and $\eta_2$ calculations, respectively.
 
-The argument $tmax$ is the maximum time for Shims to solve a node. It is proportional to the sum of the candidate items volumes in each node, in relation to the sum of all nodes $tmax$, and the maximum time to solve the tour.
+The argument $tmax$ is the maximum time for {\it Shims} to solve a node. It is proportional to the sum of the candidate items volumes in each node, in relation to the sum of all nodes volumes, and the maximum time to solve the tour.
 
 }
 
@@ -1210,7 +1233,7 @@ For each generated $t^k_j$ item, its destination is randomly selected (line \ref
 
 In the tests performed, we used a 64-bit, 16 GB, 3.6 GHz, eight-core processor with {\it Linux Ubuntu 22.04.1 LTS 64-bit} as the operational system and {\it Python 3.10.4}\/ as the programming language. We also used the well-known solver $Gurobi$\/ ({\tt www.gurobi.com}), version 9.5.2.
 
-We ran Algorithm \ref{alg:main} considering the five scenarios from Table \ref{tab:scenarios}, three values for  $surplus$\/ from $\{1.2, 1.5, 2.0\}$, four values for $tmax$\/ from $\{240s, 1200s, 2400s, 3600s\}$, and six different $method$\/ for the node-by-node solution: $Gurobi$\/ (see \ref{solver}), ACO, NMO, TS, GRASP, and $Shims$\/ (Algorithm \ref{alg:shims}). 
+We ran Algorithm \ref{alg:main} considering the five scenarios from Table \ref{tab:scenarios}, three values for  $surplus$\/ from $\{1.2, 1.5, 2.0\}$, four values for $tmax$\/ from $\{240s, 1200s, 2400s, 3600s\}$, and seven different methods for the node-by-node solution: $Gurobi$\/ (see \ref{solver}), ACO, NMO, TS, GRASP, GA and $Shims$\/ (Algorithm \ref{alg:shims}). 
 
 For $Gurobi$\/ to be able to solve the largest possible number of tests without memory overflow, we set its parameter {\it MIPgap}\/ to 1\%. This shortens its runtime, in addition to ensuring that its objective function $f$\/ is at most 1\% of the optimal solution. For more details, see {\tt www.support.gurobi.com}.
 
@@ -1228,6 +1251,7 @@ For $Gurobi$\/ to be able to solve the largest possible number of tests without 
 	ACO           & 2, 3          & 4, 5 & {\color{red}25}, {\color{red}61}  \\
 	GRASP         & 1             & 4, 5 & {\color{red}28}, {\color{red}55}  \\
 	TS            & -             & 5    & {\color{red}44}  \\
+	GA            & -             & 1,2,3,4,5  & {\color{red}did not solve}  \\
 	\midrule
 	{\it Gurobi}  & 1, 2, 3, 4    & 5    & {\color{red}did not solve}  \\
 	{\it Shims}   & 1, 2, 3, 4, 5 & -    & {\bf 3.26} \\
@@ -1237,6 +1261,20 @@ For $Gurobi$\/ to be able to solve the largest possible number of tests without 
 
 \end{table}
 
+{\color{violet}
+
+As to the genetic algorithm exclusion from the comparisons tests, we must consider that:
+\vspace{-2mm}
+
+\begin{itemize}
+	\setlength\itemsep{-0.3em}	
+	\item The palletization planning of 200 to 1000 items per node in a set of 18 aircraft pallets may be an inadequate problem to be solved with GA, because large chromosome sizes, like 18,000-dimension arrays, can pose significant challenges for each generation to evaluate individual fitness, which demonstrated to be resource-intensive.
+	\item Large chromosomes can slow GA convergence due to the vast search space, requiring more generations to find optimal solutions.
+	\item Efficient encoding and decoding of the problem into the chromosome and decoding solutions is crucial for a 18,000-dimension array. 
+	\item Also, the design of the fitness function becomes more critical as chromosome size increases, as it needs to guide the evolutionary process without being overly computationally demanding.
+\end{itemize}
+
+}
 
 \subsubsection{Shims results}
 
