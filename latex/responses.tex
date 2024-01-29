@@ -435,10 +435,10 @@ The inclusion of more figures to illustrate the flow, principle, and results of 
 			\centering
 			
 		%% Make the boxes
-\node [mybox] (first)                        {Select:\\ 1. scenario\\2. surplus\\3. time limit};
-\node [mybox, right=0.7cm of first] (second) {Config:\\4. parameters\\5. cost matrix\\6. pallets\\7. items};
-\node [mybox, right=0.7cm of second] (third) {8. Define tour\\     schema:\\- All tours\\ \ \ \ (K-1)!\\ \ \ \ or\\- Solve a TSP\\ \ \ \ (set of tours))};
-\node [mybox, right=0.7cm of third] (fourth) {Solve ACLPP+RPDP:\\9. Many tours\\ \ \ \ (node-by-node)\\10. Select best tour};
+\node [mybox] (first)                        { \small {\bf Select:}\\ \small 1. scenario\\ \small 2. surplus\\ \small 3. time limit};
+\node [mybox, right=0.7cm of first] (second) { \small {\bf Config:}\\ \small 4. parameters\\ \small 5. cost matrix\\ \small 6. pallets\\ \small 7. items};
+\node [mybox, right=0.7cm of second] (third) { \small {\bf Define tour}\\  \small {\bf schema:}\\ \small 8. All K! tours\\ \ \ \  \small or\\ \small 8. Solve a TSP\\ \small  \ \ \ (set of tours))};
+\node [mybox, right=0.7cm of third] (fourth) { \small {\bf Solve ACLPP+RPDP:}\\ \small 9. Many tours\\ \small  \ \ \ (node-by-node)\\ \small 10. Select best tour};
 
 %% Draw arrows between them
 \node[myarrow] at ([xshift=8pt]first.east) {\phantom{\tiny{aaa}}};

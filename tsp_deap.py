@@ -129,10 +129,10 @@ if __name__ == "__main__":
 
     startTime = time.perf_counter()
 
-    # distances_file = './params/distances15.txt'
-    distances_file = './params/distances7.txt'
+    distances_file = './params/distances15.txt'
+    # distances_file = './params/distances7.txt'
 
-    tours = getTours(distances_file, 7)
+    tours = getTours(distances_file, 15)
 
     base_node = "GRU"
 
@@ -144,7 +144,9 @@ if __name__ == "__main__":
 
         icaos = rotate(icaos, base_node)
 
-        print(icaos)
+        print(icaos, tour.cost)
+
+        break
 
         # origin = tour.nodes[0]
         # stour = f"{origin.ICAO} "

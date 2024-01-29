@@ -172,7 +172,7 @@ As a real case study, we consider a crucial network for the {\it Brazilian Air F
 	\end{minipage}\hfill 
 	\begin{minipage}{0.42\linewidth}
 		\centering
-		\includegraphics[scale=0.17]{nodes.png}
+		\includegraphics[scale=0.21]{nodes.png}
 		\captionof{figure}{A route with 7 airports}
 		\label{fig:nodes}
 	\end{minipage}
@@ -241,13 +241,13 @@ As for the size of the problem dealt with in this work, addressing the scale of 
 
 In practical terms, especially within the air transport sector, the size and complexity of a TSP can vary significantly depending on several factors:
 
-\textbf{Fleet and Route Planning}: For airline operations, the problem isn't just about finding the shortest path through a set of points but also involves scheduling, aircraft assignment, crew scheduling, and maintenance planning. This multi-dimensional complexity transforms a standard TSP into a more intricate problem in our study, the Pickup and Delivery Problem (PDP).
+\textbf{Fleet and Route Planning}: For airline operations, the problem isn't just about finding the shortest path through a set of points; it also involves scheduling, aircraft assignment, crew scheduling, maintenance planning, and delivering the right cargo to the right client. This last operation task complexity transforms a standard TSP into a more intricate problem in our study, the Pickup and Delivery Problem (PDP).
 
-\textbf{Operational Constraints}: Factors like weather, air traffic control restrictions, and the availability of take-off and landing slots make real-world TSP scenarios in air transport even more challenging. These constraints add layers of complexity that significantly depart from the theoretical TSP model.
+\textbf{Operational Constraints}: Factors like weather, air traffic control restrictions, and the availability of take-off and landing slots make real-world TSP scenarios in air transport even more challenging. Although we do not deal with these constraints, they add layers of complexity that significantly depart from the theoretical TSP model.
 
 \textbf{Dynamic Nature}: Unlike the static nature of classical TSP, real-world problems in air transport are highly dynamic. Routes need to be optimized continuously as conditions change, requiring algorithms that can adapt in real-time or near-real-time.
 
-In practical air transport scenarios, the size of a TSP can be less about the sheer number of nodes and more about the complexity and dynamic nature of the problem, which in our case (a single aircraft in a single day) is rarely expected to be more than seven nodes. Despite this, at the end of this work, we intend to submit the best method found to a more challenging 15-node problem as a validation test.
+In practical air transport scenarios, the size of a TSP can be less about the sheer number of nodes and more about the complexity and dynamic nature of the problem, which in our case (a single aircraft in a single day) is rarely expected to be more than seven nodes. Despite this, at the end of this work, we to submit the best method found to a more challenging 15-node problem as a validation test.
 }
 
 \subsection{Operational premises}
@@ -568,13 +568,13 @@ In practical cases, we know that a common aircraft has $m=18$\/ pallets, flight 
 	
 	\item We consider that the number of destinations is smaller than the number of pallets, that is, $K < m$. We also avoid the trivial case where $K=1$. With this premise, we can preset the destinations of the pallets at each shipping node, reserving for each destination a number of pallets proportional to the volume available. We could have used another criterion, but it was observed in the experiments that the volume is more constrictive in airlift.
 	
-	\item As the number of nodes is small, we have the possibility to check all possible tours, selecting the one that provides the best value for the objective function. For this reason, a maximum runtime $tmax$\/ per tour is established. In the tests carried out in this work, $tmax \leq 3600s$.
+	\item As the number of nodes is small, we have the possibility to check all possible tours, selecting the one that provides the best value for the objective function. For this reason, a maximum runtime $tmax$\/ per tour is established. In the tests carried out in this work, {\color{blue} $tmax \leq [240s, 1200s, 2400s, 3600s]$}.
 	
 	\item At each node, we will use a MIP solver or heuristics to check which method offers the best result within the runtime limit. As there are $K!$ tours, each of them with $K+1$\/ legs, each solution per node will have a runtime limit equal to $tmax/(K+1)!$.
 	
 	\item Just for speculation, we will especially test the two tours with the shortest distance, corresponding to the TSP solutions at the nodes considered. In these cases, the runtime limit per node will be $tmax/(K+1)$.
 	
-	\item {\color{blue} Lately, the time limit to solve a node will be adjusted to be proportional to the sum of volumes of the candidate items of the node. }
+	\item {\color{blue} Lately, the time limit to solve a node will be adjusted to be proportional to the sum of volumes of the candidate items of the node in relation to the sum of volumes of the entire tour. }
 	
 \end{itemize}
 
@@ -632,7 +632,7 @@ Scenario 6 will be used only for the best method validation.
 		%% Make the boxes
 		\node [mybox] (first)                        { \small {\bf Select:}\\ \small 1. scenario\\ \small 2. surplus\\ \small 3. time limit};
 		\node [mybox, right=0.7cm of first] (second) { \small {\bf Config:}\\ \small 4. parameters\\ \small 5. cost matrix\\ \small 6. pallets\\ \small 7. items};
-		\node [mybox, right=0.7cm of second] (third) { \small 8. {\bf Define tour}\\  \small      schema:\\ \small - All tours\\ \ \ \ (K-1)!\\ \ \ \  \small or\\ \small - Solve a TSP\\ \small  \ \ \ (set of tours))};
+		\node [mybox, right=0.7cm of second] (third) { \small {\bf Define tour}\\  \small {\bf schema:}\\ \small 8. All K! tours\\ \ \ \  \small or\\ \small 8. Solve a TSP\\ \small  \ \ \ (set of tours))};
 		\node [mybox, right=0.7cm of third] (fourth) { \small {\bf Solve ACLPP+RPDP:}\\ \small 9. Many tours\\ \small  \ \ \ (node-by-node)\\ \small 10. Select best tour};
 		
 		%% Draw arrows between them
@@ -646,7 +646,7 @@ Scenario 6 will be used only for the best method validation.
 \end{figure}
 
 {\color{blue}
-Figure \ref{fig:flow} depicts the Algorithm \ref{alg:main} for easy understanding of the main flow. (1.) Select a scenario from Table \ref{tab:scenarios}. (2.) Select a volume surplus (1.2, 1.5, or 2.0). (3.) Establish a time limit (240s, 1200s, 2400s, or 3600s). (4.) Configure the parameters presented in the mathematical formulation. (5.) Load the distance matrix and calculate the matrix cost according to the aircraft characteristics. (6.) Load the pallet configuration parameters. (7.) Load the item instance (all items to be transported) into memory. (8.) Choose a tour schema. Until 7 nodes, it is practical to generate (K-1)! tours. For a larger number of nodes, we recommend using a TSP heuristic that generates a set of similar suboptimal tours. (9.) and (10.) solve all tours and select the best.
+Figure \ref{fig:flow} depicts the Algorithm \ref{alg:main} for easy understanding of the main flow. (1.) Select a scenario from Table \ref{tab:scenarios}. (2.) Select a volume surplus (1.2, 1.5, or 2.0). (3.) Establish a time limit (240s, 1200s, 2400s, or 3600s). (4.) Configure the parameters presented in the mathematical formulation. (5.) Load the distance matrix and calculate the matrix cost according to the aircraft characteristics. (6.) Load the pallet configuration parameters. (7.) Load the item instance (all items to be transported) into memory. (8.) Choose a tour schema. Until 7 nodes, it is practical to generate K! tours. For a larger number of nodes, we recommend using a TSP heuristic that generates a set of similar suboptimal tours. (9.) and (10.) solve all tours and select the best.
 }
 
 \begin{table}[h]
