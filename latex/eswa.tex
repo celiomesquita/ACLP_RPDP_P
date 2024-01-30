@@ -26,7 +26,7 @@
 
 \usepackage{caption}
 \captionsetup{labelfont=bf}
-\captionsetup{skip=0pt}
+\captionsetup{skip=2pt}
 
 \usepackage{pgfplots}
 \pgfplotsset{compat=newest}
@@ -49,7 +49,7 @@
 
 % lets get the exact color
 \usepackage{xcolor}
-\definecolor{myblue}{HTML}{B0D7FF}
+\definecolor{myblue}{HTML}{D6EAF8} % A9CCE3  B0D7FF
 
 \tikzset{
 	mybox/.style={rectangle,
@@ -66,6 +66,11 @@
 		minimum width=0.6cm,
 		single arrow
 	},
+	downarrow/.style={draw=black,
+	fill=white,
+	minimum width=0.6cm,
+	single arrow
+	},
 	longarrow/.style={draw=none,
 		shading=axis,
 		left color=white,
@@ -75,6 +80,8 @@
 		anchor=east
 	}
 }
+
+
 
 
 
@@ -629,14 +636,44 @@ Scenario 6 will be used only for the best method validation.
 
 \begin{figure}[htp]
 	
+	
 	\centering
+	\fbox{
 	\begin{tikzpicture}
-		
+				
 		%% Make the boxes
-		\node [mybox] (first)                        { \small {\bf Select:}\\ \small 1. scenario\\ \small 2. surplus\\ \small 3. time limit};
-		\node [mybox, right=0.7cm of first] (second) { \small {\bf Config:}\\ \small 4. parameters\\ \small 5. cost matrix\\ \small 6. pallets\\ \small 7. items};
-		\node [mybox, right=0.7cm of second] (third) { \small {\bf Define tour}\\  \small {\bf schema:}\\ \small 8. All K! tours\\ \ \ \  \small or\\ \small 8. Solve a TSP\\ \small  \ \ \ (set of tours))};
-		\node [mybox, right=0.7cm of third] (fourth) { \small {\bf Solve ACLPP+RPDP:}\\ \small 9. Many tours\\ \small  \ \ \ (node-by-node)\\ \small 10. Select best tour};
+		\node [mybox] (first)                        { \small {\bf Select:}\\ 
+			\small 1. scenario\\ 
+			\small 2. surplus\\ 
+			\small 3. time limit};
+		
+		\node [mybox, right=0.7cm of first] (second) { \small {\bf Config:}\\ 
+			\small 4. parameters\\ \small 5. cost matrix\\ 
+			\small 6. pallets\\ 
+			\small 7. items};
+		
+		\node [mybox, right=0.7cm of second] (third) { \small {\bf Define tour}\\  
+			\small {\bf schema:}\\ 
+			\small 8. All K! tours\\ \ \ \  
+			\small or\\ 
+			\small 8. Solve a TSP\\ 
+			\small  \ \ \ (set of tours))};
+		
+		\node [mybox, right=0.7cm of third] (fourth) { \small {\bf Solve ACLPP+RPDP:}\\ 
+			\small 9. Many tours{\bf *}\\ 
+			\small 10. Select best tour};
+		
+		\node [mybox, below=0.7cm of third] (fifth) { \small {\bf *Solve a tour:}\\
+			\small \ \ \ {\it - For each node:}\\
+			\small \ \ \ \ \ {a. Unload some pallets}\\
+			\small \ \ \ \ \ {b. Arrange remaining pallets to balance cargo}\\
+			\small \ \ \ \ \ {c. Set empty pallets destinations}\\
+			\small \ \ \ \ \ {d. \it For each pallet:}\\
+			\small \ \ \ \ \ \ \ \ \ {Solve an ACLPP with WBP and PDP constraints}\\
+			\small \ \ \ \ \ {e. Calculate node score and torque}\\
+			\small \ \ \ {\it - Return tour Score/Cost}
+
+	};
 		
 		%% Draw arrows between them
 		\node[myarrow] at ([xshift=8pt]first.east) {\phantom{\tiny{aaa}}};
@@ -644,6 +681,7 @@ Scenario 6 will be used only for the best method validation.
 		\node[myarrow] at ([xshift=8pt]third.east) {\phantom{\tiny{aaa}}};
 		
 	\end{tikzpicture} 
+}
 	\caption{Solution main flow}
 	\label{fig:flow}
 \end{figure}
@@ -951,7 +989,13 @@ The constraints (\ref{eq:ifA}) and (\ref{eq:ifB}) are equivalent to $X_{ij} =1$\
 
 \subsubsection{Node-by-node solutions with heuristics}
 
+{\color{violet}
+	
 One of the main objectives of this work was to find a quick heuristic that offers a good-quality solution for the node-by-node problem. Taking this into account, we design algorithms based on four known meta-heuristics: {\it Ant Colony Optimization} (ACO) \citep{Dorigo1992,DorigoManiezzoColorni1996}, {\it Noising Method Optimization} (NMO) \citep{CharonHudry1993,CharonHudry2001,Zhan2020}, {\it Tabu Search} (TS) \citep{Glover1986}, {\it Greedy Randomized Adaptive Search Procedure} (GRASP) \citep{FeoResende1989}, and the Genetic Algorithm (GA) \citep{holland1992adaptation}. We considered several ideas from the literature \citep{NiarFreville1997, Fidanova2006, Alonso2019, Zhan2020, shah2020genetic}, and we were careful to use the same data structures and procedures in all implementations to enforce fair results comparison.
+
+As \citep{PeerlinckAmy2022MFEO} applied the DEAP (Distributed Evolutionary Algorithms in Python) to solve a Multi-Objective Knapsack Problem, we also decided to apply this evolutionary package to implement a GA solution for the ACLPP.
+
+}
 
 However, the heuristic that presented better solutions was none of the previous ones. In this subsection, we will present a new heuristic for the node-by-node problem, called $Shims$. Like in mechanics, shims are collections of spacers to fill gaps, which may be composed of parts with different thicknesses (see Figure \ref{fig:shims}). This strategy is based on a practical observation: usually, subsets of smaller and lighter items are saved for later adjustments to the remaining available space.
 
@@ -1115,7 +1159,7 @@ For each pallet $i$, its $n_{\pi_k}$\/ possible edges $e_{ij}$\/ are considered 
 	\setlength\itemsep{-0.3em}
 	
 	\item In the {\it greedy phase}\/ (lines \ref{shims:pallets}-\ref{shims:endfirst}), a partial solution for each pallet $i$\/ is constructed by adding edges following $\theta_{ij}$\/ order.
-	The $\eta_1$\/ index corresponds to the accumulated volume equal to $V_i \times {\color{blue}threshold_1}$. In $\eta_2$\/ index, this same accumulated volume reaches $V_i \times  {\color{blue}threshold_2}$. {\color{blue}The values of these thresholds were defined empirically by the {\it iRace}\/ tool \citep{LopezIbanezManuel2016}}.
+	The $\eta_1$\/ index corresponds to the accumulated volume equal to $V_i \times {\color{blue}threshold_1}$. In $\eta_2$\/ index, this same accumulated volume reaches $V_i \times  {\color{blue}threshold_2}$. {\color{blue}The values of these thresholds were defined empirically by the {\it irace}\/ tool \citep{LopezIbanezManuel2016}}.
 	
 	\item In the {\it composition phase}\/ (lines \ref{shims:beginsecond}-\ref{shims:endsecond}), a set of shims named $Set$\/ is created for each pallet $i$, where each shim is formed by a set of edges in the range $[\eta_1,\eta_2]$, whose total volume is limited by $slack_i$. In this phase, the heuristic that provided the best results, both in terms of time and quality, is based on {\it First-Fit Decreasing}, which is an approximation algorithm for the {\it Bin Packing Problem}\/ \citep{JohnsonGarey1985}. Basically, shims are created by accumulating the following edges, taking $slack_i$\/ as a limit.
 	
@@ -1123,8 +1167,8 @@ For each pallet $i$, its $n_{\pi_k}$\/ possible edges $e_{ij}$\/ are considered 
 	
 \end{itemize}
 
-{\color{blue}
-	iRace (Iterated Racing for Automatic Algorithm Configuration) streamlines the tuning of optimization algorithms by iteratively testing and eliminating weaker parameter configurations through statistical comparisons. It focuses computational resources on the most promising settings. This method significantly cuts down the time and effort needed to find optimal or near-optimal parameters, proving effective across various application domains.
+{\color{violet}
+	{\it irace} (Iterated Racing for Automatic Algorithm Configuration) streamlines the tuning of optimization algorithms by iteratively testing and eliminating weaker parameter configurations through statistical comparisons. Its application may be understood, from a Machine Learning standpoint, as the task of identifying optimal parameter values for solving new problem instances by leveraging knowledge gained from a set of training problem examples. This method significantly cuts down on the time and effort needed to find optimal or near-optimal parameters, proving effective across various application domains.
 }
 
 
@@ -1165,7 +1209,9 @@ In the generation of test instances, we use two types of random selections:
 \begin{itemize}
 	\setlength\itemsep{-0.3em}
 	\item $RandomInt(i_1,i_2)$: randomly selects a integer number in $[i_1,i_2]$, where $i_1$ and $i_2$ are integer numbers;
-	\item $Roulette(set)$ biased through $\phi$: selects an element from $set$, where the probability of each element is proportional to the value of a given function $\phi$\/ defined on $set$.
+{\color{violet}
+\item $Roulette()$: a proportional selection function that is biased through $P$ (Table \ref{tab:weights}).
+}
 \end{itemize}
 
 The procedure $ItemsGeneration$, which generates $N$ (all items to be moved among the nodes), is described in Algorithm \ref{alg:itemsgen}.
@@ -1205,11 +1251,11 @@ For each generated $t^k_j$ item, its destination is randomly selected (line \ref
 
 
 {\color{blue}
-	After the items were generated, some experiments with the \textit{iRace} tool were executed to determine the values for parameters $threshold_1$ and $threshold_2$ used in \textit{Shims}, whose results are presented in Table \ref{tab:irace}.
+	After the items were generated, some experiments with the \textit{irace} tool were executed to determine the values for parameters $threshold_1$ and $threshold_2$ used in \textit{Shims}, whose results are presented in Table \ref{tab:irace}.
 	
 	\begin{table}[H]
 	\centering
-	\caption{\textit{iRace} testing results}  \label{tab:irace}
+	\caption{\textit{irace} testing results}  \label{tab:irace}
 	\footnotesize
 	\begin{tabular}{cccc}
 		\toprule
@@ -1225,7 +1271,7 @@ For each generated $t^k_j$ item, its destination is randomly selected (line \ref
 	\normalsize
 \end{table}
 	
-	For these tests, we considered the odd instances (1, 3, 5, 7) as the \textbf{training} set and the even instances (2, 4, 6) as the \textbf{testing} set for the \textit{iRace} runs. We supplied \textit{iRace} for $threshold_1$ determination, the range [0.8, 1.0], and for $threshold_2$, the range [1.0, 2.0]. The number of iterations in each experiment was limited to 3000 executions for \textit{iRace} to have plenty of data for its statistical tests. More detail about these configurations may be found on the \textit{iRace} user guide in {\tt cran.r-project.org/web/packages/irace/irace.pdf}.
+	For these tests, we considered the odd instances (1, 3, 5, 7) as the \textbf{training} set and the even instances (2, 4, 6) as the \textbf{testing} set for the \textit{irace} runs. We supplied \textit{irace} for $threshold_1$ determination, the range [0.8, 1.0], and for $threshold_2$, the range [1.0, 2.0]. The number of iterations in each experiment was limited to 3000 executions for \textit{irace} to have plenty of data for its statistical tests. More detail about these configurations may be found on the \textit{irace} user guide in {\tt cran.r-project.org/web/packages/irace/irace.pdf}.
 }
 
 
@@ -1442,9 +1488,6 @@ For this task, we implemented a TSP solution method based on the Genetic Algorit
 We implemented the GA with DEAP (Distributed Evolutionary Algorithms in Python) , a evolutionary computation framework available in {\tt github.com/deap/deap}. More details can be found in \citep{DEAP_JMLR2012}.
 
 
-\citep{PeerlinckAmy2022MFEO} applied DEAP to solve a Multi-Objective Knapsack Problem. This algorithm is adapted to solve the ACLPP in each node of this work's solution.
-
-
 	\begin{figure}[H]
 		\centering
 		\caption{\label{fig:brazil} {\it Shims/GA} best ACLP+RPDP tour \\
@@ -1482,7 +1525,8 @@ It is important to remember that this is not the shortest tour, but the one with
 
 In this work, we modelled and solved a real air transport problem named {\it Air Cargo Load Planning with Routing, Pickup, and Delivery Problem}\/ (ACLP+RPDP). For the first time in the literature, a {\it NP-hard}\/ problem that involves {\it simultaneously}\/ pallet assembly, load balancing, and route planning is addressed, where the cost-effectiveness of transport is maximized. Currently, there is no commercial software available for this problem.
 
-We adopted some simplifications that are not critical, but that allowed for an unprecedented solution to this problem considering more than two nodes. In practical cases, the number $K$\/ of nodes, excluding the base, is small ($K \leq 6$), each of which has hundreds of items to be shipped. Considering a real aircraft, we have developed some node-by-node solutions. This allows us to test two strategies: find a solution using the shortest tours, or enumerate all $K!$\/ tours and choose the best. The complete process can be executed quickly on a handheld computer, offering good results and reducing stress for the transport planners.
+{\color{blue}
+We adopted some simplifications that are not critical, but that allowed for an unprecedented solution to this problem considering more than two nodes. In practical cases, the number $K$\/ of nodes, excluding the base, is small ($K \leq 6$), each of which has hundreds of items to be shipped. Considering a real aircraft, we have developed some node-by-node solutions. The complete process can be executed quickly on a handheld computer, offering good results and reducing stress for the transport planners.}
 
 As validation, we carried out tests in several real air transport scenarios. In these cases, the solution process can establish, in less than four minutes, a flight tour for a single aircraft with a good distribution of load on pallets to be put in the cargo bay, enforcing the loaded aircraft balance, maximising the total score, and minimising fuel consumption along the planned route, which is beneficial to reduce carbon emissions. This output is an essential part of airlift: it guarantees flight safety, makes ground operations more efficient, and makes sure that each item gets to its right destination.
 
