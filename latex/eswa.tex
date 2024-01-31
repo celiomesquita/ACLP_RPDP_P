@@ -66,11 +66,6 @@
 		minimum width=0.6cm,
 		single arrow
 	},
-	downarrow/.style={draw=black,
-	fill=white,
-	minimum width=0.6cm,
-	single arrow
-	},
 	longarrow/.style={draw=none,
 		shading=axis,
 		left color=white,
@@ -80,9 +75,6 @@
 		anchor=east
 	}
 }
-
-
-
 
 
 \journal{Expert Systems with Applications}
@@ -672,6 +664,8 @@ Scenario 6 will be used only for the best method validation.
 			\small \ \ \ \ \ \ \ \ \ {Solve an ACLPP with WBP and PDP constraints}\\
 			\small \ \ \ \ \ {e. Calculate node score and torque}\\
 			\small \ \ \ {\it - Return tour Score/Cost}
+			
+					
 
 	};
 		
@@ -680,11 +674,54 @@ Scenario 6 will be used only for the best method validation.
 		\node[myarrow] at ([xshift=8pt]second.east) {\phantom{\tiny{aaa}}};
 		\node[myarrow] at ([xshift=8pt]third.east) {\phantom{\tiny{aaa}}};
 		
+		\path[->] (third) edge (fifth);
+		
 	\end{tikzpicture} 
 }
 	\caption{Solution main flow}
 	\label{fig:flow}
 \end{figure}
+
+\begin{figure}[htp]
+	\centering
+	\fbox{
+		\begin{tikzpicture}
+			\node [mybox] (one) { \small {\bf Input data:}\\
+				\small \ \ \ {Aircraft parameters}\\
+				\small \ \ \ {Airports and distances}\\
+				\small \ \ \ {$scenario$ \ \ ($K$ and $L$)}\\
+				\small \ \ \ {$surplus = \sum_{j=1}^{n_k} v_j$/$\sum_{i=1}^{m} V_i$ }\\
+				\small \ \ \ {$tmax$ \ \ (overall runtime limit)}\\
+				\small {{\bf Requirement:} $K < m$}
+			};
+			
+			\node [mybox, below=0.7cm of one] (two) { \small {\bf Tours definition:}\\
+				\small \ \ \ {{\bf if} $K \leq 6$}\\
+				\small \ \ \ \ \ \ {$ntours = 2$ \ \ (optimal TSP solutions)}\\
+				\small \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\it or}\\				
+				\small \ \ \ \ \ \ {$ntours = K!$ \ \ (all possible tours)}\\
+				\small \ \ \ {\bf else}\\
+				\small \ \ \ \ \ \ {$ntours = 100$ \ \ (best tours obtained with TSP heuristic)}
+			};
+			
+			\node [mybox, below=0.7cm of two] (three) { \small {\bf On each tour of the $ntours$:}\\
+				\small \ \ \ {Calculation of a node-by-node solution (divide runtime according to shipment volumes)}\\
+				\small \ \ \ {On each node of current tour:}\\
+				\small \ \ \ \ \ \ \ {- Relocate packed contents with torque optimization}\\
+				\small \ \ \ \ \ \ \ {- Predefine pallet destinations according to shipment volumes}\\
+				\small \ \ \ \ \ \ \ {- Find a node solution (MIP, Shims, NMO, ACO, GRASP, TS, GA) }\\
+				\small \ \ \ \ \ \ \ {- Accumulate values obtained from score, torque and cost}
+			};
+		
+		
+		\node[myarrow, rotate=-90] at ([yshift=-8pt]two.south) {\phantom{\tiny{aaa}}};
+		\node[myarrow, rotate=-90] at ([yshift=-8pt]one.south) {\phantom{\tiny{aaa}}};		
+		\end{tikzpicture} 
+	}
+	\caption{Solution process}
+	\label{fig:process}
+\end{figure}
+
 
 {\color{blue}
 Figure \ref{fig:flow} depicts the Algorithm \ref{alg:main} for easy understanding of the main flow. (1.) Select a scenario from Table \ref{tab:scenarios}. (2.) Select a volume surplus (1.2, 1.5, or 2.0). (3.) Establish a time limit (240s, 1200s, 2400s, or 3600s). (4.) Configure the parameters presented in the mathematical formulation. (5.) Load the distance matrix and calculate the matrix cost according to the aircraft characteristics. (6.) Load the pallet configuration parameters. (7.) Load the item instance (all items to be transported) into memory. (8.) Choose a tour schema. Until 7 nodes, it is practical to generate K! tours. For a larger number of nodes, we recommend using a TSP heuristic that generates a set of similar suboptimal tours. (9.) and (10.) solve all tours and select the best.
