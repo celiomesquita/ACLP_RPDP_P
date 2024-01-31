@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2023.5.31)  31 JAN 2024 11:38
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2023.5.31)  31 JAN 2024 17:41
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -843,61 +843,67 @@ Overfull \hbox (2.22168pt too wide) has occurred while \output is active
 
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
-Overfull \hbox (5.81361pt too wide) in paragraph at lines 156--156
+Overfull \hbox (2.18436pt too wide) in paragraph at lines 137--139
+[]\T1/cmr/m/n/10 Another im-por-tant is-sue is man-ag-ing fuel con-sump-tion. T
+o get an idea of the in-flu-ence of CG dis-place-ment
+ []
+
+
+Overfull \hbox (5.81361pt too wide) in paragraph at lines 174--174
  []|\T1/cmr/m/n/8 IATA*| 
  []
 
 
-Overfull \hbox (1.93123pt too wide) in paragraph at lines 156--156
+Overfull \hbox (1.93123pt too wide) in paragraph at lines 174--174
  []|\T1/cmr/m/n/8 CWB|
  []
 
 
-Overfull \hbox (1.93123pt too wide) in paragraph at lines 162--162
+Overfull \hbox (1.93123pt too wide) in paragraph at lines 180--180
  []|\T1/cmr/m/n/8 CWB| 
  []
 
 <nodes.png, id=18, 766.865pt x 737.75626pt>
 File: nodes.png Graphic file (type png)
 <use nodes.png>
-Package pdftex.def Info: nodes.png  used on input line 174.
+Package pdftex.def Info: nodes.png  used on input line 192.
 (pdftex.def)             Requested size: 161.0464pt x 154.93338pt.
-[2 <./nodes.png (PNG copy)>] [3] [4]
-<lateral.png, id=45, 1272.755pt x 474.77374pt>
+[2] [3 <./nodes.png (PNG copy)>] [4]
+<lateral.png, id=37, 1272.755pt x 474.77374pt>
 File: lateral.png Graphic file (type png)
 <use lateral.png>
-Package pdftex.def Info: lateral.png  used on input line 318.
+Package pdftex.def Info: lateral.png  used on input line 336.
 (pdftex.def)             Requested size: 280.00697pt x 104.45055pt.
  [5 <./lateral.png (PNG copy)>] [6]
-Overfull \hbox (12.59494pt too wide) in paragraph at lines 550--551
+[7]
+Overfull \hbox (12.59494pt too wide) in paragraph at lines 568--569
 []\T1/cmr/m/n/10 Once the as-sump-tions and the math-e-mat-i-cal mod-elling are
  pre-sented, it is pos-si-ble to see that ACLP+RPDP
  []
 
-[7]
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
 [8] [9]
 
-LaTeX Warning: Reference `main:f1' on page 10 undefined on input line 752.
+LaTeX Warning: Reference `main:f1' on page 10 undefined on input line 767.
 
 
-LaTeX Warning: Reference `main:f2' on page 10 undefined on input line 752.
+LaTeX Warning: Reference `main:f2' on page 10 undefined on input line 767.
 
 [10] [11] [12] [13]
 <shims.png, id=89, 602.25pt x 377.41pt>
 File: shims.png Graphic file (type png)
 <use shims.png>
-Package pdftex.def Info: shims.png  used on input line 1057.
+Package pdftex.def Info: shims.png  used on input line 1072.
 (pdftex.def)             Requested size: 150.56212pt x 94.35226pt.
 
-Overfull \hbox (18.41138pt too wide) in paragraph at lines 1059--1061
+Overfull \hbox (18.41138pt too wide) in paragraph at lines 1074--1076
 []$[]$
  []
 
 [14 <./shims.png (PNG copy)>]
-Overfull \hbox (9.30414pt too wide) in paragraph at lines 1185--1186
+Overfull \hbox (9.30414pt too wide) in paragraph at lines 1200--1201
 []\T1/cmr/m/n/10 The ar-gu-ments $\OML/cmm/m/it/10 threshold[]$ \T1/cmr/m/n/10 
 and $\OML/cmm/m/it/10 threshold[]$ \T1/cmr/m/n/10 are the vol-ume thresh-olds f
 or $\OML/cmm/m/it/10 ^^Q[]$ \T1/cmr/m/n/10 and $\OML/cmm/m/it/10 ^^Q[]$ \T1/cmr
@@ -905,13 +911,13 @@ or $\OML/cmm/m/it/10 ^^Q[]$ \T1/cmr/m/n/10 and $\OML/cmm/m/it/10 ^^Q[]$ \T1/cmr
  []
 
 [15]
-Overfull \hbox (21.64462pt too wide) in paragraph at lines 1211--1213
+Overfull \hbox (21.64462pt too wide) in paragraph at lines 1226--1228
 \T1/cmr/m/n/10 al-go-rithms by it-er-a-tively test-ing and elim-i-nat-ing weake
 r pa-ram-e-ter con-fig-u-ra-tions through sta-tis-ti-cal com-par-isons.
  []
 
 [16]
-Overfull \hbox (6.11086pt too wide) in paragraph at lines 1322--1323
+Overfull \hbox (6.11086pt too wide) in paragraph at lines 1337--1338
 []\T1/cmr/m/n/10 We ran Al-go-rithm 1[] con-sid-er-ing the five sce-nar-ios fro
 m Ta-ble 8[], three val-ues for $\OML/cmm/m/it/10 surplus$ \T1/cmr/m/n/10 from 
 $\OMS/cmsy/m/n/10 f\OT1/cmr/m/n/10 1\OML/cmm/m/it/10 :\OT1/cmr/m/n/10 2\OML/cmm
@@ -921,20 +927,20 @@ mr/m/n/10 ,
  []
 
 [17]
-Overfull \hbox (19.23468pt too wide) in paragraph at lines 1357--1358
+Overfull \hbox (19.23468pt too wide) in paragraph at lines 1372--1373
 \T1/cmr/m/n/10 ar-rays, can pose sig-nif-i-cant chal-lenges for each gen-er-a-t
 ion to eval-u-ate in-di-vid-ual fit-ness, which demon-strated
  []
 
 
-Overfull \hbox (3.57031pt too wide) in paragraph at lines 1367--1368
+Overfull \hbox (3.57031pt too wide) in paragraph at lines 1382--1383
 []\T1/cmr/m/n/10 Among the heuris-tics, we will present only the re-sults ob-ta
 ined by $\OML/cmm/m/it/10 Shims$\T1/cmr/m/n/10 , which had the best per-for-man
 ce.
  []
 
 [18]
-Overfull \hbox (6.58679pt too wide) in paragraph at lines 1489--1518
+Overfull \hbox (6.58679pt too wide) in paragraph at lines 1504--1533
  [][] 
  []
 
@@ -942,17 +948,17 @@ Overfull \hbox (6.58679pt too wide) in paragraph at lines 1489--1518
 <brazil.png, id=111, 635.37375pt x 630.355pt>
 File: brazil.png Graphic file (type png)
 <use brazil.png>
-Package pdftex.def Info: brazil.png  used on input line 1535.
+Package pdftex.def Info: brazil.png  used on input line 1550.
 (pdftex.def)             Requested size: 190.61359pt x 189.10796pt.
  [20 <./brazil.png>]
-Overfull \hbox (28.32541pt too wide) in paragraph at lines 1582--1583
+Overfull \hbox (28.32541pt too wide) in paragraph at lines 1597--1598
 \T1/cmr/m/n/10 draft prepa-ra-tion, In-ves-ti-ga-tion, Val-i-da-tion. \T1/cmr/b
 x/n/10 Car-los Al-berto Alonso Sanches: \T1/cmr/m/n/10 Con-cep-tu-al-iza-tion, 
 Method-ol-ogy,
  []
 
 
-Overfull \hbox (15.5109pt too wide) in paragraph at lines 1594--1595
+Overfull \hbox (15.5109pt too wide) in paragraph at lines 1609--1610
 []\T1/cmr/m/n/10 This re-search was par-tially sup-ported by the São Paulo Re-s
 earch Foun-da-tion (FAPESP), grant 2022/05803-3. 
  []
@@ -963,10 +969,10 @@ LaTeX Warning: There were undefined references.
 
  ) 
 Here is how much of TeX's memory you used:
- 28438 strings out of 480171
- 695959 string characters out of 5894489
- 1140110 words of memory out of 5000000
- 45898 multiletter control sequences out of 15000+600000
+ 28441 strings out of 480171
+ 696004 string characters out of 5894489
+ 1141110 words of memory out of 5000000
+ 45901 multiletter control sequences out of 15000+600000
  489856 words of font info for 80 fonts, out of 8000000 for 9000
  60 hyphenation exceptions out of 8191
  84i,16n,89p,1253b,857s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -1012,9 +1018,9 @@ t/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/texmf-dist/fonts
 public/amsfonts/cm/cmsy9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/
 amsfonts/symbols/msam10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/a
 msfonts/symbols/msbm10.pfb>
-Output written on eswa.pdf (23 pages, 970446 bytes).
+Output written on eswa.pdf (23 pages, 973341 bytes).
 PDF statistics:
- 916 PDF objects out of 1000 (max. 8388607)
+ 918 PDF objects out of 1000 (max. 8388607)
  202 compressed objects within 3 object streams
  0 named destinations out of 1000 (max. 500000)
  33 words of extra memory for PDF output out of 10000 (max. 10000000)

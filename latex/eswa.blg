@@ -4,45 +4,45 @@ The top-level auxiliary file: eswa.aux
 The style file: apalike.bst
 Database file #1: bib.bib
 Warning--empty booktitle in MiguelOptimalAP
-You've used 39 entries,
+You've used 40 entries,
             1935 wiz_defined-function locations,
-            755 strings with 10959 characters,
-and the built_in function-call counts, 15968 in all, are:
-= -- 1558
-> -- 605
-< -- 29
-+ -- 234
-- -- 198
-* -- 1365
-:= -- 2727
-add.period$ -- 117
-call.type$ -- 39
-change.case$ -- 291
-chr.to.int$ -- 39
-cite$ -- 40
-duplicate$ -- 600
-empty$ -- 1154
-format.name$ -- 267
-if$ -- 3180
+            762 strings with 11109 characters,
+and the built_in function-call counts, 16245 in all, are:
+= -- 1587
+> -- 612
+< -- 31
++ -- 236
+- -- 200
+* -- 1383
+:= -- 2782
+add.period$ -- 121
+call.type$ -- 40
+change.case$ -- 297
+chr.to.int$ -- 40
+cite$ -- 41
+duplicate$ -- 612
+empty$ -- 1172
+format.name$ -- 270
+if$ -- 3232
 int.to.chr$ -- 1
 int.to.str$ -- 0
 missing$ -- 39
-newline$ -- 197
-num.names$ -- 117
-pop$ -- 234
+newline$ -- 203
+num.names$ -- 120
+pop$ -- 237
 preamble$ -- 1
-purify$ -- 294
+purify$ -- 300
 quote$ -- 0
-skip$ -- 459
+skip$ -- 468
 stack$ -- 0
-substring$ -- 1236
-swap$ -- 80
-text.length$ -- 7
+substring$ -- 1248
+swap$ -- 81
+text.length$ -- 8
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 230
+type$ -- 236
 warning$ -- 1
-while$ -- 123
+while$ -- 125
 width$ -- 0
-write$ -- 506
+write$ -- 521
 (There was 1 warning)
