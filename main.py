@@ -342,13 +342,13 @@ if __name__ == "__main__":
 
     plot      = False
     testing   = False
-    leastCost = True # Shortest
-    # leastCost = False # All K!
+    # shortest = True # 2 shortest tours
+    shortest = False # All K!
     iRace_testing = False
 
-    scenarios = [2,3,4,5,6] # represent 1,2,3,4,5 in the article
+    # scenarios = [2,3,4,5,6] # represent 1,2,3,4,5 in the article
     # scenarios = [7] # 7: 15-node problem
-    # scenarios = [2]
+    scenarios = [4]
 
     # folder = "surplus20"  # 1.2
     
@@ -398,7 +398,7 @@ if __name__ == "__main__":
     # method = "GRASP"
     # method = "NMO"
 
-    print(f"timeLimit:{timeLimit} folder: {folder} method: {method}")
+    print(f"timeLimit:{timeLimit}    folder: {folder}    method: {method}   shortest: {shortest}")
 
     # tipo = "KP"
     tipo = "FFD"
@@ -451,7 +451,7 @@ if __name__ == "__main__":
         # time limit per tour
         tourTime = timeLimit/common.factorial(cfg.numNodes)
 
-        if leastCost: # the 2 shortest tours
+        if shortest: # the 2 shortest tours
             tourTime = timeLimit/2
 
         instanceTime = 0.
@@ -489,7 +489,7 @@ if __name__ == "__main__":
             bestTour = []
             for pi, tour in enumerate(tours):
 
-                if leastCost and pi >= 2: # the first two shortest tours
+                if shortest and pi >= 2: # the first two shortest tours
                     break
 
                 tour.elapsed = 0
@@ -592,7 +592,7 @@ if __name__ == "__main__":
             print(f"{str}")
             # print(f"{folder}")
             print(f"{len(tours)} tours")
-            # print(f"tourTime: {tourTime} \t leastCost = {leastCost}")
+            # print(f"tourTime: {tourTime} \t shortest = {shortest}")
             # print(f"eta1_vol: {eta1_vol:.2f}")
             # print(f"Before:\t{beforeDict['value']:.1f}") 
             # print(f"After:\t{afterDict['value']:.1f}")
