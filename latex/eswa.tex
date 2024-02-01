@@ -1396,8 +1396,7 @@ We also indicate the two adopted strategies: dedicating all the processing time 
 The results obtained with $tmax = 3600s$, which is the highest tested runtime limit, are in Tables \ref{tab:20}, \ref{tab:50} and \ref{tab:100}, with $surplus$\/ values of $1.2$, $1.5$\/ and $2.0$, respectively. We indicate with an {\bf x} the cases where $Gurobi$\/ did not find a feasible solution within this runtime limit or had to be aborted due to high random-access memory (RAM) usage.
 
 
-
-\begin{table}[H]
+\begin{table}[htp] % update this
 	\centering
 	\caption{Solutions with $surplus = 1.2$\/ and $tmax =  3600s$}  \label{tab:20}
 	\footnotesize
@@ -1405,11 +1404,11 @@ The results obtained with $tmax = 3600s$, which is the highest tested runtime li
 		\toprule
 		{\specialcell{{\bf Tested}\\{\bf tours}}}&$method$&$scenario$&{\bf 1}&{\bf 2}&{\bf 3}&{\bf 4}&{\bf 5}&\specialcell{{\bf Normalized}\\{\bf Speed-up}}   \\
 		\toprule
-		\multirow{4}{*}{Shortest} &\multirow{2}{*}{$Gurobi$}  & $f$ & 8.61    & 11.56   & 13.67   & 13.87 & 12.48       &  0.9985 \\ % best 6028
-		&                              &               {time (s)}   & 26      & 22      & 28      & 28    & 25          &  1.0    \\ % longer 129
+		\multirow{4}{*}{Shortest} &\multirow{2}{*}{$Gurobi$}  & $f$ & 8.53    & 11.79   & 13.14   & 13.52 & 12.36       &  0.9998 \\ % best 5935
+		&                              &               {time (s)}   & 29      & 28      & 25      & 27    & 27          &  1.0    \\ % longer 136
 		\cmidrule(lr){2-9}
-		&                           \multirow{2}{*}{$Shims$}  & $f$ & 8.61    & 11.56   & 13.46   & 13.93 & 12.51       &  0.9965 \\
-		&                             &                {time (s)}   & 1       & 1       & 1       & 1     & 1           &  25.8   \\
+		&                           \multirow{2}{*}{$Shims$}  & $f$ & 8.54    & 11.78   & 13.06   & 13.51 & 12.34       &  0.9980 \\
+		&                             &                {time (s)}   & 1       & 1       & 1       & 1     & 2           &  22.7   \\
 		
 		\midrule
 		
@@ -1425,7 +1424,7 @@ The results obtained with $tmax = 3600s$, which is the highest tested runtime li
 \end{table}
 
 
-\begin{table}[H]
+\begin{table}[htp]
 	\centering
 	\caption{Solutions with $surplus = 1.5$\/ and $tmax =  3600s$}  \label{tab:50}
 	\footnotesize
@@ -1433,11 +1432,11 @@ The results obtained with $tmax = 3600s$, which is the highest tested runtime li
 		\toprule
 		{\specialcell{{\bf Tested}\\{\bf tours}}} & $method$          & $scenario$ & {\bf 1} & {\bf 2} & {\bf 3} & {\bf 4} & {\bf 5} & \specialcell{{\bf Normalized}\\{\bf Speed-up}}   \\
 		\toprule
-		\multirow{4}{*}{ Shortest } & \multirow{2}{*}{$Gurobi$} & $f$ & 11.76 & 16.29 & 18.02 & 19.42 & 16.35 & 0.9994 \\ % best 8189
-		&&               {time (s)}                                   & 51    & 39    & 40    & 36    & 38    & 1.0 \\ 
+		\multirow{4}{*}{ Shortest } & \multirow{2}{*}{$Gurobi$} & $f$ & 11.83 & 16.73 & 18.07 & 18.83 & 16.86 & 0.9996 \\ % best 8235
+		&&               {time (s)}                                   & 55    & 64    & 39    & 40    & 88    & 1.0    \\ 
 		\cmidrule(lr){2-9}	
-		&\multirow{2}{*}{$Shims$}                               & $f$ & 11.78 & 16.29 & 17.96 & 19.43 & 16.37 & 0.9993  \\
-		&&         {time (s)}                                         & 1     & 1     & 2     & 2     & 2     & 25.5  \\
+		&\multirow{2}{*}{$Shims$}                               & $f$ & 11.85 & 16.72 & 18.05 & 18.80 & 16.87 & 0.9993  \\
+		&&         {time (s)}                                         & 1     & 1     & 2     & 2     & 2     & 35.8  \\
 		
 		\midrule
 		
@@ -1453,7 +1452,7 @@ The results obtained with $tmax = 3600s$, which is the highest tested runtime li
 \end{table}
 
 
-\begin{table}[H]
+\begin{table}[htp]
 	\centering
 	\caption{Solutions with $surplus = 2.0$\/ and $tmax =  3600s$}  \label{tab:100}
 	\footnotesize
@@ -1461,11 +1460,11 @@ The results obtained with $tmax = 3600s$, which is the highest tested runtime li
 		\toprule
 		{\specialcell{{\bf Tested}\\{\bf tours}}}& $method$& $scenario$ & {\bf 1} & {\bf 2} & {\bf 3} & {\bf 4} & {\bf 5} & \specialcell{{\bf Normalized}\\{\bf Speed-up}}   \\
 		\toprule
-		\multirow{4}{*}{Shortest} & \multirow{2}{*}{$Gurobi$} & $f$ & 17.89 & 24.96 & 26.15 & 27.52 & 23.85 & 0.9996 \\ % best 12042
-		&&                                              {time (s)}  & 183   & 87    & 73    & 79    & 71    & 1.0  \\
+		\multirow{4}{*}{Shortest} & \multirow{2}{*}{$Gurobi$} & $f$ & 17.70 & 24.20 & 26.39 & 27.17 & 24.20 & 0.9995 \\ % best 11972
+		&&                                              {time (s)}  & 168   & 98    & 79    & 70    & 72    & 1.0  \\
 		\cmidrule(lr){2-9}	
-		&                            \multirow{2}{*}{$Shims$} & $f$ & 17.94 & 24.96 & 26.03 & 27.43 & 23.73 & 0.9972  \\
-		&&                                              {time (s)}  & 1     & 2     & 2     & 3     & 4     & 41.1  \\
+		&                            \multirow{2}{*}{$Shims$} & $f$ & 17.74 & 24.22 & 26.32 & 27.07 & 23.13 & 0.9896  \\
+		&&                                              {time (s)}  & 1     & 2     & 2     & 3     & 4     & 40.6  \\
 		
 		\midrule
 		

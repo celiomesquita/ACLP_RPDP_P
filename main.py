@@ -22,7 +22,7 @@ import tsp_deap
 # from py3Druiz import Packer, Item, Bin
 
 
-def solveTour(scenario, instance, pi, tour, method, pallets, cfg, secBreak, folder, tipo, numOptDict, rampDistCG, afterDict, beforeDict, eta1_vol, eta2_vol):
+def solveTour(scenario, instance, pi, tour, method, pallets, cfg, tourTime, folder, tipo, numOptDict, rampDistCG, afterDict, beforeDict, eta1_vol, eta2_vol):
     """
     Solves one tour
     """
@@ -45,7 +45,6 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg, secBreak, fold
 
     # a first tour iteration to calculate the total volume to be tested for inclusion the tour nodes.
     tourVol = 0.0
-    tourTime = 0
     for k, node in enumerate(tour.nodes):  # solve each node sequentialy
 
         # L_k destination nodes set
@@ -55,7 +54,6 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg, secBreak, fold
         _, node = common.loadNodeItems(scenario, instance, node, unattended, folder)
 
         tourVol += node.Vol
-        tourTime += secBreak
 
     # a second tour iteration solving node-by-node
     for k, node in enumerate(tour.nodes):  # solve each node sequentialy
@@ -343,20 +341,20 @@ def writeResults(method, scenario, folder, fvalue, elapsed):
 if __name__ == "__main__":
 
     plot      = False
-    testing   = True
-    # leastCost = True # Shortest
-    leastCost = False # All K!
+    testing   = False
+    leastCost = True # Shortest
+    # leastCost = False # All K!
     iRace_testing = False
 
-    # scenarios = [2,3,4,5,6] # represent 1,2,3,4,5 in the article
-    scenarios = [7] # 7: 15-node problem
+    scenarios = [2,3,4,5,6] # represent 1,2,3,4,5 in the article
+    # scenarios = [7] # 7: 15-node problem
     # scenarios = [2]
 
-    folder = "surplus20"  # 1.2
+    # folder = "surplus20"  # 1.2
     
     # folder = "surplus50"  # 1.5
 
-    # folder = "surplus100" # 2.0
+    folder = "surplus100" # 2.0
 
     iRace_scenario = 2
     iRace_instance = 1
@@ -385,10 +383,10 @@ if __name__ == "__main__":
     if folder == "surplus100":
         eta1_vol, eta2_vol = 0.9617, 1.5706
 
-    timeLimit = 240
+    # timeLimit = 240
     # timeLimit = 1200
     # timeLimit = 2400
-    # timeLimit = 3600
+    timeLimit = 3600
 
     # method = "GRB"
     # method = "CBC"
@@ -399,6 +397,8 @@ if __name__ == "__main__":
     # method = "TS"
     # method = "GRASP"
     # method = "NMO"
+
+    print(f"timeLimit:{timeLimit} folder: {folder} method: {method}")
 
     # tipo = "KP"
     tipo = "FFD"
@@ -427,9 +427,6 @@ if __name__ == "__main__":
         if cfg.numNodes > 7: # Shims validation
             instances = [1]
 
-        # time limit per node
-        secBreak = timeLimit/common.factorial(cfg.numNodes)
-        
         for i, cols in enumerate(dists):
             for j, dist in enumerate(cols):
                 costs[i][j] = cfg.kmCost*dist
@@ -451,6 +448,12 @@ if __name__ == "__main__":
         if cfg.numNodes > 3 and cfg.numNodes <= 7:
             perc = 0.25 # discard the worst tours
 
+        # time limit per tour
+        tourTime = timeLimit/common.factorial(cfg.numNodes)
+
+        if leastCost: # the 2 shortest tours
+            tourTime = timeLimit/2
+
         instanceTime = 0.
         instanceTime2 = 0. # with 3D packing
         instanceSC   = 0. # score/cost relation
@@ -460,6 +463,7 @@ if __name__ == "__main__":
         numOptDict = {"numOpt":0}
         afterDict  = {"value":0.}
         beforeDict = {"value":0.}
+
 
         for inst in instances:  
 
@@ -485,18 +489,15 @@ if __name__ == "__main__":
             bestTour = []
             for pi, tour in enumerate(tours):
 
-                if leastCost:
-                    secBreak = timeLimit/cfg.numNodes
-
-                    if pi >= 2: # the first two shortest tours
-                        break
+                if leastCost and pi >= 2: # the first two shortest tours
+                    break
 
                 tour.elapsed = 0
                 tour.elapsed2 = 0 # with 3D packing
                 tour.score   = 0.0
                 tour.AvgVol  = 0.0
 
-                solveTour(scenario, inst, pi, tour, method, pallets, cfg, secBreak, folder, tipo, numOptDict, rampDistCG, afterDict, beforeDict, eta1_vol, eta2_vol)
+                solveTour(scenario, inst, pi, tour, method, pallets, cfg, tourTime, folder, tipo, numOptDict, rampDistCG, afterDict, beforeDict, eta1_vol, eta2_vol)
 
                 # if not iRace_testing:
                 #     print(f"\tTour elapsed: {tour.elapsed:.1f}s")
@@ -559,7 +560,7 @@ if __name__ == "__main__":
         for n in bestTour:
             icaos.append(n.ICAO)
 
-        icaos = tsp_deap.rotate(icaos, "GRU")
+        icaos = tsp_deap.rotate(icaos, "GRU") # GRU is the base
 
         sbest_tour = tsp_deap.list_to_string(icaos)
 
@@ -589,15 +590,15 @@ if __name__ == "__main__":
             writeAvgResults(method, scenario, str, folder)
 
             print(f"{str}")
-            print(f"{folder}")
+            # print(f"{folder}")
             print(f"{len(tours)} tours")
-            # print(f"secBreak: {secBreak} \t leastCost = {leastCost}")
+            # print(f"tourTime: {tourTime} \t leastCost = {leastCost}")
             # print(f"eta1_vol: {eta1_vol:.2f}")
             # print(f"Before:\t{beforeDict['value']:.1f}") 
             # print(f"After:\t{afterDict['value']:.1f}")
             # print(f"% of optima: {numOptDict['numOpt']:.2f}")
-            print(f"{method}")
-            print(f"    best: {sbest_tour}")
+            # print(f"{method}")
+            # print(f"    best: {sbest_tour}")
             # print(f"shortest: {shortestTour}")
 
         else:

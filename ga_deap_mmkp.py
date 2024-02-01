@@ -17,8 +17,8 @@ def Solve(items_file, node_ID):
     # filter items on the base
     items_matrix_np = items_matrix_np[((items_matrix_np[:,3] == node_ID))]
 
-    # num_items_test = 250
-    # items_matrix_np = items_matrix_np[:num_items_test,:]
+    num_items_test = 250
+    items_matrix_np = items_matrix_np[:num_items_test,:]
 
     #  w    s    v  from to
     items_weights = items_matrix_np[ :,0]
