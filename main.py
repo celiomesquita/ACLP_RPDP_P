@@ -340,23 +340,24 @@ def writeResults(method, scenario, folder, fvalue, elapsed):
 
 if __name__ == "__main__":
 
-    startTime = time.perf_counter()
+    mainStart = time.perf_counter()
 
     plot      = False
+
     testing   = False
+    # testing   = True
+
     # shortest = True # 2 shortest tours
     shortest = False # All K!
     iRace_testing = False
 
     # scenarios = [2,3,4,5,6] # represent 1,2,3,4,5 in the article
-    # scenarios = [6] # 7: 15-node problem
+    # scenarios = [3]
     # scenarios = [7,8,9]
     scenarios = [6,7,8,9,10,11,12,13,14]
 
     # folder = "surplus20"  # 1.2
-    
     # folder = "surplus50"  # 1.5
-
     folder = "surplus100" # 2.0
 
     iRace_scenario = 2
@@ -407,13 +408,15 @@ if __name__ == "__main__":
     tipo = "FFD"
 
     distances_file = "./params/distances7.txt"
-    if scenarios[0] == 6:
+    if scenarios[0] >= 6:
         distances_file = "./params/distances15.txt"
 
     dists, _ = common.loadDistances(distances_file) # dists, cities
     costs = [[0.0 for _ in dists] for _ in dists]
 
     for scenario in scenarios:
+
+        instances = [1,2,3,4,5,6,7]
 
         if testing:
             instances = [1]
@@ -423,13 +426,7 @@ if __name__ == "__main__":
 
         cfg = common.Config(scenario)
 
-        instances = [1,2,3,4,5,6,7]
-        # instances = [1]
-
         print(f"\n{cfg.numNodes} nodes")
-
-        if cfg.numNodes > 7: # Shims validation
-            instances = [1]
 
         for i, cols in enumerate(dists):
             for j, dist in enumerate(cols):
@@ -458,39 +455,38 @@ if __name__ == "__main__":
         if shortest: # the 2 shortest tours
             tourTime = timeLimit/2
 
-        instanceTime = 0.
-        instanceTime2 = 0. # with 3D packing
-        instanceSC   = 0. # score/cost relation
-        leastSC      = 0.
-        worstTime    = 0
-
         numOptDict = {"numOpt":0}
         afterDict  = {"value":0.}
         beforeDict = {"value":0.}
 
+        numInst = float(len(instances))
 
-        for inst in instances:  
+        avgInstTime       = 0
+        instBestAvgVol    = 0.
+        instBestAvgTorque = 0.        
+        instBestAvgSC     = 0. # score/cost relation
+        leastSC           = 0.
 
-            bestSC = 0. # maximum score/cost relation
-            # leastSC = 0. # minimum cost score/cost relation
-            bestAV = 0.
-            bestAT = 0.
+        for inst in instances:
 
+            now = time.perf_counter()
 
-            if cfg.numNodes <= 5:
+            instanceStartTime  = now
+
+            if cfg.numNodes <= 6:
                 # permutation of nodes - TSP solution with all tours
                 tours = common.getTours(cfg.numNodes-1, costs, perc)
             else:
                 # TSP solution with heuristics
                 tours = tsp_deap.getTours(distances_file, cfg.numNodes)
 
-            # print( len(tours), len(tours[0].nodes) )
 
-            # selects the best tour
-            searchTime = 0
-            searchTime2 = 0 # with 3D packing
+            bestSC = 0. # maximum score/cost relation
+            bestAvgVol = 0.
+            bestAvgTorque = 0.
             bestTourID = -1
             bestTour = []
+
             for pi, tour in enumerate(tours):
 
                 if shortest and pi >= 2: # the first two shortest tours
@@ -503,15 +499,9 @@ if __name__ == "__main__":
 
                 solveTour(scenario, inst, pi, tour, method, pallets, cfg, tourTime, folder, tipo, numOptDict, rampDistCG, afterDict, beforeDict, eta1_vol, eta2_vol)
 
-                # if not iRace_testing:
-                #     print(f"\tTour elapsed: {tour.elapsed:.1f}s")
-
                 # the tour cost is increased by the average torque deviation, limited to 5%
                 tour.AvgTorque /= cfg.numNodes
                 tour.cost *= ( 1.0 + abs(tour.AvgTorque)/20.0 )
-
-                searchTime += tour.elapsed
-                searchTime2 += tour.elapsed2
 
                 tourSC = tour.score / tour.cost
 
@@ -519,46 +509,25 @@ if __name__ == "__main__":
 
                 # best tour parameters
                 if tourSC > bestSC:
-                    bestSC = tourSC
-                    bestAV = tour.AvgVol
-                    bestAT = tour.AvgTorque
-                    bestTourID = pi
-                    bestTour = tour.nodes
+                    bestSC        = tourSC
+                    bestAvgVol    = tour.AvgVol
+                    bestAvgTorque = tour.AvgTorque
+                    bestTourID    = pi
+                    bestTour      = tour.nodes
+                   
+            now = time.perf_counter()
 
-                if tour.elapsed > worstTime:
-                    worstTime = tour.elapsed
+            avgInstTime += now - instanceStartTime
 
-                if pi == 0:
-                    leastSC += tourSC
+            instBestAvgSC     += bestSC
+            instBestAvgVol    += bestAvgVol
+            instBestAvgTorque += bestAvgTorque        
+            # enf of for inst in instances:
             
-            instanceTime  += searchTime
-            instanceTime2 += searchTime2
-            instanceSC    += bestSC
-
-            # for plotting
-            # writeResults(method, scenario, folder, f"{instanceSC:.2f}", f"{tour.elapsed:.2f}")
-
-
-            numInst = float(len(instances))
-
-            numOptDict["numOpt"] /= numInst
-            numOptDict["numOpt"] /= float(cfg.numNodes)
-            numOptDict["numOpt"] /= float(len(tours))
-
-            afterDict["value"] /= numInst
-            afterDict["value"] /= float(cfg.numNodes)
-            afterDict["value"] /= float(len(tours))
-
-            beforeDict["value"] /= numInst
-            beforeDict["value"] /= float(cfg.numNodes)
-            beforeDict["value"] /= float(len(tours))
-
-            percent = 0.0
-            if beforeDict["value"] > 0:
-                percent = 100.0*( afterDict["value"] - beforeDict["value"]  ) / beforeDict["value"]   
-
-            avgTime  = math.ceil(instanceTime/numInst)
-            avgTime2 = math.ceil(instanceTime2/numInst)
+        avgTime       = math.ceil(avgInstTime/numInst)
+        bestAvgSC     = instBestAvgSC/numInst
+        bestAvgVol    = instBestAvgVol/numInst
+        bestAvgTorque = instBestAvgTorque/numInst
 
         icaos = []
         for n in bestTour:
@@ -589,16 +558,13 @@ if __name__ == "__main__":
 
         if not iRace_testing:
 
-            str = f"{leastSC/numInst:.2f}\t {instanceSC/numInst:.2f}\t {avgTime:.0f}\t {avgTime2:.0f}\t {worstTime:.1f}\t {bestAV:.2f}\t {bestAT:.2f}\t {numOptDict['numOpt']:.1f}\t {beforeDict['value']:.1f} & {afterDict['value']:.1f} & {percent:.1f}"
+            str = f"{bestAvgSC:.2f}\t {avgTime:.0f}\t {bestAvgVol:.2f}\t {bestAvgTorque:.2f}"
             # instances average
             writeAvgResults(method, scenario, str, folder)
-
-            endTime = time.perf_counter() - startTime
 
             print(f"{str}")
             # print(f"{folder}")
             print(f"{len(tours)} tours")
-            print(f"{endTime} seconds")
             # print(f"tourTime: {tourTime} \t shortest = {shortest}")
             # print(f"eta1_vol: {eta1_vol:.2f}")
             # print(f"Before:\t{beforeDict['value']:.1f}") 
@@ -608,7 +574,11 @@ if __name__ == "__main__":
             # print(f"    best: {sbest_tour}")
             # print(f"shortest: {shortestTour}")
 
+            mainElapsed = time.perf_counter() - mainStart
+
+            print(f"mainElapsed: {mainElapsed:.1f}")
+
         else:
-            print(-1*instanceSC/numInst) # -1: iRace minimizes a cost value
+            print(-1*instBestAvgSC/numInst) # -1: iRace minimizes a cost value
 
     #"""

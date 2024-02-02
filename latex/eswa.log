@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2023.5.31)  1 FEB 2024 22:02
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2023.5.31)  2 FEB 2024 07:58
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -971,7 +971,7 @@ LaTeX Warning: There were undefined references.
 Here is how much of TeX's memory you used:
  28819 strings out of 480171
  707375 string characters out of 5894489
- 1140110 words of memory out of 5000000
+ 1140109 words of memory out of 5000000
  46279 multiletter control sequences out of 15000+600000
  489856 words of font info for 80 fonts, out of 8000000 for 9000
  60 hyphenation exceptions out of 8191
@@ -1018,7 +1018,7 @@ t/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/texmf-dist/fonts
 public/amsfonts/cm/cmsy9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/
 amsfonts/symbols/msam10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/a
 msfonts/symbols/msbm10.pfb>
-Output written on eswa.pdf (24 pages, 978887 bytes).
+Output written on eswa.pdf (24 pages, 979060 bytes).
 PDF statistics:
  921 PDF objects out of 1000 (max. 8388607)
  204 compressed objects within 3 object streams
