@@ -50,6 +50,16 @@ def getTours(distances_file, numNodes):
     # Convert the DataFrame to a numpy array for easier manipulation
     distance_matrix_np = distance_matrix.to_numpy()
 
+    try:
+        del creator.FitnessMin
+    except Exception as e:
+        pass 
+
+    try:
+        del creator.Individual
+    except Exception as e:
+        pass     
+
     # Genetic Algorithm setup
     creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
     creator.create("Individual", list, fitness=creator.FitnessMin)

@@ -30,8 +30,9 @@ class Config(object):
     def __init__(self, scenario):
         self.weiCap = 0
         self.volCap = 0
-        self.numNodes = {0:3, 1:3, 2:3, 3:4, 4:5, 5:6, 6:7, 7:15 }[scenario]
-        self.Sce      = {0:1, 1:1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7  }[scenario]
+        self.numNodes = {0:3, 1:3, 2:3, 3:4, 4:5, 5:6, 6:7, 7:8, 8:9, 9:10, 10:11, 11:12, 12:13, 13:14, 14:15 }[scenario]
+        self.Sce      = {0:1, 1:1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7, 8:8, 9:9,  10:10, 11:11, 12:12, 13:13, 14:14  }[scenario]
+    
 
         self.size       = "smaller"
         self.numPallets = 7

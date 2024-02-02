@@ -1575,6 +1575,106 @@ It is important to remember that this is not the shortest tour, but the one with
 	Without adopting these three strategies, we were unable to carry out any experiments, even in smaller instances.
 }
 
+
+\begin{table}[htp]
+	\centering
+	\caption{Shims solutions with $surplus = 1.2$\/ and $tmax =  240s$}  \label{tab:15}
+	\footnotesize
+	\begin{tabular}{cccc}
+		\toprule
+$scenario$ & {\bf 7} & {\bf 8} & {\bf 9} \\
+Num. nodes & 15 & 14 & 13 \\
+		\toprule
+$f$        & 50.15 & 47.00 & 47.18    \\
+{time (s)} & 32     & 31     & 29        \\
+Occupancy rate & 0.89     & 0.84     & 0.88        \\
+		\bottomrule
+	\end{tabular}
+	\normalsize
+\end{table}
+
+\begin{center}
+	%\fbox{
+	\begin{tikzpicture}
+		\begin{axis}[xmin=6,ymin=200,
+			enlarge y limits={upper,value=0.2},
+			xlabel style={align=center},
+			xlabel={Number of nodes},
+			ylabel={Time (s)},
+			xtick={  5,   6, 7,  8,  9, 10, 11, 12, 13, 14, 15, 16},
+			ytick={250,350,450,550,650,750,850,950,1050,1150,1250},						
+			]
+			\addplot[
+			blue,
+			thick,
+			mark=*,
+			mark options={fill=blue},
+			visualization depends on=\thisrow{alignment} \as \alignment,
+			nodes near coords, % Place nodes near each coordinate
+			point meta=explicit symbolic, % The meta data used in the nodes is not explicitly provided and not numeric
+			every node near coord/.style={anchor=\alignment} % Align each coordinate at the anchor 40 degrees clockwise from the right edge
+			] table [% Provide data as a table
+			meta index=2 % the meta data is found in the third column
+			] {
+				x   y    label                  alignment
+				7   273   {\footnotesize 92.6}  -10
+				8   360   {\footnotesize 107.5} -10
+				9   468   {\footnotesize 107.5} -10
+				10  560   {\footnotesize 112.3} -10
+				11  660   {\footnotesize 92.8}  -10
+				12  756   {\footnotesize 91.2}  -10
+				13  884   {\footnotesize 96.8}  -10
+				14  1008   {\footnotesize 106.3} -10									
+				15  1170   {\footnotesize 99.8}  -10									
+			};
+		\end{axis}
+	\end{tikzpicture}
+	%}
+	\captionof{figure}{Shims performance}
+\end{center}
+	
+	
+
+\begin{center}
+	%\fbox{
+		\begin{tikzpicture}
+			\begin{axis}[xmin=6,ymin=600,
+				enlarge y limits={upper,value=0.2},
+				xlabel style={align=center},
+				xlabel={Number of nodes},
+				ylabel={Time (s)},
+				xtick={  5,  6,   7,   8,   9,  10,  11,  12,  13,  14,  15,  16},
+				ytick={700,860,1020,1180,1340,1500,1660,1820,1980,2140,2300,2460},						
+				]
+				\addplot[
+				blue,
+				thick,
+				mark=*,
+				mark options={fill=blue},
+				visualization depends on=\thisrow{alignment} \as \alignment,
+				nodes near coords, % Place nodes near each coordinate
+				point meta=explicit symbolic, % The meta data used in the nodes is not explicitly provided and not numeric
+				every node near coord/.style={anchor=\alignment} % Align each coordinate at the anchor 40 degrees clockwise from the right edge
+				] table [% Provide data as a table
+				meta index=2 % the meta data is found in the third column
+				] {
+					x   y    label                 alignment
+					7   708  {\footnotesize 91.9}  -10
+					8   837  {\footnotesize 108.2} -10
+					9   987  {\footnotesize 108.7} -10
+					10  1160 {\footnotesize 111.2} -10
+					11  1354 {\footnotesize 78.0}  -10
+					12  1574 {\footnotesize 84.1}  -10
+					13  1814 {\footnotesize 93.3}  -10
+					14  2083 {\footnotesize 104.8} -10									
+					15  2383 {\footnotesize 96.1}  -10									
+				};
+			\end{axis}
+		\end{tikzpicture}
+		%}
+	\captionof{figure}{Shims performance (total time)}
+\end{center}
+	
 \section{Conclusions}
 \label{conclusions}
 

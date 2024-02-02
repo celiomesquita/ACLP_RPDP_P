@@ -340,6 +340,8 @@ def writeResults(method, scenario, folder, fvalue, elapsed):
 
 if __name__ == "__main__":
 
+    startTime = time.perf_counter()
+
     plot      = False
     testing   = False
     # shortest = True # 2 shortest tours
@@ -347,8 +349,9 @@ if __name__ == "__main__":
     iRace_testing = False
 
     # scenarios = [2,3,4,5,6] # represent 1,2,3,4,5 in the article
-    # scenarios = [7] # 7: 15-node problem
-    scenarios = [4]
+    # scenarios = [6] # 7: 15-node problem
+    # scenarios = [7,8,9]
+    scenarios = [6,7,8,9,10,11,12,13,14]
 
     # folder = "surplus20"  # 1.2
     
@@ -383,10 +386,10 @@ if __name__ == "__main__":
     if folder == "surplus100":
         eta1_vol, eta2_vol = 0.9617, 1.5706
 
-    # timeLimit = 240
+    timeLimit = 240
     # timeLimit = 1200
     # timeLimit = 2400
-    timeLimit = 3600
+    # timeLimit = 3600
 
     # method = "GRB"
     # method = "CBC"
@@ -404,7 +407,7 @@ if __name__ == "__main__":
     tipo = "FFD"
 
     distances_file = "./params/distances7.txt"
-    if scenarios[0] == 7:
+    if scenarios[0] == 6:
         distances_file = "./params/distances15.txt"
 
     dists, _ = common.loadDistances(distances_file) # dists, cities
@@ -421,8 +424,9 @@ if __name__ == "__main__":
         cfg = common.Config(scenario)
 
         instances = [1,2,3,4,5,6,7]
+        # instances = [1]
 
-        print(f"{cfg.numNodes} nodes")
+        print(f"\n{cfg.numNodes} nodes")
 
         if cfg.numNodes > 7: # Shims validation
             instances = [1]
@@ -473,7 +477,7 @@ if __name__ == "__main__":
             bestAT = 0.
 
 
-            if cfg.numNodes <= 7:
+            if cfg.numNodes <= 5:
                 # permutation of nodes - TSP solution with all tours
                 tours = common.getTours(cfg.numNodes-1, costs, perc)
             else:
@@ -585,13 +589,16 @@ if __name__ == "__main__":
 
         if not iRace_testing:
 
-            str = f"{leastSC/numInst:.2f}\t {instanceSC/numInst:.2f}\t {avgTime:.0f}\t {avgTime2:.0f}\t {worstTime:.1f}\t {bestAV:.2f}\t {bestAT:.2f}\t {numOptDict['numOpt']:.1f}\t {beforeDict['value']:.1f} & {afterDict['value']:.1f} & {percent:.1f}\n"
+            str = f"{leastSC/numInst:.2f}\t {instanceSC/numInst:.2f}\t {avgTime:.0f}\t {avgTime2:.0f}\t {worstTime:.1f}\t {bestAV:.2f}\t {bestAT:.2f}\t {numOptDict['numOpt']:.1f}\t {beforeDict['value']:.1f} & {afterDict['value']:.1f} & {percent:.1f}"
             # instances average
             writeAvgResults(method, scenario, str, folder)
+
+            endTime = time.perf_counter() - startTime
 
             print(f"{str}")
             # print(f"{folder}")
             print(f"{len(tours)} tours")
+            print(f"{endTime} seconds")
             # print(f"tourTime: {tourTime} \t shortest = {shortest}")
             # print(f"eta1_vol: {eta1_vol:.2f}")
             # print(f"Before:\t{beforeDict['value']:.1f}") 

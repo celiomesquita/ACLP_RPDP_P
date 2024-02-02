@@ -104,10 +104,10 @@ def genItems(sce, inst, surplus):
 if __name__ == "__main__":
 
     # scenarios = [1,2,3,4,5,6]
-    scenarios = [7] # 15 nodes for Shims validation
+    scenarios = [7,8,9,10,11,12,13,14]
 
-    instances = [1,2,3,4,5,6,7]
-    #instances = [1]
+    instances = [2,3,4,5,6,7]
+    # instances = [1]
 
     # surplus = 1.2
     # surplus = 1.5
