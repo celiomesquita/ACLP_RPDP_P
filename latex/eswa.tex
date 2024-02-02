@@ -1672,8 +1672,50 @@ Occupancy rate & 0.89     & 0.84     & 0.88        \\
 			\end{axis}
 		\end{tikzpicture}
 		%}
-	\captionof{figure}{Shims performance (total time)}
+	\captionof{figure}{Shims performance (new time computation)}
 \end{center}
+	
+	
+	
+	\begin{center}
+		%\fbox{
+			\begin{tikzpicture}
+				\begin{axis}[xmin=6,ymin=600,
+					enlarge y limits={upper,value=0.2},
+					xlabel style={align=center},
+					xlabel={Number of nodes},
+					ylabel={Time (s)},
+					xtick={  5,  6,   7,   8,   9,  10,  11,  12,  13,  14,  15,  16},
+					ytick={600,1850,3100,4350,5600,6850,8100,9350,10600,11850,13100,14350},						
+					]
+					\addplot[
+					blue,
+					thick,
+					mark=*,
+					mark options={fill=blue},
+					visualization depends on=\thisrow{alignment} \as \alignment,
+					nodes near coords, % Place nodes near each coordinate
+					point meta=explicit symbolic, % The meta data used in the nodes is not explicitly provided and not numeric
+					every node near coord/.style={anchor=\alignment} % Align each coordinate at the anchor 40 degrees clockwise from the right edge
+					] table [% Provide data as a table
+					meta index=2 % the meta data is found in the third column
+					] {
+						x   y    label                 alignment
+						7   692  {\footnotesize 91.9}  -10
+						8   1570  {\footnotesize 108.2} -10
+						9   2580  {\footnotesize 108.7} -10
+						10  3754 {\footnotesize 111.2} -10
+						11  5086 {\footnotesize 78.0}  -10
+						12  6589 {\footnotesize 84.1}  -10
+						13  8528 {\footnotesize 93.3}  -10
+						14  10101 {\footnotesize 104.8} -10									
+						15  12150 {\footnotesize 96.1}  -10									
+					};
+				\end{axis}
+			\end{tikzpicture}
+			%}
+		\captionof{figure}{Shims performance (total time)}
+	\end{center}
 	
 \section{Conclusions}
 \label{conclusions}
