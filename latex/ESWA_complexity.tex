@@ -217,27 +217,23 @@ Optimizing such an algorithm involves minimizing the repetition count ($T$), red
 \subsubsection{Time Complexity Analysis of the Genetic Algorithm for TSP}
 \label{ga_tsp}
 
-When $K > 6$, we obtain 100 tours from a heuristic TSP solution with the Genetic Algorithm (GA), which addresses optimization problems by evolving a population of candidate solutions through selection, crossover (recombination), and mutation over multiple generations, aiming to improve the fitness of solutions.
+When $K > 6$, we obtain 100 tours from a heuristic TSP solution with the Genetic Algorithm (GA), which addresses the TSP by evolving a population of candidate tours through selection, crossover (recombination), and mutation over multiple generations, aiming to minimize tour length.
 
-The time complexity of applying Genetic Algorithms to solve the TSP is influenced by several key factors, including the number of nodes (\(K\)), population size (\(P\)), number of generations (\(G\)), and the complexities of the crossover (\(C(K)\)), mutation (\(M(K)\)), and selection (\(S(K)\)) operations.
+The time complexity of this method is influenced by the number of nodes (\(K\)), the population size (\(P\)), the number of generations (\(G\)), and the complexities of the crossover (\(C(K)\)), mutation (\(M(K)\)), and selection (\(S(K)\)) operations.
 
 Given these parameters, we can express the overall time complexity as:
 \begin{itemize}
 	\item $O(G \cdot (P \cdot (S(K) + P \cdot (C(K) + M(K)))))$
 \end{itemize}
 
-{\bf Detailed Explanation}
-\begin{itemize}
-	\item The selection operation's complexity, \(S(K)\), may depend on evaluating the fitness of each solution, which in turn relies on computing the total distance of a path through \(K\) nodes.
-	\item The complexities of the crossover and mutation operations, \(C(K)\) and \(M(K)\), are functions of \(K\) because they involve manipulating sequences representing paths through the \(K\) nodes.
-	\item Each generation involves selecting solutions based on fitness, generating new solutions through crossover, and applying mutations, leading to the multiplication by \(G\).
-\end{itemize}
+The selection complexity, \(S(K)\), depends on evaluating the path length of each tour.
+The complexities of the crossover and mutation operations, \(C(K)\) and \(M(K)\), are functions of \(K\) because they involve manipulating sequences of nodes.
 
-{\bf Impact of the number of nodes (\(K\))}
-\begin{itemize}
-	\item The direct involvement of \(K\) in the complexities of \(C(K)\), \(M(K)\), and \(S(K)\) highlights how the number of nodes affects the algorithm's performance. Specifically, operations that manipulate or evaluate paths become more complex as \(K\) increases.
-	\item The encoding of solutions and the calculation of fitness values, essential for the selection process, inherently depend on \(K\), emphasizing its role in the GA's computational demands.
-\end{itemize}
+Each generation involves selecting tours based on shorter distances, generating new tours through crossover, and applying mutations, leading to the multiplication by \(G\).
+
+The direct involvement of \(K\) in the complexities of \(C(K)\), \(M(K)\), and \(S(K)\) highlights how the number of nodes affects the algorithm's performance. Specifically, operations that manipulate or evaluate paths become more complex as \(K\) increases.
+
+The encoding of tours and the calculation of path length have greater influence in the GA's computational demands.
 
 }
 

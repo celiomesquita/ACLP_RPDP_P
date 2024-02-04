@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2023.5.31)  4 FEB 2024 16:12
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2023.5.31)  4 FEB 2024 17:16
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -827,13 +827,8 @@ LaTeX Font Info:    Trying to load font information for U+msb on input line 97.
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) [1
 
-{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
-Overfull \hbox (5.21033pt too wide) in paragraph at lines 233--234
-[]\T1/cmr/m/n/10 Each gen-er-a-tion in-volves se-lect-ing so-lu-tions based on 
-fit-ness, gen-er-at-ing new so-lu-tions through crossover,
- []
-
-[2] [3] (./ESWA_complexity.aux) ) 
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] [2] [3] (./ESWA_complexity
+.aux) ) 
 Here is how much of TeX's memory you used:
  27535 strings out of 480171
  679784 string characters out of 5894489
@@ -842,18 +837,17 @@ Here is how much of TeX's memory you used:
  473518 words of font info for 40 fonts, out of 8000000 for 9000
  60 hyphenation exceptions out of 8191
  84i,5n,89p,738b,609s stack positions out of 5000i,500n,10000p,200000b,80000s
- </home/celio/.texlive2021/texmf-var/fonts/pk/
-ljfour/jknappen/ec/ecbx1000.600pk> </home/celio/.texlive2021/texmf-var/fonts/pk
-/ljfour/jknappen/ec/tcrm1000.600pk> </home/celio/.texlive2021/texmf-var/fonts/p
-k/ljfour/jknappen/ec/ecrm1000.600pk> </home/celio/.texlive2021/texmf-var/fonts/
-pk/ljfour/jknappen/ec/ecti1000.600pk></usr/share/texlive/texmf-dist/fonts/type1
-/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/publi
-c/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfo
-nts/cm/cmr7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/c
-msy10.pfb>
-Output written on ESWA_complexity.pdf (3 pages, 85036 bytes).
+ </home/celio/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx100
+0.600pk> </home/celio/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm10
+00.600pk> </home/celio/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1
+000.600pk> </home/celio/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ecti
+1000.600pk></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10
+.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></
+usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/shar
+e/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb>
+Output written on ESWA_complexity.pdf (3 pages, 82546 bytes).
 PDF statistics:
- 179 PDF objects out of 1000 (max. 8388607)
+ 171 PDF objects out of 1000 (max. 8388607)
  39 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  13 words of extra memory for PDF output out of 10000 (max. 10000000)
