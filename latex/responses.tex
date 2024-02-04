@@ -1,3 +1,4 @@
+% !TeX spellcheck = en_GB
 \documentclass{article}
 \usepackage[latin1]{inputenc}
 \usepackage{textcomp}
@@ -158,19 +159,19 @@ Expert Systems With Applications
 
 \section{\#1-b: Our responses to Editor}
 
-Agradecemos e seguimos todas as orientações do Editor:
+We appreciate and comply with all the Editor's instructions::
 
 \begin{itemize}
-\item Incluímos neste texto todas as {\bf Required Sections};
+\item We have included all {\bf Required Sections} in this text, responding individually to each of the reviewers' comments.
 
-\item A submissão do nosso artigo revisado atende todas as {\bf Compliance Requirements}.
+\item Submission of this revised article meets all {\bf Compliance Requirements}. Regarding {\it Reference Style}, we use {\tt bibliographystyle\{apalike\}},\\ available in \LaTeX.
 
 \end{itemize}
 
 
 \section{\#2-a: The entire comments made by the Associate Editor}
 
-De acordo com a mensagem recebida, parece-nos que os comentários do Associate Editor são os seguintes:
+According to the message received, it appears that the Associate Editor's comments are as follows:
 
 \vspace{0.5cm}
 
@@ -180,7 +181,7 @@ Reviewers' comments:
 \begin{itemize}
 
 \item [1.] More analysis shall be given to discuss the experimental results.
-\item [2.] More newly-published related references shall be cited and dicussed in Introduction.
+\item [2.] More newly-published related references shall be cited and discussed in Introduction.
 \item [3.] More experiments hope to be added to support the conclusion.
 \end{itemize}
 
@@ -192,26 +193,17 @@ Reviewers' comments:
 More analysis shall be given to discuss the experimental results. 
 \begin{center}
 	\begin{minipage}{10cm}
-		\textit{Como pode ser observado logo abaixo, aumentamos substancialmente os dados experimentais apresentados. Consequentemente, houve também um sensível aumento na discussão sobre eles.}
-		
-		{\color{blue}As can be seen below, we have substantially increased the experimental data presented. Consequently, there was also a noticeable increase in discussion about them. Especially about the overall improvement caused by the run time limit proportional to the volumes of items in each node and the additional experiments to validate the best method found.
-		}
+		\textit{As we substantially increased the experimental data presented in the article (see the third answer in this section), there were also greater discussions about the results obtained. In any case, we emphasise that we are willing to clarify any result that is not sufficiently discussed; to do this, reviewers simply need to explicitly indicate what they are about.}
 	\end{minipage}
 \end{center}
 
 
 
 \paragraph{Revision:}
-More newly-published related references shall be cited and dicussed in Introduction.
+More newly-published related references shall be cited and discussed in Introduction.
 \begin{center}
 	\begin{minipage}{10cm}
-		\textit{Incluímos e comentamos novas referências (procurar trabalhos recentes sobre TSP e PDP em aeronaves).}
-		
-		{\color{blue}
-		We included the work of \citep{zhao2023}, that developed an air cargo loading plan that addresses the Air Cargo Palletization Problem (ACPP) and the Aircraft Weight and Balance Problem (WBP) separately, impacting payload optimization and aircraft center of gravity (CG). The authors propose three integer linear programming models: a bi-objective optimization model (BOM), a combinatorial optimization model (COM), and an improved combinatorial optimization model (IOM). The models aim to determine the maximum loading capacity and lowest CG deviation from a specified target CG.
-		
-		The study uses Gurobi to solve four scenarios with various conditional metrics for the three models. Results show that the BOM has the fastest solution speed, but the CG deviation is the largest, making the results unacceptable in some cases. The COM takes too long to solve, making it difficult to meet the needs of the actual scene. The IOM accelerates the solving process, but some scenarios still require significant computation time.	
-		}
+		\textit{In Section 2, we highlight the most recent references and concisely discuss their main aspects. To the best of our knowledge, we have not failed to cite any recent and relevant publications related to the topic of this work. This can be confirmed through the bibliography of \citep{zhao2023}, published less than a year ago.}
 		
 	\end{minipage}
 \end{center}
@@ -222,26 +214,14 @@ More newly-published related references shall be cited and dicussed in Introduct
 More experiments hope to be added to support the conclusion.
 \begin{center}
 	\begin{minipage}{10cm}
-		\textit{Incluímos novos resultados experimentais (novas figuras, testes, etc.). Concretamente: desempenhos obtidos com outras metaheurísticas; definição empírica de $\eta_1$\/ and $\eta_2$\/ no algoritmo {\it Shims}; limite de tempo variável em cada nó, de acordo com o volume de carga previsto em cada nó; resolução de casos com um maior número de nós}.
-		
-{\color{blue}
-	New experiments were conducted due to two changes suggested by the reviewers:
-	
-	\begin{itemize}
-		\item [1.] Node solution times depended on the total volume of candidate items to be loaded in each node in relation to the total items volume to be loaded in the tour.
-		\item [2.] A new process of determining the {\it Shims} volume thresholds for $eta_1$ and $eta_2$.
-	\end{itemize}
+		\textit{We substantially increased the experimental data: practical determination of Shims parameters (Table 10); distribution of the runtime among nodes in proportion to the volume available for shipment; performance comparison of five meta-heuristics in the node-by-node solution (Table 11); application and results of Shims in contexts with a greater number of nodes (subsubsection 6.2.2). If reviewers request any more specific experiments, we are willing to perform them.}
 
-
-	We included Table 10 with the results of the {\it iRace} tool, a software package that helps to automatically fine-tune algorithm parameters. We fine-tuned parameters $threshold_1$\/ and $threshold_2$\/, the relative volumes of each pallet used to determine the indexes  $\eta_1$\/ and $\eta_2$ for the {\it Shims} heuristic.
-}
 	\end{minipage}
 \end{center}
 
-
 \section{\#3-a: The entire comments made by the Reviewers}
 
-Indicamos a seguir, em cada subseção, os comentários feitos pelos três revisores.
+We indicate below, in each subsection, the comments made by the three reviewers.
 
 \subsection{Reviewer \#1}
 
@@ -305,7 +285,7 @@ This paper models the ACLP+RPDP of a real case, and develops a problem-solver. T
 
 \section{\#3-b: Our Point-to-Point responses to the Reviewers}
 
-Em cada subseção, responderemos os comentários de cada um dos três revisores.
+In each subsection, we will respond to comments from each of the three reviewers.
 
 
 \subsection{Reviewer \#1}
@@ -314,13 +294,7 @@ Em cada subseção, responderemos os comentários de cada um dos três revisores.
 In section 2, Literature review in the first and second paragraphs is too simple. Some analysis needs to be given to introduce the research status.
 \begin{center}
 	\begin{minipage}{10cm}
-		\textit{Aumentamos a revisão da literatura, descrevendo os trabalhos com maior detalhe. Acrescentamos também alguns trabalhos mais recentes. Citar quais são esses trabalhos...}
-		
-		{\color{blue}
-	We included the work of \citep{zhao2023}, that developed an air cargo loading plan that addresses the Air Cargo Palletization Problem (ACPP) and the Aircraft Weight and Balance Problem (WBP) separately, impacting payload optimization and aircraft center of gravity (CG). The authors propose three integer linear programming models: a bi-objective optimization model (BOM), a combinatorial optimization model (COM), and an improved combinatorial optimization model (IOM). The models aim to determine the maximum loading capacity and lowest CG deviation from a specified target CG.
-	
-	The study uses Gurobi to solve four scenarios with various conditional metrics for the three models. Results show that the BOM has the fastest solution speed, but the CG deviation is the largest, making the results unacceptable in some cases. The COM takes too long to solve, making it difficult to meet the needs of the actual scene. The IOM accelerates the solving process, but some scenarios still require significant computation time.	
-}
+		\textit{We appreciate this suggestion. We include in Section 2 a brief description of the six most recent and relevant articles on the research topic. We also commented on how the recent article by \cite{zhao2023} alerted us to potential performance problems in the solutions offered for air transport problems.}
 		
 	\end{minipage}
 \end{center}
@@ -330,12 +304,7 @@ In section 2, Literature review in the first and second paragraphs is too simple
 In the manuscript, any figures about algorithm simulation results cannot be found. Some figures and analysis are suggested to be presented to show the superiority of the used algorithm.
 \begin{center}
 	\begin{minipage}{10cm}
-		\textit{Incluímos figuras comparativas, mostrando o melhor desempenho da heurística {\it Shims}. Citar quais são essas figuras...}
-		
-		{\color{blue}
-		We included a map showing a 15-node tour as to validate the effectiveness of the {\it Shims} heuristic, we solve a 15-node TSP containing the 15 main Brazilian airports.
-		For this task, we implemented a TSP solution method based on the Genetic Algorithm (GA) that returns a population of 100 tours as input to the ACLP-RPDP solved by {\it Shims}.
-		}
+		\textit{As we commented in Sections 1 and 2 (see Table 2), we are dealing with a problem that has never been studied. Only \cite{LurkinSchyns2015} had addressed something similar but still quite different, as it did not produce a flight plan. In other words, no work has ever been published that has solved any instance of this problem. Therefore, developing a heuristic that presents solutions for it can be understood as a demonstration of superiority. On the other hand, we present the simulation results of our algorithm in Tables 12, 13, 14, and 15, and we now include Figures 6 and 7.}
 	\end{minipage}
 \end{center}
 
@@ -344,13 +313,7 @@ In the manuscript, any figures about algorithm simulation results cannot be foun
 Also, any figures about experiments are not given in the manuscript. "By using a portable computer, our strategy quickly found practical solutions to a wide range of real problems in much less than operationally acceptable time." Could you please show the results with some figures?
 \begin{center}
 	\begin{minipage}{10cm}
-		\textit{Nas novas figuras incluídas no artigo, mostramos o desempenho dos algoritmos desenvolvidos. Citar quais são essas figuras...}
-		
-		{\color{blue}
-The GA run time to solve a 15-node TSP was around three seconds, and the total run time (including the ACLP+RPDP solution by Shims) was around 33 seconds, which we believe is adequate for an operational scenario and using a common hand-held computer.
-
-A figure was included showing the solution tour.
-	}
+		\textit{The solution for each ACLP+RPDP instance consists of 3 plans: the flight route; items that were delivered and shipped to each node on this route; and the allocation of items and packed contents on pallets at each node on this route. As it seems very difficult to express these plans through figures, we prefer to show two simpler indicators of the results obtained in each instance: objective function value and algorithm runtime. Some of these results were presented in Tables 12, 13, 14, and 15, and we now include Figures 6 and 7. Specifically, Figure 7 shows the flight plan of an instance in which $K=15$.}
 	\end{minipage}
 \end{center}
 
@@ -359,13 +322,7 @@ A figure was included showing the solution tour.
 Too many old references are cited.
 \begin{center}
 	\begin{minipage}{10cm}
-		\textit{Incluímos referências mais recentes (citá-las). De qualquer modo, preferimos manter as antigas, para assim termos um levantamento histórico da evolução da pesquisa neste campo.}
-		
-		{\color{blue}
-		We included a more recent reference, \citep{zhao2023}, that demonstrates how hard it is to solve the ACLP and WBP, separately or together.
-		
-		In any case, we prefer to keep the old ones so that we have a historical survey of the evolution of research in this field.	
-		}
+		\textit{We believe it is appropriate to maintain the old references, as they constitute a historical survey of the evolution of research in this field. On the other hand, if reviewers prefer to omit some of them, we don't see a problem with that. At the same time, we seem to cite all recent relevant work, similar to \cite{zhao2023}, which is an article less than a year old.}
 	\end{minipage}
 \end{center}
 
@@ -377,21 +334,14 @@ Too many old references are cited.
 The experimental section lacks effectiveness analysis, where the specific contributions of each strategy are not thoroughly verified and analyzed through separate experiments.
 \begin{center}
 	\begin{minipage}{10cm}
-		\textit{Talvez não tenha ficado claro no texto original, mas três estratégias foram imprescindíveis para que pudéssemos obter alguma solução nas instâncias criadas: (1) considerar $K<m$\ para que cada pallet recebesse uma destinação predefinida; (2) em cada tour, calcular uma solução nó a nó; (3) em cada nó intermediário do tour considerado, realocar os packed contents minimizando o torque na aeronave. Sem a adoção destas três estratégias, não conseguimos realizar nenhum experimento, mesmo em instâncias menores. A única estratégia que permitiu diferentes experimentos e comparações foi a heurística utilizada na solução nó a nó. Procuramos deixar isto mais claro na nossa conclusão.}
-		
-		{\color{blue}
+		\textit{
 		It may not have been clear in the original text, but three strategies were essential for us to obtain a solution in the instances created:
-		
 		\begin{itemize}
-		\item[(1)] consider $K<m$\ so that each pallet received a predefined destination;
-		
-		\item[(2)] on each tour, calculate a node-by-node solution; and
-		
-		\item[(3)] at each intermediate node of the considered tour, relocate the packed contents, minimizing the torque on the aircraft.
+		\item[(1)] consider $K<m$\/ so that each pallet received a preset destination;
+		\item[(2)] on each tour, calculate a node-by-node solution;
+		\item[(3)] at each intermediate node of the considered tour, reallocate the packed contents, minimising the torque on the aircraft.
 		\end{itemize}
-		
-		Without adopting these three strategies, we were unable to carry out any experiments, even in smaller instances. The only strategy that allowed different experiments and comparisons was the heuristic used in the node-by-node solution. We seek to make this clearer in the discussion of the results and in our conclusion.	
-		}
+		Without adopting these three strategies, we would not be able to carry out any experiments, even in small instances. To make this clearer, we have included Figure 3, which describes the entire resolution process. The only strategy that allows different experiments and comparisons is the node-by-node solution. For this reason, we included Table 11, showing the effectiveness of each method for this problem.}
 	\end{minipage}
 \end{center}
 
@@ -400,11 +350,8 @@ The experimental section lacks effectiveness analysis, where the specific contri
 The comparative experiment should include both well-known and novel algorithms for a comprehensive evaluation.
 \begin{center}
 	\begin{minipage}{10cm}
-		\textit{Como estamos lidando com um novo problema, não dispomos de outras resoluções disponíveis na literatura. Na verdade, temos apenas meta-heurísticas bem conhecidas para a solução nó a nó, no qual o torque da aeronave é minimizado. Por este motivo, incluímos novas tabelas comparativas com os resultados obtidos nesses casos.}
-		
-		{\color{blue}
-		As we are dealing with a new problem, we do not have other solutions available in the literature. In fact, we only have well-known meta-heuristics for the node-to-node solution, in which the aircraft torque is minimized. For this reason, we have included new comparative tables with the results obtained in these cases.	
-		}
+		\textit{
+		As we are dealing with a new problem, we have no other solutions available in the literature. In fact, we only have well-known meta-heuristics for the node-by-node solution, in which the score/torque ratio is maximized. Table 11 shows the results obtained by NMO, ACO, GRASP, TS, and GA applied to this problem.}
 	\end{minipage}
 \end{center}
 
@@ -413,7 +360,7 @@ The comparative experiment should include both well-known and novel algorithms f
 The algorithm is missing a complexity analysis, which is essential to better understand its efficiency and potential limitations.
 \begin{center}
 	\begin{minipage}{10cm}
-		\textit{Agradecemos este comentário. Incluímos a análise de complexidade do algoritmo apresentado no nosso artigo.}
+		\textit{We appreciate this comment. In subsection 5.3, we include the time complexity analysis of the resolution process of an ACLP+RPDP instance.}
 	\end{minipage}
 \end{center}
 
@@ -422,35 +369,7 @@ The algorithm is missing a complexity analysis, which is essential to better und
 The inclusion of more figures to illustrate the flow, principle, and results of the algorithm would greatly enhance the clarity and visual representation.
 \begin{center}
 	\begin{minipage}{10cm}
-		\textit{Agradecemos esta sugestão. Acrescentamos novas figuras e tabelas que ilustram melhor nossos resultados. Citar quais são...}
-		
-		
-		{\color{blue}
-		We included the figure below and its description to depict the main algorithm for easy understanding of the main flow.
-		}
-		
-
-		\begin{tikzpicture}
-			
-			\centering
-			
-		%% Make the boxes
-\node [mybox] (first)                        { \small {\bf Select:}\\ \small 1. scenario\\ \small 2. surplus\\ \small 3. time limit};
-\node [mybox, right=0.7cm of first] (second) { \small {\bf Config:}\\ \small 4. parameters\\ \small 5. cost matrix\\ \small 6. pallets\\ \small 7. items};
-\node [mybox, right=0.7cm of second] (third) { \small {\bf Define tour}\\  \small {\bf schema:}\\ \small 8. All K! tours\\ \ \ \  \small or\\ \small 8. Solve a TSP\\ \small  \ \ \ (set of tours))};
-\node [mybox, right=0.7cm of third] (fourth) { \small {\bf Solve ACLPP+RPDP:}\\ \small 9. Many tours\\ \small  \ \ \ (node-by-node)\\ \small 10. Select best tour};
-
-%% Draw arrows between them
-\node[myarrow] at ([xshift=8pt]first.east) {\phantom{\tiny{aaa}}};
-\node[myarrow] at ([xshift=8pt]second.east) {\phantom{\tiny{aaa}}};
-\node[myarrow] at ([xshift=8pt]third.east) {\phantom{\tiny{aaa}}};
-			
-		\end{tikzpicture} 
-
-		{\color{blue}
-		We also included a map of Brazil with the 15 main busy airports and a tour for the reader to get an idea of how close to optimal the solution may be.
-		}
-		
+		\textit{We appreciate this suggestion. We reorganised the initial text of Section 5 and added Figure 3, which describes the entire resolution process. We also include Figures 6 and 7, which illustrate an important case. We consider that these changes facilitated the understanding of the proposed algorithm.}
 	\end{minipage}
 \end{center}
 
@@ -459,7 +378,7 @@ The inclusion of more figures to illustrate the flow, principle, and results of 
 The format of the article needs further adjustment, particularly in addressing the existing large blank spaces on pages 7 and 10.
 \begin{center}
 	\begin{minipage}{10cm}
-		\textit{Estes espaços surgiram devido à formatação do \LaTeX, e deverão ser eliminados na versão final.}
+		\textit{These blank spaces appeared due to \LaTeX\/ formatting and should be eliminated in the final version.}
 	\end{minipage}
 \end{center}
 
@@ -472,7 +391,7 @@ The format of the article needs further adjustment, particularly in addressing t
 In section 1, the authors claim that they solve an air cargo problem involving simultaneously APP, WBP, PDP, and TSP. But, there is not clear description of the importance. In other words, the motivation should be enhanced.
 \begin{center}
 	\begin{minipage}{10cm}
-		\textit{Acrescentamos novas motivações para a resolução do ACLP+RPDP, que envolve simultaneamente 4 sub-problemas {\it NP-hard}.}
+		\textit{We added a new paragraph in Section 1, highlighting the motivations for ACLP+RPDP resolution: ``Inefficient air transport plans can lead to unnecessary costs, extra routes, longer distances, and incorrect destinations. Unbalanced cargo increases fuel consumption due to altered aircraft pitch angles, increasing the risk of weight- and balance-related accidents. Balancing cargo is crucial for safe aerial transportation, as an improperly positioned centre of gravity (CG) can result in dangerous take-off and landing conditions and stall recovery issues. Despite technological advancements, many airlines still rely on manual aircraft loading and balancing, which can lead to flight delays. A rational decision-making process is essential to avoid creating inefficient or unsafe transport plans, considering the high costs of fuel, maintenance, operation, outsourcing expenses, potential operational impairments, and safety risks due to unbalanced cargo. Solving this problem is vital for optimising strategic scores, saving time and effort in loading, ensuring safety and balance, correct pickups and deliveries, and finding the best routes considering fuel use due to potential cargo imbalance''.}
 	\end{minipage}
 \end{center}
 
@@ -481,7 +400,7 @@ In section 1, the authors claim that they solve an air cargo problem involving s
 The literature review is simple. Although some studies focus on the same sub-problem in ACLPP, they still show differences in designing modelling and problem-solver. Apparently, authors should supplement them.
 \begin{center}
 	\begin{minipage}{10cm}
-		\textit{Agradecemos esta sugestão. Incluímos mais informações na revisão da literatura, indicando as modelagens e os métodos de resolução.}
+		\textit{We appreciate this suggestion. We include more information about the main articles in this field of research, indicating their modelling, the scenarios considered, and the resolution methods adopted. It seems to us that this complementation has made the contribution of our work clearer.}
 	\end{minipage}
 \end{center}
 
@@ -490,15 +409,7 @@ The literature review is simple. Although some studies focus on the same sub-pro
 In section 5, the running time at each node is fixed. Whether different nodes have different requirements for running time.
 \begin{center}
 	\begin{minipage}{10cm}
-		\textit{Agradecemos esta sugestão. Entre os novos resultados apresentados, incluímos uma resolução na qual o tempo dedicado a cada nó é proporcional à carga disponível para embarque.}
-		{\color{blue}
-			
-An important experiment inclusion was regarding the time limit to solve a node. This was adjusted to be proportional to the sum of the volumes of the candidate items in the node, as each node has a different number of items to be embarked.
-
-This inclusion certainly contributed to the slight improvement observed in the results.
-			
-		}
-		
+		\textit{We appreciate this suggestion, as we hadn't really thought about this possibility. We redid all our experiments, adopting, at each tour node, a runtime limit proportional to the load available for boarding. We found that there was a small improvement, which is why we incorporated this strategy into the resolution process.}
 	\end{minipage}
 \end{center}
 
@@ -507,32 +418,7 @@ This inclusion certainly contributed to the slight improvement observed in the r
 In section 5.2.2, $\eta_1$\/ and $\eta_2$\/ are set by authors. It is better to study them by experiments.
 \begin{center}
 	\begin{minipage}{10cm}
-		\textit{Estudamos a viabilidade de definir empiricamente os valores dessas constantes do algoritmo Shims. Explicar...}
-		
-{\color{blue}
-	After the items were generated, some experiments with the \textit{iRace} tool were executed to determine the values for volume limits $threshold_1$ and $threshold_2$ used in \textit{Shims}, whose results are presented in Table \ref{tab:irace}.
-	
-	\begin{table}[H]
-		\centering
-		\caption{\textit{iRace} testing results}  \label{tab:irace}
-		\footnotesize
-		\begin{tabular}{cccc}
-			\toprule
-			                  
-			\boldm{$surplus$} & \boldm{$threshold_1$} & \boldm{$threshold_2$} & \textbf{run time}\\
-			                 & for $\eta_1$          & for $\eta_2$          & (min) \\
-			\midrule
-			1.2& 0.8621 & 1.0539 & 47 \\
-			1.5& 0.9199 & 1.1399 & 59 \\
-			2.0& 0.9617 & 1.5706 & 63 \\						
-			\bottomrule
-		\end{tabular}
-		\normalsize
-	\end{table}
-	
-	For these tests, we considered the odd instances (1, 3, 5, 7) as the \textbf{training} set and the even instances (2, 4, 6) as the \textbf{testing} set for the \textit{iRace} runs. We supplied \textit{iRace} for $threshold_1$ determination, the range [0.8, 1.0], and for $threshold_2$, the range [1.0, 2.0]. The number of iterations in each experiment was limited to 3000 executions for \textit{iRace} to have plenty of data for its statistical tests. More detail about these configurations may be found on the \textit{iRace} user guide in \url{https://cran.r-project.org/web/packages/irace/irace.pdf}.
-}
-		
+		\textit{We appreciate this suggestion. In subsection 6.1 and Table 10, we explain how the {\bf irace} \citep{LopezIbanezManuel2016} tool was adopted to empirically define these parameters of Shims, described in Algorithm 6. There was indeed an improvement in the results, which were incorporated into Tables 12, 13, 14, and 15.}
 	\end{minipage}
 \end{center}
 
@@ -541,14 +427,7 @@ In section 5.2.2, $\eta_1$\/ and $\eta_2$\/ are set by authors. It is better to 
 The experimental settings are not complete.
 \begin{center}
 	\begin{minipage}{10cm}
-		\textit{Não entendemos este comentário... De qualquer modo, aumentamos a seção de experimentos do nosso artigo, procurando definir todas as variáveis envolvidas. Caso reste algum ponto obscuro, pedimos ao revisor que o especifique, por favor.}
-		
-{\color{blue}
-	
-An important experiment inclusion was regarding the time limit to solve a node. This was adjusted to be proportional to the sum of the volumes of the candidate items in the node, as each node has a different number of items to be embarked.
-	
-}
-		
+		\textit{Unfortunately, we do not understand this comment. Anyway, we have expanded Section 6, defining all the variables involved in the experiments carried out. If there is an unclear point, we ask the reviewer to please specify it.}
 	\end{minipage}
 \end{center}
 
@@ -557,47 +436,7 @@ An important experiment inclusion was regarding the time limit to solve a node. 
 To the best of our knowledge, the genetic algorithm is a good method for solving ACLPP. The method is not compared in the experiments.
 \begin{center}
 	\begin{minipage}{10cm}
-		\textit{Analisamos as resoluções do ACLPP através de algoritmos genéticos. Explicar...}
-		
-		{\color{blue}
-	We implemented the genetic algorithm with DEAP (Distributed Evolutionary Algorithms in Python), an evolutionary computation framework available at \url{https://github.com/deap/deap}. More details can be found in \citep{DEAP_JMLR2012}.
-		
-	\vspace{3mm}
-
-	\citep{PeerlinckAmy2022MFEO} applied DEAP to solve a multi-objective knapsack problem.
-	
-	\vspace{3mm}
-		
-	Our GA implementation is not complete. Due to performance issues, we did not include the constraints regarding the Weight and Balance (WBP) or the Pickup and Delivery (PDP) problems.
-	
-	In the first attempt, considering only the weight and volume constraints, our implementation of DEAP managed to solve problems up to 100 items to be allocated to 18 pallets in less than 10 seconds.	
-	When we included the item count constraint to prevent each item from being allocated to more than one pallet, it was able to solve only small problems (20 items on 2 pallets).
-	
-	We increased the number of items to 150, and the number of pallets to 18, but, even adjusting the GA parameters to more generations (2400) and more individuals (1200), DEAP did not generate any feasible solution. The run time of this attempt was around 10 minutes.
-	
-	For the crossover probability, we tested the range [0.6 - 0.8], and for the mutation probability, we tested from 0.01 to 0.1 with no success.
-	
-	\vspace{3mm}
-	
-	The implemented code is available in \url{https://github.com/celiomesquita/ACLP\_RPDP\_P/blob/main/ga\_deap\_mmkp.py}.
-	
-	\vspace{3mm}
-	
-	The palletization planning of 200 to 1000 items per node in a set of 18 aircraft pallets may be an inadequate problem to be solved with GA.	
-		
-Large chromosome sizes, like 18,000-dimension arrays, can pose significant challenges in using genetic algorithms.
-
-The computational complexity is significant, as each generation requires evaluating individual fitness, which can be resource-intensive.
-
-Large chromosomes can slow GA convergence due to the vast search space, potentially requiring more generations to find optimal solutions.
-
-Efficient encoding and decoding of the problem into the chromosome and decoding solutions is crucial for a 18,000-dimension array. 
-Also, the design of the fitness function becomes more critical as chromosome size increases, as it needs to guide the evolutionary process without being overly computationally demanding.
-
-\vspace{3mm}
-
-We hope that these considerations help justify why we did not include GA as a candidate method to solve the ACLP+RPDP.
-		}
+		\textit{We appreciate this suggestion. We used DEAP (Distributed Evolutionary Algorithms in Python), an evolutionary computation framework \citep{DEAP_JMLR2012}, to compare GA as one of the heuristics in the node-by-node solution. In our first version, considering only weight and volume constraints, our implementation was able to solve problems of up to 100 items being allocated on 18 pallets in less than 10 seconds. When we included the item count constraint to prevent the same item from being allocated to more than one pallet, we were able to resolve only small problems (20 items on 2 pallets). We increased the number of items to 150 and the number of pallets to 18, but even adjusting the GA parameters for more generations (2,400) and more individuals (1,200), DEAP did not generate any viable solutions. The runtime for this attempt was about 10 minutes. These results are included in Table 11. On the other hand, we successfully used DEAP in developing a TSP heuristic for cases where $K>6$, as can be seen in subsubsection 6.2.2.}
 	\end{minipage}
 \end{center}
 
@@ -606,35 +445,15 @@ We hope that these considerations help justify why we did not include GA as a ca
 With the increase of nodes, what impact will be brought in solving the problem. The experiments and analysis should be supplemented.
 \begin{center}
 	\begin{minipage}{10cm}
-		\textit{Agradecemos esta sugestão. Incluímos resultados da resolução de casos com um maior número $K$\/ de nós, mantendo a suposição $K < m$, necessária para a definição prévia da destinação dos pallets. Para isso, utilizamos uma heurística conhecida para o TSP, aplicando nosso algoritmo apenas nesse tour.}
-		
-{\color{blue}
-			
-To validate the effectiveness of the {\it Shims} heuristic, we solve a 15-node TSP containing the 15 main Brazilian airports.
-For this task, we implemented a TSP solution method based on the Genetic Algorithm (GA) that returns a population of 100 tours as input to the ACLP-RPDP solved by {\it Shims}. The GA run time was around three seconds, and the total run time was around 33 seconds.
-
-We implemented the GA with DEAP (Distributed Evolutionary Algorithms in Python), an evolutionary computation framework available in \url{https://github.com/deap/deap}. More details can be found in \citep{DEAP_JMLR2012}.
-
-\vspace{3mm}
-
-The implemented code is available in \url{https://github.com/celiomesquita/ACLP\_RPDP\_P/blob/main/tsp\_deap.py}.
-
-\vspace{3mm}
-
-	\begin{figure}[H]
-		\centering
-		\caption{\label{fig:brazil} {\it Shims/GA} best ACLP+RPDP tour}
-		\includegraphics[scale=0.3]{brazil.png}
-	\end{figure}
-
-\vspace{3mm}
-
-The airports cited in Figure \ref{fig:brazil}  are: São Paulo (GRU), Congonhas (CGH), Curitiba (CWB), Porto Alegre (POA), Florianópolis (FLN), Vitória (VIX), Salvador (SSA), Recife (REC), Fortaleza (FOR), Belém (BEL), Manaus (MAO), Brasília (BSB), Goiânia (GYN), Confins (CNF), and Rio de Janeiro (GIG), returning to GRU.			
-
-}
+		\textit{We appreciate this suggestion. We included tests for solving cases with $K>6$, maintaining the requirement $K < m$, necessary to previously define the destination of the pallets. The results are described in subsubsection 6.2.2 and in Figures 6 and 7.}
 	\end{minipage}
 \end{center}
 
+
+
+\bibliographystyle{apalike} 
+
 \bibliography{bib}
+
 
 \end{document}

@@ -1,0 +1,81 @@
+
+These are the steps to solve the ACLP+RPDP with the complexity analysis:
+
+1. Input data
+
+a) Aircraft parameters: O(1)
+b) Airports and distances: O(K)
+
+O(1+K) = O(K)
+
+c) Load packed contents and load items from text files are O(m) and O(n), respectively.
+This analysis assumes that the operations of reading lines, and processing those lines dominate any fixed overhead from filesystem interactions: O(m + n)
+
+O(K + m + n)
+
+2. Number of tested tours (T):
+
+If K <= 6, determine the number of tours through permutation. To get permutation of nodes as tours has a complexity of O(T = K!⋅K), as the number of nodes is permutated (factorial) to generate tours.
+
+O(K + m + n) + O(T = K!⋅K) or
+
+O(K + m + n) + O(T = 2), if the we are solving the two optimal TSP tours.
+
+If K > 6, we obtain 100 tours from a heuristic TSP solution: O(K + m + n) + O(T = 100)
+
+3. than, solve T tours:
+
+O(K + m + n) + O(T)
+
+a) each tour with has K nodes:
+
+OO(K + m + n) + O(T.K)
+
+b) in each node we have to reset* O(K⋅m) and set the empty pallets destinations: O(K⋅m + K⋅m) = O(2.K.m) = O(K.m)
+
+*eliminate the risk of previous destinations assigned to a pallet.
+
+O(K + m + n) + + O(T.K.(K.m))
+
+c) To calculate the time limit to solve each node, it is necessary to determine the potential total volume for each node: O(K.n)
+
+O(K + m + n) + O(T.K.(K.m + K.n))
+
+d) Put the packet contents destined to the next nodes in the tour on board: O(m).
+
+O(K + m + n) + O(T.K.(K.m + K.n + m))
+
+d) Optimize the pallets positions to minimize the CG deviation: O(m²)
+
+O(K + m + n) + O(T.K.(K.m + K.n + m + m²))
+
+e) Plus the time complexity of the method used to solve an ACLPP with the aircraft partially loaded: O(C)
+
+O(K + m + n) + O(T.K.(K.m + K.n + m + m² + C))
+
+4. Considering the Shims algorithm: O(C) = O(Shims)
+
+a) the time complexity for sorting the pallets in non-descending order of distances to the CG:
+
+O(Shims) = m.log(m)
+
+b) As each pallet is solved at a time, the overall Shims complexity is multiplied by m.
+
+O(Shims) = m.(m.log(m))
+
+c) The greedy phase has O(n).
+
+O(Shims) = m.(m.log(m) + n)
+
+d) The composition phase has O(n), plus the FFD time complexity O(m.log(m))
+
+O(Shims) = m.(m.log(m) + n + n + m.log(m))
+
+O(Shims) = m.(2n + 2.m.log(m)) = m.(n + m.log(m))
+
+The overall time complexity to solve the ACLP+RPDP with Shims is:
+
+O(K+m+n) + O(T.K.(K.m + K.n + m + m² + m.(n + m.log(m))))
+
+
+

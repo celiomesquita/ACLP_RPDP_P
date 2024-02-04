@@ -1,9 +1,9 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2023.5.31)  2 FEB 2024 18:13
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2023.5.31)  4 FEB 2024 15:52
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**eswa.tex
-(./eswa.tex
+**ESWA.tex
+(./ESWA.tex
 LaTeX2e <2021-11-15> patch level 1
 L3 programming layer <2022-01-21>
 (/usr/share/texlive/texmf-dist/tex/latex/elsarticle/elsarticle.cls
@@ -85,7 +85,7 @@ File: pdftex.def 2020/10/05 v1.2a Graphics/color driver for pdftex
 \@enLab=\toks18
 \@sep=\skip49
 \@@sep=\skip50
- (./eswa.spl) (/usr/share/texlive/texmf-dist/tex/latex/natbib/natbib.sty
+ (./ESWA.spl) (/usr/share/texlive/texmf-dist/tex/latex/natbib/natbib.sty
 Package: natbib 2010/09/13 8.31b (PWD, AO)
 \bibhang=\skip51
 \bibsep=\skip52
@@ -93,7 +93,7 @@ LaTeX Info: Redefining \cite on input line 694.
 \c@NAT@ctr=\count267
 )
 \splwrite=\write3
-\openout3 = `eswa.spl'.
+\openout3 = `ESWA.spl'.
 
 \appnamewidth=\dimen145
 )
@@ -732,23 +732,23 @@ Package: iftex 2020/03/06 v1.0d TeX engine tests
 \Gm@layouthoffset=\dimen304
 \Gm@layoutvoffset=\dimen305
 \Gm@dimlist=\toks53
-) (./eswa.aux)
-\openout1 = `eswa.aux'.
+) (./ESWA.aux)
+\openout1 = `ESWA.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 82.
-LaTeX Font Info:    ... okay on input line 82.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 82.
-LaTeX Font Info:    ... okay on input line 82.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 82.
-LaTeX Font Info:    ... okay on input line 82.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 82.
-LaTeX Font Info:    ... okay on input line 82.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 82.
-LaTeX Font Info:    ... okay on input line 82.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 82.
-LaTeX Font Info:    ... okay on input line 82.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 82.
-LaTeX Font Info:    ... okay on input line 82.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 87.
+LaTeX Font Info:    ... okay on input line 87.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 87.
+LaTeX Font Info:    ... okay on input line 87.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 87.
+LaTeX Font Info:    ... okay on input line 87.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 87.
+LaTeX Font Info:    ... okay on input line 87.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 87.
+LaTeX Font Info:    ... okay on input line 87.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 87.
+LaTeX Font Info:    ... okay on input line 87.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 87.
+LaTeX Font Info:    ... okay on input line 87.
 
 (/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
@@ -812,29 +812,23 @@ s been generated with the most recent feature set (\pgfplotsset{compat=1.18}).
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-LaTeX Font Info:    Trying to load font information for U+msa on input line 108
+LaTeX Font Info:    Trying to load font information for U+msa on input line 113
 .
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 108
+LaTeX Font Info:    Trying to load font information for U+msb on input line 113
 .
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
 LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 1
-08.
+13.
 
 (/usr/share/texlive/texmf-dist/tex/latex/base/t1cmtt.fd
 File: t1cmtt.fd 2019/12/16 v2.5j Standard LaTeX font definitions
 )
-Overfull \hbox (2.3612pt too wide) in paragraph at lines 125--126
-\T1/cmr/m/n/10 prac-tice. The IOM of-fers the best op-ti-miza-tion so-lu-tion, 
-de-spite tak-ing a lit-tle longer to solve com-pu-ta-tion-ally
- []
-
-
 Overfull \hbox (2.22168pt too wide) has occurred while \output is active
 [] 
  []
@@ -843,185 +837,156 @@ Overfull \hbox (2.22168pt too wide) has occurred while \output is active
 
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
-Overfull \hbox (2.18436pt too wide) in paragraph at lines 137--138
-[]\T1/cmr/m/n/10 Another im-por-tant is-sue is man-ag-ing fuel con-sump-tion. T
-o get an idea of the in-flu-ence of CG dis-place-ment
- []
-
-
-Overfull \hbox (5.81361pt too wide) in paragraph at lines 175--175
+Overfull \hbox (5.81361pt too wide) in paragraph at lines 152--152
  []|\T1/cmr/m/n/8 IATA*| 
  []
 
 
-Overfull \hbox (1.93123pt too wide) in paragraph at lines 175--175
+Overfull \hbox (1.93123pt too wide) in paragraph at lines 152--152
  []|\T1/cmr/m/n/8 CWB|
  []
 
 
-Overfull \hbox (1.93123pt too wide) in paragraph at lines 181--181
+Overfull \hbox (1.93123pt too wide) in paragraph at lines 158--158
  []|\T1/cmr/m/n/8 CWB| 
  []
 
 <nodes.png, id=18, 766.865pt x 737.75626pt>
 File: nodes.png Graphic file (type png)
 <use nodes.png>
-Package pdftex.def Info: nodes.png  used on input line 193.
+Package pdftex.def Info: nodes.png  used on input line 170.
 (pdftex.def)             Requested size: 161.0464pt x 154.93338pt.
-[2] [3 <./nodes.png (PNG copy)>] [4]
-<lateral.png, id=37, 1272.755pt x 474.77374pt>
+[2 <./nodes.png (PNG copy)>]
+Overfull \hbox (5.4325pt too wide) in paragraph at lines 192--193
+\T1/cmr/m/n/10 heuris-tic for its op-ti-mi-sa-tion in sev-eral air-craft, con-s
+id-er-ing load bal-anc-ing to min-imise fuel con-sump-tion. 
+ []
+
+
+Overfull \hbox (1.6001pt too wide) in paragraph at lines 194--195
+[]\T1/cmr/m/n/10 Wong and Ling (2020) de-vel-oped a math-e-mat-i-cal model and 
+a tool based on mixed in-te-ger pro-gram-ming
+ []
+
+
+Overfull \hbox (5.26587pt too wide) in paragraph at lines 198--199
+\T1/cmr/m/n/10 model (BOM), a com-bi-na-to-rial op-ti-mi-sa-tion model (COM), a
+nd an im-proved com-bi-na-to-rial op-ti-mi-sa-tion
+ []
+
+[3]
+<lateral.png, id=29, 1272.755pt x 474.77374pt>
 File: lateral.png Graphic file (type png)
 <use lateral.png>
-Package pdftex.def Info: lateral.png  used on input line 337.
+Package pdftex.def Info: lateral.png  used on input line 314.
 (pdftex.def)             Requested size: 280.00697pt x 104.45055pt.
- [5 <./lateral.png (PNG copy)>] [6]
-[7]
-Overfull \hbox (12.59494pt too wide) in paragraph at lines 569--570
+ [4] [5 <./lateral.png (PNG copy)>] [6]
+Overfull \hbox (12.59494pt too wide) in paragraph at lines 544--545
 []\T1/cmr/m/n/10 Once the as-sump-tions and the math-e-mat-i-cal mod-elling are
  pre-sented, it is pos-si-ble to see that ACLP+RPDP
  []
 
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-[8] [9]
-
-LaTeX Warning: Reference `main:f1' on page 10 undefined on input line 768.
-
-
-LaTeX Warning: Reference `main:f2' on page 10 undefined on input line 768.
-
-[10] [11] [12] [13]
-<shims.png, id=89, 602.25pt x 377.41pt>
+[7] [8] [9] [10] [11] [12]
+<shims.png, id=85, 602.25pt x 377.41pt>
 File: shims.png Graphic file (type png)
 <use shims.png>
-Package pdftex.def Info: shims.png  used on input line 1073.
+Package pdftex.def Info: shims.png  used on input line 961.
 (pdftex.def)             Requested size: 150.56212pt x 94.35226pt.
 
-Overfull \hbox (18.41138pt too wide) in paragraph at lines 1075--1077
+Overfull \hbox (18.41138pt too wide) in paragraph at lines 963--965
 []$[]$
  []
 
-[14 <./shims.png (PNG copy)>]
-Overfull \hbox (9.30414pt too wide) in paragraph at lines 1201--1202
-[]\T1/cmr/m/n/10 The ar-gu-ments $\OML/cmm/m/it/10 threshold[]$ \T1/cmr/m/n/10 
-and $\OML/cmm/m/it/10 threshold[]$ \T1/cmr/m/n/10 are the vol-ume thresh-olds f
-or $\OML/cmm/m/it/10 ^^Q[]$ \T1/cmr/m/n/10 and $\OML/cmm/m/it/10 ^^Q[]$ \T1/cmr
-/m/n/10 cal-cu-la-tions, re-spec-tively. 
- []
-
-[15]
-Overfull \hbox (21.64462pt too wide) in paragraph at lines 1227--1229
-\T1/cmr/m/n/10 al-go-rithms by it-er-a-tively test-ing and elim-i-nat-ing weake
-r pa-ram-e-ter con-fig-u-ra-tions through sta-tis-ti-cal com-par-isons.
- []
-
-[16]
-Overfull \hbox (6.11086pt too wide) in paragraph at lines 1338--1339
-[]\T1/cmr/m/n/10 We ran Al-go-rithm 1[] con-sid-er-ing the five sce-nar-ios fro
-m Ta-ble 8[], three val-ues for $\OML/cmm/m/it/10 surplus$ \T1/cmr/m/n/10 from 
-$\OMS/cmsy/m/n/10 f\OT1/cmr/m/n/10 1\OML/cmm/m/it/10 :\OT1/cmr/m/n/10 2\OML/cmm
-/m/it/10 ; \OT1/cmr/m/n/10 1\OML/cmm/m/it/10 :\OT1/cmr/m/n/10 5\OML/cmm/m/it/10
- ; \OT1/cmr/m/n/10 2\OML/cmm/m/it/10 :\OT1/cmr/m/n/10 0\OMS/cmsy/m/n/10 g$\T1/c
-mr/m/n/10 ,
+[13 <./shims.png (PNG copy)>] [14] [15] [16]
+Overfull \hbox (5.21033pt too wide) in paragraph at lines 1249--1250
+[]\T1/cmr/m/n/10 Each gen-er-a-tion in-volves se-lect-ing so-lu-tions based on 
+fit-ness, gen-er-at-ing new so-lu-tions through crossover,
  []
 
 [17]
-Overfull \hbox (19.23468pt too wide) in paragraph at lines 1373--1374
-\T1/cmr/m/n/10 ar-rays, can pose sig-nif-i-cant chal-lenges for each gen-er-a-t
-ion to eval-u-ate in-di-vid-ual fit-ness, which demon-strated
+Overfull \hbox (1.98677pt too wide) in paragraph at lines 1335--1336
+[]\T1/cmr/m/n/10 To de-ter-mine the pa-ram-e-ters $\OML/cmm/m/it/10 level[]$ \T
+1/cmr/m/n/10 and $\OML/cmm/m/it/10 level[]$\T1/cmr/m/n/10 , used by \T1/cmr/m/i
+t/10 Shims\T1/cmr/m/n/10 , we pre-vi-ously car-ried out some ex-per-i-ments
  []
 
-
-Overfull \hbox (3.57031pt too wide) in paragraph at lines 1383--1384
-[]\T1/cmr/m/n/10 Among the heuris-tics, we will present only the re-sults ob-ta
-ined by $\OML/cmm/m/it/10 Shims$\T1/cmr/m/n/10 , which had the best per-for-man
-ce.
- []
-
-[18]
-Overfull \hbox (6.58679pt too wide) in paragraph at lines 1504--1533
+[18] [19]
+Overfull \hbox (6.58679pt too wide) in paragraph at lines 1520--1549
  [][] 
  []
 
-[19]
-<brazil.png, id=111, 635.37375pt x 630.355pt>
+<brazil.png, id=109, 635.37375pt x 630.355pt>
 File: brazil.png Graphic file (type png)
 <use brazil.png>
-Package pdftex.def Info: brazil.png  used on input line 1550.
-(pdftex.def)             Requested size: 190.61359pt x 189.10796pt.
- [20 <./brazil.png>] [21]
-Overfull \hbox (28.32541pt too wide) in paragraph at lines 1739--1740
+Package pdftex.def Info: brazil.png  used on input line 1608.
+(pdftex.def)             Requested size: 186.16357pt x 184.6931pt.
+[20]
+Overfull \hbox (28.32541pt too wide) in paragraph at lines 1634--1635
 \T1/cmr/m/n/10 draft prepa-ra-tion, In-ves-ti-ga-tion, Val-i-da-tion. \T1/cmr/b
 x/n/10 Car-los Al-berto Alonso Sanches: \T1/cmr/m/n/10 Con-cep-tu-al-iza-tion, 
 Method-ol-ogy,
  []
 
-
-Overfull \hbox (15.5109pt too wide) in paragraph at lines 1751--1752
+[21 <./brazil.png>]
+Overfull \hbox (15.5109pt too wide) in paragraph at lines 1646--1647
 []\T1/cmr/m/n/10 This re-search was par-tially sup-ported by the São Paulo Re-s
 earch Foun-da-tion (FAPESP), grant 2022/05803-3. 
  []
 
-(./eswa.bbl [22] [23]) [24] (./eswa.aux)
-
-LaTeX Warning: There were undefined references.
-
- ) 
+(./ESWA.bbl [22] [23]) [24] (./ESWA.aux) ) 
 Here is how much of TeX's memory you used:
- 28826 strings out of 480171
- 707528 string characters out of 5894489
- 1140110 words of memory out of 5000000
- 46286 multiletter control sequences out of 15000+600000
- 489856 words of font info for 80 fonts, out of 8000000 for 9000
+ 28773 strings out of 480171
+ 706647 string characters out of 5894489
+ 1139110 words of memory out of 5000000
+ 46232 multiletter control sequences out of 15000+600000
+ 490543 words of font info for 81 fonts, out of 8000000 for 9000
  60 hyphenation exceptions out of 8191
- 84i,16n,89p,1267b,2237s stack positions out of 5000i,500n,10000p,200000b,80000s
- </home/celio/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm0500.600
-pk> </home/celio/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx0700.60
-0pk> </home/celio/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ecti0900.6
-00pk> </home/celio/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm0900.
-600pk> </home/celio/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx0900
-.600pk> </home/celio/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm070
-0.600pk> </home/celio/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt10
-00.600pk> </home/celio/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm1
-000.600pk> </home/celio/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm
-0600.600pk> </home/celio/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ecb
-x0800.600pk> </home/celio/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ec
-tt0800.600pk> </home/celio/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/e
-crm0800.600pk> </home/celio/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec/
-ecti1000.600pk> </home/celio/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/ec
-/ecbx1000.600pk> </home/celio/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/e
-c/ecti0800.600pk> </home/celio/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen/
-ec/ecrm1000.600pk> </home/celio/.texlive2021/texmf-var/fonts/pk/ljfour/jknappen
-/ec/ecrm1440.600pk></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/c
-m/cmbx6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex1
-0.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cmextra/cmex8.
-pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cmextra/cmex9.pf
-b></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></us
-r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/share
-/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/share/texliv
-e/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texlive/texmf
--dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/f
-onts/type1/public/amsfonts/cm/cmmi9.pfb></usr/share/texlive/texmf-dist/fonts/ty
-pe1/public/amsfonts/cmextra/cmmib6.pfb></usr/share/texlive/texmf-dist/fonts/typ
-e1/public/amsfonts/cmextra/cmmib8.pfb></usr/share/texlive/texmf-dist/fonts/type
-1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/publi
-c/amsfonts/cm/cmr5.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfon
-ts/cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cm
-r7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb><
-/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/sha
-re/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/tex
-live/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/share/texlive/te
-xmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/share/texlive/texmf-dis
-t/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/texmf-dist/fonts
-/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/fonts/type1/
-public/amsfonts/cm/cmsy9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/
-amsfonts/symbols/msam10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/a
-msfonts/symbols/msbm10.pfb>
-Output written on eswa.pdf (24 pages, 981266 bytes).
+ 84i,16n,89p,1267b,2394s stack positions out of 5000i,500n,10000p,200000b,80000s
+ </home/celio/.texlive2021/texmf-var/
+fonts/pk/ljfour/jknappen/ec/ecti0700.600pk> </home/celio/.texlive2021/texmf-var
+/fonts/pk/ljfour/jknappen/ec/ecbx0700.600pk> </home/celio/.texlive2021/texmf-va
+r/fonts/pk/ljfour/jknappen/ec/ecti0900.600pk> </home/celio/.texlive2021/texmf-v
+ar/fonts/pk/ljfour/jknappen/ec/ecrm0900.600pk> </home/celio/.texlive2021/texmf-
+var/fonts/pk/ljfour/jknappen/ec/ecbx0900.600pk> </home/celio/.texlive2021/texmf
+-var/fonts/pk/ljfour/jknappen/ec/ecrm0700.600pk> </home/celio/.texlive2021/texm
+f-var/fonts/pk/ljfour/jknappen/ec/ectt1000.600pk> </home/celio/.texlive2021/tex
+mf-var/fonts/pk/ljfour/jknappen/ec/tcrm1000.600pk> </home/celio/.texlive2021/te
+xmf-var/fonts/pk/ljfour/jknappen/ec/ecrm0600.600pk> </home/celio/.texlive2021/t
+exmf-var/fonts/pk/ljfour/jknappen/ec/ecbx0800.600pk> </home/celio/.texlive2021/
+texmf-var/fonts/pk/ljfour/jknappen/ec/ectt0800.600pk> </home/celio/.texlive2021
+/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm0800.600pk> </home/celio/.texlive202
+1/texmf-var/fonts/pk/ljfour/jknappen/ec/ecti1000.600pk> </home/celio/.texlive20
+21/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1000.600pk> </home/celio/.texlive2
+021/texmf-var/fonts/pk/ljfour/jknappen/ec/ecti0800.600pk> </home/celio/.texlive
+2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1000.600pk> </home/celio/.texliv
+e2021/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1440.600pk></usr/share/texlive/
+texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-
+dist/fonts/type1/public/amsfonts/cmextra/cmex8.pfb></usr/share/texlive/texmf-di
+st/fonts/type1/public/amsfonts/cmextra/cmex9.pfb></usr/share/texlive/texmf-dist
+/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts
+/type1/public/amsfonts/cm/cmmi5.pfb></usr/share/texlive/texmf-dist/fonts/type1/
+public/amsfonts/cm/cmmi6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/
+amsfonts/cm/cmmi7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfont
+s/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cm
+mi9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cmextra/cmmi
+b6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cmextra/cmmib
+8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb><
+/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr5.pfb></usr/sha
+re/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/texli
+ve/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texlive/texmf
+-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fo
+nts/type1/public/amsfonts/cm/cmr9.pfb></usr/share/texlive/texmf-dist/fonts/type
+1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/publ
+ic/amsfonts/cm/cmsy5.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsf
+onts/cm/cmsy6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm
+/cmsy7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.
+pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb></u
+sr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb></us
+r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
+Output written on ESWA.pdf (24 pages, 969242 bytes).
 PDF statistics:
- 921 PDF objects out of 1000 (max. 8388607)
- 204 compressed objects within 3 object streams
+ 888 PDF objects out of 1000 (max. 8388607)
+ 201 compressed objects within 3 object streams
  0 named destinations out of 1000 (max. 500000)
  33 words of extra memory for PDF output out of 10000 (max. 10000000)
 

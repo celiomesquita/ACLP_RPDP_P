@@ -66,6 +66,11 @@
 		minimum width=0.6cm,
 		single arrow
 	},
+	downarrow/.style={draw=black,
+	fill=white,
+	minimum width=0.6cm,
+	single arrow
+	},
 	longarrow/.style={draw=none,
 		shading=axis,
 		left color=white,
@@ -115,41 +120,13 @@ The aviation industry adapts during global crises to keep supply chains moving. 
 
 Air cargo services are specially designed for organisations that require customised transportation, handle sensitive goods, or serve remote locations with limited routes. Air carriers typically use high-capacity cargo planes for economies of scale. Many cargo airlines have worldwide networks spread across destinations around the world.
 
-A few years ago, \citep{BrandtStefan2019} defined the {\it Air Cargo Load Planning Problem} (ACLPP) as four sub-problems: {\it Aircraft Configuration Problem} (ACP), {\it Build-up Scheduling Problem} (BSP), {\it Air Cargo Palletization Problem} (APP), and {\it Weight and Balance Problem} (WBP). Several aspects were considered: item characteristics to be transported (dimensions, scores, dangerousness, etc.); types and quantities of {\it unit load devices} (ULDs); when these pallets are assembled; how items are allocated to pallets; in which positions these pallets are to be placed; how total cargo weight is balanced; etc.
-
-{\color{blue}
-
-Recently, \citep{zhao2023} developed integer programming solution that address ACLPP and WBP separately, impacting payload optimization and aircraft centre of gravity (CG).
-The authors argue that, with improvements in computer processing power, joint combinatorial optimization of ACPP and WBP is now feasible. They propose three integer linear programming models: a bi-objective optimization model (BOM), a combinatorial optimization model (COM), and an improved combinatorial optimization model (IOM). The models aim to determine the maximum loading capacity and lowest CG deviation from a specified target CG.
-
-The study uses Gurobi to solve four scenarios with various conditional metrics for three models. Results show that the BOM has the fastest solution speed, but the CG deviation is the largest, making the results unacceptable in some cases. The COM has the longest solution time, making it difficult to tolerate in practice. The IOM offers the best optimization solution, despite taking a little longer to solve computationally than the BOM.
-
-Using a Boeing 777F, four scenarios and 25 cases were tested, finding that the BOM's variable feasible domain is limited, the optimization result is insufficient, and the CG deviation is sometimes too large. The COM takes too long to solve, making it difficult to meet the needs of the actual scene. The IOM accelerates the solving process compared to the COM, but some scenarios still require significant computation time.
-
-}
-
-{\color{violet}
-	
-Inefficient air transport plans can lead to unnecessary costs, extra routes, longer distances, and incorrect destinations. Unbalanced cargo increases fuel consumption due to altered aircraft pitch angles.
-
-A study by \cite[p. 22]{gwh2007} highlights the risk of weight- and balance-related accidents on cargo flights compared to passenger flights. So, balancing cargo is crucial for safe aerial transportation, as an improperly positioned centre of gravity can result in dangerous take-off and landing conditions and stall recovery issues.
-
-Another important issue is managing fuel consumption. To get an idea of the influence of CG displacement on fuel consumption, \cite[p. 140]{MongeauBes2003} report that {\it "a displacement of the CG of less than 75 cm in a long-range aircraft yields, over a 10,000 km flight, a saving of 4,000 kg of fuel"}. This reinforces the importance of balancing cargo.
-
-Despite technological advancements, many airlines still rely on manual aircraft loading and balancing, using simple computer-aided tools for CG computation and constraint testing. Loadmasters often create load plans manually, which is time-consuming and can lead to flight delays.
-
-As to the right delivery, an organisation's purchasing department may acquire supplies in the main capitals of the country and abroad to meet the company's needs, and it wants these materials to be delivered to the requesting organisations within the stipulated deadlines.
-
-A rational decision-making process is crucial to avoid creating inefficient or unsafe transport plans, considering the high costs of fuel, maintenance, operation, outsourcing expenses, potential operational impairments, and safety risks due to unbalanced cargo.
-
-Solving the ACLPP+RPDP is vital for optimising strategic scores of what must be transported, saving time and effort in loading, ensuring safety and balance, ensuring correct pickups and deliveries, and finding the best routes considering fuel use due to potential cargo imbalance.
-	
-}
+A few years ago, \cite{BrandtStefan2019} defined the {\it Air Cargo Load Planning Problem} (ACLPP) as four sub-problems: {\it Aircraft Configuration Problem} (ACP), {\it Build-up Scheduling Problem} (BSP), {\it Air Cargo Palletization Problem} (APP), and {\it Weight and Balance Problem} (WBP). Several aspects were considered: item characteristics to be transported (dimensions, scores, dangerousness, etc.); types and quantities of {\it unit load devices} (ULDs); when these pallets are assembled; how items are allocated to pallets; in which positions these pallets are to be placed; how total cargo weight is balanced; etc.
 
 However, it is crucial to highlight that there are still other important challenges in air cargo transport that go beyond the definition of ACLPP, especially with regard to routes, and pickup and delivery at each destination. In this context, at least two more important sub-problems can be considered: simultaneous pickup and delivery at each node, called the {\it Pickup and Delivery Problem} (PDP), and searching for the best benefit-cost route, which is a special case of the {\it Travelling Salesman Problem} (TSP).
 
 The problem addressed in this work is the definition of the route of an aircraft that loads and unloads hundreds of items in up to seven hubs, dealing with weight, volume, and balance constraints, and maximising the benefit-cost ratio. This challenge has become even more acute during the COVID-19 pandemic due to the need for urgent medical supplies. Delays in shipping essential items such as respirators to critical areas highlighted the need for optimised solutions.
 
+Inefficient air transport plans can lead to unnecessary costs, extra routes, longer distances, and incorrect destinations. Unbalanced cargo increases fuel consumption due to altered aircraft pitch angles, increasing the risk of weight- and balance-related accidents. Balancing cargo is crucial for safe aerial transportation, as an improperly positioned centre of gravity (CG) can result in dangerous take-off and landing conditions and stall recovery issues. Despite technological advancements, many airlines still rely on manual aircraft loading and balancing, which can lead to flight delays. A rational decision-making process is essential to avoid creating inefficient or unsafe transport plans, considering high costs of fuel, maintenance, operation, outsourcing expenses, potential operational impairments, and safety risks due to unbalanced cargo. Solving this problem is vital for optimizing strategic scores, saving time and effort in loading, ensuring safety and balance, correct pickups and deliveries, and finding the best routes considering fuel use due to potential cargo imbalance.
 
 This problem is extremely complex, as it deals with different objectives: defining a route that visits all hubs; maximising the items transported along this route, prioritising the essential ones; making sure items reach the correct destinations; ensuring aircraft safety constraints; and saving fuel so that the flight is sustainable. 
 
@@ -201,13 +178,29 @@ This article is organised into six more sections. In Section \ref{literature}, w
 \section{Literature review}
 \label{literature}
 
-The vast majority of operational research applied to air cargo is focused on challenges related to WBP, that is, the distribution of items on pallets to ensure load balancing. We can mention: \citep{LarsenMikkelsen1979}; \citep{Brosh1981}; \citep{Kevin1992}; \citep{Heidelberg1998}; \citep{fok2004optimizing}; \citep{KaluznyBohdanL2009Oalb}; \citep{Verstichel2011}; \citep{Limbourg2012}; \citep{RoesenerBarnes2016}; \citep{YangLiuGao2018}; \citep{zhao2021}; \citep{MiguelOptimalAP}.
+The vast majority of operational research applied to air cargo is focused on challenges related to WBP, that is, the distribution of items on pallets to ensure load balancing. We can mention: \cite{LarsenMikkelsen1979}; \cite{Brosh1981}; \cite{Kevin1992}; \cite{Heidelberg1998}; \cite{fok2004optimizing}; \cite{KaluznyBohdanL2009Oalb}; \cite{Verstichel2011}; \cite{Limbourg2012}; \cite{RoesenerBarnes2016}; \cite{YangLiuGao2018}; \cite{zhao2021}; \cite{MiguelOptimalAP}.
 
-Other authors have addressed pallet assembly (APP) on aircraft, possibly also considering load balancing (WBP): \citep{MongeauBes2003}; \citep{Chan2006}; \citep{RoesenerHall2014}; \citep{Vancroonemburg2014}; \citep{Paquay2016}; \citep{Paquay2018}; \citep{wong2020}; \citep{eugene2021}; \citep{zhao2023}.
+Other authors have addressed pallet assembly (APP) on aircraft, possibly also considering load balancing (WBP): \cite{MongeauBes2003}; \cite{Chan2006}; \cite{RoesenerHall2014}; \cite{Vancroonemburg2014}; \cite{Paquay2016}; \cite{Paquay2018}; \cite{wong2020}; \cite{eugene2021}; \cite{zhao2023}.
 
-In all these works, there is a great diversity of scenarios and solutions: some consider items in two dimensions, and others in three dimensions; some used integer programming, and others developed specific heuristics.
+In all these works, there is a great diversity of scenarios and solutions: some consider items in two dimensions, and others in three dimensions; some used integer programming, and others developed specific heuristics. Among the most recent, we can highlight:
+\begin{itemize}
+	
+	\item \cite{RoesenerBarnes2016} proposed a heuristic to solve the {\it Dynamic Airlift Loading Problem} (DALP). Given a set of palletized cargo items that require transport between two nodes in a given time frame, the objective of this problem is to select an efficient subset of aircraft, partition the pallets into aircraft loads, and assign them to allowable positions in those aircraft.
+	
+	\item \cite{Paquay2016} presented a mathematical model to optimise the loading of heterogeneous 3D boxes on pallets with a truncated parallelepiped format. Its objective is to maximise the volume used in containers, considering load balancing constraints, the presence of fragile items, and the possibility of rotating these boxes. \cite{Paquay2018} developed some heuristics to solve this problem.
+	
+	\item \cite{YangLiuGao2018} modelled the air transport problem as a 2D packing problem and presented a heuristic for its optimisation in several aircraft, considering load balancing to minimise fuel consumption.
+	
+	\item \cite{wong2020} developed a mathematical model and a tool based on mixed integer programming for optimising cargo in aircraft with different pallet configurations. Balance constraints and the presence of dangerous items were considered. \cite{eugene2021} integrated this tool into a digital simulation model with a visualisation and validation system based on sensors that alert about load deviations.
+	
+	\item \cite{zhao2021} proposed a model for WBP based on Mixed Integer Programming (MIP). Instead of focusing on the CG deviation, the authors consider the original CG envelope of the aircraft, with a linearization method for its non-linear constraints.
+	
+	\item \cite{zhao2023} proposed three integer linear programming models: a bi-objective optimisation model (BOM), a combinatorial optimisation model (COM), and an improved combinatorial optimisation model (IOM). Its objectives were the maximum possible loading and the smallest CG deviation. Four scenarios with multiple metrics are resolved for the {\it Boeing 777F}. The results showed that the BOM has the fastest solution speed, but the CG deviation is the worst; in several cases, the CG deviation is unacceptable. COM has the longest solution time, which is difficult to tolerate in practice.
+	
+\end{itemize}
 
-\citep{LurkinSchyns2015} is the only work that simultaneously addresses an air cargo (WBP) and a flight itinerary (PDP) sub-problem. The authors demonstrated that this problem is {\it NP-hard}. Although it is innovative, strong simplifications were imposed by these authors: in relation to loading, APP was ignored; regarding routing, it is assumed that a predefined tour plan is restricted to only two legs. Referring directly to this work, \citep{BrandtStefan2019} comment: {\it However, not even these sub-problems are acceptably solved for real-world problem sizes, or models omit some practically relevant constraints}.
+
+\cite{LurkinSchyns2015} is the only work that simultaneously addresses an air cargo (WBP) and a flight itinerary (PDP) sub-problem. The authors demonstrated that this problem is {\it NP-hard}. Although it is innovative, strong simplifications were imposed by these authors: in relation to loading, APP was ignored; regarding routing, it is assumed that a predefined tour plan is restricted to only two legs. Referring directly to this work, \cite{BrandtStefan2019} comment: {\it However, not even these sub-problems are acceptably solved for real-world problem sizes, or models omit some practically relevant constraints}.
 
 Table \ref{tab:sa} lists this literature and the involved sub-problems. We also indicate whether the dimensions of the items were considered ({\bf 2D} or {\bf 3D}) and which solution method was used: heuristic search methods ({\bf Heu}), integer programming ({\bf Int}), or linear programming ({\bf Lin}).
 
@@ -219,27 +212,27 @@ Table \ref{tab:sa} lists this literature and the involved sub-problems. We also 
 		\toprule
 		Work & {\bf APP}  & {\bf WBP}  &  {\bf PDP}   &{\bf TSP}   & {\bf 2D}  & {\bf 3D}  & {\bf Heu}  & {\bf Int}  & {\bf Lin} \\
 		\midrule
-		\citep{LarsenMikkelsen1979}  & $.$        & $\bigstar$ & $.$          & $.$        & $.$       & $.$       & $\bigstar$ & $.$        &  $.$ \\
-		\citep{Brosh1981}  & $.$ & $\bigstar$  & $.$   & $.$ & $.$ & $.$   & $.$  & $.$  &  $\bigstar$ \\
-		\citep{Kevin1992}  & $.$ & $\bigstar$  & $.$ & $.$ & $.$ &$.$   & $.$  & $\bigstar$  &  $.$ \\
-		\citep{Heidelberg1998}  & $.$ & $\bigstar$  & $.$ & $.$ & $\bigstar$ &$.$   & $\bigstar$  & $.$  &  $.$ \\
-		\citep{MongeauBes2003}    & $\bigstar$ & $\bigstar$   & $.$ & $.$ & $.$ & $.$   & $.$  & $\bigstar$  &  $.$ \\
-		\citep{fok2004optimizing} & $.$ & $\bigstar$   & $.$ & $.$ & $.$ & $.$   & $.$  & $\bigstar$  &  $.$ \\	
-		\citep{Chan2006}  & $\bigstar$ & $.$    & $.$ & $.$ & $.$ & $\bigstar$  & $\bigstar$  & $.$  &  $.$ \\
-		\citep{KaluznyBohdanL2009Oalb}  & $.$ & $\bigstar$  & $.$  & $.$ & $\bigstar$ &$.$  & $.$  & $\bigstar$  &  $.$ \\
-		\citep{Verstichel2011}   & $.$ & $\bigstar$    & $.$ & $.$ & $.$ & $.$   & $.$  & $\bigstar$  &  $.$ \\	
-		\citep{Limbourg2012} & $.$ & $\bigstar$  & $.$ & $.$ & $.$ & $.$   & $.$  & $\bigstar$  &  $.$ \\
-		\citep{RoesenerHall2014}  & $\bigstar$ & $\bigstar$  & $.$  & $.$ & $.$ & $\bigstar$   & $.$  & $\bigstar$  &  $.$ \\
-		\citep{Vancroonemburg2014}  & $\bigstar$ & $\bigstar$   & $.$ & $.$ & $.$ & $.$   & $.$  & $\bigstar$  &  $.$ \\
-		\citep{LurkinSchyns2015} & $.$ & $\bigstar$  & $\bigstar$ & $.$  & $.$ & $.$   & $.$  & $\bigstar$  &  $.$ \\
-		\citep{RoesenerBarnes2016}  & $.$ & $\bigstar$   & $.$ & $.$ & $.$ & $.$   & $\bigstar$  & $.$  &  $.$ \\
-		\citep{Paquay2016,Paquay2018}  & $\bigstar$ & $\bigstar$ & $.$ & $.$ & $.$ & $\bigstar$ & $\bigstar$  & $\bigstar$ & $.$ \\
-		\citep{YangLiuGao2018} & $.$ & $\bigstar$  & $.$  & $.$ & $\bigstar$  & $.$ & $\bigstar$ & $.$  & $.$ \\
-		\citep{wong2020} & $\bigstar$  & $\bigstar$  & $.$  & $.$   & $.$  & $.$ & $.$ & $\bigstar$  & $.$  \\
-		\citep{eugene2021} & $\bigstar$ & $\bigstar$ & $.$  & $.$   & $.$ & $.$ & $.$ & $\bigstar$  & $.$  \\
-		\citep{zhao2021} & $.$ & $\bigstar$ & $.$  & $.$  & $.$ & $.$ & $.$  & $\bigstar$ &  $.$ \\
-		\citep{zhao2023} & $\bigstar$ & $\bigstar$ & $.$  & $.$  & $.$ & $.$ & $.$  & $\bigstar$ &  $.$  \\
-		\citep{MiguelOptimalAP} & $.$ & $\bigstar$ & $.$  & $.$  & $.$ & $.$ & $.$  & $\bigstar$ &  $.$  \\
+		\cite{LarsenMikkelsen1979}  & $.$        & $\bigstar$ & $.$          & $.$        & $.$       & $.$       & $\bigstar$ & $.$        &  $.$ \\
+		\cite{Brosh1981}  & $.$ & $\bigstar$  & $.$   & $.$ & $.$ & $.$   & $.$  & $.$  &  $\bigstar$ \\
+		\cite{Kevin1992}  & $.$ & $\bigstar$  & $.$ & $.$ & $.$ &$.$   & $.$  & $\bigstar$  &  $.$ \\
+		\cite{Heidelberg1998}  & $.$ & $\bigstar$  & $.$ & $.$ & $\bigstar$ &$.$   & $\bigstar$  & $.$  &  $.$ \\
+		\cite{MongeauBes2003}    & $\bigstar$ & $\bigstar$   & $.$ & $.$ & $.$ & $.$   & $.$  & $\bigstar$  &  $.$ \\
+		\cite{fok2004optimizing} & $.$ & $\bigstar$   & $.$ & $.$ & $.$ & $.$   & $.$  & $\bigstar$  &  $.$ \\	
+		\cite{Chan2006}  & $\bigstar$ & $.$    & $.$ & $.$ & $.$ & $\bigstar$  & $\bigstar$  & $.$  &  $.$ \\
+		\cite{KaluznyBohdanL2009Oalb}  & $.$ & $\bigstar$  & $.$  & $.$ & $\bigstar$ &$.$  & $.$  & $\bigstar$  &  $.$ \\
+		\cite{Verstichel2011}   & $.$ & $\bigstar$    & $.$ & $.$ & $.$ & $.$   & $.$  & $\bigstar$  &  $.$ \\	
+		\cite{Limbourg2012} & $.$ & $\bigstar$  & $.$ & $.$ & $.$ & $.$   & $.$  & $\bigstar$  &  $.$ \\
+		\cite{RoesenerHall2014}  & $\bigstar$ & $\bigstar$  & $.$  & $.$ & $.$ & $\bigstar$   & $.$  & $\bigstar$  &  $.$ \\
+		\cite{Vancroonemburg2014}  & $\bigstar$ & $\bigstar$   & $.$ & $.$ & $.$ & $.$   & $.$  & $\bigstar$  &  $.$ \\
+		\cite{LurkinSchyns2015} & $.$ & $\bigstar$  & $\bigstar$ & $.$  & $.$ & $.$   & $.$  & $\bigstar$  &  $.$ \\
+		\cite{RoesenerBarnes2016}  & $.$ & $\bigstar$   & $.$ & $.$ & $.$ & $.$   & $\bigstar$  & $.$  &  $.$ \\
+		\cite{Paquay2016,Paquay2018}  & $\bigstar$ & $\bigstar$ & $.$ & $.$ & $.$ & $\bigstar$ & $\bigstar$  & $\bigstar$ & $.$ \\
+		\cite{YangLiuGao2018} & $.$ & $\bigstar$  & $.$  & $.$ & $\bigstar$  & $.$ & $\bigstar$ & $.$  & $.$ \\
+		\cite{wong2020} & $\bigstar$  & $\bigstar$  & $.$  & $.$   & $.$  & $.$ & $.$ & $\bigstar$  & $.$  \\
+		\cite{eugene2021} & $\bigstar$ & $\bigstar$ & $.$  & $.$   & $.$ & $.$ & $.$ & $\bigstar$  & $.$  \\
+		\cite{zhao2021} & $.$ & $\bigstar$ & $.$  & $.$  & $.$ & $.$ & $.$  & $\bigstar$ &  $.$ \\
+		\cite{zhao2023} & $\bigstar$ & $\bigstar$ & $.$  & $.$  & $.$ & $.$ & $.$  & $\bigstar$ &  $.$  \\
+		\cite{MiguelOptimalAP} & $.$ & $\bigstar$ & $.$  & $.$  & $.$ & $.$ & $.$  & $\bigstar$ &  $.$  \\
 		{\bf This article}   & $\bigstar$ & $\bigstar$  & $\bigstar$& $\bigstar$ & $.$ & $.$ & $\bigstar$ & $\bigstar$   &  $.$  \\
 		\bottomrule 
 	\end{tabular}
@@ -253,26 +246,10 @@ As can be seen, none of these papers address air cargo palletization and load ba
 
 In this section, we describe the context of the problem addressed in this work as well as the assumptions considered.
 
-{\color{blue}
-
-As for the size of the problem dealt with in this work, addressing the scale of the Travelling Salesperson Problem (TSP) in practical, real-world air transport contexts indeed reveals a fascinating and complex challenge. In the realm of academic research, TSP problems often explore theoretical models that can scale to hundreds or even larger numbers of cities.
-
-In practical terms, especially within the air transport sector, the size and complexity of a TSP can vary significantly depending on several factors:
-
-\textbf{Fleet and Route Planning}: For airline operations, the problem isn't just about finding the shortest path through a set of points; it also involves scheduling, aircraft assignment, crew scheduling, maintenance planning, and delivering the right cargo to the right client. This last operation task complexity transforms a standard TSP into a more intricate problem in our study, the Pickup and Delivery Problem (PDP).
-
-\textbf{Operational Constraints}: Factors like weather, air traffic control restrictions, and the availability of take-off and landing slots make real-world TSP scenarios in air transport even more challenging. Although we do not deal with these constraints, they add layers of complexity that significantly depart from the theoretical TSP model.
-
-\textbf{Dynamic Nature}: Unlike the static nature of classical TSP, real-world problems in air transport are highly dynamic. Routes need to be optimized continuously as conditions change, requiring algorithms that can adapt in real-time or near-real-time.
-
-In practical air transport scenarios, the size of a TSP can be less about the sheer number of nodes and more about the complexity and dynamic nature of the problem, which in our case (a single aircraft in a single day) is rarely expected to be more than seven nodes. Despite this, at the end of this work, we to submit the best method found to a more challenging 15-node problem as a validation test.
-}
 
 \subsection{Operational premises}
 
 As we are dealing with an extremely complex and diverse problem, we decided to establish some simplifying characteristics:
-
-\vspace{-2mm}
 
 \begin{itemize}
 	\setlength\itemsep{-0.3em}
@@ -292,7 +269,7 @@ Throughout this text, we call {\it packed content}\/ a set of items of the same 
 
 \subsection{Aircraft parameters and load balancing}
 
-We consider real-world scenarios, where Table \ref{tab:larger} shows the aircraft parameters. $p_i$\/ are pallets, $1\leq i \leq 18$, whose weight and volume limits are $W_i$\/ and $V_i$, respectively. $D_i^{long}$\/ and $D_i^{lat}$\/ are, respectively, the longitudinal and lateral distances of each pallet centroids to the aircraft centre of gravity (CG) along both axes. These distances will be used in the calculation of the torque, referring to the items allocated on each pallet. In this aircraft, as the ramp has an inclination of $25^{\circ}$, we made the necessary corrections in $D_i^{long}$, $W_i$\/ and $V_i$\/ of the corresponding pallets ($p_1$, $p_2$, $p_3$, and $p_4$).
+We consider real-world scenarios, where Table \ref{tab:larger} shows the aircraft parameters. $p_i$\/ are pallets, $1\leq i \leq 18$, whose weight and volume limits are $W_i$\/ and $V_i$, respectively. $D_i^{long}$\/ and $D_i^{lat}$\/ are, respectively, the longitudinal and lateral distances of each pallet centroids to the aircraft CG along both axes. These distances will be used in the calculation of the torque, referring to the items allocated on each pallet. In this aircraft, as the ramp has an inclination of $25^{\circ}$, we made the necessary corrections in $D_i^{long}$, $W_i$\/ and $V_i$\/ of the corresponding pallets ($p_1$, $p_2$, $p_3$, and $p_4$).
 
 
 \begin{table}[htp]
@@ -341,8 +318,6 @@ The torque applied to the aircraft must keep its CG in the operational range, wh
 
 
 We also make the following assumptions:
-
-\vspace{-2mm}
 
 \begin{itemize}
 	\setlength\itemsep{-0.3em}
@@ -566,7 +541,7 @@ Finally, ACLP+RPDP constraints related to each node ${\pi_k}$\/ are described in
 	Y_{iq}^{\pi_k} <= Y_{iq}^{\pi_k} \times (to_q - T_i^{\pi_k} + 1); \ i \in \{1, \ldots, m\}; \ q \in \{1, \ldots, m_{\pi_k}\}
 \end{equation}
 
-Once the assumptions and the mathematical modelling are presented, it is possible to see that ACLP+RPDP is {\it NP-hard}. In a similar way to \citep{LurkinSchyns2015}, consider the simple case where $K=1$\/ (one leg), $m=2$\/ (two pallets around the aircraft CG), $2n$\/ sufficiently light items with same scores in node 0, and no items in node 1. Under these conditions, through polynomial reductions for the {\it Set-Partition Problem}, it is possible to demonstrate that the decision problem associated with ACLP+RPDP is {\it NP-complete}. For more details, see \citep[p.~6]{LurkinSchyns2015}.
+Once the assumptions and the mathematical modelling are presented, it is possible to see that ACLP+RPDP is {\it NP-hard}. In a similar way to \cite{LurkinSchyns2015}, consider the simple case where $K=1$\/ (one leg), $m=2$\/ (two pallets around the aircraft CG), $2n$\/ sufficiently light items with same scores in node 0, and no items in node 1. Under these conditions, through polynomial reductions for the {\it Set-Partition Problem}, it is possible to demonstrate that the decision problem associated with ACLP+RPDP is {\it NP-complete}. For more details, see \cite[p.~6]{LurkinSchyns2015}.
 
 
 
@@ -577,164 +552,43 @@ Once the assumptions and the mathematical modelling are presented, it is possibl
 
 Throughout our research, we have thoughtfully described ACLP+RPDP in standard MIP format and found that no solver can handle its practical cases in a feasible time. Thus, as ACLP+RPDP is highly complex, involving four intractable and interconnected sub-problems, we decided to focus only on {\it real cases}, developing quick node-by-node solutions, not necessarily optimal, but which would allow us to obtain a complete tour.
 
-In practical cases, we know that a common aircraft has $m=18$\/ pallets, flight itineraries have $K \leq 6$\/ nodes plus the base, and each node has hundreds of items to be shipped. We also know that missions with fewer nodes are more frequent than longer ones. Under these circumstances, we can adopt some important strategies:
-
-\vspace{-2mm}
-
-\begin{itemize}
-	\setlength\itemsep{-0.3em}
-	
-	\item We consider that the number of destinations is smaller than the number of pallets, that is, $K < m$. We also avoid the trivial case where $K=1$. With this premise, we can preset the destinations of the pallets at each shipping node, reserving for each destination a number of pallets proportional to the volume available. We could have used another criterion, but it was observed in the experiments that the volume is more constrictive in airlift.
-	
-{\color{violet}
-	\item As the number of nodes is small, we have the possibility to check all possible tours, selecting the one that provides the best value for the objective function. For this reason, a maximum time per solution ($tmax$) is established. In the tests carried out in this work, these times were in the range [240s, 1200s, 2400s, 3600s].
-
-	\item At each node, we will use a MIP solver or heuristics to check which method offers the best result within the time limit for each node.
-
-	\item The time limit to solve a node will be adjusted to be proportional to the sum of volumes of the candidate items of the node in relation to the sum of volumes of the entire tour.
-}
-	
-\end{itemize}
-
-
-Our complete strategy is summarized in Algorithm \ref{alg:main}.
-
-\begin{algorithm}[htp]
-	
-	\caption{Solving the ACLP+RPDP}  \label{alg:main}
-		
-	\begin{algorithmic}[1]
-			\State {\bf ACLP+RPDP} \,\, {\it in:}~$scenario, surplus, tmax, tsp, ntours$ \, \, {\it out:}~$answer$
-			
-			\State Let $M$ be the set of pallets ({\it cfr.} Table \ref{tab:larger}) \label{main:M} 
-			
-			\State Let $K$, $L$\/ and $C$ be according to the $scenario$ ({\it cfr.} Tables \ref{tab:costs}, \ref{tab:larger} and \ref{tab:scenarios}) \label{main:KLC} 
-						
-			\State $N \gets ItemsGeneration(scenario, surplus)$ \label{main:items}
-			
-		{\color{violet}
-			\If {$tsp$ = True}
-			
-				\State $tmax \gets tmax/ntours$ \Comment{max. tour time to solve the number of tours from the TSP heuristic}
-			
-			\Else
-			
-				\State $tmax \gets tmax/K!$
-			
-			\EndIf
-		}
-			\For {each $method$}  \label{main:method} 
-			
-				\For {each $\pi \in S_K$} \label{main:loop1}
-				
-					\State $f_{\pi} \gets SolveTour(\pi, L, M, C, N, method, tmax)$ \label{main:fpi}
-				
-				\EndFor \label{main:loop2}
-				
-				\State $answer[scenario,surplus,method] \gets \max f_{\pi}$ \label{main:a2}
-			\EndFor
-	\end{algorithmic}
-
-\end{algorithm}
-
-
-In this algorithm, we use {\color{blue}six} values for $scenario$, according to Tables \ref{tab:costs} and \ref{tab:scenarios}, which define the number $K$ of destinations, the set $L$\/ of nodes, the costs $C$\/, and the shortest tours $\pi_{TSP1}$\/ and $\pi_{TSP2}$.
-
-{\color{blue}
-Scenario 6 will be used only for the best method validation.
-}
 
 
 \begin{figure}[htp]
-	
-	
 	\centering
-	\fbox{
-	\begin{tikzpicture}
-				
-		%% Make the boxes
-		\node [mybox] (first)                        { \small {\bf Select:}\\ 
-			\small 1. scenario\\ 
-			\small 2. surplus\\ 
-			\small 3. time limit};
-		
-		\node [mybox, right=0.7cm of first] (second) { \small {\bf Config:}\\ 
-			\small 4. parameters\\ \small 5. cost matrix\\ 
-			\small 6. pallets\\ 
-			\small 7. items};
-		
-		\node [mybox, right=0.7cm of second] (third) { \small {\bf Define tour}\\  
-			\small {\bf schema:}\\ 
-			\small 8. All K! tours\\ \ \ \  
-			\small or\\ 
-			\small 8. Solve a TSP\\ 
-			\small  \ \ \ (set of tours))};
-		
-		\node [mybox, right=0.7cm of third] (fourth) { \small {\bf Solve ACLPP+RPDP:}\\ 
-			\small 9. Many tours{\bf *}\\ 
-			\small 10. Select best tour};
-		
-		\node [mybox, below=0.7cm of third] (fifth) { \small {\bf *Solve a tour:}\\
-			\small \ \ \ {\it - For each node:}\\
-			\small \ \ \ \ \ {a. Unload some pallets}\\
-			\small \ \ \ \ \ {b. Arrange remaining pallets to balance cargo}\\
-			\small \ \ \ \ \ {c. Set empty pallets destinations}\\
-			\small \ \ \ \ \ {d. \it For each pallet:}\\
-			\small \ \ \ \ \ \ \ \ \ {Solve an ACLPP with WBP and PDP constraints}\\
-			\small \ \ \ \ \ {e. Calculate node score and torque}\\
-			\small \ \ \ {\it - Return tour Score/Cost}
-			
-					
-
-	};
-		
-		%% Draw arrows between them
-		\node[myarrow] at ([xshift=8pt]first.east) {\phantom{\tiny{aaa}}};
-		\node[myarrow] at ([xshift=8pt]second.east) {\phantom{\tiny{aaa}}};
-		\node[myarrow] at ([xshift=8pt]third.east) {\phantom{\tiny{aaa}}};
-		
-		\path[->] (third) edge (fifth);
-		
-	\end{tikzpicture} 
-}
-	\caption{Solution main flow}
-	\label{fig:flow}
-\end{figure}
-
-\begin{figure}[htp]
-	\centering
-	\fbox{
+	\fbox{ \small
 		\begin{tikzpicture}
 			\node [mybox] (one) { \small {\bf Input data:}\\
 				\small \ \ \ {Aircraft parameters}\\
 				\small \ \ \ {Airports and distances}\\
-				\small \ \ \ {$scenario$ \ \ ($K$ and $L$)}\\
-				\small \ \ \ {$surplus = \sum_{j=1}^{n_k} v_j$/$\sum_{i=1}^{m} V_i$ }\\
+				\small \ \ \ {$scenario$ \ \ ($K$, $L$\/ and $C$)}\\
+				\small \ \ \ {Items available for shipment at each airport}\\						
+				\small \ \ \ {$surplus = \sum_{j=1}^{n_k} v_j$/$\sum_{i=1}^{m} V_i$ }\\		
 				\small \ \ \ {$tmax$ \ \ (overall runtime limit)}\\
-				\small {{\bf Requirement:} $K < m$}
+				\small {{\bf Requirement:} $1 < K < m$}
 			};
 			
-			\node [mybox, below=0.7cm of one] (two) { \small {\bf Tours definition:}\\
+			\node [mybox, below=0.7cm of one] (two) { \small {\bf Number of tested tours:}\\
 				\small \ \ \ {{\bf if} $K \leq 6$}\\
 				\small \ \ \ \ \ \ {$ntours = 2$ \ \ (optimal TSP solutions)}\\
 				\small \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\it or}\\				
 				\small \ \ \ \ \ \ {$ntours = K!$ \ \ (all possible tours)}\\
 				\small \ \ \ {\bf else}\\
-				\small \ \ \ \ \ \ {$ntours = 100$ \ \ (best tours obtained with TSP heuristic)}
+				\small \ \ \ \ \ \ {$ntours = 100$ \ \ (best tours obtained with a TSP heuristic)}
 			};
 			
-			\node [mybox, below=0.7cm of two] (three) { \small {\bf On each tour of the $ntours$:}\\
-				\small \ \ \ {Calculation of a node-by-node solution (divide runtime according to shipment volumes)}\\
-				\small \ \ \ {On each node of current tour:}\\
-				\small \ \ \ \ \ \ \ {- Relocate packed contents with torque optimization}\\
-				\small \ \ \ \ \ \ \ {- Predefine pallet destinations according to shipment volumes}\\
+			\node [mybox, below=0.7cm of two] (three) { \small {\bf On each tour of $ntours$:}\\
+				\small \ \ \ {Calculate a node-by-node solution (divide runtime according to shipment volumes):}\\
+				\small \ \ \ \ \ \ \ {- Reallocate packed contents with torque optimization}\\
+				\small \ \ \ \ \ \ \ {- Preset pallet destinations according to shipment volumes}\\
 				\small \ \ \ \ \ \ \ {- Find a node solution (MIP, Shims, NMO, ACO, GRASP, TS, GA) }\\
-				\small \ \ \ \ \ \ \ {- Accumulate values obtained from score, torque and cost}
+				\small \ \ \ \ \ \ \ {- Accumulate values obtained from score, torque and cost}\\
+				\small \ \ \ \ \ \ \ {- Go to the next node on the current tour}
 			};
-		
-		
-		\node[myarrow, rotate=-90] at ([yshift=-8pt]two.south) {\phantom{\tiny{aaa}}};
-		\node[myarrow, rotate=-90] at ([yshift=-8pt]one.south) {\phantom{\tiny{aaa}}};		
+			
+			
+			\node[myarrow, rotate=-90] at ([yshift=-8pt]two.south) {\phantom{\tiny{aaa}}};
+			\node[myarrow, rotate=-90] at ([yshift=-8pt]one.south) {\phantom{\tiny{aaa}}};		
 		\end{tikzpicture} 
 	}
 	\caption{Solution process}
@@ -742,9 +596,67 @@ Scenario 6 will be used only for the best method validation.
 \end{figure}
 
 
-{\color{blue}
-Figure \ref{fig:flow} depicts the Algorithm \ref{alg:main} for easy understanding of the main flow. (1.) Select a scenario from Table \ref{tab:scenarios}. (2.) Select a volume surplus (1.2, 1.5, or 2.0). (3.) Establish a time limit (240s, 1200s, 2400s, or 3600s). (4.) Configure the parameters presented in the mathematical formulation. (5.) Load the distance matrix and calculate the matrix cost according to the aircraft characteristics. (6.) Load the pallet configuration parameters. (7.) Load the item instance (all items to be transported) into memory. (8.) Choose a tour schema. Until 7 nodes, it is practical to generate K! tours. For a larger number of nodes, we recommend using a TSP heuristic that generates a set of similar suboptimal tours. (9.) and (10.) solve all tours and select the best.
-}
+
+
+In practical cases, we know that a common aircraft has $m=18$\/ pallets, flight itineraries have $K \leq 6$\/ nodes plus the base, and each node has hundreds of items to be shipped. We also know that missions with fewer nodes are more frequent than longer ones. Under these circumstances, we can adopt some important strategies summarized in Figure \ref{fig:process}:
+
+
+\begin{itemize}
+	
+	\item We consider that the number of destinations is smaller than the number of pallets ($K < m$), and we avoid the trivial case where $K=1$. With this premise, we can preset the destinations of the pallets at each shipping node, reserving a number of pallets proportional to the volume available for each destination. We could have used another criterion, but it was observed in the experiments that the volume is more constrictive in airlift.
+	
+	\item An important parameter is the number $ntours$\/ of tours tested. In practical cases where $K \leq 6$, we have the possibility to check all possible tours ($ntours = K!$). In this situation, as $K$\/ is small, we can also specially analyse the two optimal solutions of the corresponding TSP ($ntours = 2$). Finally, in cases where $K>6$, we will use a heuristic to select $100$\/ tours of low length ($ntours=100$), and search among them for the one that provides the best value for the objective function.
+	
+	\item To compare the performance of each strategy, an overall runtime limit $tmax$\/ is established and divided by $ntours$\/ tours. In turn, the runtime limit for each tour will be distributed among its nodes in proportion to the volume available for boarding.
+	
+	\item At each node of a tour, the packed contents that remain on board are reallocated on pallets in order to minimize torque on the aircraft. This calculation is done quickly using a MIP solver. Then, the destinations of the pallets are previously defined in proportion to the shipment volume. Finally, considering the runtime limit of each node, we will use a MIP solver and five well-known meta-heuristics to find the best allocation of shipping items: {\it Ant Colony Optimization} (ACO), {\it Noising Method Optimization } (NMO), {\it Tabu Search} (TS), {\it Greedy Randomized Adaptive Search Procedure} (GRASP), and {\it Genetic Algorithm} (GA).
+	
+	\item We will generate benchmarks using the $surplus$\/ parameter, which is a value in $\{1.2, 1.5, 2.0\}$. It corresponds, at each node $k$, to the ratio between the sum of the volumes of the items and the load capacity of the pallets ($surplus = \sum_{j=1}^{n_k} v_j$/$\sum_{i=1}^{m} V_i$). This parameter allows us to verify the different behaviour of each method, according to $scenario$\/ and the quantity of items available for shipment.
+	
+	\item We will do tests by varying the number $K$\/ of destinations, the set $L$\/ of nodes, and the costs $C$. Each group of values tested is called $scenario$, according to Tables \ref{tab:costs} and \ref{tab:scenarios}, where $1<K \leq 6$. After finding the method with the best performance in node-by-node solution, we will test it in solving cases with $K > 6$.
+	
+\end{itemize}
+
+
+Algorithm \ref{alg:main} is the main program of this solution process, which parameters are $scenario$, $surplus$, $tmax$, and $ntours$. The input data is obtained from Tables \ref{tab:costs}, \ref{tab:larger} and \ref{tab:scenarios} (lines \ref{main:M}-\ref{main:KLC}).
+ 
+
+
+
+\begin{algorithm}[htp]
+	
+	\caption{Solving the ACLP+RPDP}  \label{alg:main}
+		
+	\begin{algorithmic}[1]
+			\State {\bf ACLP+RPDP} \,\, {\it in:}~$scenario, surplus, tmax, ntours$ \, \, {\it out:}~$answer$
+			
+			\State Let $M$ be the set of pallets ({\it cfr.} Table \ref{tab:larger}) \label{main:M} 
+			
+			\State Let $K$, $L$\/ and $C$ be according to the $scenario$ ({\it cfr.} Tables \ref{tab:costs}, \ref{tab:larger} and \ref{tab:scenarios}) \label{main:KLC} 
+						
+			\State $N \gets ItemsGeneration(scenario, surplus)$ \label{main:items}
+
+			\For {each $method$}  \label{main:method} 
+			
+				\For {$x \gets 1$ to $ntours$} \label{main:loop1}
+
+					\State $f(S_K[x]) \gets SolveTour(S_K[x], L, M, C, N, method, tmax/ntours)$ \label{main:fpi}
+				
+				\EndFor \label{main:loop2}
+				
+				\State $answer[scenario,surplus,method] \gets \max f(S_K[x])$ \label{main:a2}
+			\EndFor
+	\end{algorithmic}
+
+\end{algorithm}
+
+
+
+
+$surplus$ is passed to $ItemsGeneration$\/ (line \ref{main:items}), responsible for creating the items to be shipped, which will be presented in the next section (Algorithm \ref{alg:itemsgen}). $tmax$\/ is the runtime limit, which will be distributed among the tours (line \ref{main:fpi}). $method$\/ corresponds to a MIP solver or a heuristic to the node-by-node solution $SolveTour$, which will be presented in subsection \ref{methods}. The best results obtained by testing all tours are stored in $answer$\/ (line \ref{main:a2}), which is the output of this algorithm.
+
+{\color{red}$\pi_k$ are tours} {\color{blue}$\pi$ are tours}, that is, permutations with the $K$\/ nodes. When $ntours=2$, $\pi_1$\/ and $\pi_2$\/ are the optimal solutions of the corresponding TSP. When $ntours=K!$, $\pi_k$\/ is the $k^{th}$ permutation of $S_K$. Finally, when $ntours=100$, $\pi_1, \ldots, \pi_{100}$\/ are the best TSP solutions provided by a heuristic.
+
 
 \begin{table}[h]
 	\centering
@@ -758,25 +670,21 @@ Figure \ref{fig:flow} depicts the Algorithm \ref{alg:main} for easy understandin
 		3 & 4    & \{$0,1,2,3,4$\}        \\
 		4 & 5    & \{$0,1,2,3,4,5$\}      \\
 		5 & 6    & \{$0,1,2,3,4,5,6$\}    \\
-		6 & 15   & \{$0,1,2,3,4,5,6,7,8,9,10,11,12,13,14$\}    \\
 		\bottomrule
 	\end{tabular}
 \end{table}
 
-$surplus$\/ is a value in $\{1.2, 1.5, 2.0\}$, which corresponds, at each node $k$, to the ratio between the sum of the volumes of the items  and the load capacity of the pallets ($surplus = \sum_{j=1}^{n_k} v_j$/$\sum_{i=1}^{m} V_i$). This parameter allows us to verify the different behaviour of each $method$, according to $scenario$\/ and the quantity of items available for shipment. It is passed to $ItemsGeneration$\/ (line \ref{main:items}), responsible for creating the items to be shipped, which will be presented in the next section (Algorithm \ref{alg:itemsgen}).
 
-$tmax$\/ is the runtime limit, which will be distributed among the tours (lines \ref{main:f1}, \ref{main:f2} and \ref{main:fpi}). $method$\/ corresponds to a MIP solver or a heuristic to the node-by-node solution $SolveTour$, which will be presented in subsection \ref{methods}.
+Next, we will present two subsections: in the first we explain how $SolveTour$\/ is executed. In the second we will present the heuristics developed for node-by-node solutions.
 
-The best results obtained by testing all tours are stored in $answer$\/ (line \ref{main:a2}).
 
-Next, we will present two subsections: in the first we explain how $SolveTour$\/ is executed, presetting the destinations of the pallets. In the second we will present the heuristics developed for node-by-node solutions.
 
 \subsection{SolveTour algorithm}
 \label{tour}
 
 As we commented in the previous subsection, we will adopt the strategy of presetting the destinations of each pallet throughout the tour. This is feasible in practical cases where $1<K<m$. For this, each pallet $i$\/ also has a field $T^k_i$, $0\leq k \leq K$, which stores its next destination after being loaded at node $k$. For this reason, $T^k_i \in L_k$, $1 \leq i \leq m$, $0\leq k \leq K$.
 
-$SolveTour$\/ is described in Algorithm \ref{alg:tour}, where $\pi$\/ is a permutation of the nodes (excluding the base) that defines the order of visits in this tour, $method$\/ corresponds to a MIP solver or a heuristic for solving the node-by-node problems, and $tmax$\/ is the {\color{blue}runtime limit of the tour.}
+$SolveTour$\/ is described in Algorithm \ref{alg:tour}, where $\pi$\/ is a permutation of the nodes (excluding the base) that defines the order of visits in this tour, $method$\/ corresponds to a MIP solver or a heuristic for solving the node-by-node problems, and $tmax$\/ is the runtime limit of this tour.
 
 \begin{algorithm}[H]
 	\caption{Solving the tour $\pi$ with $method$}  \label{alg:tour}
@@ -789,25 +697,9 @@ $SolveTour$\/ is described in Algorithm \ref{alg:tour}, where $\pi$\/ is a permu
 		
 		\State $score \gets 0$ \label{tour:score}
 		\State $cost  \gets 0$ \label{tour:cost}
-		
-		{\color{violet}
-			
-		\State $V_{\pi}  \gets 0$ \label{tour:Vol} \Comment{tour volume}
-		
-		\For {$k \gets 0$ to $K$} \label{tour:loop0}
-		
-			\State $v_{\pi_k}  \gets \sum_{j=1}^{n_k} v_j$
-			\State $V_{k} \gets V_{k} + v_{\pi_k}$
-		
-		\EndFor
-		
-	}
 
 		\For {$k \gets 0$ to $K$} \label{tour:loop1}
-		
-		
-		\State $tnode_{\pi_k} = (v_{\pi_k}/V_{\pi}) * tmax$ \Comment{{\color{blue} node time limit calculation}}
-			
+		\State $t_{\pi_k} = (\sum_{j=1}^{n_k} v_j/ \sum_{k=0}^K \sum_{j=1}^{n_k} v_j) * tmax$ \label{tour:tnode}	 \Comment{runtime limit proportional to the shipment volume}
 	
 		\State $L_{\pi_k} \gets L - \{\pi_0,\pi_1,\ldots,\pi_k\}$  \label{tour:lk1}	 \Comment{the set of remaining nodes is updated}	
 		\State $T_i^{\pi_k} \gets -1$, $1 \leq i \leq m$ \label{tour:-1}             \Comment{the pallet destination is unset}
@@ -821,7 +713,7 @@ $SolveTour$\/ is described in Algorithm \ref{alg:tour}, where $\pi$\/ is a permu
 		
 		\State $M \gets SetPalletsDestinations(M, \pi_k )$ \label{tour:dest2}
 		
-		\State $G_2 \gets SolveNode(method, \pi_k, G_1, tnode_{\pi_k})$  \label{tour:SolveNode}
+		\State $G_2 \gets SolveNode(method, \pi_k, G_1, t_{\pi_k})$  \label{tour:SolveNode}
 		
 		\State $s, \tau \gets ScoreAndTorque(\pi_k, G_2)$ \label{tour:analyse}
 		
@@ -834,9 +726,9 @@ $SolveTour$\/ is described in Algorithm \ref{alg:tour}, where $\pi$\/ is a permu
 	\end{algorithmic}
 \end{algorithm}
 
-As we mentioned in the previous section, all tours start and end at the base $0$\/ (lines \ref{tour:pi1}-\ref{tour:pi2}). After initializing the score and cost values (lines \ref{tour:score}-\ref{tour:cost}), there is a loop for the $K+1$\/ flights (lines \ref{tour:loop1}-\ref{tour:loop2}). Initially, the set $L_{\pi_k}$\/ of remaining nodes is updated (line \ref{tour:lk1}), and the pallet destinations are unset (line \ref{tour:-1}).
+As we mentioned in the previous section, all tours start and end at the base $0$\/ (lines \ref{tour:pi1}-\ref{tour:pi2}). After initializing the score and cost values (lines \ref{tour:score}-\ref{tour:cost}), there is a loop for the $K+1$\/ flights (lines \ref{tour:loop1}-\ref{tour:loop2}). Initially, the runtime limit $t_{\pi_k}$\/ for each node is calculated (line \ref{tour:tnode}), the set $L_{\pi_k}$\/ of remaining nodes is updated (line \ref{tour:lk1}), and the pallet destinations are unset (line \ref{tour:-1}).
 
-When the aircraft is at the base, the initial graph $G_1$\/ is empty, and there are no packed contents \ref{tour:g11}. Otherwise, $UpdatePacked$\/ (line \ref{tour:dest}) returns the set of packed contents that have not yet reached their destination and remain on board, rearranging them on the pallets to minimize CG deviation. This allocation is stored in graph $G_1$\/ (line \ref{tour:g12}).
+When the aircraft is at the base, the initial graph $G_1$\/ is empty, and there are no packed contents {\color{blue}(line \ref{tour:g11})}. Otherwise, $UpdatePacked$\/ (line \ref{tour:dest}) returns the set of packed contents that have not yet reached their destination and remain on board, rearranging them on the pallets to minimize CG deviation. This allocation is stored in graph $G_1$\/ (line \ref{tour:g12}).
 
 $SetPalletsDestinations$\/ (line \ref{tour:dest2}) presets the destination of each pallet based on the volume demands of the current node without changing the pallet's destination with packed contents.
 
@@ -1045,15 +937,11 @@ The constraints (\ref{eq:ifA}) and (\ref{eq:ifB}) are equivalent to $X_{ij} =1$\
 
 \subsubsection{Node-by-node solutions with heuristics}
 
-{\color{violet}
 	
-One of the main objectives of this work was to find a quick heuristic that offers a good-quality solution for the node-by-node problem. Taking this into account, we design algorithms based on four known meta-heuristics: {\it Ant Colony Optimization} (ACO) \citep{Dorigo1992,DorigoManiezzoColorni1996}, {\it Noising Method Optimization} (NMO) \citep{CharonHudry1993,CharonHudry2001,Zhan2020}, {\it Tabu Search} (TS) \citep{Glover1986}, {\it Greedy Randomized Adaptive Search Procedure} (GRASP) \citep{FeoResende1989}, and the Genetic Algorithm (GA) \citep{holland1992adaptation}. We considered several ideas from the literature \citep{NiarFreville1997, Fidanova2006, Alonso2019, Zhan2020, shah2020genetic}, and we were careful to use the same data structures and procedures in all implementations to enforce fair results comparison.
+One of the main objectives of this work was to find a quick heuristic that offers a good-quality solution for the node-by-node problem. Taking this into account, we design algorithms based on five known meta-heuristics: {\it Ant Colony Optimization} (ACO) \citep{Dorigo1992,DorigoManiezzoColorni1996}, {\it Noising Method Optimization} (NMO) \citep{CharonHudry1993,CharonHudry2001,Zhan2020}, {\it Tabu Search} (TS) \citep{Glover1986}, {\it Greedy Randomized Adaptive Search Procedure} (GRASP) \citep{FeoResende1989}, and {\it Genetic Algorithm} (GA) \citep{holland1992adaptation}. We considered several ideas from the literature \citep{NiarFreville1997, Fidanova2006, Alonso2019, Zhan2020, shah2020genetic,PeerlinckAmy2022MFEO}, and we were careful to use the same data structures and procedures in all implementations to enforce fair results comparison.
 
-As \citep{PeerlinckAmy2022MFEO} applied the DEAP (Distributed Evolutionary Algorithms in Python) to solve a Multi-Objective Knapsack Problem, we also decided to apply this evolutionary package to implement a GA solution for the ACLPP.
 
-}
-
-However, the heuristic that presented better solutions was none of the previous ones. In this subsection, we will present a new heuristic for the node-by-node problem, called $Shims$. Like in mechanics, shims are collections of spacers to fill gaps, which may be composed of parts with different thicknesses (see Figure \ref{fig:shims}). This strategy is based on a practical observation: usually, subsets of smaller and lighter items are saved for later adjustments to the remaining available space.
+However, the heuristic that presented better solutions was none of the previous ones. In this subsection, we will present a new heuristic for the node-by-node problem, called {\it Shims}. Like in mechanics, shims are collections of spacers to fill gaps, which may be composed of parts with different thicknesses (see Figure \ref{fig:shims}). This strategy is based on a practical observation: usually, subsets of smaller and lighter items are saved for later adjustments to the remaining available space.
 
 The selection of edges for $E_{ N_{\pi_k} }$ uses the {\it edge attractiveness}\/ $\theta_{ij}$\/ (\ref{eq:edge}), which can be understood as the tendency to allocate the item $j$\/ to the pallet $i$\/ at the node $\pi_k$. It is directly proportional to the score, and inversely to the volume and the torque of each item.
 
@@ -1100,15 +988,16 @@ The selection of edges for $E_{ N_{\pi_k} }$ uses the {\it edge attractiveness}\
 \end{table}
 
 
-Considering only the items that can be shipped at the node $\pi_k$, Figure \ref{fig:whip} represents $n_{\pi_k}$\/ possible edges $e_{ij}$\/ of the pallet $i$\/ sorted by $\theta_{ij}$\/ in non-ascending order. Initially, $Shims$\/ builds a greedy solution for the pallet $i$\/ selecting edges up to index $\eta_1$ ({\it greedy phase}). Then, with the edges between $\eta_1$\/ and $\eta_2$, it elaborates different possible complements ({\it composition phase}), including later the best ones in the same pallet ({\it selection phase}). $Shims$\/ is depicted in Algorithm \ref{alg:shims}. 
+Considering only the items that can be shipped at node $\pi_k$, Figure \ref{fig:whip} represents $n_{\pi_k}$\/ possible edges $e_{ij}$\/ of the pallet $i$\/ sorted by $\theta_{ij}$\/ in non-ascending order. Initially, {\it Shims}\/ builds a greedy solution for the pallet $i$\/ selecting edges up to index $\eta_1$ ({\it greedy phase}). Then, with the edges between $\eta_1$\/ and $\eta_2$, it elaborates different possible complements ({\it composition phase}), including later the best ones in the same pallet ({\it selection phase}). {\it Shims}\/ is depicted in Algorithm \ref{alg:shims}. 
 
 
 
 \begin{algorithm}[H]
-	\caption{$Shims$\/ heuristic at node $\pi_k$}  \label{alg:shims}
+\small
+	\caption{{\it Shims}\/ heuristic at node $\pi_k$}  \label{alg:shims}
 	\begin{algorithmic}[1]
 				
-		\State {\bf SolveNode} \,\, {\it in: $Shims, \pi_k, G, tmax, {\color{blue}threshold_1, threshold_2}$} \, \, {\it out: $G(M \cup N_{\pi_k} \cup Q_{\pi_k}, E_{Q_{\pi_k}} \cup E_{N_{\pi_k}})$}
+		\State {\bf SolveNode} \,\, {\it in: {\it Shims}, $\pi_k, G, tmax, level_1, level_2$} \, \, {\it out: $G(M \cup N_{\pi_k} \cup Q_{\pi_k}, E_{Q_{\pi_k}} \cup E_{N_{\pi_k}})$}
 		
 		\State $T_{begin} \gets$ current system time
 		
@@ -1130,7 +1019,7 @@ Considering only the items that can be shipped at the node $\pi_k$, Figure \ref{
 		\Repeat
 		\State $e_{ij} \gets E_{\eta_1}$ 
 		
-		\If{ ($E_{N_{\pi_k}} \cup \{e_{ij}\}$ is feasible) {\bf and} ($vol_i \leq V_i \times {\color{blue}threshold_1}$) {\bf and} ($| \tau_{\pi_k} + w_j \times D_i^{long} | \leq W_{max} \times limit^{CG}_{long}$)} 
+		\If{ ($E_{N_{\pi_k}} \cup \{e_{ij}\}$ is feasible) {\bf and} ($vol_i \leq V_i \times level_1$) {\bf and} ($| \tau_{\pi_k} + w_j \times D_i^{long} | \leq W_{max} \times limit^{CG}_{long}$)} 
 		
 		\State $E_{N_{\pi_k}} \gets E_{N_{\pi_k}} \cup \{e_{ij}\}$
 		
@@ -1141,20 +1030,18 @@ Considering only the items that can be shipped at the node $\pi_k$, Figure \ref{
 		\State $\eta_1 \gets \eta_1 + 1$ 
 		
 		\EndIf
-		\Until ($vol_i > V_i \times {\color{blue}threshold_1}$) {\bf or} ($\eta_1>n_{\pi_k}$) \label{shims:endfirst}	
+		\Until ($vol_i > V_i \times level_1$) {\bf or} ($\eta_1>n_{\pi_k}$) \label{shims:endfirst}	
 		
 		\State $slack_i \gets V_i - vol_i$  \label{shims:beginsecond}
 		\State $\eta_2 \gets \eta_1$  \label{shims:eta2a}
-%		\While{($\eta_2 \leq n_{\pi_k}$) {\bf and} ($ vol_i < (1 + 2 \times (1-limit)) \times V_i$)}
-{\color{blue}
-		\While{($\eta_2 \leq n_{\pi_k}$) {\bf and} ($ vol_i < V_i \times {\color{blue}threshold_2}$)}
+		\While{($\eta_2 \leq n_{\pi_k}$) {\bf and} ($ vol_i < V_i \times level_2$)}
 	
 		\State $e_{ij} \gets E_{\eta_2}$
 		
 		\State $vol_i \gets vol_i + v_j$
 		\State $\eta_2 \gets \eta_2 + 1$  \label{shims:eta2} 
 		\EndWhile \label{shims:endsecond} 
-	}
+
 		\State $vol \gets 0$; $b \gets 1$; $shims_b \gets \varnothing$; $Set \gets \{ shims_b \}$  \label{shims:beginthird} 
 				
 		\For{$x \gets \eta_1$ to $\eta_2$} \label{edges_indexes}
@@ -1196,26 +1083,18 @@ Considering only the items that can be shipped at the node $\pi_k$, Figure \ref{
 	\end{algorithmic}
 \end{algorithm}
 
-{\color{violet}
-	
-	The arguments $threshold_1$ and $threshold_2$ are the volume thresholds for $\eta_1$ and $\eta_2$ calculations, respectively.
 
-The argument $tmax$ is the maximum time for {\it Shims} to solve a node. It is proportional to the sum of the candidate items volumes in each node, in relation to the sum of all nodes volumes, and the maximum time to solve the tour.
-
-}
+$tmax$\/ is the runtime limit for {\it Shims}, and $level_1$\/ and $level_2$\/ are volume thresholds for the indices $\eta_1$ and $\eta_2$, respectively.
 
 Initially, $Q_{\pi_k}$\/ (line \ref{shims:initQ}) corresponds to the packed contents that remain on board. It is important to remember that $E_{Q_{\pi_k}}$\/ and $M$\/ were modified by the procedure $UpdatePacked(M, Q_{\pi_k}, \pi_k)$ and the procedure $SetPalletsDestinations(M, \pi_k)$. Then, the pallets $i$\/ are considered in non-descending order of $|D_i^{long}|$.
 
 For each pallet $i$, its $n_{\pi_k}$\/ possible edges $e_{ij}$\/ are considered in non-increasing order of $\theta_{ij}$:
 
-\vspace{-2mm}
 
 \begin{itemize}
 	
-	\setlength\itemsep{-0.3em}
 	
-	\item In the {\it greedy phase}\/ (lines \ref{shims:pallets}-\ref{shims:endfirst}), a partial solution for each pallet $i$\/ is constructed by adding edges following $\theta_{ij}$\/ order.
-	The $\eta_1$\/ index corresponds to the accumulated volume equal to $V_i \times {\color{blue}threshold_1}$. In $\eta_2$\/ index, this same accumulated volume reaches $V_i \times  {\color{blue}threshold_2}$. {\color{blue}The values of these thresholds were defined empirically by the {\it irace}\/ tool \citep{LopezIbanezManuel2016}}.
+	\item In the {\it greedy phase}\/ (lines \ref{shims:pallets}-\ref{shims:endfirst}), a partial solution for each pallet $i$\/ is constructed by adding edges following $\theta_{ij}$\/ order. The indices $\eta_1$\/ and $\eta_2$\/ refer to the accumulated volumes $V_i \times level_1$\/ and $V_i \times level_2$, respectively, which were defined empirically by the {\it irace}\/ tool \citep{LopezIbanezManuel2016}. We will explain this in detail in the subsection \ref{items}.
 	
 	\item In the {\it composition phase}\/ (lines \ref{shims:beginsecond}-\ref{shims:endsecond}), a set of shims named $Set$\/ is created for each pallet $i$, where each shim is formed by a set of edges in the range $[\eta_1,\eta_2]$, whose total volume is limited by $slack_i$. In this phase, the heuristic that provided the best results, both in terms of time and quality, is based on {\it First-Fit Decreasing}, which is an approximation algorithm for the {\it Bin Packing Problem}\/ \citep{JohnsonGarey1985}. Basically, shims are created by accumulating the following edges, taking $slack_i$\/ as a limit.
 	
@@ -1223,10 +1102,160 @@ For each pallet $i$, its $n_{\pi_k}$\/ possible edges $e_{ij}$\/ are considered 
 	
 \end{itemize}
 
-{\color{violet}
-	{\it irace} (Iterated Racing for Automatic Algorithm Configuration) streamlines the tuning of optimization algorithms by iteratively testing and eliminating weaker parameter configurations through statistical comparisons. Its application may be understood, from a Machine Learning standpoint, as the task of identifying optimal parameter values for solving new problem instances by leveraging knowledge gained from a set of training problem examples. This method significantly cuts down on the time and effort needed to find optimal or near-optimal parameters, proving effective across various application domains.
-}
+{\color{blue}
+\subsection{Complexity analysis}
 
+
+These are the steps to solve the ACLP+RPDP with the complexity analysis:
+
+\subsubsection{Input data}
+
+Load $K$ lines of text to compose a distances matrix for $K$ airports, the $m$ packed contents from previous nodes, and $n$ items parameters from text files are of complexities $O(K)$, $O(m)$, and $O(n)$, respectively:
+
+	\begin{itemize}
+		\item $O(K + m + n)$
+	\end{itemize}
+
+
+\subsubsection{Number of tested tours ($T$)}
+
+\begin{itemize}
+\item If $K <= 6$, determine the number of tours through permutation. To get permutation of nodes as tours has a complexity of $O(T = K! \cdot K)$, as the number of nodes is permutated (factorial) to generate tours.
+
+	\begin{itemize}
+	\item $ O(K + m + n) + O(T = K! \cdot K)$ or
+	\item $ O(K + m + n) + O(T = 2)$, if the we are solving the two optimal TSP tours.
+	\end{itemize}
+
+\item If $K > 6$, we obtain 100 tours from a heuristic TSP solution (see its time complexity analysis in subsubsection \ref{ga_tsp}):
+
+	\begin{itemize}
+		\item $O(K + m + n) + O(T = 100)$
+	\end{itemize}
+\end{itemize}
+
+\subsubsection{Solving $T$ tours:}
+
+\begin{itemize}
+	\item $O(K + m + n) + O(T)$
+\end{itemize}
+
+
+a) each tour with $K$ nodes:
+\begin{itemize}
+	\item $O(K + m + n) + O(T \cdot K)$
+\end{itemize}
+
+
+b) in each node we have to reset (to eliminate the risk of previous destinations assigned to a pallet) $O(K \cdot m)$ and set the empty pallets destinations: $O(K \cdot m + K \cdot m) = O(2 \cdot K \cdot m) = O(K \cdot m)$
+\begin{itemize}
+	\item $O(K + m + n) + O(T \cdot K \cdot (K \cdot m))$
+\end{itemize}
+
+c) To calculate the time limit to solve each node, it is necessary to determine the potential total volume for each node.: $O(K \cdot n)$
+\begin{itemize}
+	\item $O(K + m + n) + O(T \cdot K \cdot (K \cdot m + K \cdot n))$
+\end{itemize}
+
+d) The time complexity to put the packet contents destined to the next nodes in the tour on board: $O(m)$.
+\begin{itemize}
+	\item $O(K + m + n) + O(T \cdot K \cdot (K \cdot m + K \cdot n + m))$
+\end{itemize}
+
+d) The time complexity to optimize the pallets positions to minimize the CG deviation: $O(m^2)$ ($m$ pallets in $m$ positions)
+\begin{itemize}
+	\item $O(K + m + n) + O(T \cdot K \cdot (K \cdot m + K \cdot n + m + m^2))$
+\end{itemize}
+
+e) Plus the time complexity of the method used to solve an ACLPP with the aircraft partially loaded: $O(C)$
+\begin{itemize}
+	\item $O(K + m + n) + O(T \cdot K \cdot (K \cdot m + K \cdot n + m + m^2 + C))$
+\end{itemize}
+
+\subsubsection{Considering the Shims algorithm: $O(C) = O(Shims)$}
+
+a) the time complexity for sorting the pallets in non-descending order of distances to the CG:
+\begin{itemize}
+	\item $O(Shims) = m \cdot log(m)$
+\end{itemize}
+
+b) As each pallet is solved at a time, the overall Shims complexity is multiplied by $m$.
+\begin{itemize}
+	\item $O(Shims) = m.(m \cdot log(m))$
+\end{itemize}
+
+c) The greedy phase has $O(n)$.
+\begin{itemize}
+	\item $O(Shims) = m \cdot (m \cdot log(m) + n)$
+\end{itemize}
+
+d) The composition phase has $O(n)$ added to the First-Fit Decreasing algorithm time complexity $O(m \cdot log(m))$
+\begin{itemize}
+	\item $O(Shims) = m \cdot (m \cdot log(m) + n + n + m \cdot log(m))$
+	\item $O(Shims) = m \cdot (2n + 2 \cdot m \cdot log(m)) = m \cdot (n + m \cdot log(m))$
+\end{itemize}
+
+The overall time complexity to solve the ACLP+RPDP with Shims is:
+\begin{itemize}
+	\item $O(K+m+n) + O(T \cdot K \cdot (K \cdot m + K \cdot n + m + m^2 + m \cdot (n + m \cdot log(m))))$
+\end{itemize}
+
+
+The overall time complexity provided combines two distinct parts: $O(K+m+n)$ and $O(T \cdot K \cdot (K \cdot m + K \cdot n + m + m^2 + m \cdot (n + m \cdot \log(m))))$. Analysing each part separately and then considering their combined implications provides insight into the algorithm's performance characteristics.
+
+\subsubsection{Complexity analysis considerations}
+
+\textbf{First Part:} $O(K+m+n)$
+
+This component of the time complexity suggests a linear dependency on the sizes of three separate inputs or parameters, denoted by $K$, $m$, and $n$.
+These are sequential steps, each influenced by each of these parameters size. This implies that as any of $K$, $m$, or $n$ increases, the time required by the algorithm increases linearly with respect to the largest of these parameters, the number of items to be transported ($n$).
+
+\textbf{Second Part:} $O(T \cdot K \cdot (K \cdot m + K \cdot n + m + m^2 + m \cdot (n + m \cdot \log(m))))$
+
+This portion is considerably more complex, indicating an algorithm with nested dependencies on several variables ($T$, $K$, $m$, and $n$):
+
+\begin{itemize}
+	\item $T \cdot K$: repeated iterations $T$ for each of $K$ nodes, nested loops where inner operations are contingent upon $K$.
+	\item $K \cdot m + K \cdot n$: These operations scale with both $K$ and each of $m$ and $n$, indicating processes that involve all pairs of $K$ with $m$ and $n$.
+	\item $m + m^2$: operations with linear and quadratic dependencies on the number of pallets $m$, indicating that as $m$ grows, the complexity increases more significantly due to the quadratic term $m^2$.
+	\item $m \cdot (n + m \cdot \log(m))$: Combines linear scaling with $m$ and $n$ and a logarithmic term $m \cdot \log(m)$, because the algorithm uses divide-and-conquer strategies on $m$ elements, the Shims heuristics.
+\end{itemize}
+
+\textbf{Combined Implications}
+
+When combining these parts, the linear terms in the first part ($O(K+m+n)$) are overshadowed by the more complex and potentially rapidly increasing terms of the second part, especially due to the presence of $m^2$ and the product $T \cdot K \cdot (...)$. The quadratic ($m^2$) and logarithmic ($m \cdot \log(m)$) terms indicate that the algorithm's efficiency decreases significantly as the number of pallets $m$ increases.
+
+The overall complexity suggests an algorithm that performs efficiently with small values of $K$, $m$, and $n$ but may become substantially more resource-intensive as these parameters increase. The number tours $T$ indicates that the entire complex operation is executed $T$ times, further amplifying the effect of the inner complexities.
+
+Optimizing such an algorithm involves minimizing the repetition count ($T$), reducing the complexity of operations dependent on $K$, $m$, and $n$.
+
+
+\subsubsection{Time Complexity Analysis of the Genetic Algorithm for TSP}
+\label{ga_tsp}
+
+When $K > 6$, we obtain 100 tours from a heuristic TSP solution with the Genetic Algorithm (GA), which addresses optimization problems by evolving a population of candidate solutions through selection, crossover (recombination), and mutation over multiple generations, aiming to improve the fitness of solutions.
+
+The time complexity of applying Genetic Algorithms to solve the TSP is influenced by several key factors, including the number of nodes (\(K\)), population size (\(P\)), number of generations (\(G\)), and the complexities of the crossover (\(C(K)\)), mutation (\(M(K)\)), and selection (\(S(K)\)) operations.
+
+Given these parameters, we can express the overall time complexity as:
+\begin{itemize}
+	\item $O(G \cdot (P \cdot (S(K) + P \cdot (C(K) + M(K)))))$
+\end{itemize}
+
+{\bf Detailed Explanation}
+\begin{itemize}
+	\item The selection operation's complexity, \(S(K)\), may depend on evaluating the fitness of each solution, which in turn relies on computing the total distance of a path through \(K\) nodes.
+	\item The complexities of the crossover and mutation operations, \(C(K)\) and \(M(K)\), are functions of \(K\) because they involve manipulating sequences representing paths through the \(K\) nodes.
+	\item Each generation involves selecting solutions based on fitness, generating new solutions through crossover, and applying mutations, leading to the multiplication by \(G\).
+\end{itemize}
+
+{\bf Impact of the number of nodes (\(K\))}
+\begin{itemize}
+	\item The direct involvement of \(K\) in the complexities of \(C(K)\), \(M(K)\), and \(S(K)\) highlights how the number of nodes affects the algorithm's performance. Specifically, operations that manipulate or evaluate paths become more complex as \(K\) increases.
+	\item The encoding of solutions and the calculation of fitness values, essential for the selection process, inherently depend on \(K\), emphasizing its role in the GA's computational demands.
+\end{itemize}
+
+}
 
 \section{Implementation and results}
 \label{results}
@@ -1246,7 +1275,7 @@ In the delivery of supplies carried out in Brazil from 2008 to 2010, 23\% of the
 	\caption{Items weight distribution}  \label{tab:weights}
 	\begin{tabular}{c c c c }
 		\toprule
-		$x$ & $P$ & $low$ ($kg$) & $high$ ($kg$) \\		
+		$item$ & $P$ & $low$ ($kg$) & $high$ ($kg$) \\		
 		\midrule
 		1              & 0.23           & 10  & 20  \\
 		2              & 0.22           & 21  & 40  \\
@@ -1260,14 +1289,12 @@ In the delivery of supplies carried out in Brazil from 2008 to 2010, 23\% of the
 
 In the generation of test instances, we use two types of random selections:
 
-\vspace{-2mm}
-
 \begin{itemize}
-	\setlength\itemsep{-0.3em}
+
 	\item $RandomInt(i_1,i_2)$: randomly selects a integer number in $[i_1,i_2]$, where $i_1$ and $i_2$ are integer numbers;
-{\color{violet}
-\item $Roulette()$: a proportional selection function that is biased through $P$ (Table \ref{tab:weights}).
-}
+	
+	\item $Roulette(set)$ biased through $\phi$: selects an element from $set$, where the probability of each element is proportional to the value of a given function $\phi$\/ defined on $set$.
+	
 \end{itemize}
 
 The procedure $ItemsGeneration$, which generates $N$ (all items to be moved among the nodes), is described in Algorithm \ref{alg:itemsgen}.
@@ -1289,7 +1316,7 @@ The procedure $ItemsGeneration$, which generates $N$ (all items to be moved amon
 		\Repeat
 		\State $to_j \gets RandomInt(0, K)$ \label{ig:dest}
 		\Until{$to_j \neq k$}
-		\State $x = Roulette()$ \Comment{biased through $P$ ({\it cfr.} Table \ref{tab:weights})} \label{ig:weight1} 
+		\State $x = Roulette(item)$ biased through $P$ \label{ig:weight1} \Comment{From Table \ref{tab:weights}}	 
 		\State $w_j \gets RandomInt(low(x), high(x))$        \label{ig:weight2}		
 		\State $s_j \gets \round{100 \times (1 - \log_{10}(RandomInt(1, 9)))} $ \label{ig:score}
 		\State $v_j \gets w_j / RandomInt(148, 344)$ \label{ig:volume}
@@ -1305,19 +1332,17 @@ $scenario$\/ defines $L$\/ and $M$\/ (line \ref{ig:LM}), and the argument $surpl
 
 For each generated $t^k_j$ item, its destination is randomly selected (line \ref{ig:dest}), its weight has a distribution according to Table \ref{tab:weights} (lines \ref{ig:weight1}-\ref{ig:weight2}), its score varies $100$\/ (highest) and $5$\/ (lowest) according to a logarithmic scale (line \ref{ig:score}), and its volume is randomly defined from the density, where we allow a variation of 40\% around the average density of $246 kg/m^3$\/ (line \ref{ig:volume}).
 
+To determine the parameters $level_1$\/ and $level_2$, used by \textit{Shims}, we previously carried out some experiments with the tool {\it irace}\/ \citep{LopezIbanezManuel2016}, the results of which are presented in Table \ref {tab:irace}. In these tests, of every 7 instances generated for each value of $surplus$, 4 were used as the training set and 3 as the testing set. We provided the ranges [0.8, 1.0] and [1.0, 2.0] for $level_1$\/ and $level_2$, respectively. In each experiment, there was a maximum of 3,000 runs so that \textit{irace}\/ would have enough data for its statistical tests. For more details, see {\tt cran.r-project.org/web/packages/irace/}.
 
-{\color{blue}
-	After the items were generated, some experiments with the \textit{irace} tool were executed to determine the values for parameters $threshold_1$ and $threshold_2$ used in \textit{Shims}, whose results are presented in Table \ref{tab:irace}.
-	
+
 	\begin{table}[H]
 	\centering
 	\caption{\textit{irace} testing results}  \label{tab:irace}
-	\footnotesize
 	\begin{tabular}{cccc}
 		\toprule
 		
-		\boldm{$surplus$} & \boldm{$threshold_1$} & \boldm{$threshold_2$} & \textbf{run time}\\
-		& for $\eta_1$          & for $\eta_2$          & (min) \\
+		$surplus$ & $level_1$ & $level_2$ & runtime (min)\\
+
 		\midrule
 		1.2& 0.8621 & 1.0539 & 47 \\
 		1.5& 0.9199 & 1.1399 & 59 \\
@@ -1326,96 +1351,82 @@ For each generated $t^k_j$ item, its destination is randomly selected (line \ref
 	\end{tabular}
 	\normalsize
 \end{table}
-	
-	For these tests, we considered the odd instances (1, 3, 5, 7) as the \textbf{training} set and the even instances (2, 4, 6) as the \textbf{testing} set for the \textit{irace} runs. We supplied \textit{irace} for $threshold_1$ determination, the range [0.8, 1.0], and for $threshold_2$, the range [1.0, 2.0]. The number of iterations in each experiment was limited to 3000 executions for \textit{irace} to have plenty of data for its statistical tests. More detail about these configurations may be found on the \textit{irace} user guide in {\tt cran.r-project.org/web/packages/irace/irace.pdf}.
-}
-
 
 \subsection{Obtained solutions: quality and runtimes}
 
-In the tests performed, we used a 64-bit, 16 GB, 3.6 GHz, eight-core processor with {\it Linux Ubuntu 22.04.1 LTS 64-bit} as the operational system and {\it Python 3.10.4}\/ as the programming language. We also used the well-known solver $Gurobi$\/ ({\tt www.gurobi.com}), version 9.5.2.
+In the tests performed, we used a 64-bit, 16 GB, 3.6 GHz, eight-core processor with {\it Linux Ubuntu 22.04.1 LTS 64-bit} as the operational system and {\it Python 3.10.4}\/ as the programming language. We also used the well-known solver {\it Gurobi}\/ ({\tt www.gurobi.com}), version 9.5.2.
 
-We ran Algorithm \ref{alg:main} considering the five scenarios from Table \ref{tab:scenarios}, three values for  $surplus$\/ from $\{1.2, 1.5, 2.0\}$, four values for $tmax$\/ from $\{240s, 1200s, 2400s, 3600s\}$, and seven different methods for the node-by-node solution: $Gurobi$\/ (see \ref{solver}), ACO, NMO, TS, GRASP, GA and $Shims$\/ (Algorithm \ref{alg:shims}). 
+We will first present the results obtained in practical cases, that is, when $1<K\leq6$. Next, we will show how the same {\it Shims}\/ heuristic remains robust when $K>6$.
 
-For $Gurobi$\/ to be able to solve the largest possible number of tests without memory overflow, we set its parameter {\it MIPgap}\/ to 1\%. This shortens its runtime, in addition to ensuring that its objective function $f$\/ is at most 1\% of the optimal solution. For more details, see {\tt www.support.gurobi.com}.
+\subsubsection{Results when $1<K\leq6$}
 
+We ran Algorithm \ref{alg:main} considering the 5 scenarios from Table \ref{tab:scenarios}, 3 values for  $surplus$\/ from $\{1.2, 1.5, 2.0\}$, 4 values for $tmax$\/ from $\{240s, 1200s, 2400s, 3600s\}$, and 7 different methods for the node-by-node solution: {\it Gurobi}\/ (see \ref{solver}), ACO, NMO, TS, GRASP, GA and {\it Shims}\/ (Algorithm \ref{alg:shims}).
+
+For {\it Gurobi}\/ to be able to solve the largest possible number of tests without memory overflow, we set its parameter {\it MIPgap}\/ to 1\%. This shortens its runtime, in addition to ensuring that its objective function $f$\/ is at most 1\% of the optimal solution. For more details, see {\tt www.support.gurobi.com}.
+
+For each $scenario$, $surplus$\/ and $tmax$\/ tested, 7 different instances were generated. Table \ref{tab:overall} succinctly shows the overall performance of the methods for the node-by-node solution. Only {\it Shims}\/ found a solution for all scenarios, as well as being the fastest.
+	
 	
 \begin{table}[H]
 
 	\centering
-	\caption{ \color{blue}Overall results}  \label{tab:mr}
-	\footnotesize
+	\caption{Overall results}  \label{tab:overall}
+	\small
 	\begin{tabular}{cccc}	
 	\toprule
-	{\bf Method} & {\bf Best scenarios} & {\bf Worst scenarios} & {\bf Worst run times (min)}  \\
+	{\bf Method} & {\bf Best scenarios} & {\bf Worst scenarios} & {\bf Worst runtimes (min)}  \\
 	\midrule
-	NMO           & 4             & 5    & {\color{red}60}  \\
-	ACO           & 2, 3          & 4, 5 & {\color{red}25}, {\color{red}61}  \\
-	GRASP         & 1             & 4, 5 & {\color{red}28}, {\color{red}55}  \\
-	TS            & -             & 5    & {\color{red}44}  \\
-	GA            & -             & 1,2,3,4,5  & {\color{red}did not solve}  \\
+	NMO           & 4       & 5    & 60  \\
+	ACO           & 2, 3    & 4, 5 & 25, 61  \\
+	GRASP         & 1       & 4, 5 & 28, 55  \\
+	TS            & -       & 5    & 44  \\
+	GA            & -       & 1, 2, 3, 4, 5  & did not solve  \\
 	\midrule
-	{\it Gurobi}  & 1, 2, 3, 4    & 5    & {\color{red}did not solve}  \\
-	{\it Shims}   & 1, 2, 3, 4, 5 & -    & {\bf 3.26} \\
+	{\it Gurobi}  & 1, 2, 3, 4    & 5    & did not solve  \\
+	{\it Shims}   & 1, 2, 3, 4, 5 & -    & 3.26 \\
 	\bottomrule
 	\end{tabular}
 \normalsize
 
 \end{table}
 
-{\color{violet}
 
-As to the genetic algorithm exclusion from the comparisons tests, we must consider that:
-\vspace{-2mm}
+For this reason, we will present only the results obtained by {\it Shims}, with the average of the objective function $f$\/ and the runtime of {\it Gurobi}\/ and {\it Shims}. To facilitate the comparison between both, we added a last column in the tables where two values are indicated:
 
-\begin{itemize}
-	\setlength\itemsep{-0.3em}	
-	\item The palletization planning of 200 to 1000 items per node in a set of 18 aircraft pallets may be an inadequate problem to be solved with GA, because large chromosome sizes, like 18,000-dimension arrays, can pose significant challenges for each generation to evaluate individual fitness, which demonstrated to be resource-intensive.
-	\item Large chromosomes can slow GA convergence due to the vast search space, requiring more generations to find optimal solutions.
-	\item Efficient encoding and decoding of the problem into the chromosome and decoding solutions is crucial for a 18,000-dimension array. 
-	\item Also, the design of the fitness function becomes more critical as chromosome size increases, as it needs to guide the evolutionary process without being overly computationally demanding.
-\end{itemize}
-
-}
-
-\subsubsection{Shims results}
-
-Among the heuristics, we will present only the results obtained by $Shims$, which had the best performance. For each $scenario$, $surplus$\/ and $tmax$, seven different instances were generated. We will present the average of the objective function $f$\/ and the runtime of $Gurobi$\/ and $Shims$\/ in these instances. To facilitate the comparison between both, we added a last column in the tables where two values are indicated:
-
-\vspace{-2mm}
 
 \begin{itemize}
-	\setlength\itemsep{-0.3em}
+
 	\item {\bf Normalized}: value between 0 and 1, which corresponds to the ratio between the sum of $f$\/ values obtained by the method in all scenarios and the sum of the best values obtained by both methods in all scenarios. The higher the value of {\bf Normalized}, the closer the method approached the best solutions found.
+	
 	\item {\bf Speed-up}: ratio of the sums of the runtimes of all scenarios and the sum of the method runtimes in all scenarios. The method with the highest {\bf Speed-up}\/ is the fastest.
+	
 \end{itemize}
 
 
-We also indicate the two adopted strategies: dedicating all the processing time to the two shortest tours or distributing it among all $K!$\/ tours.
-
-The results obtained with $tmax = 3600s$, which is the highest tested runtime limit, are in Tables \ref{tab:20}, \ref{tab:50} and \ref{tab:100}, with $surplus$\/ values of $1.2$, $1.5$\/ and $2.0$, respectively. We indicate with an {\bf x} the cases where $Gurobi$\/ did not find a feasible solution within this runtime limit or had to be aborted due to high random-access memory (RAM) usage.
+We also indicate the two adopted strategies: dedicating all the processing time to the 2 shortest tours or distributing it among all $K!$\/ tours. The results obtained with $tmax = 3600s$, which is the highest tested runtime limit, are in Tables \ref{tab:20}, \ref{tab:50} and \ref{tab:100}, with $surplus$\/ values of $1.2$, $1.5$\/ and $2.0$, respectively. We indicate with an {\bf x} the cases where {\it Gurobi}\/ did not find a feasible solution within this runtime limit or had to be aborted due to high random-access memory (RAM) usage.
 
 
-\begin{table}[htp] % update this
+
+\begin{table}[htp] 
 	\centering
 	\caption{Solutions with $surplus = 1.2$\/ and $tmax =  3600s$}  \label{tab:20}
 	\footnotesize
 	\begin{tabular}{ccccccccc}
 		\toprule
-		{\specialcell{{\bf Tested}\\{\bf tours}}}&$method$&$scenario$&{\bf 1}&{\bf 2}&{\bf 3}&{\bf 4}&{\bf 5}&\specialcell{{\bf Normalized}\\{\bf Speed-up}}   \\
+		$ntours$&$method$&$scenario$&{\bf 1}&{\bf 2}&{\bf 3}&{\bf 4}&{\bf 5}&\specialcell{{\bf Normalized}\\{\bf Speed-up}}   \\
 		\toprule
-		\multirow{4}{*}{Shortest} &\multirow{2}{*}{$Gurobi$}  & $f$ & 8.53    & 11.79   & 13.14   & 13.52 & 12.36       &  0.9998 \\ % best 5935
+		\multirow{4}{*}{2} &\multirow{2}{*}{{\it Gurobi}}  & $f$ & 8.53    & 11.79   & 13.14   & 13.52 & 12.36       &  0.9998 \\ % best 5935
 		&                              &               {time (s)}   & 29      & 28      & 25      & 27    & 27          &  1.0    \\ % longer 136
 		\cmidrule(lr){2-9}
-		&                           \multirow{2}{*}{$Shims$}  & $f$ & 8.54    & 11.78   & 13.06   & 13.51 & 12.34       &  0.9980 \\
+		&                           \multirow{2}{*}{{\it Shims}}  & $f$ & 8.54    & 11.78   & 13.06   & 13.51 & 12.34       &  0.9980 \\
 		&                             &                {time (s)}   & 1       & 1       & 1       & 1     & 2           &  22.7   \\
 		
 		\midrule
 		
-		\multirow{4}{*}{All $K!$}&  \multirow{2}{*}{$Gurobi$} & $f$ & 8.60    & 12.20   & 13.66   & 15.00  & {\bf x}    & 0.9998 \\ % best 4947
+		\multirow{4}{*}{$K!$}&  \multirow{2}{*}{{\it Gurobi}} & $f$ & 8.60    & 12.20   & 13.66   & 15.00  & {\bf x}    & 0.9998 \\ % best 4947
 		&                              &               {time (s)}   & 30      & 35      & 123     & 314    & {\bf x}    & 1.0 \\
 		\cmidrule(lr){2-9}	
-		&                           \multirow{2}{*}{$Shims$}  & $f$ & 8.61    & 12.20   & 13.46   & 14.99  & 13.35      & 0.9958  \\
+		&                           \multirow{2}{*}{{\it Shims}}  & $f$ & 8.61    & 12.20   & 13.46   & 14.99  & 13.35      & 0.9958  \\
 		&                              &               {time (s)}   & 1       & 1       & 4       & 10     & 51         & 7.49   \\
 		\bottomrule
 		
@@ -1430,20 +1441,20 @@ The results obtained with $tmax = 3600s$, which is the highest tested runtime li
 	\footnotesize
 	\begin{tabular}{ccccccccc}
 		\toprule
-		{\specialcell{{\bf Tested}\\{\bf tours}}} & $method$          & $scenario$ & {\bf 1} & {\bf 2} & {\bf 3} & {\bf 4} & {\bf 5} & \specialcell{{\bf Normalized}\\{\bf Speed-up}}   \\
+		$ntours$ & $method$          & $scenario$ & {\bf 1} & {\bf 2} & {\bf 3} & {\bf 4} & {\bf 5} & \specialcell{{\bf Normalized}\\{\bf Speed-up}}   \\
 		\toprule
-		\multirow{4}{*}{ Shortest } & \multirow{2}{*}{$Gurobi$} & $f$ & 11.83 & 16.73 & 18.07 & 18.83 & 16.86 & 0.9996 \\ % best 8235
+		\multirow{4}{*}{ 2 } & \multirow{2}{*}{{\it Gurobi}} & $f$ & 11.83 & 16.73 & 18.07 & 18.83 & 16.86 & 0.9996 \\ % best 8235
 		&&               {time (s)}                                   & 55    & 64    & 39    & 40    & 88    & 1.0    \\ 
 		\cmidrule(lr){2-9}	
-		&\multirow{2}{*}{$Shims$}                               & $f$ & 11.85 & 16.72 & 18.05 & 18.80 & 16.87 & 0.9993  \\
+		&\multirow{2}{*}{{\it Shims}}                               & $f$ & 11.85 & 16.72 & 18.05 & 18.80 & 16.87 & 0.9993  \\
 		&&         {time (s)}                                         & 1     & 1     & 2     & 2     & 2     & 35.8  \\
 		
 		\midrule
 		
-		\multirow{4}{*}{All $K!$} & \multirow{2}{*}{$Gurobi$}   & $f$ & 11.83 & 16.93 & 18.40 & 20.95 & 17.60 & 0.9999 \\  % best 8469
+		\multirow{4}{*}{$K!$} & \multirow{2}{*}{{\it Gurobi}}   & $f$ & 11.83 & 16.93 & 18.40 & 20.95 & 17.60 & 0.9999 \\  % best 8469
 		&&               {time (s)}                                   & 63    & 59    & 195   & 472   & 2258  & 1.0  \\
 		\cmidrule(lr){2-9}	
-		&\multirow{2}{*}{$Shims$}                               & $f$ & 11.85 & 16.91 & 18.36 & 20.93 & 17.50 & 0.9976  \\ 
+		&\multirow{2}{*}{{\it Shims}}                               & $f$ & 11.85 & 16.91 & 18.36 & 20.93 & 17.50 & 0.9976  \\ 
 		&&         {time (s)}                                         & 1     & 2     & 5     & 15    & 100   & 23.8 \\
 		\bottomrule
 		
@@ -1458,20 +1469,20 @@ The results obtained with $tmax = 3600s$, which is the highest tested runtime li
 	\footnotesize
 	\begin{tabular}{ccccccccc}
 		\toprule
-		{\specialcell{{\bf Tested}\\{\bf tours}}}& $method$& $scenario$ & {\bf 1} & {\bf 2} & {\bf 3} & {\bf 4} & {\bf 5} & \specialcell{{\bf Normalized}\\{\bf Speed-up}}   \\
+		$ntours$& $method$& $scenario$ & {\bf 1} & {\bf 2} & {\bf 3} & {\bf 4} & {\bf 5} & \specialcell{{\bf Normalized}\\{\bf Speed-up}}   \\
 		\toprule
-		\multirow{4}{*}{Shortest} & \multirow{2}{*}{$Gurobi$} & $f$ & 17.70 & 24.20 & 26.39 & 27.17 & 24.20 & 0.9995 \\ % best 11972
+		\multirow{4}{*}{2} & \multirow{2}{*}{{\it Gurobi}} & $f$ & 17.70 & 24.20 & 26.39 & 27.17 & 24.20 & 0.9995 \\ % best 11972
 		&&                                              {time (s)}  & 168   & 98    & 79    & 70    & 72    & 1.0  \\
 		\cmidrule(lr){2-9}	
-		&                            \multirow{2}{*}{$Shims$} & $f$ & 17.74 & 24.22 & 26.32 & 27.07 & 23.13 & 0.9896  \\
+		&                            \multirow{2}{*}{{\it Shims}} & $f$ & 17.74 & 24.22 & 26.32 & 27.07 & 23.13 & 0.9896  \\
 		&&                                              {time (s)}  & 1     & 2     & 2     & 3     & 4     & 40.6  \\
 		
 		\midrule
 		
-		\multirow{4}{*}{All $K!$} & \multirow{2}{*}{$Gurobi$} & $f$ & 17.90 & 25.44 & 26.51 & 29.13 &{\bf x}& 0.9994 \\ % best 9867
+		\multirow{4}{*}{$K!$} & \multirow{2}{*}{{\it Gurobi}} & $f$ & 17.90 & 25.44 & 26.51 & 29.13 &{\bf x}& 0.9994 \\ % best 9867
 		&&                                               {time (s)} & 178   & 143   & 378   & 862   &{\bf x}& 1.0  \\
 		\cmidrule(lr){2-9}	
-		&                         \multirow{2}{*}{$Shims$}    & $f$ & 17.94 & 25.45 & 26.44 & 28.84 & 26.22  & 0.9970  \\
+		&                         \multirow{2}{*}{{\it Shims}}    & $f$ & 17.94 & 25.45 & 26.44 & 28.84 & 26.22  & 0.9970  \\
 		&&                                               {time (s)} & 1     & 3     & 10    & 31    & 196    & 34.7  \\
 		\bottomrule
 		
@@ -1480,20 +1491,25 @@ The results obtained with $tmax = 3600s$, which is the highest tested runtime li
 \end{table}
 
 
+
 From these data, we can draw some conclusions:
 
-\vspace{-2mm}
 
 \begin{itemize}
-	\setlength\itemsep{-0.3em}
+
 	\item The strategy of testing all $K!$\/ tours often provide a better-quality solution, even with less time on each node. This shows that the four sub-problems are interconnected in such a way that it is not enough to solve them separately.
-	\item $Gurobi$\/ fails in some cases when $scenario=5$\/ and the strategy is to check all $K!$\/ tours. This occurs because the runtime limit per node is smaller and there tend to be more packed contents on the aircraft, reducing the space for allocating items and making the solution difficult.
-	\item When $Gurobi$\/ finishes, it finds the best solution, but the one obtained by $Shims$\/ reaches {\color{blue}$99.9\%$}\/ of that value.
-	\item $Shims$\/ always finds a solution, being {\color{blue}8 to 41} times faster.
-	\item All runtimes are much lower than the limit because the solution on many nodes can be fast. Anyway, in all the tests performed, the maximum time spent by $Shims$\/ did not reach 4 minutes. On the other hand, when $scenario=5$\/ and $surplus=1.5$, $Gurobi$\/ spent almost 40 minutes.
+	
+	\item {\it Gurobi}\/ fails in some cases when $scenario=5$\/ and the strategy is to check all $K!$\/ tours. This occurs because the runtime limit per node is smaller and there tend to be more packed contents on the aircraft, reducing the space for allocating items and making the solution difficult.
+	
+	\item When {\it Gurobi}\/ finishes, it finds the best solution, but the one obtained by {\it Shims}\/ reaches at least $98.96\%$\/ of that value. Considering only the strategy of testing all $K!$ tours, this value increases to $99.58\%$.
+	
+	\item {\it Shims}\/ always finds a solution, being 7 to 40 times faster.
+	
+	\item All runtimes are much lower than the limit because the solution on many nodes can be fast. Anyway, in all the tests performed, the maximum time spent by {\it Shims}\/ did not reach 4 minutes. On the other hand, when $scenario=5$\/ and $surplus=1.5$, {\it Gurobi}\/ spent almost 40 minutes.
+	
 \end{itemize}
 
-Table \ref{tab:100time} shows the results obtained with the strategy of testing the $K!$\/ tours in all scenarios with different $tmax$. We can observe more cases where $Gurobi$\/ fails, even in smaller scenarios. When $Gurobi$\/ finishes, $Shims$\/ finds a solution of similar quality ($99\%$\/ or better). In all cases, $Shims$\/ finds a good solution in less than 4 minutes.
+Table \ref{tab:100time} shows the results obtained with the strategy of testing the $K!$\/ tours in all scenarios with different $tmax$. We can observe more cases where {\it Gurobi}\/ fails, even in smaller scenarios. When {\it Gurobi}\/ finishes, {\it Shims}\/ finds a solution of similar quality ($99\%$\/ or better). In all cases, {\it Shims}\/ finds a solution in less than 4 minutes.
 
 
 \begin{table}[H]
@@ -1508,7 +1524,7 @@ Table \ref{tab:100time} shows the results obtained with the strategy of testing 
 		$method$& {$tmax$} & $scenario$  &{\bf 1}&{\bf 2}&{\bf 3}&{\bf 4}&{\bf 5}&{\bf 1}&{\bf 2}&{\bf 3}&{\bf 4}&{\bf 5}&{\bf 1}&{\bf 2}&{\bf 3}&{\bf 4}&{\bf 5} \\
 		\toprule
 		
-		\multirow{10}{*}{$Gurobi$} & \multirow{2}{*}{240s} & $f$ & 8.60 & 12.20 & 13.67 & {\bf x} & {\bf x} & 11.77 & 16.38 & 18.10 & {\bf x} & {\bf x} & 17.89 & 25.42 & {\bf x} & {\bf x} & {\bf x} \\ 
+		\multirow{10}{*}{{\it Gurobi}} & \multirow{2}{*}{240s} & $f$ & 8.60 & 12.20 & 13.67 & {\bf x} & {\bf x} & 11.77 & 16.38 & 18.10 & {\bf x} & {\bf x} & 17.89 & 25.42 & {\bf x} & {\bf x} & {\bf x} \\ 
 		&               &  {time (s)}                            & 31   & 35    & 124   & {\bf x} & {\bf x} & 52    & 59    & 200   & {\bf x} & {\bf x} & 188   & 145   & {\bf x} & {\bf x} & {\bf x} \\ 
 		\cmidrule(lr){2-18}		
 		
@@ -1524,7 +1540,7 @@ Table \ref{tab:100time} shows the results obtained with the strategy of testing 
 		
 		\midrule
 		
-		\multirow{2}{*}{$Shims$} &  \multirow{2}{*}{240s}  & $f$ & 8.61 & 12.20 & 13.46 & 14.99   & 13.35   & 11.78 & 16.29 & 17.99 &  20.93  & 17.50   & 17.94 & 25.45 & 26.14 & 28.84   & 26.22 \\ % 
+		\multirow{2}{*}{{\it Shims}} &  \multirow{2}{*}{240s}  & $f$ & 8.61 & 12.20 & 13.46 & 14.99   & 13.35   & 11.78 & 16.29 & 17.99 &  20.93  & 17.50   & 17.94 & 25.45 & 26.14 & 28.84   & 26.22 \\ % 
 		&         & {time (s)}                                   & 1    & 2     & 4     & 10      & 51      & 1     & 2     & 5     &  15     & 100     & 1     & 3     & 10    & 31      & 196   \\ 
 		
 		\bottomrule
@@ -1532,76 +1548,31 @@ Table \ref{tab:100time} shows the results obtained with the strategy of testing 
 	\normalsize
 \end{table}
 
-The actual RAM consumption of $Gurobi$\/ was over 8.5 GB, and all of $Shims$\/'s executions consumed at most 1.5 GB of RAM.
-
-{\color{blue}
-\subsection{{\it Shims} validation with more nodes}
-
-To validate the effectiveness of the {\it Shims} heuristic, we solve a 15-node TSP containing the 15 main Brazilian airports.
-For this task, we implemented a TSP solution method based on the Genetic Algorithm (GA) that returns a population of 100 tours as input to the ACLP-RPDP solved by {\it Shims}. The GA run time was around three seconds, and the total run time was around 33 seconds.
-
-We implemented the GA with DEAP (Distributed Evolutionary Algorithms in Python) , a evolutionary computation framework available in {\tt github.com/deap/deap}. More details can be found in \citep{DEAP_JMLR2012}.
+The actual RAM consumption of {\it Gurobi}\/ was over 8.5 GB, and all of {\it Shims}\/'s executions consumed at most 1.5 GB of RAM.
 
 
-	\begin{figure}[H]
-		\centering
-		\caption{\label{fig:brazil} {\it Shims/GA} best ACLP+RPDP tour \\
-			\tiny{Solution for scenario 7, instance 1}}
-		\fbox{\includegraphics[scale=0.30]{brazil.png}}
-	\end{figure}
+\subsubsection{Results when $K>6$}
 
+These last results that we will show here do not correspond to practical cases of air transport, as tours where $K>6$ very rarely occur. However, it is possible to see that the {\it Shims} heuristic maintains robust behaviour as the number of nodes grows, that is, it could be adapted to similar contexts
+({\color{red}vehicles and warehouses} {\color{blue}ships and trucks})
+, for example), where there may be more nodes.
 
-The airports cited in Figure \ref{fig:brazil} are: São Paulo (GRU), Congonhas (CGH), Curitiba (CWB), Porto Alegre (POA), Florianópolis (FLN), Vitória (VIX), Salvador (SSA), Recife (REC), Fortaleza (FOR), Belém (BEL), Manaus (MAO), Brasília (BSB), Goiânia (GYN), Confins (CNF), and Rio de Janeiro (GIG), returning to GRU.
+In the tests carried out, we considered real data from the 15 main Brazilian airports. For this task, we implemented a TSP heuristic based on GA that returned 100 tours in approximately 33 seconds. We implemented this heuristic with DEAP (Distributed Evolutionary Algorithms in Python), an evolutionary computation framework available in {\tt github.com/deap/deap}. For more details, see \citep{DEAP_JMLR2012}.
 
-It is important to remember that this is not the shortest tour, but the one with the best relationship with score, cost, and fuel consumption.
-
-}
-
-{\color{purple}
-	
-	It is also important to highlight that three strategies were essential for us to obtain a solution in the instances created:
-	
-	\vspace{-2mm}
-	
-	\begin{itemize}
-		\setlength\itemsep{-0.3em}
-		\item[(1)] consider $K<m$\ so that each pallet received a predefined destination;
-		\item[(2)] on each tour, calculate a node-by-node solution; and
-		\item[(3)] at each intermediate node of the considered tour, relocate the packed contents, minimizing the torque on the aircraft.
-	\end{itemize}
-	
-	\vspace{-2mm}
-	
-	Without adopting these three strategies, we were unable to carry out any experiments, even in smaller instances.
-}
-
+Figure \ref{fig:performance} shows the runtime curve of {\it Shims}\/ as the number of nodes increases, indicating at each point the value found for the objective function $f$. Runtime and $f$\/ are the averages obtained from 7 instances generated with $surplus=2.0$\/ for each value of $K$. In Figure \ref{fig:morenodes}, we indicate one of the tours found by the TSP heuristic when $K=15$.
 
 \begin{table}[htp]
+	
+	\begin{minipage}{0.58\linewidth}
 	\centering
-	\caption{Shims solutions with $surplus = 1.2$\/ and $tmax =  240s$}  \label{tab:15}
-	\footnotesize
-	\begin{tabular}{cccc}
-		\toprule
-$scenario$ & {\bf 7} & {\bf 8} & {\bf 9} \\
-Num. nodes & 15 & 14 & 13 \\
-		\toprule
-$f$        & 50.15 & 47.00 & 47.18    \\
-{time (s)} & 32     & 31     & 29        \\
-Occupancy rate & 0.89     & 0.84     & 0.88        \\
-		\bottomrule
-	\end{tabular}
-	\normalsize
-\end{table}
-
-\begin{center}
-	%\fbox{
 	\begin{tikzpicture}
+	\footnotesize
 		\begin{axis}[xmin=6,ymin=200,
 			enlarge y limits={upper,value=0.2},
 			xlabel style={align=center},
-			xlabel={Number of nodes},
-			ylabel={Time (s)},
-			xtick={  5,   6, 7,  8,  9, 10, 11, 12, 13, 14, 15, 16},
+			xlabel={Number $K$\/ of nodes},
+			ylabel={Runtime (s)},
+			xtick={ 5, 6, 7,  8,  9, 10, 11, 12, 13, 14, 15, 16},
 			ytick={250,350,450,550,650,750,850,950,1050,1150,1250},						
 			]
 			\addplot[
@@ -1617,113 +1588,37 @@ Occupancy rate & 0.89     & 0.84     & 0.88        \\
 			meta index=2 % the meta data is found in the third column
 			] {
 				x   y    label                  alignment
-				7   273   {\footnotesize 92.6}  -10
-				8   360   {\footnotesize 107.5} -10
-				9   468   {\footnotesize 107.5} -10
-				10  560   {\footnotesize 112.3} -10
-				11  660   {\footnotesize 92.8}  -10
-				12  756   {\footnotesize 91.2}  -10
-				13  884   {\footnotesize 96.8}  -10
-				14  1008   {\footnotesize 106.3} -10									
-				15  1170   {\footnotesize 99.8}  -10									
+				7   273   {\footnotesize 92.6}  0
+				8   360   {\footnotesize 107.5} 0
+				9   468   {\footnotesize 107.5}  0
+				10  560   {\footnotesize 112.3}  0
+				11  660   {\footnotesize 92.8}  0
+				12  756   {\footnotesize 91.2} 0
+				13  884   {\footnotesize 96.8}  0
+				14  1008   {\footnotesize 106.3} 0									
+				15  1170   {\footnotesize 99.8}  0									
 			};
 		\end{axis}
 	\end{tikzpicture}
-	%}
-	\captionof{figure}{Shims performance}
-\end{center}
-	
-	
+	\captionof{figure}{{\it Shims}\/ performance with $surplus=2.0$}
+	\label{fig:performance}
+	\end{minipage}\hfill 
+	\begin{minipage}{0.42\linewidth}
+		\centering
+		\includegraphics[scale=0.293]{brazil.png}
+		\captionof{figure}{A tour where $K=15$}
+		\label{fig:morenodes}
+	\end{minipage}
+\end{table}
 
-\begin{center}
-	%\fbox{
-		\begin{tikzpicture}
-			\begin{axis}[xmin=6,ymin=80,
-				enlarge y limits={upper,value=0.2},
-				xlabel style={align=center},
-				xlabel={Number of nodes},
-				ylabel={Time (s)},
-				xtick={  5,  6,   7,   8,   9,  10,  11,  12,  13,  14,  15,  16},
-				ytick={80,100,120,140,160,180,200,220,240,260,280,300},						
-				]
-				\addplot[
-				blue,
-				thick,
-				mark=*,
-				mark options={fill=blue},
-				visualization depends on=\thisrow{alignment} \as \alignment,
-				nodes near coords, % Place nodes near each coordinate
-				point meta=explicit symbolic, % The meta data used in the nodes is not explicitly provided and not numeric
-				every node near coord/.style={anchor=\alignment} % Align each coordinate at the anchor 40 degrees clockwise from the right edge
-				] table [% Provide data as a table
-				meta index=2 % the meta data is found in the third column
-				] {
-					x   y    label                 alignment
-					7   99  {\footnotesize 91.9}  -10
-					8   126  {\footnotesize 108.2} -10
-					9   145  {\footnotesize 108.7} -10
-					10  168 {\footnotesize 111.2} -10
-					11  191 {\footnotesize 78.0}  -10
-					12  215 {\footnotesize 84.1}  -10
-					13  239 {\footnotesize 93.3}  -10
-					14  264 {\footnotesize 104.8} -10									
-					15  293 {\footnotesize 96.1}  -10									
-				};
-			\end{axis}
-		\end{tikzpicture}
-		%}
-	\captionof{figure}{Shims performance (new time computation)}
-\end{center}
-	
-	
-	
-	\begin{center}
-		%\fbox{
-			\begin{tikzpicture}
-				\begin{axis}[xmin=6,ymin=600,
-					enlarge y limits={upper,value=0.2},
-					xlabel style={align=center},
-					xlabel={Number of nodes},
-					ylabel={Time (s)},
-					xtick={  5,  6,   7,   8,   9,  10,  11,  12,  13,  14,  15,  16},
-					ytick={600,1850,3100,4350,5600,6850,8100,9350,10600,11850,13100,14350},						
-					]
-					\addplot[
-					blue,
-					thick,
-					mark=*,
-					mark options={fill=blue},
-					visualization depends on=\thisrow{alignment} \as \alignment,
-					nodes near coords, % Place nodes near each coordinate
-					point meta=explicit symbolic, % The meta data used in the nodes is not explicitly provided and not numeric
-					every node near coord/.style={anchor=\alignment} % Align each coordinate at the anchor 40 degrees clockwise from the right edge
-					] table [% Provide data as a table
-					meta index=2 % the meta data is found in the third column
-					] {
-						x   y    label                 alignment
-						7   692  {\footnotesize 91.9}  -10
-						8   1570  {\footnotesize 108.2} -10
-						9   2580  {\footnotesize 108.7} -10
-						10  3754 {\footnotesize 111.2} -10
-						11  5086 {\footnotesize 78.0}  -10
-						12  6589 {\footnotesize 84.1}  -10
-						13  8528 {\footnotesize 93.3}  -10
-						14  10101 {\footnotesize 104.8} -10									
-						15  12150 {\footnotesize 96.1}  -10									
-					};
-				\end{axis}
-			\end{tikzpicture}
-			%}
-		\captionof{figure}{Shims performance (total time)}
-	\end{center}
-	
+
+
 \section{Conclusions}
 \label{conclusions}
 
 In this work, we modelled and solved a real air transport problem named {\it Air Cargo Load Planning with Routing, Pickup, and Delivery Problem}\/ (ACLP+RPDP). For the first time in the literature, a {\it NP-hard}\/ problem that involves {\it simultaneously}\/ pallet assembly, load balancing, and route planning is addressed, where the cost-effectiveness of transport is maximized. Currently, there is no commercial software available for this problem.
 
-{\color{blue}
-We adopted some simplifications that are not critical, but that allowed for an unprecedented solution to this problem considering more than two nodes. In practical cases, the number $K$\/ of nodes, excluding the base, is small ($K \leq 6$), each of which has hundreds of items to be shipped. Considering a real aircraft, we have developed some node-by-node solutions. The complete process can be executed quickly on a handheld computer, offering good results and reducing stress for the transport planners.}
+We adopted some simplifications that are not critical, but that allowed for an unprecedented solution to this problem considering more than two nodes. In practical cases, the number $K$\/ of nodes, excluding the base, is small ($K \leq 6$), each of which has hundreds of items to be shipped. Considering a real aircraft, we have developed some node-by-node solutions. The complete process can be executed quickly on a handheld computer, offering good results and reducing stress for the transport planners.
 
 As validation, we carried out tests in several real air transport scenarios. In these cases, the solution process can establish, in less than four minutes, a flight tour for a single aircraft with a good distribution of load on pallets to be put in the cargo bay, enforcing the loaded aircraft balance, maximising the total score, and minimising fuel consumption along the planned route, which is beneficial to reduce carbon emissions. This output is an essential part of airlift: it guarantees flight safety, makes ground operations more efficient, and makes sure that each item gets to its right destination.
 

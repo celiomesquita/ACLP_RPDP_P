@@ -6,12 +6,17 @@ Fortin, F.-A., {De Rainville}, F.-M., Gardner, M.-A., Parizeau, M., and
 \newblock {DEAP}: Evolutionary algorithms made easy.
 \newblock {\em Journal of Machine Learning Research}, 13:2171--2175.
 
-\bibitem[Peerlinck and Sheppard, 2022]{PeerlinckAmy2022MFEO}
-Peerlinck, A. and Sheppard, J. (2022).
-\newblock Multi-objective factored evolutionary optimization and the
-  multi-objective knapsack problem.
-\newblock In {\em 2022 IEEE Congress on Evolutionary Computation (CEC)}, pages
-  1--8. IEEE.
+\bibitem[Lopez-Ibanez et~al., 2016]{LopezIbanezManuel2016}
+Lopez-Ibanez, M., Dubois-Lacoste, J., C\'{a}ceres, L., Birattari, M., and
+  St\"{u}tzle, T. (2016).
+\newblock The irace package: iterated racing for automatic algorithm
+  configuration.
+\newblock {\em Operations {R}esearch {P}erspectives}, 3:43--58.
+
+\bibitem[Lurkin and Schyns, 2015]{LurkinSchyns2015}
+Lurkin, V. and Schyns, M. (2015).
+\newblock The airline container loading problem with pickup and delivery.
+\newblock {\em {European Journal of Operational Research}}, 244(3):955--965.
 
 \bibitem[Zhao et~al., 2023]{zhao2023}
 Zhao, X., Dong, Y., and Zuo, L. (2023).
