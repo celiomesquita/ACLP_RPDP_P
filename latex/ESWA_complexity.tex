@@ -94,107 +94,107 @@ These are the steps to solve the ACLP+RPDP with the complexity analysis:
 
 \subsubsection{Input data}
 
-Load $K$ lines of text to compose a distances matrix for $K$ airports, the $m$ packed contents from previous nodes, and $n$ items parameters from text files are of complexities $O(K)$, $O(m)$, and $O(n)$, respectively:
+Load $K$ lines of text to compose a distances matrix for $K$ airports, the $m$ packed contents from previous nodes, and $n$ items parameters from text files are of complexities $\mathcal{O}(K)$, $\mathcal{O}(m)$, and $\mathcal{O}(n)$, respectively:
 
 	\begin{itemize}
-		\item $O(K + m + n)$
+		\item $\mathcal{O}(K + m + n)$
 	\end{itemize}
 
 
 \subsubsection{Number of tested tours ($T$)}
 
 \begin{itemize}
-\item If $K <= 6$, determine the number of tours through permutation. To get permutation of nodes as tours has a complexity of $O(T = K! \cdot K)$, as the number of nodes is permutated (factorial) to generate tours.
+\item If $K <= 6$, determine the number of tours through permutation. To get permutation of nodes as tours has a complexity of $\mathcal{O}(T = K!)$, as the nodes are permutated (factorial) to generate tours.
 
 	\begin{itemize}
-	\item $ O(K + m + n) + O(T = K! \cdot K)$ or
-	\item $ O(K + m + n) + O(T = 2)$, if the we are solving the two optimal TSP tours.
+	\item $ \mathcal{O}(K + m + n) + \mathcal{O}(T = K!)$ or
+	\item $ \mathcal{O}(K + m + n) + \mathcal{O}(T = 2)$, if the we are solving the two optimal TSP tours.
 	\end{itemize}
 
 \item If $K > 6$, we obtain 100 tours from a heuristic TSP solution (see its time complexity analysis in subsubsection \ref{ga_tsp}):
 
 	\begin{itemize}
-		\item $O(K + m + n) + O(T = 100)$
+		\item $\mathcal{O}(K + m + n) + \mathcal{O}(T = 100)$
 	\end{itemize}
 \end{itemize}
 
 \subsubsection{Solving $T$ tours:}
 
 \begin{itemize}
-	\item $O(K + m + n) + O(T)$
+	\item $\mathcal{O}(K + m + n) + \mathcal{O}(T)$
 \end{itemize}
 
 
-a) each tour with $K$ nodes:
+a) For each tour with $K$ nodes:
 \begin{itemize}
-	\item $O(K + m + n) + O(T \cdot K)$
+	\item $\mathcal{O}(K + m + n) + \mathcal{O}(T \cdot K)$
 \end{itemize}
 
 
-b) in each node we have to reset (to eliminate the risk of previous destinations assigned to a pallet) $O(K \cdot m)$ and set the empty pallets destinations: $O(K \cdot m + K \cdot m) = O(2 \cdot K \cdot m) = O(K \cdot m)$
+b) in each node we have to reset (to eliminate the risk of previous destinations assigned to a pallet) $\mathcal{O}(K \cdot m)$ and set the empty pallets destinations: $\mathcal{O}(K \cdot m + K \cdot m) = \mathcal{O}(2 \cdot K \cdot m) = \mathcal{O}(K \cdot m)$
 \begin{itemize}
-	\item $O(K + m + n) + O(T \cdot K \cdot (K \cdot m))$
+	\item $\mathcal{O}(K + m + n) + \mathcal{O}(T \cdot K \cdot (K \cdot m))$
 \end{itemize}
 
-c) To calculate the time limit to solve each node, it is necessary to determine the potential total volume for each node.: $O(K \cdot n)$
+c) To calculate the time limit to solve each node, it is necessary to determine the potential total volume for each node.: $\mathcal{O}(K \cdot n)$
 \begin{itemize}
-	\item $O(K + m + n) + O(T \cdot K \cdot (K \cdot m + K \cdot n))$
+	\item $\mathcal{O}(K + m + n) + \mathcal{O}(T \cdot K \cdot (K \cdot m + K \cdot n))$
 \end{itemize}
 
-d) The time complexity to put the packet contents destined to the next nodes in the tour on board: $O(m)$.
+d) The time complexity to put the packet contents destined to the next nodes in the tour on board: $\mathcal{O}(m)$.
 \begin{itemize}
-	\item $O(K + m + n) + O(T \cdot K \cdot (K \cdot m + K \cdot n + m))$
+	\item $\mathcal{O}(K + m + n) + \mathcal{O}(T \cdot K \cdot (K \cdot m + K \cdot n + m))$
 \end{itemize}
 
-d) The time complexity to optimize the pallets positions to minimize the CG deviation: $O(m^2)$ ($m$ pallets in $m$ positions)
+d) The time complexity to optimize the pallets positions to minimize the CG deviation: $\mathcal{O}(m^2)$ ($m$ pallets in $m$ positions)
 \begin{itemize}
-	\item $O(K + m + n) + O(T \cdot K \cdot (K \cdot m + K \cdot n + m + m^2))$
+	\item $\mathcal{O}(K + m + n) + \mathcal{O}(T \cdot K \cdot (K \cdot m + K \cdot n + m + m^2))$
 \end{itemize}
 
-e) Plus the time complexity of the method used to solve an ACLPP with the aircraft partially loaded: $O(C)$
+e) Plus the time complexity of the method used to solve an ACLPP with the aircraft partially loaded: $\mathcal{O}(C)$
 \begin{itemize}
-	\item $O(K + m + n) + O(T \cdot K \cdot (K \cdot m + K \cdot n + m + m^2 + C))$
+	\item $\mathcal{O}(K + m + n) + \mathcal{O}(T \cdot K \cdot (K \cdot m + K \cdot n + m + m^2 + C))$
 \end{itemize}
 
-\subsubsection{Considering the Shims algorithm: $O(C) = O(Shims)$}
+\subsubsection{Considering the Shims algorithm: $\mathcal{O}(C) = \mathcal{O}(Shims)$}
 
 a) the time complexity for sorting the pallets in non-descending order of distances to the CG:
 \begin{itemize}
-	\item $O(Shims) = m \cdot log(m)$
+	\item $\mathcal{O}(Shims) = m \cdot log(m)$
 \end{itemize}
 
 b) As each pallet is solved at a time, the overall Shims complexity is multiplied by $m$.
 \begin{itemize}
-	\item $O(Shims) = m.(m \cdot log(m))$
+	\item $\mathcal{O}(Shims) = m.(m \cdot log(m))$
 \end{itemize}
 
-c) The greedy phase has $O(n)$.
+c) The greedy phase has $\mathcal{O}(n)$.
 \begin{itemize}
-	\item $O(Shims) = m \cdot (m \cdot log(m) + n)$
+	\item $\mathcal{O}(Shims) = m \cdot (m \cdot log(m) + n)$
 \end{itemize}
 
-d) The composition phase has $O(n)$ added to the First-Fit Decreasing algorithm time complexity $O(m \cdot log(m))$
+d) The composition phase has $\mathcal{O}(n)$ added to the First-Fit Decreasing algorithm time complexity $\mathcal{O}(m \cdot log(m))$
 \begin{itemize}
-	\item $O(Shims) = m \cdot (m \cdot log(m) + n + n + m \cdot log(m))$
-	\item $O(Shims) = m \cdot (2n + 2 \cdot m \cdot log(m)) = m \cdot (n + m \cdot log(m))$
+	\item $\mathcal{O}(Shims) = m \cdot (m \cdot log(m) + n + n + m \cdot log(m))$
+	\item $\mathcal{O}(Shims) = m \cdot (2n + 2 \cdot m \cdot log(m)) = m \cdot (n + m \cdot log(m))$
 \end{itemize}
 
 The overall time complexity to solve the ACLP+RPDP with Shims is:
 \begin{itemize}
-	\item $O(K+m+n) + O(T \cdot K \cdot (K \cdot m + K \cdot n + m + m^2 + m \cdot (n + m \cdot log(m))))$
+	\item $\mathcal{O}(K+m+n) + \mathcal{O}(T \cdot K \cdot (K \cdot m + K \cdot n + m + m^2 + m \cdot (n + m \cdot log(m))))$
 \end{itemize}
 
 
-The overall time complexity provided combines two distinct parts: $O(K+m+n)$ and $O(T \cdot K \cdot (K \cdot m + K \cdot n + m + m^2 + m \cdot (n + m \cdot \log(m))))$. Analysing each part separately and then considering their combined implications provides insight into the algorithm's performance characteristics.
+The overall time complexity provided combines two distinct parts: $\mathcal{O}(K+m+n)$ and $\mathcal{O}(T \cdot K \cdot (K \cdot m + K \cdot n + m + m^2 + m \cdot (n + m \cdot \log(m))))$. Analysing each part separately and then considering their combined implications provides insight into the algorithm's performance characteristics.
 
 \subsubsection{Complexity analysis considerations}
 
-\textbf{First Part:} $O(K+m+n)$
+\textbf{First Part:} $\mathcal{O}(K+m+n)$
 
 This component of the time complexity suggests a linear dependency on the sizes of three separate inputs or parameters, denoted by $K$, $m$, and $n$.
 These are sequential steps, each influenced by each of these parameters size. This implies that as any of $K$, $m$, or $n$ increases, the time required by the algorithm increases linearly with respect to the largest of these parameters, the number of items to be transported ($n$).
 
-\textbf{Second Part:} $O(T \cdot K \cdot (K \cdot m + K \cdot n + m + m^2 + m \cdot (n + m \cdot \log(m))))$
+\textbf{Second Part:} $\mathcal{O}(T \cdot K \cdot (K \cdot m + K \cdot n + m + m^2 + m \cdot (n + m \cdot \log(m))))$
 
 This portion is considerably more complex, indicating an algorithm with nested dependencies on several variables ($T$, $K$, $m$, and $n$):
 
@@ -207,7 +207,12 @@ This portion is considerably more complex, indicating an algorithm with nested d
 
 \textbf{Combined Implications}
 
-When combining these parts, the linear terms in the first part ($O(K+m+n)$) are overshadowed by the more complex and potentially rapidly increasing terms of the second part, especially due to the presence of $m^2$ and the product $T \cdot K \cdot (...)$. The quadratic ($m^2$) and logarithmic ($m \cdot \log(m)$) terms indicate that the algorithm's efficiency decreases significantly as the number of pallets $m$ increases.
+When combining these parts, the linear terms in the first part ($\mathcal{O}(K+m+n)$) are overshadowed by the more complex and potentially rapidly increasing terms of the second part, especially due to the presence of $m^2$ and the product $T \cdot K \cdot (...)$. The quadratic ($m^2$) and logarithmic ($m \cdot \log(m)$) terms indicate that the algorithm's efficiency decreases significantly as the number of pallets $m$ increases.
+
+So, the overall time complexity may be simplified by relaxing the first part to:
+\begin{itemize}
+	\item $\mathcal{O}(T \cdot K \cdot (K \cdot m + K \cdot n + m + m^2 + m \cdot (n + m \cdot log(m))))$
+\end{itemize}
 
 The overall complexity suggests an algorithm that performs efficiently with small values of $K$, $m$, and $n$ but may become substantially more resource-intensive as these parameters increase. The number tours $T$ indicates that the entire complex operation is executed $T$ times, further amplifying the effect of the inner complexities.
 
@@ -223,7 +228,7 @@ The time complexity of this method is influenced by the number of nodes (\(K\)),
 
 Given these parameters, we can express the overall time complexity as:
 \begin{itemize}
-	\item $O(G \cdot (P \cdot (S(K) + P \cdot (C(K) + M(K)))))$
+	\item $\mathcal{O}(G \cdot (P \cdot (S(K) + P \cdot (C(K) + M(K)))))$
 \end{itemize}
 
 The selection complexity, \(S(K)\), depends on evaluating the path length of each tour.
