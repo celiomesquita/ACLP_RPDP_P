@@ -1,0 +1,234 @@
+\begin{thebibliography}{}
+
+\bibitem[Alonso et~al., 2019]{Alonso2019}
+Alonso, M.~T., Alvarez-Valdes, R., and Parreno, F. (2019).
+\newblock A grasp algorithm for multi-container loading problems with practical
+  constraints.
+\newblock {\em A Quarterly Journal of Operations Research}, 18:49--72.
+
+\bibitem[Brandt and Nickel, 2019]{BrandtStefan2019}
+Brandt, F. and Nickel, S. (2019).
+\newblock The air cargo load planning problem - a consolidated problem
+  definition and literature review on related problems.
+\newblock {\em {European Journal of Operational Research}}, 275(2):399--410.
+
+\bibitem[Brosh, 1981]{Brosh1981}
+Brosh, I. (1981).
+\newblock Optimal cargo allocation on board a plane: a sequential linear
+  programming approach.
+\newblock {\em European Journal of Operational Research}, 8(1):40--46.
+
+\bibitem[Chan et~al., 2006]{Chan2006}
+Chan, F., Bhagwat, R., Kumar, N., Tiwari, M., and Lam, P. (2006).
+\newblock Development of a decision support system for air-cargo pallets
+  loading problem: A case study.
+\newblock {\em Expert Systems with Applications}, 31(3):472--485.
+
+\bibitem[Charon and Hudry, 1993]{CharonHudry1993}
+Charon, I. and Hudry, O. (1993).
+\newblock The noising method: a new method for combinatorial optimization.
+\newblock {\em Operations Research Letters}, 14(3):133--137.
+
+\bibitem[Charon and Hudry, 2001]{CharonHudry2001}
+Charon, I. and Hudry, O. (2001).
+\newblock The noising methods: A generalization of some metaheuristics.
+\newblock {\em European Journal of Operational Research}, 135(1):86--101.
+
+\bibitem[Chenguang et~al., 2018]{YangLiuGao2018}
+Chenguang, Y., Hu, L., and Yuan, G. (2018).
+\newblock Load planning of transport aircraft based on hybrid genetic
+  algorithm.
+\newblock {\em MATEC Web of Conferences}, 179:1--6.
+
+\bibitem[Dorigo, 1992]{Dorigo1992}
+Dorigo, M. (1992).
+\newblock {\em Optimization, Learning and Natural Algorithms}.
+\newblock PhD thesis, Politecnico di Milano.
+
+\bibitem[Dorigo et~al., 1996]{DorigoManiezzoColorni1996}
+Dorigo, M., Maniezzo, V., and Colorni, A. (1996).
+\newblock The ant system: optimization by a colony of cooperating agents.
+\newblock {\em IEEE Transactions on Systems, Man, and Cybernetics}, 26:29--41.
+
+\bibitem[Feo and Resende, 1989]{FeoResende1989}
+Feo, T.~A. and Resende, M. G.~C. (1989).
+\newblock A probabilistic heuristic for a computationally difficult set
+  covering problem.
+\newblock {\em Operations Research Letters}, 8:67--71.
+
+\bibitem[Fidanova, 2006]{Fidanova2006}
+Fidanova, S. (2006).
+\newblock {\em Ant Colony Optimization and Multiple Knapsack Problem}, volume
+  Chapter 33.
+\newblock J--Ph. Renard editor.
+
+\bibitem[Fok and Chun, 2004]{fok2004optimizing}
+Fok, K. and Chun, A. (2004).
+\newblock Optimizing air cargo load planning and analysis.
+\newblock In {\em Proceedings of the International Conference on Computing,
+  Communications and Control Technologies}, pages 520--531.
+
+\bibitem[Fortin et~al., 2012]{DEAP_JMLR2012}
+Fortin, F.-A., {De Rainville}, F.-M., Gardner, M.-A., Parizeau, M., and
+  Gagn\'e, C. (2012).
+\newblock {DEAP}: Evolutionary algorithms made easy.
+\newblock {\em Journal of Machine Learning Research}, 13:2171--2175.
+
+\bibitem[Glover, 1986]{Glover1986}
+Glover, F. (1986).
+\newblock Future paths for integer programming and links to artificial
+  intelligence.
+\newblock {\em Computers and Operations Research}, 13:533--549.
+
+\bibitem[Heidelberg et~al., 1998]{Heidelberg1998}
+Heidelberg, K.~R., Parnell, G.~S., and Ames, J.~E. (1998).
+\newblock Automated air load planning.
+\newblock {\em Naval Research Logistics}, 45(8):751--768.
+
+\bibitem[Holland, 1992]{holland1992adaptation}
+Holland, J.~H. (1992).
+\newblock {\em Adaptation in natural and artificial systems: an introductory
+  analysis with applications to biology, control, and artificial intelligence}.
+\newblock MIT press.
+
+\bibitem[Johnson and Garey, 1985]{JohnsonGarey1985}
+Johnson, D.~S. and Garey, M.~R. (1985).
+\newblock A 7160 theorem for bin packing.
+\newblock {\em Journal of Complexity}, 1(1):65--106.
+
+\bibitem[Kaluzny and Shaw, 2009]{KaluznyBohdanL2009Oalb}
+Kaluzny, B.~L. and Shaw, R. H. A.~D. (2009).
+\newblock Optimal aircraft load balancing.
+\newblock {\em International Transactions in Operational Research},
+  16(6):767--787.
+
+\bibitem[Larsen and Mikkelsen, 1980]{LarsenMikkelsen1979}
+Larsen, O. and Mikkelsen, G. (1980).
+\newblock An interactive system for the loading of cargo aircraft.
+\newblock {\em European Journal of Operational Research}, 4(6):367--373.
+
+\bibitem[Limbourg et~al., 2012]{Limbourg2012}
+Limbourg, S., Schyns, M., and Laporte, G. (2012).
+\newblock Automatic aircraft cargo load planning.
+\newblock {\em Journal of the Operational Research Society}, 63(9):1271--1283.
+
+\bibitem[Lopez-Ibanez et~al., 2016]{LopezIbanezManuel2016}
+Lopez-Ibanez, M., Dubois-Lacoste, J., C\'{a}ceres, L., Birattari, M., and
+  St\"{u}tzle, T. (2016).
+\newblock The irace package: iterated racing for automatic algorithm
+  configuration.
+\newblock {\em Operations {R}esearch {P}erspectives}, 3:43--58.
+
+\bibitem[Lurkin and Schyns, 2015]{LurkinSchyns2015}
+Lurkin, V. and Schyns, M. (2015).
+\newblock The airline container loading problem with pickup and delivery.
+\newblock {\em {European Journal of Operational Research}}, 244(3):955--965.
+
+\bibitem[Miguel et~al., 2023]{MiguelOptimalAP}
+Miguel, J., Macalintal, V., and Ubando, A.~T. (2023).
+\newblock Optimal aircraft payload weight and balance using fuzzy linear
+  programming model.
+\newblock volume 103, pages 613--618.
+
+\bibitem[Mongeau and Bes, 2003]{MongeauBes2003}
+Mongeau, M. and Bes, C. (2003).
+\newblock Optimization of aircraft container loading.
+\newblock {\em IEEE Transaction on Aerospace and Electronic Systems},
+  39(1):140--150.
+
+\bibitem[Ng, 1992]{Kevin1992}
+Ng, K. Y.~K. (1992).
+\newblock A multicriteria optimization approach to aircraft loading.
+\newblock {\em Operations Research}, 40(6):1200--1205.
+
+\bibitem[Niar and Freville, 1997]{NiarFreville1997}
+Niar, S. and Freville, A. (1997).
+\newblock A parallel tabu search algorithm for the 0-1 multidimensional
+  knapsack problem.
+\newblock In {\em Proceedings 11th International Parallel Processing
+  Symposium}, pages 512--516.
+
+\bibitem[Paquay et~al., 2016]{Paquay2016}
+Paquay, C., Schyns, M., and Limbourg, S. (2016).
+\newblock A mixed integer programming formulation for the three-dimensional bin
+  packing problem deriving from an air cargo application.
+\newblock {\em International Transactions in Operational Research},
+  23:187--213.
+
+\bibitem[Paquay et~al., 2018]{Paquay2018}
+Paquay, C., Schyns, M., Limbourg, S., and Oliveira, J.~F. (2018).
+\newblock {MIP}-based constructive heuristics for the three-dimensional {Bin
+  Packing Problem} with transportation constraints.
+\newblock {\em International Journal of Production Research}, 56(4):1581--1592.
+
+\bibitem[Peerlinck and Sheppard, 2022]{PeerlinckAmy2022MFEO}
+Peerlinck, A. and Sheppard, J. (2022).
+\newblock Multi-objective factored evolutionary optimization and the
+  multi-objective knapsack problem.
+\newblock In {\em 2022 IEEE Congress on Evolutionary Computation (CEC)}, pages
+  1--8. IEEE.
+
+\bibitem[Roesener and Barnes, 2016]{RoesenerBarnes2016}
+Roesener, A. and Barnes, J. (2016).
+\newblock An advanced tabu search approach to the dynamic airlift loading
+  problem.
+\newblock {\em Logistics Research}, 9(1):1--18.
+
+\bibitem[Roesener and Hall, 2014]{RoesenerHall2014}
+Roesener, A. and Hall, S. (2014).
+\newblock A nonlinear integer programming formulation for the airlift loading
+  problem with insufficient aircraft.
+\newblock {\em Journal of Nonlinear Analysis and Optimization: Theory and
+  Applications}, 5(1):125--141.
+
+\bibitem[Shah, 2020]{shah2020genetic}
+Shah, S. (2020).
+\newblock Genetic algorithm for the 0/1 multidimensional knapsack problem.
+
+\bibitem[Vancroonenburg et~al., 2014]{Vancroonemburg2014}
+Vancroonenburg, W., Verstichel, J., Tavernier, K., and Vanden~Berghe, G.
+  (2014).
+\newblock Automatic air cargo selection and weight balancing: A mixed integer
+  programming approach.
+\newblock {\em Transportation Research Part E: Logistics and Transportation
+  Review}, 65:70--83.
+
+\bibitem[Verstichel et~al., 2011]{Verstichel2011}
+Verstichel, J., Vancroonenburg, W., Souffriau, W., and Berghe, G.~V. (2011).
+\newblock A mixed integer programming approach to the aircraft weight and
+  balance problem.
+\newblock {\em Procedia Social and Behavioral Sciences}, 20:1051--1059.
+
+\bibitem[Wong and Ling, 2020]{wong2020}
+Wong, E.~Y. and Ling, K. K.~T. (2020).
+\newblock A mixed integer programming approach to air cargo load planning with
+  multiple aircraft configurations and dangerous goods.
+\newblock In {\em 7th International Conference on Frontiers of Industrial
+  Engineering (ICFIE)}, pages 123--130.
+
+\bibitem[Wong et~al., 2021]{eugene2021}
+Wong, E. Y.~C., Mo, D.~Y., and So, S. (2021).
+\newblock Closed-loop digital twin system for air cargo load planning
+  operations.
+\newblock {\em International Journal of Computer Integrated Manufacturing},
+  34(7-8):801--813.
+
+\bibitem[Zhan et~al., 2020]{Zhan2020}
+Zhan, S., Wang, L., Zhang, Z., and Zhong, Y. (2020).
+\newblock Noising methods with hybrid greedy repair operator for 0-1 knapsack
+  problem.
+\newblock {\em Memetic Computing}, 12:37--50.
+
+\bibitem[Zhao et~al., 2023]{zhao2023}
+Zhao, X., Dong, Y., and Zuo, L. (2023).
+\newblock A combinatorial optimization approach for air cargo palletization and
+  aircraft loading.
+\newblock {\em Mathematics}, 11(13):1--16.
+
+\bibitem[Zhao et~al., 2021]{zhao2021}
+Zhao, X., Yuan, Y., Dong, Y., and Zhao, R. (2021).
+\newblock Optimization approach to the aircraft weight and balance problem with
+  the centre of gravity envelope constraints.
+\newblock {\em IET Intelligent Transport Systems}, 15(10):1269--1286.
+
+\end{thebibliography}
