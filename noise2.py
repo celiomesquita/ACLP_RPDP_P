@@ -27,7 +27,7 @@ def Transform(iterPallets, iterItemsDict, iterSolDict, iterScore, N, items, node
 
             iterPallets[i].popItem(items[id1], nodeTorque, iterSolDict, N, iterItemsDict)
             
-            if iterPallets[i].isFeasible(items[id0], 1.0, k, nodeTorque, cfg, iterItemsDict, lock, torqueSurplus=1.0):
+            if iterPallets[i].isFeasible(items[id0], 1.0, k, nodeTorque, cfg, iterItemsDict, lock):
                 iterPallets[i].putItem(items[id0], nodeTorque, iterSolDict, N, iterItemsDict, lock)
             else:
                 iterPallets[i].putItem(items[id1], nodeTorque, iterSolDict, N, iterItemsDict, lock)
@@ -58,7 +58,7 @@ def Solve(pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
     initScore = 0.0 # G
 
     for i, _ in enumerate(pallets):               
-        common.fillPallet(pallets[i], items, k, nodeTorque, solDict, cfg, 1.0, itemsDict, lock)
+        common.fillPallet(pallets[i], items, k, nodeTorque, solDict, cfg, 0.98, itemsDict, lock)
         initScore += pallets[i].PCS
 
     print(f"Greedy initial score {initScore}")
@@ -77,9 +77,12 @@ def Solve(pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
     r_max = 1 - (initScore - primeScore)/initScore # maximum initial noise
 
     # the bigger the problem less iterations
-    numIter = int( 2_000_000.0 / float(N * M) )
+    # numIter = int( 2_000_000.0 / float(N * M) )
+    # numTrials = int( float(numIter) / 2)
 
-    numTrials = int( float(numIter) / 2)
+    numTrials = math.ceil(float(N * M)/50)
+
+    numIter = math.ceil(float(N * M)/30)
 
     print(f"numTrials: {numTrials}\tnumIter: {numIter}")
 

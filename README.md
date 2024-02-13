@@ -25,7 +25,7 @@ As this is ongoing research, we thought about some possible future improvements:
 
 ### Before testing, it is necessary to have a complete understanding of the paper's content.
 
-*Mesquita, A.C.P., Sanches, C.A.A., 2023. Air cargo load and route planning in pickup and delivery operations.
+*Mesquita, A.C.P., Sanches, C.A.A., 2024. Air cargo load and route planning in pickup and delivery operations.
 Expert Systems with Applications, XX–XX.*
 
 1. Open the main.py file

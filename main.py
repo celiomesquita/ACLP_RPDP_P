@@ -13,6 +13,7 @@ import mipCBC
 import tabu
 import grasp
 import noise2
+import greedy
 import tsp_deap
 
 # from plots import TTT
@@ -22,7 +23,8 @@ import tsp_deap
 # from py3Druiz import Packer, Item, Bin
 
 
-def solveTour(scenario, instance, pi, tour, method, pallets, cfg, tourTime, folder, tipo, numOptDict, rampDistCG, afterDict, beforeDict, eta1_vol, eta2_vol):
+def solveTour(scenario, instance, pi, tour, method, pallets, cfg, tourTime, folder, tipo, numOptDict,
+               rampDistCG, afterDict, beforeDict, eta1_vol, eta2_vol):
     """
     Solves one tour
     """
@@ -65,13 +67,15 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg, tourTime, fold
         if k < k0:
             next = tour.nodes[k+1]
 
-        for i, p in enumerate(pallets):
-            pallets[i].reset(cfg.numNodes)
-
         # solution global torque to be shared and changed by all processes concurrently
         nodeTorque = mp.Value('d', 0.0) # a multiprocessing double type variable
         nodeVol    = 0.0
         
+        # initialize pallets and the node torque
+        for i, p in enumerate(pallets):
+            pallets[i].reset(cfg.numNodes) # resets pallets current weight (PCW) as 140kg
+            nodeTorque.value += p.D * p.PCW # empty pallet torque
+
         # initialize- the accumulated values
         if writeConsFile:  # write text files, 1 for packed each packed items
             wNodeAccum = 0.
@@ -172,6 +176,9 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg, tourTime, fold
         
         if method == "NMO":       
             noise2.Solve( pallets, items, cfg, k, node.tLim, nodeTorque, solDict, itemsDict) 
+
+        if method == "Greedy":       
+            greedy.Solve( pallets, items, cfg, k, node.tLim, nodeTorque, solDict, itemsDict) 
 
         if method == "GRB":
             modStatus, ObjBound = mipGRB.Solve( pallets, items, cfg, k, node.tLim, nodeTorque, solDict, itemsDict) 
@@ -350,31 +357,50 @@ if __name__ == "__main__":
     # shortest = True # 2 shortest tours
     shortest = False # All K!
     iRace_testing = False
+    # iRace_testing = True
 
-    # scenarios = [2,3,4,5,6] # represent 1,2,3,4,5 in the article
+    scenarios = [2,3,4,5,6] # represent 1,2,3,4,5 in the article
     # scenarios = [3]
     # scenarios = [7,8,9]
-    scenarios = [6,7,8,9,10,11,12,13,14]
+    # scenarios = [6,7,8,9,10,11,12,13,14]
 
-    # folder = "surplus20"  # 1.2
+    folder = "surplus20"  # 1.2  
     # folder = "surplus50"  # 1.5
-    folder = "surplus100" # 2.0
+    # folder = "surplus100" # 2.0
 
     iRace_scenario = 2
     iRace_instance = 1
 
     if iRace_testing:
-        # from inside folder tunning
+        # 1. cd tunning
+        # 2. configure sys inputs
+        # 3. edit "target-runner" and uncomment 'echo "EXE_PARAMS: $EXE $EXE_PARAMS"'
+        # 4. comment again
+        # 5. irace
+
+        # to test the "main.py"
+        #                                   1    2       3         4         5        6        7          8          9
+        # python -m main 0.9 1.2         /home/celio/Projects/ACLP_RPDP_P/tunning/Instances/surplus20/scenario_2/instance_2
+        #                CONFIG_PARAMS   INSTANCE
+
+
+        # to test the target runner
+        # ./target-runner 1 4 1134750365 /home/celio/Projects/ACLP_RPDP_P/tunning/Instances/surplus20/scenario_2/instance_7 0.92 1.2
+
+        # to execute, just command "irace" or
         # irace -s scenario.txt --target-runner ./target-runner
 
         import sys
-        eta1_vol = float(sys.argv[1])
-        eta2_vol = float(sys.argv[2])
-        path_items = sys.argv[3] # path to items.txt
+        eta1_vol   = float(sys.argv[1]) # 0.9
+        eta2_vol   = float(sys.argv[2]) # 1.2
+        path_items =       sys.argv[3]  # path to the instance
+        
 
         folder   = path_items.split("/")[7]
         iRace_scenario = int(path_items.split("/")[8][len(path_items.split("/")[8])-1])
         iRace_instance = int(path_items.split("/")[9][len(path_items.split("/")[9])-1])
+
+        # print()
 
         scenarios = [iRace_scenario]
 
@@ -387,22 +413,23 @@ if __name__ == "__main__":
     if folder == "surplus100":
         eta1_vol, eta2_vol = 0.9617, 1.5706
 
-    timeLimit = 240
+    # timeLimit = 240
     # timeLimit = 1200
     # timeLimit = 2400
-    # timeLimit = 3600
+    timeLimit = 3600 # if there is any metaheuristics in the experiment (except Shims)
 
     # method = "GRB"
     # method = "CBC"
-    method = "Shims"
+    # method = "Shims"
     # method = "mpShims"
     # method = "mpACO"
     # method = "ACO"
     # method = "TS"
     # method = "GRASP"
-    # method = "NMO"
-
-    print(f"timeLimit:{timeLimit}    folder: {folder}    method: {method}   shortest: {shortest}")
+    method = "NMO"
+    # method = "Greedy"
+    if not iRace_testing:
+        print(f"timeLimit:{timeLimit}    folder: {folder}    method: {method}   shortest: {shortest}")
 
     # tipo = "KP"
     tipo = "FFD"
@@ -426,7 +453,8 @@ if __name__ == "__main__":
 
         cfg = common.Config(scenario)
 
-        print(f"\n{cfg.numNodes} nodes")
+        if not iRace_testing:
+            print(f"\n{cfg.numNodes} nodes")
 
         for i, cols in enumerate(dists):
             for j, dist in enumerate(cols):
@@ -449,12 +477,6 @@ if __name__ == "__main__":
         if cfg.numNodes > 3 and cfg.numNodes <= 7:
             perc = 0.25 # discard the worst tours
 
-        # time limit per tour
-        tourTime = timeLimit/common.factorial(cfg.numNodes)
-
-        if shortest: # the 2 shortest tours
-            tourTime = timeLimit/2
-
         numOptDict = {"numOpt":0}
         afterDict  = {"value":0.}
         beforeDict = {"value":0.}
@@ -467,19 +489,20 @@ if __name__ == "__main__":
         instBestAvgSC     = 0. # score/cost relation
         leastSC           = 0.
 
+        if cfg.numNodes <= 6:
+            # permutation of nodes - TSP solution with all tours
+            tours = common.getTours(cfg.numNodes-1, costs, perc)
+        else:
+            # TSP solution with heuristics
+            tours = tsp_deap.getTours(distances_file, cfg.numNodes)
+
+        tourTime = timeLimit/len(tours)
+
         for inst in instances:
 
             now = time.perf_counter()
 
             instanceStartTime  = now
-
-            if cfg.numNodes <= 6:
-                # permutation of nodes - TSP solution with all tours
-                tours = common.getTours(cfg.numNodes-1, costs, perc)
-            else:
-                # TSP solution with heuristics
-                tours = tsp_deap.getTours(distances_file, cfg.numNodes)
-
 
             bestSC = 0. # maximum score/cost relation
             bestAvgVol = 0.
@@ -558,7 +581,7 @@ if __name__ == "__main__":
 
         if not iRace_testing:
 
-            str = f"{bestAvgSC:.2f}\t {avgTime:.0f}\t {bestAvgVol:.2f}\t {bestAvgTorque:.2f}"
+            str = f"{bestAvgSC:.2f}\t&\t{avgTime:.0f}\t {bestAvgVol:.2f}\t {bestAvgTorque:.2f}"
             # instances average
             writeAvgResults(method, scenario, str, folder)
 

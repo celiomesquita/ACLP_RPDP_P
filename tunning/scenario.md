@@ -10,7 +10,7 @@
 execDir = "./"
 
 ## File that contains the description of the parameters of the target algorithm.
-parameterFile = "./parameters.txt"
+parameterFile = "./parameters.md"
 
 ## File that contains a list of logical expressions that cannot be TRUE for
 ## any evaluated configuration. If empty or NULL, do not use forbidden expressions.
@@ -18,7 +18,7 @@ parameterFile = "./parameters.txt"
 
 ## File that contains a table of initial configurations. If empty or NULL, all
 ## initial configurations are randomly generated.
-configurationsFile = "./configurations.txt"
+configurationsFile = "./configurations.md"
 
 ## File to save tuning results as an R dataset, either absolute path or relative to execDir.
 logFile = "./irace.Rdata"
@@ -99,7 +99,7 @@ targetRunner = "./target-runner"
 
 ## Maximum number of runs (invocations of targetRunner) that will be
 ## performed. It determines the maximum budget of experiments for the tuning.
-maxExperiments = 3000
+maxExperiments = 5000
 
 ## Maximum total execution time in seconds for the executions of targetRunner.
 ## targetRunner must return two values: cost and time.

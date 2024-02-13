@@ -8,7 +8,6 @@ from os import cpu_count
 def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
 
     # itemsDict to control items inclusion feasibility
-    relaxed = False
 
     score = 0
     for p in pallets:
@@ -31,6 +30,7 @@ def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
 
     mod.max_mip_gap = 0.005
 
+    relaxed = False
     # relaxed = True
 
     X = [ [ mod.add_var(name=f"X[{i}],[{j}]", var_type=CONTINUOUS) for j in set_N ] for i in set_M ]   
@@ -112,7 +112,7 @@ def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
         )
 
         # for torque calculation
-        palletWeights[i] = pallets[i].PCW + 140 + itemsWeights[i]
+        palletWeights[i] = pallets[i].PCW + itemsWeights[i]
 
     # the final torque must be between minus maxTorque and maxTorque
 

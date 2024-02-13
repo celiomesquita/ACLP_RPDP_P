@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/home/celio/Projects/ACLP_RPDP_P/tunning/../main.py", line 529, in <module>
+    solveTour(scenario, inst, pi, tour, method, pallets, cfg, tourTime, folder, tipo, numOptDict, rampDistCG, afterDict, beforeDict, eta1_vol, eta2_vol, ts)
+  File "/home/celio/Projects/ACLP_RPDP_P/tunning/../main.py", line 161, in solveTour
+    mpShims.Solve(pallets, items, cfg, k, eta1_vol, eta2_vol, node.tLim, "s", nodeTorque, solDict, itemsDict, tipo, ts)  # s - serial      
+  File "/home/celio/Projects/ACLP_RPDP_P/mpShims.py", line 145, in Solve
+    common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, eta1_vol, itemsDict, lock, ts)
+  File "/home/celio/Projects/ACLP_RPDP_P/common.py", line 233, in fillPallet
+    if pallet.isFeasible(item, threshold, k, nodeTorque,   cfg,           itemsDict, lock, ts):
+  File "/home/celio/Projects/ACLP_RPDP_P/common.py", line 136, in isFeasible
+    def isFeasible(self, item, threshold, k, nodeTorque, cfg, itemsDict, lock, ts=1.0): # check constraints
+KeyboardInterrupt

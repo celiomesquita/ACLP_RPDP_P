@@ -92,7 +92,7 @@ class Pallet(object):
         self.V  = v  # volume threshold
         self.W  = w  # weight threshold
         self.Dest = np.full(numNodes, -1) # nodes IDs indexed by "k"
-        self.PCW = 0 # pallet current weight
+        self.PCW = 140 # pallet current weight
         self.PCV = 0.
         self.PCS = 0.
         self.w = 2.15 # width 84"
@@ -101,7 +101,7 @@ class Pallet(object):
 
     def reset(self, numNodes):
         self.Dest = np.full(numNodes, -1)
-        self.PCW = 0
+        self.PCW = 140
         self.PCV = 0.
         self.PCS = 0.
 
@@ -133,7 +133,7 @@ class Pallet(object):
         self.PCV += consol.V
         self.PCS += consol.S
             
-    def isFeasible(self, item, threshold, k, nodeTorque, cfg, itemsDict, lock, torqueSurplus=1.0): # check constraints
+    def isFeasible(self, item, threshold, k, nodeTorque, cfg, itemsDict, lock, ts=1.0): # check constraints
 
         feasible = True
 
@@ -149,15 +149,20 @@ class Pallet(object):
         if feasible:
             with lock: # ask for a lock to control race condition
                 j = item.ID
-                if itemsDict["mpItems"][j] > 0: # returns False if the item is already included in any pallet
+                if itemsDict["mpItems"][j] > 0: # if it is greater than zero it is already allocated
                     feasible = False
 
                 if feasible:
                     deltaTau = float(item.W) * float(self.D)
-                    newTorque = abs(nodeTorque.value + deltaTau)
-                    if newTorque > abs(nodeTorque.value) and newTorque > cfg.maxTorque * torqueSurplus:
+                    newTorque = nodeTorque.value + deltaTau
+                    """
+                    Infeasible:
+                    If the torque is increasing positively and is bigger  than  maxTorque
+                    If the torque is increasing negatively and is smaller than -maxTorque
+                    """
+                    if  abs(nodeTorque.value) < abs(newTorque) and cfg.maxTorque * ts < abs(newTorque):
                         feasible = False
-
+                                           
         return feasible
 
 
@@ -218,11 +223,11 @@ def loadPallets(cfg):
    
     return pallets, dists[0] # ramp door distance from CG
 
-def fillPallet(pallet, items, k, nodeTorque, solDict, cfg, threshold, itemsDict, lock, torqueSurplus=1.0):
+def fillPallet(pallet, items, k, nodeTorque, solDict, cfg, threshold, itemsDict, lock, ts=1.0):
     N = len(items)
     counter = 0
     for item in items:
-        if pallet.isFeasible(item, threshold, k, nodeTorque,   cfg,           itemsDict, lock, torqueSurplus):
+        if pallet.isFeasible(item, threshold, k, nodeTorque,   cfg,           itemsDict, lock, ts):
             pallet.putItem(  item,               nodeTorque, solDict,      N, itemsDict, lock)
             counter += 1
     return counter
@@ -310,6 +315,9 @@ def getTours(num, costs, threshold):
             maxCost = cost
 
         tours[i] = Tour(nodes, cost)
+
+    if len(tours) <= 24:
+        return tours
 
     tours2 = []
     for i, t in enumerate(tours):

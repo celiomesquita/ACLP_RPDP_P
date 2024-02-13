@@ -37,9 +37,10 @@ CONFIG_PARAMS=$*
 # EDIT THIS: Path to your executable
 EXE="python3 ../main.py"
 
+
 # $IRACE_HOME/bin/irace
 
-# EDIT THIS: Specify how parameters are given to your executable  
+#               0.9 1.2 1.5   /home/celio/Projects/ACLP_RPDP_P/tunning/Instances/surplus20/scenario_2/instance_2
 EXE_PARAMS="${CONFIG_PARAMS} ${INSTANCE}"
 
 #echo "-----"

@@ -79,7 +79,7 @@ def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
         )
 
         # for torque calculation
-        palletWeights[i] = pallets[i].PCW + 140 + itemsWeights[i]
+        palletWeights[i] = pallets[i].PCW + itemsWeights[i]
 
     # the final torque must be between minus maxTorque and maxTorqu
 

@@ -12,6 +12,7 @@ def Solve(items_file, node_ID):
         that neither the weight nor the volume capacity of any pallet is exceeded.
         It checks also if an item is included in more than one pallet.
     """
+
     items_matrix_np = np.loadtxt(items_file)
 
     # filter items on the base

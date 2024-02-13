@@ -40,9 +40,19 @@ class Shims(object):
         deltaTau = float(item.W) * float(self.Pallet.D)
         ret = True
         with lock:
-            newTorque = abs(nodeTorque.value + self.SCT + deltaTau)
-            if newTorque > abs(nodeTorque.value + self.SCT) and newTorque > cfg.maxTorque:
+            newTorque = nodeTorque.value + self.SCT + deltaTau
+
+            """
+            Infeasible:
+            If the torque is increasing positively and is bigger  than max
+            If the torque is increasing negatively and is smaller than -max
+            """
+            if nodeTorque.value + self.SCT > 0 and newTorque > 0 and nodeTorque.value + self.SCT < newTorque and newTorque  > cfg.maxTorque:
                 ret = False
+                
+            if nodeTorque.value + self.SCT < 0 and newTorque < 0 and newTorque < nodeTorque.value + self.SCT and newTorque  < -cfg.maxTorque:
+                ret = False
+
         return ret
 
 # create a set of shims for this pallet and selects the best shims
@@ -119,7 +129,6 @@ def getBestShims(pallet, items, k, nodeTorque, solDict, cfg, eta2_vol, itemsDict
 #                                    eta 1    eta 2
 def Solve(pallets, items, cfg, k, eta1_vol, eta2_vol, secBreak, mode, nodeTorque, solDict, itemsDict, tipo):
 
-
     startTime = time.perf_counter()
 
     if mode == "p":
@@ -127,15 +136,11 @@ def Solve(pallets, items, cfg, k, eta1_vol, eta2_vol, secBreak, mode, nodeTorque
     else:
         mode = "Serial"
 
-    # eta2_vol = 1. + 3. *(1. - eta1_vol)
-
-    torqueSurplus = 1.1
-
     lock  = mp.Lock()
     counter = 0
 
     for i, _ in enumerate(pallets):
-        common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, eta1_vol, itemsDict, lock, torqueSurplus)
+        common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, eta1_vol, itemsDict, lock, ts=1.5)
 
     if mode == "Parallel":
     
@@ -157,12 +162,14 @@ def Solve(pallets, items, cfg, k, eta1_vol, eta2_vol, secBreak, mode, nodeTorque
             # get the best Shims for the pallet
             getBestShims( pallets[i], items, k, nodeTorque, solDict, cfg, eta2_vol, itemsDict, lock, tipo, startTime, secBreak)
 
+    optcgcons.minCGdev(pallets, k, nodeTorque, cfg)
 
     # try to complete the pallet
     for i, _ in enumerate(pallets):
-        counter += common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, 1.0, itemsDict, lock)
+        counter += common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, 1.04, itemsDict, lock)
 
-    # print(f"----->{mode}: {counter} items inserted in post local search.")
+    # if counter > 0:
+    #     print(f"----->{mode}: {counter} items inserted in post local search.")
 
 
 if __name__ == "__main__":
