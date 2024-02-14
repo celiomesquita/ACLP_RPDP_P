@@ -15,4 +15,4 @@ def Solve(pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
 
 if __name__ == "__main__":
 
-    print("----- Please execute the main py file -------------")
+    print("----- Please execute the main.py file -------------")
