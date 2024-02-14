@@ -223,11 +223,11 @@ def loadPallets(cfg):
    
     return pallets, dists[0] # ramp door distance from CG
 
-def fillPallet(pallet, items, k, nodeTorque, solDict, cfg, threshold, itemsDict, lock, ts=1.0):
+def fillPallet(pallet, items, k, nodeTorque, solDict, cfg, vthreshold, itemsDict, lock, ts=1.0):
     N = len(items)
     counter = 0
     for item in items:
-        if pallet.isFeasible(item, threshold, k, nodeTorque,   cfg,           itemsDict, lock, ts):
+        if pallet.isFeasible(item, vthreshold, k, nodeTorque,   cfg,           itemsDict, lock, ts):
             pallet.putItem(  item,               nodeTorque, solDict,      N, itemsDict, lock)
             counter += 1
     return counter

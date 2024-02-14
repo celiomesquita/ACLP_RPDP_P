@@ -12,7 +12,7 @@ import mipGRB
 import mipCBC
 import tabu
 import grasp
-import noise2
+import noise
 import greedy
 import tsp_deap
 
@@ -175,7 +175,7 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg, tourTime, fold
             grasp.Solve( pallets, items, cfg, k, node.tLim, nodeTorque, solDict, itemsDict) 
         
         if method == "NMO":       
-            noise2.Solve( pallets, items, cfg, k, node.tLim, nodeTorque, solDict, itemsDict) 
+            noise.Solve( pallets, items, cfg, k, node.tLim, nodeTorque, solDict, itemsDict) 
 
         if method == "Greedy":       
             greedy.Solve( pallets, items, cfg, k, node.tLim, nodeTorque, solDict, itemsDict) 
@@ -362,13 +362,13 @@ if __name__ == "__main__":
     scenarios = [1,2,3,4,5,6] # 2-6 is 1-5 in the article
 
     if testing:
-        scenarios = [1,2,3]
+        scenarios = [1,2,3,4]
 
-    # scenarios = [6,7,8,9,10,11,12,13,14]
+    scenarios = [6,7,8,9,10,11,12,13,14]
 
-    folder = "surplus20"  # 1.2  
+    # folder = "surplus20"  # 1.2  
     # folder = "surplus50"  # 1.5
-    # folder = "surplus100" # 2.0
+    folder = "surplus100" # 2.0
 
     iRace_scenario = 2
     iRace_instance = 1
@@ -418,18 +418,19 @@ if __name__ == "__main__":
     # timeLimit = 240
     timeLimit = 1200
     # timeLimit = 2400
-    # timeLimit = 3600
+    # timeLimit = 3600 # if there is any metaheuristics in the experiment (except Shims)
 
     # method = "GRB"
     # method = "CBC"
-    # method = "Shims"
+    method = "Shims"
     # method = "mpShims"
     # method = "mpACO"
     # method = "ACO"
     # method = "TS"
     # method = "GRASP"
-    method = "NMO"
+    # method = "NMO"
     # method = "Greedy"
+
     if not iRace_testing:
         print(f"timeLimit:{timeLimit}    folder: {folder}    method: {method}   shortest: {shortest}")
 
@@ -448,6 +449,9 @@ if __name__ == "__main__":
     for scenario in scenarios:
 
         instances = [1,2,3,4,5,6,7]
+
+        if scenarios[0] >= 6:
+            instances = [1,2,3]
 
         if testing:
             instances = [1,2,3]
@@ -565,7 +569,7 @@ if __name__ == "__main__":
 
         sbest_tour = tsp_deap.list_to_string(icaos)
 
-        # list the Shims best tour as an ICAO list
+        # # list the Shims best tour as an ICAO list
         # origin = icaos[0]
         # sbest_tour = f"{origin} "
         # prev = icaos[0]
@@ -599,7 +603,7 @@ if __name__ == "__main__":
             # print(f"After:\t{afterDict['value']:.1f}")
             # print(f"% of optima: {numOptDict['numOpt']:.2f}")
             # print(f"{method}")
-            # print(f"    best: {sbest_tour}")
+            print(f"    best: {sbest_tour}")
             # print(f"shortest: {shortestTour}")
 
             mainElapsed = time.perf_counter() - mainStart
