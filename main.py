@@ -416,9 +416,9 @@ if __name__ == "__main__":
         eta1_vol, eta2_vol = 0.96, 1.45
 
     # timeLimit = 240
-    # timeLimit = 1200
+    timeLimit = 1200
     # timeLimit = 2400
-    timeLimit = 3600 # if there is any metaheuristics in the experiment (except Shims)
+    # timeLimit = 3600
 
     # method = "GRB"
     # method = "CBC"
