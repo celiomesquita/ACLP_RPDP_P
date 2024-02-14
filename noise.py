@@ -76,10 +76,6 @@ def Solve(pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
 
     r_max = 1 - (initScore - primeScore)/initScore # maximum initial noise
 
-    # the bigger the problem less iterations
-    # numIter = int( 2_000_000.0 / float(N * M) )
-    # numTrials = int( float(numIter) / 2)
-
     numTrials = math.ceil(float(N * M)/50)
 
     numIter = math.ceil(float(N * M)/30)
@@ -89,14 +85,8 @@ def Solve(pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
     step = r_max/(numTrials/numIter-1)
     r = r_max  
 
-    # the most attractive edges come first
-    # Ek.sort(key=lambda  x: x.Attract, reverse=True)
-
     bestScore = initScore
-
-    # arrItems_0 = [j for j, a in enumerate(iterItemsDict["mpItems"])                ]
-    # arrItems_1 = [j for j, a in enumerate(iterSolDict["solMatrix"][N*i:N*i+(N-1)]) ]    
-
+  
     trial = 0
     while trial < numTrials and (time.perf_counter() - startTime) < secBreak:
 

@@ -356,15 +356,17 @@ if __name__ == "__main__":
 
     # shortest = True # 2 shortest tours
     shortest = False # All K!
+
     iRace_testing = False
     # iRace_testing = True
 
-    scenarios = [1,2,3,4,5,6] # 2-6 is 1-5 in the article
+    # scenarios = [1,2,3,4,5,6] # 2-6 is 1-5 in the article
+    scenarios = [1]
 
     if testing:
         scenarios = [1,2,3,4]
 
-    scenarios = [6,7,8,9,10,11,12,13,14]
+    # scenarios = [6,7,8,9,10,11,12,13,14]
 
     # folder = "surplus20"  # 1.2  
     # folder = "surplus50"  # 1.5
@@ -416,9 +418,9 @@ if __name__ == "__main__":
         eta1_vol, eta2_vol = 0.96, 1.45
 
     # timeLimit = 240
-    timeLimit = 1200
+    # timeLimit = 1200
     # timeLimit = 2400
-    # timeLimit = 3600 # if there is any metaheuristics in the experiment (except Shims)
+    timeLimit = 3600 # if there is any metaheuristics in the experiment (except Shims)
 
     # method = "GRB"
     # method = "CBC"
