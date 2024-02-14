@@ -12,7 +12,7 @@ import mipGRB
 import mipCBC
 import tabu
 import grasp
-import noise2
+import noise
 import greedy
 import tsp_deap
 
@@ -175,7 +175,7 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg, tourTime, fold
             grasp.Solve( pallets, items, cfg, k, node.tLim, nodeTorque, solDict, itemsDict) 
         
         if method == "NMO":       
-            noise2.Solve( pallets, items, cfg, k, node.tLim, nodeTorque, solDict, itemsDict) 
+            noise.Solve( pallets, items, cfg, k, node.tLim, nodeTorque, solDict, itemsDict) 
 
         if method == "Greedy":       
             greedy.Solve( pallets, items, cfg, k, node.tLim, nodeTorque, solDict, itemsDict) 

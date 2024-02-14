@@ -1,12 +1,39 @@
 
 import common
-from time import time
+import time
 import math
 import numpy as np
-from multiprocessing import Queue, Process
+import multiprocessing as mp
 import common
 
 RNG = np.random.default_rng()
+
+def Transform(iterPallets, iterItemsDict, iterSolDict, iterScore, N, items, nodeTorque, k, cfg, lock, startTime, secBreak):
+
+    for i, _ in enumerate(iterPallets):
+
+        if ((time.perf_counter() - startTime) > secBreak):
+            break
+
+        iterScore -= iterPallets[i].PCS
+
+        arr0 = [j for j, a in enumerate(iterItemsDict["mpItems"])                if a == 0]
+        arr1 = [j for j, a in enumerate(iterSolDict["solMatrix"][N*i:N*i+(N-1)]) if a == 1]
+
+        if len(arr0) > 0 and len(arr1) > 0:
+
+            id0 = RNG.choice(arr0) # not in solution
+            id1 = RNG.choice(arr1) # in this pallet            
+
+            iterPallets[i].popItem(items[id1], nodeTorque, iterSolDict, N, iterItemsDict)
+            
+            if iterPallets[i].isFeasible(items[id0], 1.0, k, nodeTorque, cfg, iterItemsDict, lock):
+                iterPallets[i].putItem(items[id0], nodeTorque, iterSolDict, N, iterItemsDict, lock)
+            else:
+                iterPallets[i].putItem(items[id1], nodeTorque, iterSolDict, N, iterItemsDict, lock)
+
+        iterScore += iterPallets[i].PCS
+
 
 # ProbAccept is the Noising Method acceptance method.
 # This feature prevents the method from becoming stuck at a local optima.
@@ -14,61 +41,111 @@ def ProbAccept(newScore, oldScore, r):
 	delta = float(newScore-oldScore) / float(oldScore)
 	return delta + (2*r*RNG.random() - r)  > 0 
 
-def Solve( pallets, items, startTime, cfg, k):  # items include kept on board
 
-    print("\nNoising Method Optimization for ACLP+RPDP")
+def Solve(pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
 
-    Gbest  = common.Solution(pallets, items, 1.0, cfg, k, False) # False is Greedy
-    Gprime = common.Solution(pallets, items, 0.7, cfg, k, False)
+    startTime = time.perf_counter()
 
-    r_max = 1 - (Gbest.S - Gprime.S)/Gbest.S # maximum initial noise
+    N = len(items)
+    M = len(pallets)
 
-    numTrials = math.ceil(len(Gbest.Nbhood)/50)
+    print("\nNoising Method Optimization for ACLP+RPDP\n")        
 
-    numIter = math.ceil(len(Gbest.Edges)/30)
+    lock  = mp.Lock() # for use in parallel mode
 
-    print(numTrials,numIter,math.ceil(numTrials/numIter))
+    print(f"{N} items  {M} pallets")
+
+    initScore = 0.0 # G
+
+    for i, _ in enumerate(pallets):               
+        common.fillPallet(pallets[i], items, k, nodeTorque, solDict, cfg, 0.98, itemsDict, lock)
+        initScore += pallets[i].PCS
+
+    print(f"Greedy initial score {initScore}")
+
+    bestScore = initScore # G*
+
+    primePallets   = common.copyPallets(pallets)
+    primeSolDict   = common.copySolDict(solDict)
+    primeItemsDict = common.copyItemsDict(itemsDict)
+    primeTorque    = mp.Value('d', nodeTorque.value)  
+    primeScore = 0.0
+    for i, _ in enumerate(primePallets):               
+        common.fillPallet(primePallets[i], items, k, primeTorque, primeSolDict, cfg, 0.7, primeItemsDict, lock)
+        primeScore += primePallets[i].PCS
+
+    r_max = 1 - (initScore - primeScore)/initScore # maximum initial noise
+
+    # the bigger the problem less iterations
+    # numIter = int( 2_000_000.0 / float(N * M) )
+    # numTrials = int( float(numIter) / 2)
+
+    numTrials = math.ceil(float(N * M)/50)
+
+    numIter = math.ceil(float(N * M)/30)
+
+    print(f"numTrials: {numTrials}\tnumIter: {numIter}")
 
     step = r_max/(numTrials/numIter-1)
-    r = r_max
+    r = r_max  
+
+    # the most attractive edges come first
+    # Ek.sort(key=lambda  x: x.Attract, reverse=True)
+
+    bestScore = initScore
+
+    # arrItems_0 = [j for j, a in enumerate(iterItemsDict["mpItems"])                ]
+    # arrItems_1 = [j for j, a in enumerate(iterSolDict["solMatrix"][N*i:N*i+(N-1)]) ]    
 
     trial = 0
-    while trial < numTrials:
+    while trial < numTrials and (time.perf_counter() - startTime) < secBreak:
 
-        # restart: copy the best so far local iteration
-        Glocal = Gbest
-        
+        localScore     = initScore
+        localSolDict   = common.copySolDict(solDict)
+        localItemsDict = common.copyItemsDict(itemsDict)
+        localTorque    = mp.Value('d', nodeTorque.value)
+        localPallets    = common.copyPallets(pallets)
+
+        iterScore      = initScore
+        iterSolDict    = common.copySolDict(solDict)
+        iterItemsDict  = common.copyItemsDict(itemsDict)
+        iterTorque     = mp.Value('d', nodeTorque.value)
+        iterPallets    = common.copyPallets(pallets)
+
         for _ in range(numIter):
 
-            trial += 1
 
-            if ((time() - startTime) > common.SEC_BREAK):
+            if ((time.perf_counter() - startTime) > secBreak):
                 trial = numTrials
-                break
+                break 
 
-            Gprime = Glocal
+            iterScore = localScore
 
-            oldScore = Gprime.S
+            oldScore = iterScore
 
-            if Gprime.Transform(k, cfg) and ProbAccept(Gprime.S, oldScore, r):
-                Glocal = Gprime
-            
-        for ce in Glocal.Nbhood: # try to improve
-            if Glocal.isFeasible(ce, 1.0, cfg, k): # Check all constraints
-                Glocal.AppendEdge(ce)
-                Glocal.Nbhood.remove(ce)
+            # Transform makes a random elementary transformation in each pallet
+            Transform(iterPallets, iterItemsDict, iterSolDict, iterScore, N, items, iterTorque, k, cfg, lock, startTime, secBreak)
 
-        if Glocal.S > Gbest.S:
-            Gbest = Glocal
+            if ProbAccept(iterScore, oldScore, r):
+
+                localScore     = iterScore
+                localSolDict   = common.copySolDict(iterSolDict)
+                localItemsDict = common.copyItemsDict(iterItemsDict)
+                localPallets    = common.copyPallets(iterPallets)
+                localTorque    = mp.Value('d', iterTorque.value)
 
         r -= step
 
-    # decision matrix for which items will be put in which pallet
-    X = [[0 for _ in np.arange(len(items))] for _ in np.arange(len(pallets))]
-    for e in Gbest.Edges:
-        X[e.Pallet.ID][e.Item.ID] = 1
+        if localScore > bestScore:
 
-    return X
+            bestScore = localScore
+
+            solDict    = common.copySolDict(localSolDict)
+            itemsDict  = common.copyItemsDict(localItemsDict)
+            pallets    = common.copyPallets(localPallets)
+            nodeTorque = mp.Value('d', localTorque.value)
+
+        trial += 1
 
 
 if __name__ == "__main__":
