@@ -140,7 +140,18 @@ def Solve(pallets, items, cfg, k, eta1_vol, eta2_vol, secBreak, mode, nodeTorque
     counter = 0
 
     for i, _ in enumerate(pallets):
-        common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, eta1_vol, itemsDict, lock, ts=1.5)
+        common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, eta1_vol, itemsDict, lock, ts=2.1)
+
+    optcgcons.minCGdev(pallets, k, nodeTorque, cfg)
+
+    # best: optcgcons before
+    # 2.5 33.6
+    # 2.3 32.7
+    # 2.1 34.1
+    # 1.9 33.2
+    # 1.7 32.0
+    # 1.5 31.5
+
 
     if mode == "Parallel":
     
@@ -162,11 +173,10 @@ def Solve(pallets, items, cfg, k, eta1_vol, eta2_vol, secBreak, mode, nodeTorque
             # get the best Shims for the pallet
             getBestShims( pallets[i], items, k, nodeTorque, solDict, cfg, eta2_vol, itemsDict, lock, tipo, startTime, secBreak)
 
-    optcgcons.minCGdev(pallets, k, nodeTorque, cfg)
 
     # try to complete the pallet
     for i, _ in enumerate(pallets):
-        counter += common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, 1.04, itemsDict, lock)
+        counter += common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, 1.0, itemsDict, lock)
 
     # if counter > 0:
     #     print(f"----->{mode}: {counter} items inserted in post local search.")

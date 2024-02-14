@@ -359,9 +359,11 @@ if __name__ == "__main__":
     iRace_testing = False
     # iRace_testing = True
 
-    scenarios = [2,3,4,5,6] # represent 1,2,3,4,5 in the article
-    # scenarios = [3]
-    # scenarios = [7,8,9]
+    scenarios = [1,2,3,4,5,6] # 2-6 is 1-5 in the article
+
+    if testing:
+        scenarios = [1,2,3]
+
     # scenarios = [6,7,8,9,10,11,12,13,14]
 
     folder = "surplus20"  # 1.2  
@@ -404,14 +406,14 @@ if __name__ == "__main__":
 
         scenarios = [iRace_scenario]
 
-    # Apply iRace results
-    eta1_vol, eta2_vol = 0.8621, 1.0539
+    # Apply irace results
+    eta1_vol, eta2_vol = 0.95, 1.35
 
     if folder == "surplus50":
-        eta1_vol, eta2_vol = 0.9199, 1.1399
+        eta1_vol, eta2_vol = 0.92, 1.65
 
     if folder == "surplus100":
-        eta1_vol, eta2_vol = 0.9617, 1.5706
+        eta1_vol, eta2_vol = 0.96, 1.45
 
     # timeLimit = 240
     # timeLimit = 1200
@@ -420,13 +422,13 @@ if __name__ == "__main__":
 
     # method = "GRB"
     # method = "CBC"
-    # method = "Shims"
+    method = "Shims"
     # method = "mpShims"
     # method = "mpACO"
     # method = "ACO"
     # method = "TS"
     # method = "GRASP"
-    method = "NMO"
+    # method = "NMO"
     # method = "Greedy"
     if not iRace_testing:
         print(f"timeLimit:{timeLimit}    folder: {folder}    method: {method}   shortest: {shortest}")
@@ -441,12 +443,14 @@ if __name__ == "__main__":
     dists, _ = common.loadDistances(distances_file) # dists, cities
     costs = [[0.0 for _ in dists] for _ in dists]
 
+    overallSC = 0.0
+
     for scenario in scenarios:
 
         instances = [1,2,3,4,5,6,7]
 
         if testing:
-            instances = [1]
+            instances = [1,2,3]
 
         if iRace_testing:
             instances = [iRace_instance]
@@ -551,6 +555,7 @@ if __name__ == "__main__":
         bestAvgSC     = instBestAvgSC/numInst
         bestAvgVol    = instBestAvgVol/numInst
         bestAvgTorque = instBestAvgTorque/numInst
+           
 
         icaos = []
         for n in bestTour:
@@ -599,7 +604,9 @@ if __name__ == "__main__":
 
             mainElapsed = time.perf_counter() - mainStart
 
-            print(f"mainElapsed: {mainElapsed:.1f}")
+            overallSC += bestAvgSC
+
+            print(f"mainElapsed: {mainElapsed:.1f}    overall SC: {overallSC:.1f}")
 
         else:
             print(-1*instBestAvgSC/numInst) # -1: iRace minimizes a cost value

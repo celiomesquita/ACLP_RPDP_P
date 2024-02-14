@@ -11,12 +11,10 @@ def OptCGCons(kept, pallets, k, nodeTorque):
     KeptRange    = range(len(kept))
     PalletsRange = range(len(pallets))
 
-    # mod = gp.Model()
     mod = Model(solver_name=CBC)
     # mod.setParam('OutputFlag', 0)
     mod.verbose = 0 # hide messages
 
-    # X = [ [ mod.addVar(name=f"X[{i}],[{j}]", vtype=GRB.BINARY) for j in KeptRange ] for i in PalletsRange ]  
     X = [ [ mod.add_var(name=f"X[{i}],[{j}]", var_type=BINARY) for j in KeptRange ] for i in PalletsRange ]     
 
     torque1 = xsum( X[i][j] * ((140+kept[j].W) * pallets[i].D) for i in PalletsRange for j in KeptRange if pallets[i].D > 0 ) 
