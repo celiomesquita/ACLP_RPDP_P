@@ -360,17 +360,17 @@ if __name__ == "__main__":
     iRace_testing = False
     # iRace_testing = True
 
-    # scenarios = [1,2,3,4,5,6] # 2-6 is 1-5 in the article
-    scenarios = [1]
+    scenarios = [1,2,3,4,5,6] # 2-6 is 1-5 in the article
+    # scenarios = [1]
 
     if testing:
         scenarios = [1,2,3,4]
 
     # scenarios = [6,7,8,9,10,11,12,13,14]
 
-    # folder = "surplus20"  # 1.2  
+    folder = "surplus20"  # 1.2  
     # folder = "surplus50"  # 1.5
-    folder = "surplus100" # 2.0
+    # folder = "surplus100" # 2.0
 
     iRace_scenario = 2
     iRace_instance = 1
@@ -409,13 +409,16 @@ if __name__ == "__main__":
         scenarios = [iRace_scenario]
 
     # Apply irace results
-    eta1_vol, eta2_vol = 0.95, 1.35
+    # eta1_vol, eta2_vol = 0.95, 1.35
+    eta1_vol, eta2_vol = 0.86, 1.05
 
     if folder == "surplus50":
-        eta1_vol, eta2_vol = 0.92, 1.65
+        # eta1_vol, eta2_vol = 0.92, 1.65
+        eta1_vol, eta2_vol = 0.92, 1.14
 
     if folder == "surplus100":
-        eta1_vol, eta2_vol = 0.96, 1.45
+        # eta1_vol, eta2_vol = 0.96, 1.45
+        eta1_vol, eta2_vol = 0.96, 1.57
 
     # timeLimit = 240
     # timeLimit = 1200
