@@ -107,6 +107,31 @@ def getBestShims(pallet, items, k, nodeTorque, solDict, cfg, eta2_vol, itemsDict
                     sh.putItem(item, w)
                 Set.append(sh)
 
+    if tipo == "BF":
+        for w, item in enumerate(whip): # for each item
+
+            if ((time.perf_counter() - startTime) > secBreak):
+                break 
+
+            # calculate the shims slacks
+            best_fit = float('inf')
+            best_fit_ix = -1
+            for s, sh in enumerate(Set):
+
+                sh_slack = pallet.V - sh.SCV
+
+                if sh_slack - item.V < best_fit:
+                    best_fit = sh_slack - item.V
+                    best_fit_ix = s # index of the shims that best fits the item
+
+            if best_fit_ix > -1: # fit the item or ...
+                sh = Set[best_fit_ix]
+                sh.putItem(item, w)
+            else:
+                sh = Shims(pallet, len(whip)) # create a new Shim
+                sh.putItem(item, w)
+                Set.append(sh)
+    
     # select the best Shim
     bestScore = 0
     bestIndex = 0
