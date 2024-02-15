@@ -440,8 +440,7 @@ if __name__ == "__main__":
         print(f"timeLimit:{timeLimit}    folder: {folder}    method: {method}   shortest: {shortest}")
 
     # tipo = "KP" # with dynamic programming
-    # tipo = "FFD"  # with First-fit decreasing
-    tipo = "BFD"  # with Best-fit decreasing
+    tipo = "FFD"  # with First-fit decreasing
 
     distances_file = "./params/distances7.txt"
     if scenarios[0] >= 6:

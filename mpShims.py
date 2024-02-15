@@ -107,55 +107,17 @@ def getBestShims(pallet, items, k, nodeTorque, solDict, cfg, eta2_vol, itemsDict
                     sh.putItem(item, w)
                 Set.append(sh)
 
-
-    if tipo == "BFD":                
-        # First Fit Decrease - faster than KP
-        whip.sort(key=lambda x: abs(x.V), reverse=True)
-
-        sh_remainders = []  # Track remaining capacity for shims
-
-        for w, item in enumerate(whip):
-
-            if ((time.perf_counter() - startTime) > secBreak):
-                break 
-
-            best_fit_idx = -1
-            best_fit_remainder = float('inf') # a big number
-
-            for sh in Set:
-                if sh.isFeasible(item, k, nodeTorque, cfg, lock):            
-                    best_fit_remainder = remainder - item.V
-                    best_fit_idx = i 
-
-            for i, remainder in enumerate(sh_remainders):
-                # if the item fits     and the space difference is smaller than the best
-                if remainder >= item.V and remainder - item.V < best_fit_remainder:
-                    best_fit_remainder = remainder - item.V
-                    best_fit_idx = i            
-
-
-            # If found a shim that fits, place the item in it
-            if best_fit_idx != -1:
-                sh = Set[best_fit_idx] # found a Shims that fit the item
-                sh.putItem(item, w)
-                sh_remainders[best_fit_idx] -= item.V
-            else:
-                sh = Shims(pallet, len(whip)) # create a new Shim
-                sh.putItem(item, w)
-                Set.append(sh)
-
-
-        # select the best Shim
-        bestScore = 0
-        bestIndex = 0
-        for i, shims in enumerate(Set):
-            if shims.SCS > bestScore:
-                bestScore = shims.SCS
-                bestIndex = i
-        # put the best Shim in the solution
-        for item in Set[bestIndex].Items:
-            if item != None and pallet.isFeasible(item, 1.0, k, nodeTorque,  cfg, itemsDict, lock):
-                pallet.putItem(item, nodeTorque, solDict, N, itemsDict, lock)
+    # select the best Shim
+    bestScore = 0
+    bestIndex = 0
+    for i, shims in enumerate(Set):
+        if shims.SCS > bestScore:
+            bestScore = shims.SCS
+            bestIndex = i
+    # put the best Shim in the solution
+    for item in Set[bestIndex].Items:
+        if item != None and pallet.isFeasible(item, 1.0, k, nodeTorque,  cfg, itemsDict, lock):
+            pallet.putItem(item, nodeTorque, solDict, N, itemsDict, lock)
 
 #                                    eta 1    eta 2
 def Solve(pallets, items, cfg, k, eta1_vol, eta2_vol, secBreak, mode, nodeTorque, solDict, itemsDict, tipo):
