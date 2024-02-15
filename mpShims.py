@@ -42,15 +42,7 @@ class Shims(object):
         with lock:
             newTorque = nodeTorque.value + self.SCT + deltaTau
 
-            """
-            Infeasible:
-            If the torque is increasing positively and is bigger  than max
-            If the torque is increasing negatively and is smaller than -max
-            """
-            if nodeTorque.value + self.SCT > 0 and newTorque > 0 and nodeTorque.value + self.SCT < newTorque and newTorque  > cfg.maxTorque:
-                ret = False
-                
-            if nodeTorque.value + self.SCT < 0 and newTorque < 0 and newTorque < nodeTorque.value + self.SCT and newTorque  < -cfg.maxTorque:
+            if  cfg.maxTorque < abs(newTorque):
                 ret = False
 
         return ret
@@ -114,6 +106,45 @@ def getBestShims(pallet, items, k, nodeTorque, solDict, cfg, eta2_vol, itemsDict
                 if sh.isFeasible(item, k, nodeTorque, cfg, lock):
                     sh.putItem(item, w)
                 Set.append(sh)
+
+
+    if tipo == "BFD":                
+        # First Fit Decrease - faster than KP
+        whip.sort(key=lambda x: abs(x.V), reverse=True)
+
+        sh_remainders = []  # Track remaining capacity for shims
+
+        for w, item in enumerate(whip):
+
+            if ((time.perf_counter() - startTime) > secBreak):
+                break 
+
+            best_fit_idx = -1
+            best_fit_remainder = float('inf') # a big number
+
+            for sh in Set:
+                if sh.isFeasible(item, k, nodeTorque, cfg, lock):            
+                    best_fit_remainder = remainder - item.V
+                    best_fit_idx = i 
+
+            for i, remainder in enumerate(sh_remainders):
+                # if the item fits     and the space difference is smaller than the best
+                if remainder >= item.V and remainder - item.V < best_fit_remainder:
+                    best_fit_remainder = remainder - item.V
+                    best_fit_idx = i            
+
+
+            # If found a shim that fits, place the item in it
+            if best_fit_idx != -1:
+                sh = Set[best_fit_idx] # found a Shims that fit the item
+                sh.putItem(item, w)
+                sh_remainders[best_fit_idx] -= item.V
+            else:
+                sh = Shims(pallet, len(whip)) # create a new Shim
+                sh.putItem(item, w)
+                Set.append(sh)
+
+
         # select the best Shim
         bestScore = 0
         bestIndex = 0
@@ -208,12 +239,8 @@ def Solve(pallets, items, cfg, k, eta1_vol, eta2_vol, secBreak, mode, nodeTorque
             # get the best Shims for the pallet
             getBestShims( pallets[i], items, k, nodeTorque, solDict, cfg, eta2_vol, itemsDict, lock, tipo, startTime, secBreak)
 
-    # try to complete the pallet
-    for i, _ in enumerate(pallets):
-        counter += common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, 1.0, itemsDict, lock)
-
-    # if counter > 0:
-    #     print(f"----->{mode}: {counter} items inserted in post local search.")
+    # try to complete the pallet   
+    common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, 1.0, itemsDict, lock)
 
 
 if __name__ == "__main__":

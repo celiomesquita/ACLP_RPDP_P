@@ -352,7 +352,7 @@ if __name__ == "__main__":
     plot      = False
 
     testing   = False
-    # testing   = True
+    testing   = True
 
     # shortest = True # 2 shortest tours
     shortest = False # All K!
@@ -361,7 +361,7 @@ if __name__ == "__main__":
     # iRace_testing = True
 
     scenarios = [1,2,3,4,5,6] # 2-6 is 1-5 in the article
-    # scenarios = [1]
+    # scenarios = [1,2,3]
 
     if testing:
         scenarios = [1,2,3,4]
@@ -439,8 +439,9 @@ if __name__ == "__main__":
     if not iRace_testing:
         print(f"timeLimit:{timeLimit}    folder: {folder}    method: {method}   shortest: {shortest}")
 
-    # tipo = "KP"
-    tipo = "FFD"
+    # tipo = "KP" # with dynamic programming
+    # tipo = "FFD"  # with First-fit decreasing
+    tipo = "BFD"  # with Best-fit decreasing
 
     distances_file = "./params/distances7.txt"
     if scenarios[0] >= 6:
