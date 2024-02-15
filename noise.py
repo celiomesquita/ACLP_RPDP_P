@@ -66,8 +66,8 @@ def Solve(pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
     bestScore = initScore # G*
 
     primePallets   = common.copyPallets(pallets)
-    primeSolDict   = common.copySolDict(solDict)
-    primeItemsDict = common.copyItemsDict(itemsDict)
+    primeSolDict   = dict(solDict)
+    primeItemsDict = dict(itemsDict)
     primeTorque    = mp.Value('d', nodeTorque.value)  
     primeScore = 0.0
     for i, _ in enumerate(primePallets):               
@@ -91,14 +91,14 @@ def Solve(pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
     while trial < numTrials and (time.perf_counter() - startTime) < secBreak:
 
         localScore     = initScore
-        localSolDict   = common.copySolDict(solDict)
-        localItemsDict = common.copyItemsDict(itemsDict)
+        localSolDict   = dict(solDict)
+        localItemsDict = dict(itemsDict)
         localTorque    = mp.Value('d', nodeTorque.value)
         localPallets    = common.copyPallets(pallets)
 
         iterScore      = initScore
-        iterSolDict    = common.copySolDict(solDict)
-        iterItemsDict  = common.copyItemsDict(itemsDict)
+        iterSolDict    = dict(solDict)
+        iterItemsDict  = dict(itemsDict)
         iterTorque     = mp.Value('d', nodeTorque.value)
         iterPallets    = common.copyPallets(pallets)
 
@@ -119,21 +119,20 @@ def Solve(pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
             if ProbAccept(iterScore, oldScore, r):
 
                 localScore     = iterScore
-                localSolDict   = common.copySolDict(iterSolDict)
-                localItemsDict = common.copyItemsDict(iterItemsDict)
-                localPallets    = common.copyPallets(iterPallets)
+                localSolDict   = dict(iterSolDict)
+                localItemsDict = dict(iterItemsDict)
+                localPallets   = common.copyPallets(iterPallets)
                 localTorque    = mp.Value('d', iterTorque.value)
 
         r -= step
 
         if localScore > bestScore:
-
             bestScore = localScore
-
-            solDict    = common.copySolDict(localSolDict)
-            itemsDict  = common.copyItemsDict(localItemsDict)
+            solDict    = dict(localSolDict)
+            itemsDict  = dict(localItemsDict)
             pallets    = common.copyPallets(localPallets)
             nodeTorque = mp.Value('d', localTorque.value)
+            break
 
         trial += 1
 
