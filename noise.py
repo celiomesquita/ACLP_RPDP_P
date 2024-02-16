@@ -5,44 +5,57 @@ import math
 import numpy as np
 import multiprocessing as mp
 import common
+import icecream as ic
 
 RNG = np.random.default_rng()
 
-def Transform(iterPallets, iterItemsDict, iterSolDict, iterScore, N, items, nodeTorque, k, cfg, lock, startTime, secBreak):
+def Transform(iterPallets, iterItemsDict, iterSolDict, iterScore, N, items, iterTorque, k, cfg, lock, startTime, nodeTime):
 
-    for i, _ in enumerate(iterPallets):
+    # make an elementary feasible transformation in the solution
+    transformed = False
 
-        if ((time.perf_counter() - startTime) > secBreak):
+    i = RNG.integers(len(iterPallets))
+
+    notIncluded  = [j for j, a in enumerate(iterSolDict["solMatrix"][N:N+(N-1)])     if a == 0] # not included items
+    inThisPallet = [j for j, a in enumerate(iterSolDict["solMatrix"][N*i:N*i+(N-1)]) if a == 1] # in this pallet
+
+    while not transformed:
+
+        id0 = RNG.choice(notIncluded)
+        notIncluded.remove(id0)
+
+        if len(inThisPallet) > 0:
+            id1 = RNG.choice(inThisPallet)
+            inThisPallet.remove(id1)
+        else:
             break
 
-        iterScore -= iterPallets[i].PCS
+        # remove item id1 from this pallet
+        iterPallets[i].popItem(items[id1], iterTorque, iterSolDict, N, iterItemsDict)
+        
+        # try to include id0
+        if iterPallets[i].isFeasible(items[id0], 1.0, k, iterTorque, cfg, iterItemsDict, lock):
+            iterPallets[i].putItem(items[id0], iterTorque, iterSolDict, N, iterItemsDict, lock)
+            transformed = True
+        else:
+            # put id1 back into this pallet
+            iterPallets[i].putItem(items[id1], iterTorque, iterSolDict, N, iterItemsDict, lock)
 
-        arr0 = [j for j, a in enumerate(iterItemsDict["mpItems"])                if a == 0]
-        arr1 = [j for j, a in enumerate(iterSolDict["solMatrix"][N*i:N*i+(N-1)]) if a == 1]
-
-        if len(arr0) > 0 and len(arr1) > 0:
-
-            id0 = RNG.choice(arr0) # not in solution
-            id1 = RNG.choice(arr1) # in this pallet            
-
-            iterPallets[i].popItem(items[id1], nodeTorque, iterSolDict, N, iterItemsDict)
-            
-            if iterPallets[i].isFeasible(items[id0], 1.0, k, nodeTorque, cfg, iterItemsDict, lock):
-                iterPallets[i].putItem(items[id0], nodeTorque, iterSolDict, N, iterItemsDict, lock)
-            else:
-                iterPallets[i].putItem(items[id1], nodeTorque, iterSolDict, N, iterItemsDict, lock)
-
-        iterScore += iterPallets[i].PCS
+    iterScore += iterPallets[i].PCS
 
 
 # ProbAccept is the Noising Method acceptance method.
 # This feature prevents the method from becoming stuck at a local optima.
 def ProbAccept(newScore, oldScore, r):
-	delta = float(newScore-oldScore) / float(oldScore)
-	return delta + (2*r*RNG.random() - r)  > 0 
+
+    ratio = float(newScore-oldScore) / float(oldScore)
+
+    delta = ratio + r*(2*RNG.random() - 1.0)
+
+    return delta > 0 # may return true or false
 
 
-def Solve(pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
+def Solve(pallets, items, cfg, k, nodeTime, nodeTorque, solDict, itemsDict):
 
     startTime = time.perf_counter()
 
@@ -55,13 +68,14 @@ def Solve(pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
 
     print(f"{N} items  {M} pallets")
 
-    initScore = 0.0 # G
-
-    for i, _ in enumerate(pallets):               
-        common.fillPallet(pallets[i], items, k, nodeTorque, solDict, cfg, 0.98, itemsDict, lock)
-        initScore += pallets[i].PCS
-
-    print(f"Greedy initial score {initScore}")
+    initPallets   = common.copyPallets(pallets)
+    initSolDict   = dict(solDict)
+    initItemsDict = dict(itemsDict)
+    initTorque    = mp.Value('d', nodeTorque.value)  
+    initScore     = 0.0
+    for i, _ in enumerate(initPallets):               
+        common.fillPallet(initPallets[i], items, k, initTorque, initSolDict, cfg, 1.0, initItemsDict, lock)
+        initScore += initPallets[i].PCS
 
     bestScore = initScore # G*
 
@@ -69,26 +83,29 @@ def Solve(pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
     primeSolDict   = dict(solDict)
     primeItemsDict = dict(itemsDict)
     primeTorque    = mp.Value('d', nodeTorque.value)  
-    primeScore = 0.0
+    primeScore     = 0.0
     for i, _ in enumerate(primePallets):               
-        common.fillPallet(primePallets[i], items, k, primeTorque, primeSolDict, cfg, 0.7, primeItemsDict, lock)
+        common.fillPallet(primePallets[i], items, k, primeTorque, primeSolDict, cfg, 0.95, primeItemsDict, lock)
         primeScore += primePallets[i].PCS
 
-    r_max = 1 - (initScore - primeScore)/initScore # maximum initial noise
+    r_max = 1 - (initScore-primeScore)/initScore # maximum initial noise
 
-    numTrials = math.ceil(float(N * M)/50)
+    print(f"r_max:{r_max:.3f}, initScore:{initScore}, primeScore:{primeScore}")
 
-    numIter = math.ceil(float(N * M)/30)
+    numTrials = math.ceil(float(N * M)/100)
+
+    numIter = math.ceil(float(N * M)/50)
 
     print(f"numTrials: {numTrials}\tnumIter: {numIter}")
 
-    step = r_max/(numTrials/numIter-1)
-    r = r_max  
+    step = r_max/(numTrials-1)
 
-    bestScore = initScore
+    print(f"step = {step:.6f}")
+
+    r = r_max  
   
     trial = 0
-    while trial < numTrials and (time.perf_counter() - startTime) < secBreak:
+    while trial < numTrials and (time.perf_counter() - startTime) < nodeTime:
 
         localScore     = initScore
         localSolDict   = dict(solDict)
@@ -105,7 +122,7 @@ def Solve(pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
         for _ in range(numIter):
 
 
-            if ((time.perf_counter() - startTime) > secBreak):
+            if ((time.perf_counter() - startTime) > nodeTime):
                 trial = numTrials
                 break 
 
@@ -114,7 +131,7 @@ def Solve(pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
             oldScore = iterScore
 
             # Transform makes a random elementary transformation in each pallet
-            Transform(iterPallets, iterItemsDict, iterSolDict, iterScore, N, items, iterTorque, k, cfg, lock, startTime, secBreak)
+            Transform(iterPallets, iterItemsDict, iterSolDict, iterScore, N, items, iterTorque, k, cfg, lock, startTime, nodeTime)
 
             if ProbAccept(iterScore, oldScore, r):
 
@@ -132,7 +149,6 @@ def Solve(pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
             itemsDict  = dict(localItemsDict)
             pallets    = common.copyPallets(localPallets)
             nodeTorque = mp.Value('d', localTorque.value)
-            break
 
         trial += 1
 
