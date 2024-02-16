@@ -427,20 +427,21 @@ if __name__ == "__main__":
 
     # method = "GRB"
     # method = "CBC"
-    # method = "Shims"
+    method = "Shims"
     # method = "mpShims"
     # method = "mpACO"
     # method = "ACO"
     # method = "TS"
     # method = "GRASP"
-    method = "NMO"
+    # method = "NMO"
     # method = "Greedy"
 
     if not iRace_testing:
         print(f"timeLimit:{timeLimit}    folder: {folder}    method: {method}   shortest: {shortest}")
 
-    # tipo = "KP" # with dynamic programming
-    tipo = "FFD"  # with First-fit decreasing
+    # tipo = "KP" # with dynamic programming          46.6    61
+    # tipo = "FFD"  # with First-fit decreasing mainElapsed: 860.1    overall SC: 113.5
+    tipo = "BF"  # with Best-fit        mainElapsed: 662.5    overall SC: 114.6
 
     distances_file = "./params/distances7.txt"
     if scenarios[0] >= 6:
