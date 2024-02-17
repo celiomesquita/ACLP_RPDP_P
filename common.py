@@ -133,7 +133,7 @@ class Pallet(object):
         self.PCV += consol.V
         self.PCS += consol.S
             
-    def isFeasible(self, item, threshold, k, nodeTorque, cfg, itemsDict, lock, ts=1.0): # check constraints
+    def isFeasible(self, item, threshold, k, nodeTorque, cfg, itemsDict, lock): # check constraints
 
         feasible = True
 
@@ -160,7 +160,7 @@ class Pallet(object):
                     If the torque is increasing positively and is bigger  than  maxTorque
                     If the torque is increasing negatively and is smaller than -maxTorque
                     """
-                    if  abs(nodeTorque.value) < abs(newTorque) and cfg.maxTorque * ts < abs(newTorque):
+                    if  abs(nodeTorque.value) < abs(newTorque) and cfg.maxTorque < abs(newTorque):
                         feasible = False
                                            
         return feasible
@@ -187,19 +187,6 @@ def copyPallets(pallets):
         array[i].PCS  = p.PCS
     return array
 
-def copySolDict(solDict):
-    N_M = len(solDict["solMatrix"])
-    solMatrix = mp.Array('i', [0 for _ in np.arange(N_M)] ) 
-    for pos, v in enumerate(solDict["solMatrix"]):
-        solMatrix[pos] = v
-    return dict(solMatrix=solMatrix)
-
-def copyItemsDict(itemsDict):
-    N = len(itemsDict["mpItems"])
-    mpItems = mp.Array('i', [0 for _ in np.arange(N)] ) 
-    for pos, v in enumerate(itemsDict["mpItems"]):
-        mpItems[pos] = v
-    return dict(mpItems=mpItems)
 
 def loadPallets(cfg):
     """
@@ -223,11 +210,11 @@ def loadPallets(cfg):
    
     return pallets, dists[0] # ramp door distance from CG
 
-def fillPallet(pallet, items, k, nodeTorque, solDict, cfg, vthreshold, itemsDict, lock, ts=1.0):
+def fillPallet(pallet, items, k, nodeTorque, solDict, cfg, vthreshold, itemsDict, lock):
     N = len(items)
     counter = 0
     for item in items:
-        if pallet.isFeasible(item, vthreshold, k, nodeTorque,   cfg,           itemsDict, lock, ts):
+        if pallet.isFeasible(item, vthreshold, k, nodeTorque,   cfg,          itemsDict, lock):
             pallet.putItem(  item,               nodeTorque, solDict,      N, itemsDict, lock)
             counter += 1
     return counter

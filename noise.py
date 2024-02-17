@@ -63,9 +63,9 @@ def Transform(iterPallets, iterItemsDict, iterSolDict, iterScore, N, items, iter
 # This feature prevents the method from becoming stuck at a trial optima.
 def ProbAccept(newScore, oldScore, r):
 
-    ratio = (newScore.value-oldScore.value) / oldScore.value
+    ratio = (newScore.value-oldScore.value) / oldScore.value # may be positive or negative
 
-    delta = ratio + r*(2*RNG.random() - 1.0)
+    delta = ratio + r*(2*RNG.random() - 1.0) # r = 0.001
 
     return delta > 0 # may return true or false
 
@@ -89,19 +89,19 @@ def Solve(pallets, items, cfg, k, nodeTime, nodeTorque, solDict, itemsDict):
     initScore     = mp.Value('d', 0)
 
     for i, _ in enumerate(initPallets):               
-        common.fillPallet(initPallets[i], items, k, initTorque, initSolDict, cfg, 0.95, initItemsDict, lock)
+        common.fillPallet(initPallets[i], items, k, initTorque, initSolDict, cfg, 1.0, initItemsDict, lock)
         initScore.value += initPallets[i].PCS
 
     bestScore = mp.Value('d', initScore.value) # G*
 
-    r_init = 0.5
+    r_init = 0.0001
 
-    numTrials = math.ceil(float(N))
+    # numTrials = math.ceil(float(N))
+    numTrials = math.ceil( float(N * M) / 300 )
 
-    numIters = int(numTrials/3)
+    numIters = int(numTrials/2)
 
     step = r_init/(numTrials-1)
-
 
     r = r_init 
 
@@ -137,17 +137,20 @@ def Solve(pallets, items, cfg, k, nodeTime, nodeTorque, solDict, itemsDict):
             Transform(iterPallets, iterItemsDict, iterSolDict, iterScore, N, items, iterTorque, k, cfg, lock)
 
             if ProbAccept(iterScore, trialScore, r):
-            # if iterScore > trialScore:
+            # if iterScore.value > trialScore.value + 0.0001:
                 trialPallets       = common.copyPallets(iterPallets)
                 trialSolDict       = dict(iterSolDict)
                 trialItemsDict     = dict(iterItemsDict)
                 trialTorque.value  = iterTorque.value
                 trialScore.value   = iterScore.value 
 
-
         r -= step
 
-        if trialScore.value  > bestScore.value + 0.00001 :
+        # if  RNG.random() < 0.1:
+        #     for i, _ in enumerate(trialPallets):               
+        #         common.fillPallet(trialPallets[i], items, k, trialTorque, trialSolDict, cfg, 1.0, trialItemsDict, lock)
+
+        if trialScore.value  > bestScore.value + 0.001 :
             pallets    = common.copyPallets(trialPallets)
             solDict    = dict(trialSolDict)
             itemsDict  = dict(trialItemsDict)
@@ -157,7 +160,7 @@ def Solve(pallets, items, cfg, k, nodeTime, nodeTorque, solDict, itemsDict):
 
         trial += 1
     """"""
-    print(f"trials:{numTrials}\titers:{numIters}\tstep:{step:.5f}\t ratio:{trialScore.value/bestScore.value:.5f}")
+    print(f"trials:{numTrials}\titers:{numIters}\tstep:{step:.5f}\t ratio:{100.0*(bestScore.value-initScore.value)/initScore.value:.1f}%\n")
 
 
 if __name__ == "__main__":

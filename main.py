@@ -163,10 +163,10 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg, tourTime, fold
             mpShims.Solve(pallets, items, cfg, k, eta1_vol, eta2_vol, node.tLim, "s", nodeTorque, solDict, itemsDict, tipo)  # s - serial      
 
         if method == "mpACO":       
-            mpACO.Solve(  pallets, items, cfg, k, eta1_vol, node.tLim, "p", nodeTorque, solDict, itemsDict) 
+            mpACO.Solve(  pallets, items, cfg, k, node.tLim, "p", nodeTorque, solDict, itemsDict) 
 
         if method == "ACO":       
-            mpACO.Solve(  pallets, items, cfg, k, eta1_vol, node.tLim, "s", nodeTorque, solDict, itemsDict)
+            mpACO.Solve(  pallets, items, cfg, k, node.tLim, "s", nodeTorque, solDict, itemsDict)
 
         if method == "TS":       
             tabu.Solve(  pallets, items, cfg, k, node.tLim, nodeTorque, solDict, itemsDict)             
@@ -352,7 +352,7 @@ if __name__ == "__main__":
     plot      = False
 
     testing   = False
-    # testing   = True
+    testing   = True
 
     # shortest = True # 2 shortest tours
     shortest = False # All K!
@@ -364,7 +364,7 @@ if __name__ == "__main__":
     # scenarios = [1,2,3]
 
     if testing:
-        scenarios = [1,2]
+        scenarios = [1]
 
     # scenarios = [6,7,8,9,10,11,12,13,14]
 
@@ -430,9 +430,9 @@ if __name__ == "__main__":
     # method = "Shims"
     # method = "mpShims"
     # method = "mpACO"
-    # method = "ACO"
+    method = "ACO"
     # method = "TS"
-    method = "GRASP"
+    # method = "GRASP"
     # method = "NMO"
     # method = "Greedy"
 
@@ -457,7 +457,7 @@ if __name__ == "__main__":
         instances = [1,2,3,4,5,6,7]
 
         if scenarios[0] >= 6:
-            instances = [1,2,3]
+            instances = [1]
 
         if testing:
             instances = [1,2,3]
@@ -616,7 +616,7 @@ if __name__ == "__main__":
 
             overallSC += bestAvgSC
 
-            print(f"mainElapsed: {mainElapsed:.1f}    overall SC: {overallSC:.1f}")
+            print(f"mainElapsed: {mainElapsed:.1f}    overall SC: {overallSC:.3f}")
 
         else:
             print(-1*instBestAvgSC/numInst) # -1: iRace minimizes a cost value
