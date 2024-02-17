@@ -6,46 +6,61 @@ import numpy as np
 import multiprocessing as mp
 import common
 import icecream as ic
+import tqdm
 
 RNG = np.random.default_rng()
 
-def Transform(iterPallets, iterItemsDict, iterSolDict, iterScore, N, items, iterTorque, k, cfg, lock, startTime, nodeTime):
+def Transform(iterPallets, iterItemsDict, iterSolDict, iterScore, N, items, iterTorque, k, cfg, lock):
 
     # make an elementary feasible transformation in the solution
     transformed = False
 
-    i = RNG.integers(len(iterPallets))
-
-    notIncluded  = [j for j, a in enumerate(iterSolDict["solMatrix"][N:N+(N-1)])     if a == 0] # not included items
-    inThisPallet = [j for j, a in enumerate(iterSolDict["solMatrix"][N*i:N*i+(N-1)]) if a == 1] # in this pallet
+    tested = []
 
     while not transformed:
 
-        id0 = RNG.choice(notIncluded)
-        notIncluded.remove(id0)
-
-        if len(inThisPallet) > 0:
-            id1 = RNG.choice(inThisPallet)
-            inThisPallet.remove(id1)
-        else:
-            break
-
-        # remove item id1 from this pallet
-        iterPallets[i].popItem(items[id1], iterTorque, iterSolDict, N, iterItemsDict)
+        i = RNG.integers(len(iterPallets))
         
-        # try to include id0
-        if iterPallets[i].isFeasible(items[id0], 1.0, k, iterTorque, cfg, iterItemsDict, lock):
-            iterPallets[i].putItem(items[id0], iterTorque, iterSolDict, N, iterItemsDict, lock)
-            transformed = True
-        else:
-            # put id1 back into this pallet
-            iterPallets[i].putItem(items[id1], iterTorque, iterSolDict, N, iterItemsDict, lock)
+        if i not in tested:
+            
+            tested.append(i)
 
-    iterScore += iterPallets[i].PCS
+            notIncluded  = [j for j, a in enumerate(iterItemsDict["mpItems"])                if a == 0] # not included items
+            inThisPallet = [j for j, a in enumerate(iterSolDict["solMatrix"][N*i:N*i+(N-1)]) if a == 1] # in this pallet
+
+            while not transformed and len(notIncluded) > 0:
+
+                id0 = RNG.choice(notIncluded)
+                notIncluded.remove(id0)
+
+                if len(inThisPallet) > 0:
+                    id1 = RNG.choice(inThisPallet)
+                    inThisPallet.remove(id1)
+                else:
+                    break
+
+                # remove item id1 from this pallet
+                iterPallets[i].popItem(items[id1], iterTorque, iterSolDict, N, iterItemsDict)
+                iterScore -= items[id1].S
+                
+                # try to include id0
+                if iterPallets[i].isFeasible(items[id0], 1.0, k, iterTorque, cfg, iterItemsDict, lock):
+                    iterPallets[i].putItem(items[id0], iterTorque, iterSolDict, N, iterItemsDict, lock)
+                    transformed = True
+                    iterScore += items[id0].S
+                else:
+                    # put id1 back into this pallet
+                    iterPallets[i].putItem(items[id1], iterTorque, iterSolDict, N, iterItemsDict, lock)
+                    iterScore += items[id1].S
+
+        if len(tested) == len(iterPallets):
+            return iterScore
+        
+    return iterScore
 
 
 # ProbAccept is the Noising Method acceptance method.
-# This feature prevents the method from becoming stuck at a local optima.
+# This feature prevents the method from becoming stuck at a trial optima.
 def ProbAccept(newScore, oldScore, r):
 
     ratio = float(newScore-oldScore) / float(oldScore)
@@ -77,80 +92,67 @@ def Solve(pallets, items, cfg, k, nodeTime, nodeTorque, solDict, itemsDict):
         common.fillPallet(initPallets[i], items, k, initTorque, initSolDict, cfg, 1.0, initItemsDict, lock)
         initScore += initPallets[i].PCS
 
-    bestScore = initScore # G*
+    bestScore = float(initScore) # G*
 
-    primePallets   = common.copyPallets(pallets)
-    primeSolDict   = dict(solDict)
-    primeItemsDict = dict(itemsDict)
-    primeTorque    = mp.Value('d', nodeTorque.value)  
-    primeScore     = 0.0
-    for i, _ in enumerate(primePallets):               
-        common.fillPallet(primePallets[i], items, k, primeTorque, primeSolDict, cfg, 0.95, primeItemsDict, lock)
-        primeScore += primePallets[i].PCS
+    r_init = 0.3
 
-    r_max = 1 - (initScore-primeScore)/initScore # maximum initial noise
+    numTrials = math.ceil(float(N))
 
-    print(f"r_max:{r_max:.3f}, initScore:{initScore}, primeScore:{primeScore}")
+    numIters = int(numTrials/1)
 
-    numTrials = math.ceil(float(N * M)/100)
+    step = r_init/(numTrials-1)
 
-    numIter = math.ceil(float(N * M)/50)
 
-    print(f"numTrials: {numTrials}\tnumIter: {numIter}")
+    r = r_init 
 
-    step = r_max/(numTrials-1)
-
-    print(f"step = {step:.6f}")
-
-    r = r_max  
-  
+    # initialize the trial solution
+    trialScore     = float(initScore)
+    trialSolDict   = dict(solDict)
+    trialItemsDict = dict(itemsDict)
+    trialTorque    = mp.Value('d', nodeTorque.value)
+    trialPallets    = common.copyPallets(pallets)    
+    """"""
     trial = 0
-    while trial < numTrials and (time.perf_counter() - startTime) < nodeTime:
+    while trial < numTrials:
 
-        localScore     = initScore
-        localSolDict   = dict(solDict)
-        localItemsDict = dict(itemsDict)
-        localTorque    = mp.Value('d', nodeTorque.value)
-        localPallets    = common.copyPallets(pallets)
+        # update the trial solution (back and forth)
 
-        iterScore      = initScore
-        iterSolDict    = dict(solDict)
-        iterItemsDict  = dict(itemsDict)
-        iterTorque     = mp.Value('d', nodeTorque.value)
-        iterPallets    = common.copyPallets(pallets)
-
-        for _ in range(numIter):
-
+        for _ in range(numIters):
 
             if ((time.perf_counter() - startTime) > nodeTime):
                 trial = numTrials
-                break 
+                break
 
-            iterScore = localScore
+            iterScore      = float(trialScore)
+            iterSolDict    = dict(trialSolDict)
+            iterItemsDict  = dict(trialItemsDict)
+            iterTorque     = mp.Value('d', trialTorque.value)
+            iterPallets    = common.copyPallets(trialPallets)
 
-            oldScore = iterScore
+            # Transform makes a random elementary transformation in a randomly chosen pallet
+            iterScore = Transform(iterPallets, iterItemsDict, iterSolDict, iterScore, N, items, iterTorque, k, cfg, lock)
 
-            # Transform makes a random elementary transformation in each pallet
-            Transform(iterPallets, iterItemsDict, iterSolDict, iterScore, N, items, iterTorque, k, cfg, lock, startTime, nodeTime)
-
-            if ProbAccept(iterScore, oldScore, r):
-
-                localScore     = iterScore
-                localSolDict   = dict(iterSolDict)
-                localItemsDict = dict(iterItemsDict)
-                localPallets   = common.copyPallets(iterPallets)
-                localTorque    = mp.Value('d', iterTorque.value)
+            if ProbAccept(iterScore, trialScore, r):
+            # if iterScore > trialScore:
+                trialScore     = float(iterScore)
+                trialSolDict   = dict(iterSolDict)
+                trialItemsDict = dict(iterItemsDict)
+                trialPallets   = common.copyPallets(iterPallets)
+                trialTorque    = mp.Value('d', iterTorque.value)
 
         r -= step
 
-        if localScore > bestScore:
-            bestScore = localScore
-            solDict    = dict(localSolDict)
-            itemsDict  = dict(localItemsDict)
-            pallets    = common.copyPallets(localPallets)
-            nodeTorque = mp.Value('d', localTorque.value)
+        if trialScore > bestScore:
+            bestScore  = float(trialScore)
+            solDict    = dict(trialSolDict)
+            itemsDict  = dict(trialItemsDict)
+            pallets    = common.copyPallets(trialPallets)
+            nodeTorque = mp.Value('d', trialTorque.value)
+            break # first improvement
 
         trial += 1
+    """"""
+    print(f"trials:{numTrials}\titers:{numIters}\tstep:{step:.5f}\t ratio:{trialScore/bestScore:.5f}")
 
 
 if __name__ == "__main__":
