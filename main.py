@@ -352,7 +352,7 @@ if __name__ == "__main__":
     plot      = False
 
     testing   = False
-    testing   = True
+    # testing   = True
 
     # shortest = True # 2 shortest tours
     shortest = False # All K!
@@ -364,7 +364,7 @@ if __name__ == "__main__":
     # scenarios = [1,2,3]
 
     if testing:
-        scenarios = [1]
+        scenarios = [1,2]
 
     # scenarios = [6,7,8,9,10,11,12,13,14]
 
@@ -408,7 +408,7 @@ if __name__ == "__main__":
 
         scenarios = [iRace_scenario]
 
-    # Apply irace results for SHims parameters
+    # Apply irace results for SHims parametersinitScore
     # eta1_vol, eta2_vol = 0.95, 1.35
     eta1_vol, eta2_vol = 0.86, 1.05
 
@@ -432,8 +432,8 @@ if __name__ == "__main__":
     # method = "mpACO"
     # method = "ACO"
     # method = "TS"
-    # method = "GRASP"
-    method = "NMO"
+    method = "GRASP"
+    # method = "NMO"
     # method = "Greedy"
 
     if not iRace_testing:
@@ -460,7 +460,7 @@ if __name__ == "__main__":
             instances = [1,2,3]
 
         if testing:
-            instances = [1]
+            instances = [1,2,3]
 
         if iRace_testing:
             instances = [iRace_instance]

@@ -34,7 +34,7 @@ def Solve(pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
     N = len(items)
     M = len(pallets)
 
-    print(f"\nGRASP for ACLP+RPDP\n")        
+    print(f"\nGRASP for ACLP+RPDP")        
 
     lock  = mp.Lock() # for use in parallel mode
 
@@ -43,13 +43,10 @@ def Solve(pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
     initScore = 0.0 # G
 
     for i, _ in enumerate(pallets):               
-        common.fillPallet(pallets[i], items, k, nodeTorque, solDict, cfg, 0.9, itemsDict, lock)
+        common.fillPallet(pallets[i], items, k, nodeTorque, solDict, cfg, 0.95, itemsDict, lock)
         initScore += pallets[i].PCS
 
-    print(f"Greedy initial score {initScore}")
-
     bestScore = initScore # G*
-
 
     # initialize the edges between pallets and items
     Ek = [None] * N * M
@@ -74,12 +71,12 @@ def Solve(pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
     while stagnant <= 3 and (time.perf_counter() - startTime) < secBreak:
 
         localScore     = initScore
-        localSolDict   = common.copySolDict(solDict)
-        localItemsDict = common.copyItemsDict(itemsDict)
+        localSolDict   = dict(solDict)
+        localItemsDict = dict(itemsDict)
 
         iterScore      = initScore
-        iterSolDict    = common.copySolDict(solDict)
-        iterItemsDict  = common.copyItemsDict(itemsDict)
+        iterSolDict    = dict(solDict)
+        iterItemsDict  = dict(itemsDict)
 
         Eprime = Ek
         rcl = RCL(L_rcl, Eprime) # edges are drawed from Eprime
@@ -104,7 +101,7 @@ def Solve(pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
 
                 # try to insert this candidate edge
 
-                if ce.Pallet.isFeasible(ce.Item, 1.0, k, nodeTorque, cfg, iterItemsDict, lock, torqueSurplus=1.0):
+                if ce.Pallet.isFeasible(ce.Item, 1.0, k, nodeTorque, cfg, iterItemsDict, lock):
 
                     ce.Pallet.putItem(ce.Item, nodeTorque, iterSolDict, N, iterItemsDict, lock)
 
@@ -113,8 +110,8 @@ def Solve(pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
                 if iterScore > localScore:
 
                     localScore     = iterScore
-                    localSolDict   = common.copySolDict(iterSolDict)
-                    localItemsDict = common.copyItemsDict(iterItemsDict)
+                    localSolDict   = dict(iterSolDict)
+                    localItemsDict = dict(iterItemsDict)
 
                 rcl = RCL(L_rcl, Eprime) 
 
@@ -128,14 +125,16 @@ def Solve(pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
 
             bestScore = localScore
 
-            solDict   = common.copySolDict(localSolDict)
-            itemsDict = common.copyItemsDict(localItemsDict)
+            solDict   = dict(localSolDict)
+            itemsDict = dict(localItemsDict)
 
             stagnant = 0
         else:
             stagnant += 1
 
 
+    for i, _ in enumerate(pallets):               
+        common.fillPallet(pallets[i], items, k, nodeTorque, solDict, cfg, 1.0, itemsDict, lock)
 
 if __name__ == "__main__":
 

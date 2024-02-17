@@ -30,7 +30,7 @@ def Transform(iterPallets, iterItemsDict, iterSolDict, iterScore, iterSolID, N, 
 
             iterPallets[i].popItem(items[id1], nodeTorque, iterSolDict, N, iterItemsDict)
             
-            if iterPallets[i].isFeasible(items[id0], 1.0, k, nodeTorque, cfg, iterItemsDict, lock, torqueSurplus=1.0):
+            if iterPallets[i].isFeasible(items[id0], 1.0, k, nodeTorque, cfg, iterItemsDict, lock):
                 iterPallets[i].putItem(items[id0], nodeTorque, iterSolDict, N, iterItemsDict, lock)
             else:
                 iterPallets[i].putItem(items[id1], nodeTorque, iterSolDict, N, iterItemsDict, lock)

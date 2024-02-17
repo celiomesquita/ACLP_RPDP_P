@@ -41,17 +41,17 @@ def Transform(iterPallets, iterItemsDict, iterSolDict, iterScore, N, items, iter
 
                 # remove item id1 from this pallet
                 iterPallets[i].popItem(items[id1], iterTorque, iterSolDict, N, iterItemsDict)
-                iterScore -= items[id1].S
+                iterScore.value -= items[id1].S
                 
                 # try to include id0
                 if iterPallets[i].isFeasible(items[id0], 1.0, k, iterTorque, cfg, iterItemsDict, lock):
                     iterPallets[i].putItem(items[id0], iterTorque, iterSolDict, N, iterItemsDict, lock)
                     transformed = True
-                    iterScore += items[id0].S
+                    iterScore.value += items[id0].S
                 else:
                     # put id1 back into this pallet
                     iterPallets[i].putItem(items[id1], iterTorque, iterSolDict, N, iterItemsDict, lock)
-                    iterScore += items[id1].S
+                    iterScore.value += items[id1].S
 
         if len(tested) == len(iterPallets):
             return iterScore
@@ -63,7 +63,7 @@ def Transform(iterPallets, iterItemsDict, iterSolDict, iterScore, N, items, iter
 # This feature prevents the method from becoming stuck at a trial optima.
 def ProbAccept(newScore, oldScore, r):
 
-    ratio = float(newScore-oldScore) / float(oldScore)
+    ratio = (newScore.value-oldScore.value) / oldScore.value
 
     delta = ratio + r*(2*RNG.random() - 1.0)
 
@@ -78,27 +78,27 @@ def Solve(pallets, items, cfg, k, nodeTime, nodeTorque, solDict, itemsDict):
     M = len(pallets)
 
     print("\nNoising Method Optimization for ACLP+RPDP\n")        
+    print(f"{N} items  {M} pallets")
 
     lock  = mp.Lock() # for use in parallel mode
-
-    print(f"{N} items  {M} pallets")
 
     initPallets   = common.copyPallets(pallets)
     initSolDict   = dict(solDict)
     initItemsDict = dict(itemsDict)
-    initTorque    = mp.Value('d', nodeTorque.value)  
-    initScore     = 0.0
+    initTorque    = mp.Value('d', nodeTorque.value) 
+    initScore     = mp.Value('d', 0)
+
     for i, _ in enumerate(initPallets):               
-        common.fillPallet(initPallets[i], items, k, initTorque, initSolDict, cfg, 1.0, initItemsDict, lock)
-        initScore += initPallets[i].PCS
+        common.fillPallet(initPallets[i], items, k, initTorque, initSolDict, cfg, 0.95, initItemsDict, lock)
+        initScore.value += initPallets[i].PCS
 
-    bestScore = float(initScore) # G*
+    bestScore = mp.Value('d', initScore.value) # G*
 
-    r_init = 0.3
+    r_init = 0.5
 
     numTrials = math.ceil(float(N))
 
-    numIters = int(numTrials/1)
+    numIters = int(numTrials/3)
 
     step = r_init/(numTrials-1)
 
@@ -106,11 +106,15 @@ def Solve(pallets, items, cfg, k, nodeTime, nodeTorque, solDict, itemsDict):
     r = r_init 
 
     # initialize the trial solution
-    trialScore     = float(initScore)
+    trialPallets   = common.copyPallets(pallets)  
     trialSolDict   = dict(solDict)
     trialItemsDict = dict(itemsDict)
-    trialTorque    = mp.Value('d', nodeTorque.value)
-    trialPallets    = common.copyPallets(pallets)    
+    trialTorque    = mp.Value('d', initTorque.value)
+    trialScore     = mp.Value('d', initScore.value)
+
+    iterTorque = mp.Value('d', initTorque.value)
+    iterScore  = mp.Value('d', initTorque.value)
+
     """"""
     trial = 0
     while trial < numTrials:
@@ -123,36 +127,37 @@ def Solve(pallets, items, cfg, k, nodeTime, nodeTorque, solDict, itemsDict):
                 trial = numTrials
                 break
 
-            iterScore      = float(trialScore)
-            iterSolDict    = dict(trialSolDict)
-            iterItemsDict  = dict(trialItemsDict)
-            iterTorque     = mp.Value('d', trialTorque.value)
-            iterPallets    = common.copyPallets(trialPallets)
+            iterPallets      = common.copyPallets(trialPallets)
+            iterSolDict      = dict(trialSolDict)
+            iterItemsDict    = dict(trialItemsDict)
+            iterTorque.value = trialTorque.value
+            iterScore.value  = trialScore.value
 
             # Transform makes a random elementary transformation in a randomly chosen pallet
-            iterScore = Transform(iterPallets, iterItemsDict, iterSolDict, iterScore, N, items, iterTorque, k, cfg, lock)
+            Transform(iterPallets, iterItemsDict, iterSolDict, iterScore, N, items, iterTorque, k, cfg, lock)
 
             if ProbAccept(iterScore, trialScore, r):
             # if iterScore > trialScore:
-                trialScore     = float(iterScore)
-                trialSolDict   = dict(iterSolDict)
-                trialItemsDict = dict(iterItemsDict)
-                trialPallets   = common.copyPallets(iterPallets)
-                trialTorque    = mp.Value('d', iterTorque.value)
+                trialPallets       = common.copyPallets(iterPallets)
+                trialSolDict       = dict(iterSolDict)
+                trialItemsDict     = dict(iterItemsDict)
+                trialTorque.value  = iterTorque.value
+                trialScore.value   = iterScore.value 
+
 
         r -= step
 
-        if trialScore > bestScore:
-            bestScore  = float(trialScore)
+        if trialScore.value  > bestScore.value + 0.00001 :
+            pallets    = common.copyPallets(trialPallets)
             solDict    = dict(trialSolDict)
             itemsDict  = dict(trialItemsDict)
-            pallets    = common.copyPallets(trialPallets)
-            nodeTorque = mp.Value('d', trialTorque.value)
+            nodeTorque.value = trialTorque.value
+            bestScore.value  = trialScore.value
             break # first improvement
 
         trial += 1
     """"""
-    print(f"trials:{numTrials}\titers:{numIters}\tstep:{step:.5f}\t ratio:{trialScore/bestScore:.5f}")
+    print(f"trials:{numTrials}\titers:{numIters}\tstep:{step:.5f}\t ratio:{trialScore.value/bestScore.value:.5f}")
 
 
 if __name__ == "__main__":

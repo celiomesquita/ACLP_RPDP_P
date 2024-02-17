@@ -434,6 +434,7 @@ def loadNodeItems(scenario, instance, node, unatended, surplus): # unatended, fu
     items.sort(key=lambda x: x.S/x.V, reverse=True)
     id = 0
 
+    # prepare for ACO
     if len(items) > 0:
 
         bestAttr = items[0].S / items[0].V # the first item has the best attractiveness
