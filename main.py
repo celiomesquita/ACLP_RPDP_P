@@ -426,14 +426,14 @@ if __name__ == "__main__":
     # timeLimit = 3600 # if there is any metaheuristics in the experiment (except Shims)
 
     # method = "GRB"
-    method = "CBC"
+    # method = "CBC"
     # method = "Shims"
     # method = "mpShims"
     # method = "mpACO"
     # method = "ACO"
-    method = "TS"
+    # method = "TS"
     # method = "GRASP"
-    # method = "NMO"
+    method = "NMO"
     # method = "Greedy"
 
     if not iRace_testing:

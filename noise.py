@@ -115,9 +115,9 @@ def Solve(pallets, items, cfg, pi, k, nodeTime, nodeTorque, solDict, itemsDict):
         common.fillPallet(initPallets[i], items, k, initTorque, initSolDict, cfg, 1.0, initItemsDict, lock)
         initScore.value += initPallets[i].PCS
 
-    r_init = 0.5
+    r_init = 0.001
 
-    numTrials = math.ceil( float(N * M) / 50 )
+    numTrials = math.ceil( float(N * M) / 100 )
     numIters = int(numTrials/2)
 
     step = r_init/(numTrials-1)
