@@ -431,7 +431,7 @@ if __name__ == "__main__":
     # method = "mpShims"
     # method = "mpACO"
     # method = "ACO"
-    # method = "TS"
+    method = "TS"
     # method = "GRASP"
     # method = "NMO"
     # method = "Greedy"
