@@ -24,121 +24,110 @@ BETA  = 4 # heuristic exponent
 # while the pheromone is deposited by all ants proportionally to their solution quality and
 # is evaporated in all the components. Each Ant makes use of "depositPhero" to update 
 # item attractiveness according to the its solution value.
-def depositPhero(antScore, iterScore, Attract, Phero, items):
+def depositPhero(antScore, iterScore, Attract, Phero, Edges):
 
     deltaTau = (antScore - iterScore)/iterScore
 
     # if deltaTau > 0: # if improved...
 
-    for id, _ in enumerate(Phero):
+    for x, _ in enumerate(Phero):
 
-        Phero[id] += deltaTau
+        Phero[x] += deltaTau
 
-        Attract[id] = Phero[id]**ALPHA * items[id].Attr**BETA
+        Attract[x] = Phero[x]**ALPHA * Edges[x].Attract**BETA
 
-def evaporate(Attract, Phero, items):
+def evaporate(Attract, Phero, Edges):
 
-        for id, phero in enumerate(Phero):
+        for x, phero in enumerate(Phero):
 
             #evaporate some pheromone 
-            Phero[id] = math.sqrt(phero) / 1.35
+            Phero[x] = math.sqrt(phero) / 1.35
 
-            Attract[id] = Phero[id]**ALPHA * items[id].Attr**BETA
+            Attract[x] = Phero[x]**ALPHA * Edges[x].Attract**BETA
 
 # at least 15 times faster than randomChoice
-def rouletteSelection(values): 
-    pick = RNG.random()*sum(values) # stop the roulette in a random point
+def rouletteSelection(attracts): 
+    pick = RNG.random()*sum(attracts) # stop the roulette in a random point
     current = 0.
-    for key, value in enumerate(values): # walk on the roulette
-        current += value
+    for x, attr in enumerate(attracts): # walk on the roulette
+        current += attr
         if current > pick:
-            return key # return the roulette sector index
-    return 0
+            return x, attr # return the edge index
+    return 0, 0
 
 # for tournament selection
 class Value(object):
     def __init__(self):
-        self.ID = -1
-        self.V  = 0.0
+        self.x    = -1
+        self.Attr = 0.0
 
 # pick and delete an item from the neighborhood by a tournament selection
-def selectItem(nbhood, values, pallet, maxTorque):
-
-    for j, it in enumerate(nbhood):
-        thisTorque = it.W * abs(pallet.D)
-        epsilon = thisTorque / maxTorque
-        values[j] *= 2 - epsilon
+def pickAnEdge(nbhood, attracts):
       
     # make the tournament selection with 3 individuals
     individuals = [Value() for _ in range(3)]
 
     for i, _ in enumerate(individuals):
-        individuals[i].ID = rouletteSelection(values)
-        individuals[i].V  = values[individuals[i].ID]
+        individuals[i].x, individuals[i].Attr = rouletteSelection(attracts)
 
     # choose the best individual
-    individuals.sort(key=lambda x: x.V, reverse=True)
-    j = individuals[0].ID
+    individuals.sort(key=lambda x: x.Attr, reverse=True)
 
-    item = nbhood[j]
+    x = individuals[0].x
 
-    return item, j
+    # x, _ = rouletteSelection(attracts)
 
-def antSolve(antPallets, items, cfg, k, secBreak, antTorque, antSolDict, Attract, Phero,\
-     bestScore, maxD, startTime, antScores, itemsDict, lock, mp=False):
+    edge = nbhood[x]
 
-    # items are read only
-    # antSolDict are changed by this ant
+    nbhood.pop(x)
+    attracts.pop(x)
 
-    nbhood   = [it for it in items]
-    values   = [v  for v  in Attract]
-    N = len(items)
+    return edge
 
-    # accum['score'] -> accumulated score for serial mode
-    # antScores.value  -> accumulated score for parallel mode
+def antSolve(antPallets, edges, cfg, k, secBreak, antTorque, antSolDict, startTime, antScores, itemsDict, lock, n):
+
+    nbhood   = [e for e in edges if itemsDict["mpItems"][e.Item.ID] == 0]
+    attracts = [e.Phero**ALPHA * e.Attract**BETA for e in nbhood]
 
     while nbhood and (time.perf_counter() - startTime) < secBreak:
-
-        for i, p in enumerate(antPallets):
             
-            if len(nbhood) > 0:
+        if len(nbhood) > 0:
 
-                maxTorque = max([it.W * maxD for it in nbhood])
+            # pick from the neighborhood the probable best item-pallet association
+            edge = pickAnEdge(nbhood, attracts)         
 
-                # pick from the neighborhood the probable best item for this pallet
-                item, j = selectItem(nbhood, values, p, maxTorque)
+            if antPallets[edge.Pallet.ID].isFeasible(edge.Item, 1.0, k, antTorque, cfg, itemsDict, lock):
 
-                if antPallets[i].isFeasible(item, 1.0, k, antTorque, cfg, itemsDict, lock):
+                antPallets[edge.Pallet.ID].putItem(edge.Item, antTorque, antSolDict, n, itemsDict, lock)
 
-                    antPallets[i].putItem(item, antTorque, antSolDict, N, itemsDict, lock)
-
-                    with lock:
-                        antScores.value  += item.S
-                        Phero[item.ID] -= item.S/bestScore.value # dissimulate other parallel ants
-                        Attract[item.ID] = Phero[item.ID]**ALPHA * items[item.ID].Attr**BETA                    
-
-                    nbhood.pop(j) # pop if included in solution
-                    values.pop(j)
-
-                else: # pop in the last pallet tested
-                    if i == len(antPallets)-1:
-                        nbhood.pop(j)
-                        values.pop(j)        
+                with lock:
+                    antScores.value += edge.Item.S    
 
 
 def Solve( pallets, items, cfg, pi, k, secBreak, mode, nodeTorque, solDict, itemsDict ):
 
+    startTime = time.perf_counter()
+
+    n = len(items)
+    m = len(pallets)
+
+    edges = [None]*n*m
+    id = 0
+    for p in pallets:
+        for it in items:
+            edges[id] = common.Edge(id, p, it)
+            id += 1
+
     # to control the general attractiveness for the tournament selection
-    Attract = mp.Array('d', np.arange(len(items)))
-    for j, _ in enumerate(Attract):
-        Attract[j] = 0.5
+    Attract = mp.Array('d', np.arange(n*m) )
+    for x, _ in enumerate(Attract):       
+        Attract[x] = edges[x].Attract
 
     # to control pheromone deposition and evaporation
-    Phero = mp.Array('d', np.arange(len(items)))
-    for j, _ in enumerate(Phero):
-        Phero[j] = 0.5
+    Phero = mp.Array('d', np.arange(n*m) )
+    for x, _ in enumerate(Phero):
+        Phero[x] = 0.5
 
-    startTime = time.perf_counter()
 
     if mode == "p":
         mode = "Parallel"
@@ -149,11 +138,6 @@ def Solve( pallets, items, cfg, pi, k, secBreak, mode, nodeTorque, solDict, item
     print(f"{len(items)} items  {len(pallets)} pallets")
 
     lock  = mp.Lock()
-
-
-    pallets.sort(key=lambda x: abs(x.D)) # sort pallets ascendent by CG distance
-
-    maxD = pallets[len(pallets)-1].D # the maximum distance from the CG
 
     initPallets   = common.copyPallets(pallets)
     initSolDict   = dict(solDict)
@@ -201,19 +185,18 @@ def Solve( pallets, items, cfg, pi, k, secBreak, mode, nodeTorque, solDict, item
 
             if mode == "Parallel": # send "antSolve" to parallel processes (ants)
 
-                ants[a] = mp.Process( target=antSolve, args=( antPallets[a], items, cfg, k, secBreak,\
-                    antTorques[a], antSolDict[a], Attract, Phero, iterScore, maxD, startTime, antScores[a],\
-                         antIteDict[a], lock, True) )
+                ants[a] = mp.Process( target=antSolve, args=( antPallets[a], edges, cfg, k, secBreak,\
+                    antTorques[a], antSolDict[a], startTime, antScores[a], antIteDict[a], lock, n) )
 
                 ants[a].start() # send ant
 
             else: # solve sequentially
 
-                antSolve( antPallets[a], items, cfg, k, secBreak, antTorques[a], antSolDict[a], Attract, Phero,\
-                                               iterScore, maxD, startTime, antScores[a], antIteDict[a], lock)
+                antSolve( antPallets[a], edges, cfg, k, secBreak, antTorques[a], antSolDict[a], \
+                                               startTime, antScores[a], antIteDict[a], lock, n)
 
                 # Ant System: all ants deposit pheromone
-                depositPhero(antScores[a].value, iterScore.value, Attract, Phero, items)
+                depositPhero(antScores[a].value, iterScore.value, Attract, Phero, edges)
 
                 # serial ant best solution update  accumsS[a]['score']
                 if antScores[a].value > bestAntScore.value+0.001:
@@ -237,7 +220,7 @@ def Solve( pallets, items, cfg, pi, k, secBreak, mode, nodeTorque, solDict, item
                 ants[a].join() # get results from parallel ants
 
                 # Ant System: all ants deposit pheromone
-                depositPhero(antScores[a].value, iterScore.value, Attract, Phero, items)
+                depositPhero(antScores[a].value, iterScore.value, Attract, Phero, edges)
 
                 # ant best solution update
                 if antScores[a].value > bestAntScore.value+0.001:
@@ -256,7 +239,7 @@ def Solve( pallets, items, cfg, pi, k, secBreak, mode, nodeTorque, solDict, item
 
         iter += 1
 
-        evaporate(Attract, Phero, items)
+        evaporate(Attract, Phero, edges)
   
     print(f"{improvements} improvements ({numAnts*iter} total ants).")
                 

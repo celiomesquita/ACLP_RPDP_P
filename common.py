@@ -166,15 +166,16 @@ class Pallet(object):
         return feasible
 
 
-# Edge connecting a pallet and an item
+# Edge connecting a pallet and an item. Used by ACO
 class Edge(object):
-    def __init__(self, id, pallet, item, cfg):
-        self.ID        = id
-        self.Pallet    = pallet
-        self.Item      = item
-        self.Torque    = float(item.W) * float(pallet.D)
+    def __init__(self, id, pallet, item):
+        self.ID      = id
+        self.Pallet  = pallet
+        self.Item    = item
+        self.Torque  = float(item.W) * float(pallet.D)
         self.Attract = item.S / item.V 
         self.Attract *= 1 - abs(self.Torque) / ( 340 * 17.57) # 17.57m last pallet dist from CG
+        self.Phero   = 0.5
 
 
 def copyPallets(pallets):
