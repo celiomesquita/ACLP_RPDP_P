@@ -27,14 +27,14 @@ class RCL(object):
                 edges.pop(0)
                 self.list.append(e)
 
-def Solve(pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
+def Solve(pallets, items, cfg, pi, k, secBreak, nodeTorque, solDict, itemsDict):
 
     startTime = time.perf_counter()
 
     N = len(items)
     M = len(pallets)
 
-    print(f"\nGRASP for ACLP+RPDP")        
+    print(f"\nGRASP for ACLP+RPDP ({pi}-{k})")        
 
     lock  = mp.Lock() # for use in parallel mode
 
@@ -53,7 +53,7 @@ def Solve(pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
     id = 0
     for p in pallets:
         for it in items:
-            Ek[id] = common.Edge(id, p, it, cfg)
+            Ek[id] = common.Edge(id, p, it)
             id += 1    
 
     # the most attractive edges come first
