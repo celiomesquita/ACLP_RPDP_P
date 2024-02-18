@@ -361,7 +361,7 @@ if __name__ == "__main__":
     # iRace_testing = True
 
     scenarios = [1,2,3,4,5,6] # 2-6 is 1-5 in the article
-    # scenarios = [1,2,3]
+    # scenarios = [1]
 
     if testing:
         scenarios = [1]

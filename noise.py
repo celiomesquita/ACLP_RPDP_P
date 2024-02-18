@@ -70,14 +70,14 @@ def ProbAccept(newScore, oldScore, r):
     return delta > 0 # may return true or false
 
 
-def Solve(pallets, items, cfg, k, nodeTime, nodeTorque, solDict, itemsDict):
+def Solve(pallets, items, cfg, pi, k, nodeTime, nodeTorque, solDict, itemsDict):
 
     startTime = time.perf_counter()
 
     N = len(items)
     M = len(pallets)
 
-    print("\nNoising Method Optimization for ACLP+RPDP\n")        
+    print(f"\nNoising Method Optimization for ACLP+RPDP ({pi}-{k})")        
     print(f"{N} items  {M} pallets")
 
     lock  = mp.Lock() # for use in parallel mode
@@ -94,12 +94,10 @@ def Solve(pallets, items, cfg, k, nodeTime, nodeTorque, solDict, itemsDict):
 
     bestScore = mp.Value('d', initScore.value) # G*
 
-    r_init = 0.0001
+    r_init = 0.001
 
-    # numTrials = math.ceil(float(N))
     numTrials = math.ceil( float(N * M) / 300 )
-
-    numIters = int(numTrials/2)
+    numIters = int(numTrials/3)
 
     step = r_init/(numTrials-1)
 
