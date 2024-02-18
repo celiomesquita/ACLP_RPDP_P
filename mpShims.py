@@ -145,7 +145,7 @@ def getBestShims(pallet, items, k, nodeTorque, solDict, cfg, eta2_vol, itemsDict
             pallet.putItem(item, nodeTorque, solDict, N, itemsDict, lock)
 
 #                                    eta 1    eta 2
-def Solve(pallets, items, cfg, k, eta1_vol, eta2_vol, secBreak, mode, nodeTorque, solDict, itemsDict, tipo):
+def Solve(pallets, items, cfg, pi, k, eta1_vol, eta2_vol, secBreak, mode, nodeTorque, solDict, itemsDict, tipo):
 
     startTime = time.perf_counter()
 
@@ -156,6 +156,12 @@ def Solve(pallets, items, cfg, k, eta1_vol, eta2_vol, secBreak, mode, nodeTorque
 
     lock  = mp.Lock()
     counter = 0
+
+    N = len(items)
+    M = len(pallets)
+    
+    print(f"\nShims heuristic for ACLP+RPDP ({pi}-{k})")        
+    print(f"{N} items  {M} pallets")
 
     # nodeTorque2 = mp.Value('d', nodeTorque.value)
     # pallets2    = common.copyPallets(pallets)

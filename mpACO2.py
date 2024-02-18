@@ -134,7 +134,7 @@ def Solve( pallets, items, cfg, pi, k, secBreak, mode, nodeTorque, solDict, item
     else:
         mode = "Serial"
 
-    print(f"\n{mode} Ant Colony Optimization for ACLP+RPDP (tour {pi} - node {k})")        
+    print(f"\n{mode} Ant Colony Optimization for ACLP+RPDP ({pi}-{k})")        
     print(f"{len(items)} items  {len(pallets)} pallets")
 
     lock  = mp.Lock()

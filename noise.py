@@ -7,6 +7,7 @@ import multiprocessing as mp
 import common
 import icecream as ic
 import tqdm
+import os
 
 RNG = np.random.default_rng()
 
@@ -58,6 +59,23 @@ def Transform(iterPallets, iterItemsDict, iterSolDict, iterScore, N, items, iter
         
     return iterScore
 
+def writeDelta(value):
+
+    dirname = f"./results/NMO/"
+    try:
+        os.makedirs(dirname)
+    except FileExistsError:
+        pass  
+
+    fname = f"{dirname}/NMO_delta.res"    
+        
+    line = f"{value}\n"
+
+    writer = open(fname, "a+") 
+    try:
+        writer.write(line)
+    finally:
+        writer.close() 
 
 # ProbAccept is the Noising Method acceptance method.
 # This feature prevents the method from becoming stuck at a trial optima.
@@ -65,10 +83,15 @@ def ProbAccept(newScore, oldScore, r):
 
     ratio = (newScore.value-oldScore.value) / oldScore.value # may be positive or negative
 
-    delta = ratio + r*(2*RNG.random() - 1.0) # r = 0.001
+    #let noise be a random real number uniformly drawn into  rate; rate
+
+    noise = 2*RNG.random() - 1.0
+
+    delta = ratio + r * noise
+
+    # writeDelta(f"{delta:.5f}")
 
     return delta > 0 # may return true or false
-
 
 def Solve(pallets, items, cfg, pi, k, nodeTime, nodeTorque, solDict, itemsDict):
 
@@ -92,30 +115,37 @@ def Solve(pallets, items, cfg, pi, k, nodeTime, nodeTorque, solDict, itemsDict):
         common.fillPallet(initPallets[i], items, k, initTorque, initSolDict, cfg, 1.0, initItemsDict, lock)
         initScore.value += initPallets[i].PCS
 
-    bestScore = mp.Value('d', initScore.value) # G*
+    r_init = 0.5
 
-    r_init = 0.001
-
-    numTrials = math.ceil( float(N * M) / 300 )
-    numIters = int(numTrials/3)
+    numTrials = math.ceil( float(N * M) / 50 )
+    numIters = int(numTrials/2)
 
     step = r_init/(numTrials-1)
 
     r = r_init 
 
     # initialize the trial solution
-    trialPallets   = common.copyPallets(pallets)  
-    trialSolDict   = dict(solDict)
-    trialItemsDict = dict(itemsDict)
-    trialTorque    = mp.Value('d', initTorque.value)
-    trialScore     = mp.Value('d', initScore.value)
+    bestPallets   = common.copyPallets(initPallets)  
+    bestSolDict   = dict(initSolDict)
+    bestItemsDict = dict(initItemsDict)
+    bestTorque    = mp.Value('d', initTorque.value)
+    bestScore     = mp.Value('d', initScore.value)
 
+    trialTorque    = mp.Value('d', bestTorque.value)
+    trialScore     = mp.Value('d', bestScore.value)
     iterTorque = mp.Value('d', initTorque.value)
     iterScore  = mp.Value('d', initTorque.value)
 
     """"""
     trial = 0
     while trial < numTrials:
+
+        # initialize the trial solution
+        trialPallets   = common.copyPallets(bestPallets)  
+        trialSolDict   = dict(bestSolDict)
+        trialItemsDict = dict(bestItemsDict)
+        trialTorque.value  = bestTorque.value
+        trialScore.value   = bestScore.value
 
         # update the trial solution (back and forth)
 
@@ -144,21 +174,24 @@ def Solve(pallets, items, cfg, pi, k, nodeTime, nodeTorque, solDict, itemsDict):
 
         r -= step
 
-        # if  RNG.random() < 0.1:
-        #     for i, _ in enumerate(trialPallets):               
-        #         common.fillPallet(trialPallets[i], items, k, trialTorque, trialSolDict, cfg, 1.0, trialItemsDict, lock)
-
-        if trialScore.value  > bestScore.value + 0.001 :
-            pallets    = common.copyPallets(trialPallets)
-            solDict    = dict(trialSolDict)
-            itemsDict  = dict(trialItemsDict)
-            nodeTorque.value = trialTorque.value
+        if trialScore.value > bestScore.value + 0.001 :
+            bestPallets    = common.copyPallets(trialPallets)
+            bestSolDict    = dict(trialSolDict)
+            bestItemsDict  = dict(trialItemsDict)
+            bestTorque.value = trialTorque.value
             bestScore.value  = trialScore.value
-            break # first improvement
+            # break # first improvement
 
         trial += 1
+
+    pallets    = common.copyPallets(bestPallets)  
+    solDict    = dict(bestSolDict)
+    itemsDict  = dict(bestItemsDict)
+    nodeTorque.value = bestTorque.value
+    bestScore.value  = bestScore.value
+
     """"""
-    print(f"trials:{numTrials}\titers:{numIters}\tstep:{step:.5f}\t ratio:{100.0*(bestScore.value-initScore.value)/initScore.value:.1f}%\n")
+    print(f"trials:{numTrials}\titers:{numIters}\tstep:{step:.5f}\t ratio:{(bestScore.value-initScore.value)/initScore.value:.3f}\n")
 
 
 if __name__ == "__main__":
