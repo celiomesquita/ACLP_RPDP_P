@@ -6,7 +6,7 @@ import os
 import math
 
 import mpShims
-import mpACO
+import mpACO2 as mpACO
 import optcgcons
 import mipGRB
 import mipCBC
@@ -157,34 +157,34 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg, tourTime, fold
         modStatus = 0
 
         if method == "mpShims":
-            mpShims.Solve(pallets, items, cfg, k, eta1_vol, eta2_vol, node.tLim, "p", nodeTorque, solDict, itemsDict, tipo) # p - parallel
+            mpShims.Solve(pallets, items, cfg, pi, k, eta1_vol, eta2_vol, node.tLim, "p", nodeTorque, solDict, itemsDict, tipo) # p - parallel
 
         if method == "Shims":            
-            mpShims.Solve(pallets, items, cfg, k, eta1_vol, eta2_vol, node.tLim, "s", nodeTorque, solDict, itemsDict, tipo)  # s - serial      
+            mpShims.Solve(pallets, items, cfg, pi, k, eta1_vol, eta2_vol, node.tLim, "s", nodeTorque, solDict, itemsDict, tipo)  # s - serial      
 
         if method == "mpACO":       
-            mpACO.Solve(  pallets, items, cfg, k, node.tLim, "p", nodeTorque, solDict, itemsDict) 
+            mpACO.Solve( pallets, items, cfg, pi, k, node.tLim, "p", nodeTorque, solDict, itemsDict) 
 
         if method == "ACO":       
-            mpACO.Solve(  pallets, items, cfg, k, node.tLim, "s", nodeTorque, solDict, itemsDict)
+            mpACO.Solve(  pallets, items, cfg, pi, k, node.tLim, "s", nodeTorque, solDict, itemsDict)
 
         if method == "TS":       
-            tabu.Solve(  pallets, items, cfg, k, node.tLim, nodeTorque, solDict, itemsDict)             
+            tabu.Solve(  pallets, items, cfg, pi, k, node.tLim, nodeTorque, solDict, itemsDict)             
 
         if method == "GRASP":       
-            grasp.Solve( pallets, items, cfg, k, node.tLim, nodeTorque, solDict, itemsDict) 
+            grasp.Solve( pallets, items, cfg, pi, k, node.tLim, nodeTorque, solDict, itemsDict) 
         
         if method == "NMO":       
-            noise.Solve( pallets, items, cfg, k, node.tLim, nodeTorque, solDict, itemsDict) 
+            noise.Solve( pallets, items, cfg, pi, k, node.tLim, nodeTorque, solDict, itemsDict) 
 
         if method == "Greedy":       
-            greedy.Solve( pallets, items, cfg, k, node.tLim, nodeTorque, solDict, itemsDict) 
+            greedy.Solve( pallets, items, cfg, pi, k, node.tLim, nodeTorque, solDict, itemsDict) 
 
         if method == "GRB":
-            modStatus, ObjBound = mipGRB.Solve( pallets, items, cfg, k, node.tLim, nodeTorque, solDict, itemsDict) 
+            modStatus, ObjBound = mipGRB.Solve( pallets, items, cfg, pi, k, node.tLim, nodeTorque, solDict, itemsDict) 
 
         if method == "CBC": # new formulation
-            modStatus, ObjBound = mipCBC.Solve( pallets, items, cfg, k, node.tLim, nodeTorque, solDict, itemsDict) 
+            modStatus, ObjBound = mipCBC.Solve( pallets, items, cfg, pi, k, node.tLim, nodeTorque, solDict, itemsDict) 
 
         if modStatus == 2: # 2: optimal
             numOptDict["numOpt"] += 1
