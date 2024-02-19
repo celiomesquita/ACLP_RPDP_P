@@ -2,7 +2,7 @@
 import common
 import multiprocessing as mp
 
-def Solve(pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
+def Solve(pallets, items, cfg, pi, k, secBreak, nodeTorque, solDict, itemsDict):
 
     N = len(items)
     M = len(pallets)

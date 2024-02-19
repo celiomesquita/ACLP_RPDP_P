@@ -5,6 +5,7 @@ import math
 import numpy as np
 import common
 import multiprocessing as mp
+import random
 
 RNG = np.random.default_rng()
 
@@ -66,14 +67,19 @@ def Solve(pallets, items, cfg, pi, k, secBreak, nodeTorque, solDict, itemsDict):
 
     # Tabu Queue size: 2% the size of the problem
     tq_size  = math.ceil( float(N * M) / 50 )
-    numIters = math.ceil( float(N * M) / 300 )
+    numIters = math.ceil( float(N * M) / 100 )
 
     tq = []
+
+    # the bigger the problem less iterations (244 - 27 iterations)
+    # numIter = math.ceil( 600_000.0 / float(len_tq) )
 
     print(f"\nTabu Search for ACLP+RPDP ({pi}-{k})")        
     print(f"{len(items)} items  {len(pallets)} pallets")
 
     lock  = mp.Lock() # for use in parallel mode
+
+    initScore = mp.Value('d', 0) # G
 
     initPallets   = common.copyPallets(pallets)
     initSolDict   = dict(solDict)
@@ -109,7 +115,7 @@ def Solve(pallets, items, cfg, pi, k, secBreak, nodeTorque, solDict, itemsDict):
     stagnant = 0
     while stagnant < smax:
 
-        for _ in range(numIters): # local solution iterations
+        for iter in range(numIters): # local solution iterations
 
             if ((time.perf_counter() - startTime) > secBreak):
                 stagnant = smax

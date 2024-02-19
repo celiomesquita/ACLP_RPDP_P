@@ -5,17 +5,19 @@ from mip import Model, xsum, maximize, BINARY, CBC, CONTINUOUS, INTEGER
 from os import cpu_count
 # import os
 
-def Solve( pallets, items, cfg, k, secBreak, nodeTorque, solDict, itemsDict):
+def Solve( pallets, items, cfg, pi, k, secBreak, nodeTorque, solDict, itemsDict):
 
     # itemsDict to control items inclusion feasibility
-
-    score = 0
-    for p in pallets:
-        score += p.PCS
 
     N = len(items)
     M = len(pallets)
 
+    print(f"\nCBC solver for ACLP+RPDP ({pi}-{k})")        
+    print(f"{N} items  {M} pallets")
+
+    score = 0
+    for p in pallets:
+        score += p.PCS
 
     set_M = range( M ) # i, pallets
     set_N = range( N ) # j, items
