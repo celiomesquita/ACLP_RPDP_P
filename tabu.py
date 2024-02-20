@@ -65,9 +65,9 @@ def Solve(pallets, items, cfg, pi, k, secBreak, nodeTorque, solDict, itemsDict):
     N = len(items)
     M = len(pallets)
 
-    # Tabu Queue size: 2% the size of the problem
-    tq_size  = math.ceil( float(N * M) / 50 )
-    numIters = math.ceil( float(N * M) / 100 )
+    # 2% the problem size
+    tq_size  = math.ceil( float(N*M) / 50 )
+    numIters = 10*tq_size
 
     tq = []
 
@@ -156,7 +156,7 @@ def Solve(pallets, items, cfg, pi, k, secBreak, nodeTorque, solDict, itemsDict):
         else:
             stagnant += 1
     """"""
-    print(f"iters:{numIters}\t ratio:{100.0*(bestScore.value-initScore.value)/initScore.value:.1f}%\n")
+    print(f"TQ size:{tq_size}   iters:{numIters}   ratio:{(bestScore.value-initScore.value)/initScore.value:.3f}")
  
 if __name__ == "__main__":
 

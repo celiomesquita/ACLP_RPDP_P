@@ -75,8 +75,6 @@ def pickAnEdge(nbhood, attracts):
 
     x = individuals[0].x
 
-    # x, _ = rouletteSelection(attracts)
-
     edge = nbhood[x]
 
     nbhood.pop(x)

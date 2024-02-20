@@ -81,7 +81,8 @@ def writeDelta(value):
 # This feature prevents the method from becoming stuck at a trial optima.
 def ProbAccept(newScore, oldScore, r):
 
-    ratio = (newScore.value-oldScore.value) / oldScore.value # may be positive or negative
+    # ratio = (newScore.value-oldScore.value) / oldScore.value # may be positive or negative
+    ratio = (newScore.value-oldScore.value)
 
     u = 2.*RNG.random()-1. # -1 to 1
 
@@ -116,7 +117,8 @@ def Solve(pallets, items, cfg, pi, k, nodeTime, nodeTorque, solDict, itemsDict):
         common.fillPallet(initPallets[i], items, k, initTorque, initSolDict, cfg, 1.0, initItemsDict, lock)
         initScore.value += initPallets[i].PCS
 
-    r_init = 0.002 # must be smaller than the ratio 0.004 - 0.008
+    # r_init = 0.002 # must be smaller than the ratio 0.004 - 0.008
+    r_init = 35.
 
     numIters = int(N/5) # number of elementary transformations in a trial solution
     numTrials = int(numIters/5)
@@ -171,7 +173,8 @@ def Solve(pallets, items, cfg, pi, k, nodeTime, nodeTorque, solDict, itemsDict):
             Transform(iterPallets, iterItemsDict, iterSolDict, iterScore, N, items, iterTorque, k, cfg, lock)
 
 
-            noise = abs(iterScore.value - trialScore.value)/trialScore.value
+            # noise = abs(iterScore.value - trialScore.value)/trialScore.value
+            noise = abs(iterScore.value - trialScore.value)
             if noise > maxNoise:
                 maxNoise = noise
 
