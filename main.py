@@ -352,7 +352,7 @@ if __name__ == "__main__":
     plot      = False
 
     testing   = False
-    testing   = True
+    # testing   = True
 
     # shortest = True # 2 shortest tours
     shortest = False # All K!
@@ -360,11 +360,11 @@ if __name__ == "__main__":
     iRace_testing = False
     # iRace_testing = True
 
-    scenarios = [1,2,3,4,5,6] # 2-6 is 1-5 in the article
-    # scenarios = [1]
+    # scenarios = [1,2,3,4,5,6] # 2-6 is 1-5 in the article
+    scenarios = [1]
 
     if testing:
-        scenarios = [1]
+        scenarios = [3]
 
     # scenarios = [6,7,8,9,10,11,12,13,14]
 
@@ -427,11 +427,11 @@ if __name__ == "__main__":
 
     # method = "GRB"
     # method = "CBC"
-    # method = "Shims"
+    method = "Shims"
     # method = "mpShims"
     # method = "mpACO"
     # method = "ACO"
-    method = "TS"
+    # method = "TS"
     # method = "GRASP"
     # method = "NMO"
     # method = "Greedy"

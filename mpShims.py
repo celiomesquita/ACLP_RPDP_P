@@ -149,13 +149,16 @@ def Solve(pallets, items, cfg, pi, k, eta1_vol, eta2_vol, secBreak, mode, nodeTo
 
     startTime = time.perf_counter()
 
+    ts = 1.0
+
     if mode == "p":
         mode = "Parallel"
+        ts = 2.0
     else:
         mode = "Serial"
 
     lock  = mp.Lock()
-    counter = 0
+    # counter = 0
 
     N = len(items)
     M = len(pallets)
@@ -168,57 +171,17 @@ def Solve(pallets, items, cfg, pi, k, eta1_vol, eta2_vol, secBreak, mode, nodeTo
     # solDict2 = dict(solDict)
     # itemsDict2  = dict(itemsDict)
 
+
     for i, _ in enumerate(pallets):
-        common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, eta1_vol, itemsDict, lock)
-
-    # solve the greedy phase 3 times and choose the best
-    # N    = len(items)
-    # M    = len(pallets)
-    # best = 0.0
-    # counter = 0
-    # for x in range(3):
-
-    #     if x == 2:
-    #         ts = 1.3
-
-    #     for i, _ in enumerate(pallets2):
-    #         common.fillPallet( pallets2[i], items, k, nodeTorque2, solDict2, cfg, eta1_vol, itemsDict2, lock, ts)
-
-    #     if x > 0:
-    #         optcgcons.minCGdev(pallets2, k, nodeTorque2, cfg)
-
-    #     Y = np.reshape(solDict2["solMatrix"], (-1, N))
-
-    #     nodeScore2 = 0.0
-    #     for i, row in enumerate(Y):
-    #         for j, X_ij in enumerate(row):
-    #             if X_ij:
-    #                 nodeScore2 += items[j].S
-
-    #     if nodeScore2 > best:
-    #         best = nodeScore2
-    #         nodeTorque = mp.Value('d', nodeTorque2.value)
-    #         pallets   = common.copyPallets(pallets2)
-    #         solDict    = dict(solDict2)
-    #         itemsDict  = dict(itemsDict2)
-    #         # counter += 1
-    #         # print(f"improved {counter} times")
-
-    #     # initialize pallets and the node torque
-    #     nodeTorque2 = mp.Value('d', 0.0) # a multiprocessing double type variable        
-    #     for i, p in enumerate(pallets2):
-    #         pallets2[i].reset(cfg.numNodes) # resets pallets current weight (PCW) as 140kg
-    #         nodeTorque2.value += p.D * p.PCW # empty pallet torque
-
-    #     # initialize the dictionaries
-    #     solMatrix  = mp.Array('i', [0 for _ in np.arange(N*M)] )
-    #     solDict2   = dict(solMatrix=solMatrix)
-    #     mpItems    = mp.Array('i', [0 for _ in np.arange(N)] ) # to check items inclusions feasibility
-    #     itemsDict2 = dict(mpItems=mpItems)
-
+        common.fillPallet( pallets[i], items, k, nodeTorque, solDict, cfg, eta1_vol, itemsDict, lock, ts)
 
     if mode == "Parallel":
+
+        # --- did not work as expected
+        # optcgcons.minCGdev(pallets, k, nodeTorque, cfg)
+
         procs = [None for _ in pallets] # each pallets has its own process
+
         # parallel shims phase
         for i, p in enumerate(pallets):
             procs[i] = mp.Process( target=getBestShims, args=( pallets[i], items, k,\
@@ -227,8 +190,9 @@ def Solve(pallets, items, cfg, pi, k, eta1_vol, eta2_vol, secBreak, mode, nodeTo
             procs[i].start()
         for p in procs:
             p.join()
+
     else: # serial
-        for i, _ in enumerate(pallets):
+        for i, _ in enumerate(pallets):            
             # get the best Shims for the pallet
             getBestShims( pallets[i], items, k, nodeTorque, solDict, cfg, eta2_vol, itemsDict, lock, tipo, startTime, secBreak)
 
