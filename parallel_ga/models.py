@@ -46,3 +46,6 @@ class Knapsack:
             self.add_item(item)
             return True
         return False
+
+    def print_results(self):
+        print(f"{self.knapsack_id}\t{self.current_weight:.0f}\t{self.current_volume:.2f}\t{len(self.items)}")

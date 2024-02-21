@@ -10,9 +10,9 @@ def generate_items(n=800):
     """
     items = []
     for i in range(n):
-        weight = random.uniform(10, 340)  # Assuming weight range
-        volume = random.uniform(0.1, 2.0)   # Assuming volume range
-        value = random.uniform(10, 100) # Assuming value range
+        weight = random.uniform(10, 340)   # Assuming weight range
+        volume = random.uniform(0.05, 1.0) # Assuming volume range
+        value = random.uniform(10, 100)    # Assuming value range
         items.append(Item(item_id=i, weight=weight, volume=volume, value=value))
     return items
 

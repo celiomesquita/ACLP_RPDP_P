@@ -45,27 +45,31 @@ def main():
 
         population = next_generation[:pop_size]  # Ensure population size remains constant
 
-        print(f"Generation {gen+1}/{num_gens}  {fitness_values[0]:.0f}  {fitness_values[len(fitness_values)-1]:.0f} MR:{mutation_rate:.3f}")
+        print(f"Gen.: {gen+1}/{num_gens}  mutation rate:{mutation_rate:.3f}")
 
     end_time = time.time()  # End timing
 
     print(f"GA completed in {end_time - start_time:.2f} seconds.")
 
     for individual in population[:1]:
+        print("---")
         for item_id, knapsack_id in enumerate(individual):
             item = items[item_id]
             knapsack = knapsacks[knapsack_id - 1]  # Adjust for 0-based index
             knapsack.try_add_item(item)  # Assume try_add_item adds the item if it fits        
 
-    vol_max = 18 * 14.
+    vol_max = num_kps * 14.
     vol_sum = 0.
-    wei_max = 18 * 4500
+    wei_max = num_kps * 4500
     wei_sum = 0.
+    num_items = 0
     for kp in knapsacks:
         vol_sum += kp.current_volume
         wei_sum += kp.current_weight
-        print(f"{kp.knapsack_id}\t{kp.current_weight:.0f}\t{kp.current_volume:.2f}\t{len(kp.items)}")
-    print(f"Ocupation rate: {wei_sum/wei_max:.3f} {vol_sum/vol_max:.3f}")
+        num_items += len(kp.items)
+        kp.print_results()
+
+    print(f"Ocupation: {wei_sum/wei_max:.3f} {vol_sum/vol_max:.3f} items:{num_items}")
 
 if __name__ == "__main__":
     main()
