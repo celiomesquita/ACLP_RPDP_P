@@ -12,6 +12,7 @@ def main():
     num_gens       = 50
     elite_size     = 10 # best individuals
     batch_size     = os.cpu_count()
+    torque         = {'maximum': 75_000 * 1.170, 'current': 0.}
 
     # Generate items and knapsacks
     items = generate_items(num_items)
