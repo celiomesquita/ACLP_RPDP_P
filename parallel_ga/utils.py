@@ -16,7 +16,7 @@ def generate_items(n=800):
         items.append(Item(item_id=i, weight=weight, volume=volume, value=value))
     return items
 
-def generate_knapsacks(n=18, max_weight=4500, max_volume=14):
+def generate_knapsacks(dists_cg, n=18, max_weight=4500, max_volume=14 ):
     """
     Generates a list of knapsacks with specified maximum weight and volume capacities.
 
@@ -25,7 +25,7 @@ def generate_knapsacks(n=18, max_weight=4500, max_volume=14):
     :param max_volume: Maximum volume capacity for each knapsack.
     :return: List of Knapsack objects.
     """
-    knapsacks = [Knapsack(knapsack_id=i, max_weight=max_weight, max_volume=max_volume) for i in range(n)]
+    knapsacks = [Knapsack(dists_cg[i], knapsack_id=i, max_weight=max_weight, max_volume=max_volume ) for i in range(n)]
     return knapsacks
 
 def read_items_from_file(filepath):

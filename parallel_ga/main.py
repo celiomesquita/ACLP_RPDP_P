@@ -14,8 +14,28 @@ def main():
     batch_size     = os.cpu_count()
 
     # Generate items and knapsacks
-    items     = generate_items(num_items)   
-    knapsacks = generate_knapsacks(num_kps)
+    items = generate_items(num_items)
+
+    dists_cg = [14.89,
+                14.89,
+                11.47,
+                11.47,
+                8.77,
+                8.77,
+                4.40,
+                4.40,
+                0.00,
+                0.00,
+                -4.40,
+                -4.40,
+                -8.77,
+                -8.77,
+                -13.17,
+                -13.17,
+                -17.57,
+                -17.57]
+
+    knapsacks = generate_knapsacks(dists_cg, num_kps)
 
     # Initialize population
     population = initialize_population(num_items, num_kps, pop_size)
