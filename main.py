@@ -14,6 +14,7 @@ import tabu
 import grasp
 import noise
 import greedy
+import genetic
 import tsp_deap
 
 # from plots import TTT
@@ -179,6 +180,9 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg, tourTime, fold
 
         if method == "Greedy":       
             greedy.Solve( pallets, items, cfg, pi, k, node.tLim, nodeTorque, solDict, itemsDict) 
+
+        if method == "GA":       
+            genetic.Solve( pallets, items, cfg, pi, k, node.tLim, nodeTorque, solDict, itemsDict)             
 
         if method == "GRB":
             modStatus, ObjBound = mipGRB.Solve( pallets, items, cfg, pi, k, node.tLim, nodeTorque, solDict, itemsDict) 
@@ -352,7 +356,7 @@ if __name__ == "__main__":
     plot      = False
 
     testing   = False
-    # testing   = True
+    testing   = True
 
     # shortest = True # 2 shortest tours
     shortest = False # All K!
@@ -364,7 +368,7 @@ if __name__ == "__main__":
     scenarios = [1]
 
     if testing:
-        scenarios = [3]
+        scenarios = [1]
 
     # scenarios = [6,7,8,9,10,11,12,13,14]
 
@@ -427,7 +431,7 @@ if __name__ == "__main__":
 
     # method = "GRB"
     # method = "CBC"
-    method = "Shims"
+    # method = "Shims"
     # method = "mpShims"
     # method = "mpACO"
     # method = "ACO"
@@ -435,6 +439,7 @@ if __name__ == "__main__":
     # method = "GRASP"
     # method = "NMO"
     # method = "Greedy"
+    method = "GA"
 
     if not iRace_testing:
         print(f"timeLimit:{timeLimit}    folder: {folder}    method: {method}   shortest: {shortest}")
@@ -460,7 +465,7 @@ if __name__ == "__main__":
             instances = [1]
 
         if testing:
-            instances = [1,2,3]
+            instances = [1]
 
         if iRace_testing:
             instances = [iRace_instance]
