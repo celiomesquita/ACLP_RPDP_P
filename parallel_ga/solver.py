@@ -1,7 +1,5 @@
 import random
 import multiprocessing as mp
-from multiprocessing import Pool
-
 
 def initialize_population(item_count, knapsack_count, population_size):
     #        a random knapsack                   for each item
@@ -100,26 +98,17 @@ def batch_evaluate(population, knapsacks, items, torque, solDict, itemsDict, N, 
     
     return fitness_values
 
-def evaluate_population(population, knapsacks, items, torque, solDict, itemsDict, N):
-    """
-    Evaluates the entire population in parallel using multiprocessing.
-    """
+# def evaluate_population(population, knapsacks, items, torque, solDict, itemsDict, N):
+#     """
+#     Evaluates the entire population in parallel using multiprocessing.
+#     """
     
-    # Prepare a list of arguments for the fitness function
-    args = [(individual, knapsacks, items, torque, solDict, itemsDict, N) for individual in population]
+#     # Prepare a list of arguments for the fitness function
+#     args = [(individual, knapsacks, items, torque, solDict, itemsDict, N) for individual in population]
 
-    # Create a pool of worker processes
-    with Pool() as pool:
-        # Map each individual to the fitness function and collect the results
-        results = pool.starmap(fitness, args)
+#     # Create a pool of worker processes
+#     with Pool() as pool:
+#         # Map each individual to the fitness function and collect the results
+#         results = pool.starmap(fitness, args)
 
-    return results
-
-
-# NOT USED YET
-
-def rank_selection(population, fitnesses, selection_size):
-    ranked_population = sorted(zip(population, fitnesses), key=lambda x: x[1], reverse=True)
-    # Implement selection based on ranking here
-    # This is a placeholder for the logic you'll need to implement
-
+#     return results

@@ -1,9 +1,8 @@
 import time
 import random
 from parallel_ga import solver as ga_solver
-from parallel_ga import utils as ga_models
+from parallel_ga import models as ga_models
 import os
-import multiprocessing as mp
 
 def Solve(pallets, items2, cfg, pi, k, secBreak, nodeTorque, solDict, itemsDict):
 
@@ -27,14 +26,14 @@ def Solve(pallets, items2, cfg, pi, k, secBreak, nodeTorque, solDict, itemsDict)
     items = []
     id = 0
     for it in items2:
-        item = ga_models.models.Item(id, it.W, it.V, it.S)
+        item = ga_models.Item(id, it.W, it.V, it.S)
         items.append(item)
         id += 1
     
     knapsacks = []
     id = 0
     for p in pallets:
-        kp = ga_models.models.Knapsack(p.D, id, p.W, p.V)
+        kp = ga_models.Knapsack(p.D, id, p.W, p.V)
         knapsacks.append(kp)
         id += 1
 
