@@ -198,38 +198,44 @@ def solveTour(scenario, instance, pi, tour, method, pallets, cfg, tourTime, fold
 
         Y = np.reshape(solDict["solMatrix"], (-1, N)) # N number of items (columns)
        
-        # begin ---- parallel solving the 3D packing for each pallet  
-        # procs   = [None for _ in pallets]
-        # packers = [None for _ in pallets]
-        # counter1 = 0
-        # for i, row in enumerate(Y):
+        # begin ---- parallel solving the 3D packing for each pallet 
+        try:
+            procs   = [None for _ in pallets]
+            packers = [None for _ in pallets]
+            counter1 = 0
+            for i, row in enumerate(Y):
 
-        #     packers[i] = Packer()
-        #     packers[i].add_bin( Bin(f'pallet{i}', pallets[i].w, pallets[i].h, pallets[i].d, pallets[i].W, i) )
-            
-        #     for j, X_ij in enumerate(row):
-        #         if X_ij:
-        #             packers[i].add_item(Item(f'item{j}', items[j].w, items[j].h, items[j].d, 0, j))
-        #             counter1 += 1
-            
-        #     procs[i] = mp.Process( target=packers[i].pack() )
-        #     procs[i].start()
+                packers[i] = Packer()
+                packers[i].add_bin( Bin(f'pallet{i}', pallets[i].w, pallets[i].h, pallets[i].d, pallets[i].W, i) )
+                
+                for j, X_ij in enumerate(row):
+                    if X_ij:
+                        packers[i].add_item(Item(f'item{j}', items[j].w, items[j].h, items[j].d, 0, j))
+                        counter1 += 1
+                
+                procs[i] = mp.Process( target=packers[i].pack() )
+                procs[i].start()
 
-        # counter2 = 0
-        # for i, proc in enumerate(procs):
-        #     proc.join()
-        #     for bin in packers[i].bins:
-        #         i = bin.ID
-        #         for item in bin.unfitted_items:
-        #             j = item.ID
-        #             Y[i][j] = 0
-        #             counter2 += 1
-        #             pallets[i].popItem(items[j], nodeTorque, solDict, N, itemsDict)
+            counter2 = 0
+            for i, proc in enumerate(procs):
+                proc.join()
+                for bin in packers[i].bins:
+                    i = bin.ID
+                    for item in bin.unfitted_items:
+                        j = item.ID
+                        Y[i][j] = 0
+                        counter2 += 1
+                        pallets[i].popItem(items[j], nodeTorque, solDict, N, itemsDict)
 
-        # if counter1 > 0:
-        #     print(f"{100*counter2/counter1:.1f}% unfit items excluded from solution!")
+            if counter1 > 0:
+                print(f"{100*counter2/counter1:.1f}% unfit items excluded from solution!")
+
+        except Exception as e:
+
+            pass
 
         nodeElapsed2 = time.perf_counter() - startNodeTime
+
 
         # end ---- parallel solving the 3D packing for each pallet         
 
@@ -356,7 +362,7 @@ if __name__ == "__main__":
     plot      = False
 
     testing   = False
-    testing   = True
+    # testing   = True
 
     # shortest = True # 2 shortest tours
     shortest = False # All K!
@@ -364,15 +370,14 @@ if __name__ == "__main__":
     iRace_testing = False
     # iRace_testing = True
 
-    # scenarios = [1,2,3,4,5,6] # 2-6 is 1-5 in the article
-    scenarios = [1]
+    scenarios = [1,2,3,4,5,6] # 2-6 is 1-5 in the article
 
     if testing:
         scenarios = [1]
 
-    # scenarios = [6,7,8,9,10,11,12,13,14]
+    # scenarios = [6,7,8,9,10,11,12,13,14] # for Shims validation
 
-    folder = "surplus20"  # 1.2  
+    folder = "surplus20"  # 1.2  20% over pallet volumetric capacity
     # folder = "surplus50"  # 1.5
     # folder = "surplus100" # 2.0
 
@@ -431,7 +436,7 @@ if __name__ == "__main__":
 
     # method = "GRB"
     # method = "CBC"
-    # method = "Shims"
+    method = "Shims"
     # method = "mpShims"
     # method = "mpACO"
     # method = "ACO"
@@ -439,8 +444,9 @@ if __name__ == "__main__":
     # method = "GRASP"
     # method = "NMO"
     # method = "Greedy"
-    method = "GA"
+    # method = "GA"
 
+    # when using irace, nothing must be printed, except f(G).
     if not iRace_testing:
         print(f"timeLimit:{timeLimit}    folder: {folder}    method: {method}   shortest: {shortest}")
 
@@ -472,6 +478,7 @@ if __name__ == "__main__":
 
         cfg = common.Config(scenario)
 
+        # when using irace, nothing must be printed, except f(G).
         if not iRace_testing:
             print(f"\n{cfg.numNodes} nodes")
 
@@ -599,6 +606,7 @@ if __name__ == "__main__":
         #         prev = node
         # shortestTour += f"{origin.ICAO}"
 
+        # when using irace, nothing must be printed, except f(G).
         if not iRace_testing:
 
             str = f"{bestAvgSC:.2f}\t&\t{avgTime:.0f}\t {bestAvgVol:.2f}\t {bestAvgTorque:.2f}"
