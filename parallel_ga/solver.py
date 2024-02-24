@@ -5,7 +5,7 @@ def initialize_population(item_count, knapsack_count, population_size):
     #        a random knapsack                   for each item
     return [[random.randint(0, knapsack_count-1) for _ in range(item_count)] for _ in range(population_size)]
 
-def fitness(individual, knapsacks, items, torque, solDict, itemsDict, N):
+def fitness(individual, knapsacks, items, torque, solDict_ga, itemsDict_ga, N):
     # Reset knapsacks
     for knapsack in knapsacks:
         knapsack.reset()  # Assume reset method clears items and recalculates capacity
@@ -16,7 +16,7 @@ def fitness(individual, knapsacks, items, torque, solDict, itemsDict, N):
         for item_id, knapsack_id in enumerate(individual):
             item     = items[item_id]
             knapsack = knapsacks[knapsack_id]
-            knapsack.try_add_item(item, torque, solDict, itemsDict, N)
+            knapsack.try_add_item(item, torque, solDict_ga, itemsDict_ga, N)
     
     except IndexError as e:
         # Log error context for debugging
@@ -65,12 +65,12 @@ def adaptive_mutation_rate(gen, num_gens):
     rate = initial_rate - (gen / num_gens) * (initial_rate - final_rate)
     return max(rate, final_rate)
 
-def evaluate_batch(batch, knapsacks, items, torque, solDict, itemsDict, N, output_queue):
+def evaluate_batch(batch, knapsacks, items, torque, solDict_ga, itemsDict_ga, N, output_queue):
     """Evaluates a batch of individuals for their fitness and stores results in the output queue."""
     # Calculate fitness for the batch and put the result in the output queue
-    output_queue.put([fitness(individual, knapsacks, items, torque, solDict, itemsDict, N) for individual in batch])
+    output_queue.put([fitness(individual, knapsacks, items, torque, solDict_ga, itemsDict_ga, N) for individual in batch])
 
-def batch_evaluate(population, knapsacks, items, torque, solDict, itemsDict, N, batch_size=10):
+def batch_evaluate(population, knapsacks, items, torque, solDict_ga, itemsDict_ga, N, batch_size=10):
 
     """Splits the population into batches and evaluates them in parallel using multiprocessing.Process."""
 
@@ -83,7 +83,7 @@ def batch_evaluate(population, knapsacks, items, torque, solDict, itemsDict, N, 
     
     # Create and start a process for each batch
     for batch in batches:
-        process = mp.Process(target=evaluate_batch, args=(batch, knapsacks, items, torque, solDict, itemsDict, N, output_queue))
+        process = mp.Process(target=evaluate_batch, args=(batch, knapsacks, items, torque, solDict_ga, itemsDict_ga, N, output_queue))
         processes.append(process)
         process.start()
     
@@ -98,13 +98,13 @@ def batch_evaluate(population, knapsacks, items, torque, solDict, itemsDict, N, 
     
     return fitness_values
 
-# def evaluate_population(population, knapsacks, items, torque, solDict, itemsDict, N):
+# def evaluate_population(population, knapsacks, items, torque, solDict_ga, itemsDict_ga, N):
 #     """
 #     Evaluates the entire population in parallel using multiprocessing.
 #     """
     
 #     # Prepare a list of arguments for the fitness function
-#     args = [(individual, knapsacks, items, torque, solDict, itemsDict, N) for individual in population]
+#     args = [(individual, knapsacks, items, torque, solDict_ga, itemsDict_ga, N) for individual in population]
 
 #     # Create a pool of worker processes
 #     with Pool() as pool:

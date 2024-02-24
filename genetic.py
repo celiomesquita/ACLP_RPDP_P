@@ -3,6 +3,8 @@ import random
 from parallel_ga import solver as ga_solver
 from parallel_ga import models as ga_models
 import os
+import multiprocessing as mp
+import numpy as np
 
 def Solve(pallets, items2, cfg, pi, k, secBreak, nodeTorque, solDict, itemsDict):
 
@@ -23,17 +25,23 @@ def Solve(pallets, items2, cfg, pi, k, secBreak, nodeTorque, solDict, itemsDict)
     batch_size     = os.cpu_count()
     torque         = {'maximum': cfg.maxTorque, 'current': nodeTorque.value}
 
+    solMatrix_ga = mp.Array('i', [0 for _ in np.arange(N*M)] )
+    mpItems_ga   = mp.Array('i', [0 for _ in np.arange(N)] ) # to check items inclusions feasibility
+
+    solDict_ga   = dict(solMatrix=solMatrix_ga)
+    itemsDict_ga = dict(mpItems=mpItems_ga)       
+
     items = []
     id = 0
     for it in items2:
-        item = ga_models.Item(id, it.W, it.V, it.S)
+        item = ga_models.Item(id, it.W, it.V, it.S, it.To)
         items.append(item)
         id += 1
     
     knapsacks = []
     id = 0
     for p in pallets:
-        kp = ga_models.Knapsack(p.D, id, p.W, p.V)
+        kp = ga_models.Knapsack(p.D, id, p.W, p.V, p.Dest[k])
         knapsacks.append(kp)
         id += 1
 
@@ -55,7 +63,7 @@ def Solve(pallets, items2, cfg, pi, k, secBreak, nodeTorque, solDict, itemsDict)
         # batch_size = len(items)  
 
         # Evaluate population
-        fitness_values = ga_solver.batch_evaluate( population, knapsacks, items, torque, solDict, itemsDict, N, batch_size)
+        fitness_values = ga_solver.batch_evaluate( population, knapsacks, items, torque, solDict_ga, itemsDict_ga, N, batch_size)
 
         # # Select parents
         parents = ga_solver.select_parents(population, fitness_values, elite_size)
@@ -77,12 +85,16 @@ def Solve(pallets, items2, cfg, pi, k, secBreak, nodeTorque, solDict, itemsDict)
     # end_time = time.time()  # End timing
 
     # print(f"GA completed in {end_time - start_time:.2f} seconds.")
+        
 
     for individual in population[:1]:
-        for item_id, knapsack_id in enumerate(individual):
-            item = items[item_id]
-            knapsack = knapsacks[knapsack_id]
-            knapsack.try_add_item(item, torque, solDict, itemsDict, N)
+
+        ga_solver.fitness(individual, knapsacks, items, torque, solDict, itemsDict, N)
+
+        # for item_id, knapsack_id in enumerate(individual):
+        #     item = items[item_id]
+        #     knapsack = knapsacks[knapsack_id]
+        #     knapsack.try_add_item(item, torque, solDict_ga, itemsDict_ga, N)
 
     # vol_max = num_kps * 14.
     # vol_sum = 0.

@@ -362,7 +362,7 @@ if __name__ == "__main__":
     plot      = False
 
     testing   = False
-    # testing   = True
+    testing   = True
 
     # shortest = True # 2 shortest tours
     shortest = False # All K!
@@ -436,7 +436,7 @@ if __name__ == "__main__":
 
     # method = "GRB"
     # method = "CBC"
-    method = "Shims"
+    # method = "Shims"
     # method = "mpShims"
     # method = "mpACO"
     # method = "ACO"
@@ -444,7 +444,7 @@ if __name__ == "__main__":
     # method = "GRASP"
     # method = "NMO"
     # method = "Greedy"
-    # method = "GA"
+    method = "GA"
 
     # when using irace, nothing must be printed, except f(G).
     if not iRace_testing:
