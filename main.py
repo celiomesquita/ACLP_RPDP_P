@@ -362,7 +362,7 @@ if __name__ == "__main__":
     plot      = False
 
     testing   = False
-    testing   = True
+    # testing   = True
 
     # shortest = True # 2 shortest tours
     shortest = False # All K!
@@ -430,9 +430,9 @@ if __name__ == "__main__":
         eta1_vol, eta2_vol = 0.96, 1.57
 
     # timeLimit = 240
-    timeLimit = 1200
+    # timeLimit = 1200
     # timeLimit = 2400
-    # timeLimit = 3600 # if there is any metaheuristics in the experiment (except Shims)
+    timeLimit = 3600 # if there is any metaheuristics in the experiment (except Shims)
 
     # method = "GRB"
     # method = "CBC"
@@ -465,7 +465,7 @@ if __name__ == "__main__":
 
     for scenario in scenarios:
 
-        instances = [1,2,3,4,5,6,7]
+        instances = [1,2]
 
         if scenarios[0] >= 6:
             instances = [1]

@@ -19,8 +19,8 @@ def Solve(pallets, items2, cfg, pi, k, secBreak, nodeTorque, solDict, itemsDict)
     # GA Parameters
     num_items      = N
     num_kps        = M
-    pop_size       = 80
-    num_gens       = 40
+    pop_size       = 200
+    num_gens       = 100
     elite_size     = 10 # best individuals
     batch_size     = os.cpu_count()
     torque         = {'maximum': cfg.maxTorque, 'current': nodeTorque.value}
