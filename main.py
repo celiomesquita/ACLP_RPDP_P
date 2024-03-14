@@ -4,6 +4,7 @@ import time
 import multiprocessing as mp
 import os
 import math
+import greedy
 
 import mpShims
 import mpACO2 as mpACO
@@ -13,7 +14,6 @@ import mipCBC
 import tabu
 import grasp
 import noise
-import greedy
 import genetic
 import tsp_deap
 
