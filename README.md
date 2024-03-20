@@ -25,8 +25,7 @@ As this is ongoing research, we thought about some possible future improvements:
 
 ### Before testing, it is necessary to have a complete understanding of the paper's content.
 
-*Mesquita, A.C.P., Sanches, C.A.A., 2024. Air cargo load and route planning in pickup and delivery operations.
-Expert Systems with Applications, XX–XX.*
+*MESQUITA, A.; SANCHES, C. Air cargo load and route planning in pickup and delivery operations. Expert Systems with Applications, p. 123711, 2024. ISSN 0957-4174. Available in: <https://www.sciencedirect.com/science/article/pii/S0957417424005773>.*
 
 1. Open the main.py file
 2. Choose a time limit for the solver to work on a node.
