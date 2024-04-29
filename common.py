@@ -133,7 +133,7 @@ class Pallet(object):
         self.PCV += consol.V
         self.PCS += consol.S
             
-    def isFeasible(self, item, threshold, k, nodeTorque, cfg, itemsDict, lock): # check constraints
+    def isFeasible(self, item, threshold, k, nodeTorque, cfg, itemsDict, lock, ts=1.0): # check constraints
 
         feasible = True
 
@@ -160,7 +160,7 @@ class Pallet(object):
                     If the torque is increasing positively and is bigger  than  maxTorque
                     If the torque is increasing negatively and is smaller than -maxTorque
                     """
-                    if  abs(nodeTorque.value) < abs(newTorque) and cfg.maxTorque < abs(newTorque):
+                    if  abs(nodeTorque.value) < abs(newTorque) and cfg.maxTorque*ts < abs(newTorque):
                         feasible = False
                                            
         return feasible
@@ -211,11 +211,11 @@ def loadPallets(cfg):
    
     return pallets, dists[0] # ramp door distance from CG
 
-def fillPallet(pallet, items, k, nodeTorque, solDict, cfg, vthreshold, itemsDict, lock):
+def fillPallet(pallet, items, k, nodeTorque, solDict, cfg, vthreshold, itemsDict, lock, ts=1.0):
     N = len(items)
     counter = 0
     for item in items:
-        if pallet.isFeasible(item, vthreshold, k, nodeTorque,   cfg,          itemsDict, lock):
+        if pallet.isFeasible(item, vthreshold, k, nodeTorque,   cfg,          itemsDict, lock, ts):
             pallet.putItem(  item,               nodeTorque, solDict,      N, itemsDict, lock)
             counter += 1
     return counter

@@ -81,13 +81,15 @@ def writeDelta(value):
 # This feature prevents the method from becoming stuck at a trial optima.
 def ProbAccept(newScore, oldScore, r):
 
-    ratio = (newScore.value-oldScore.value) / oldScore.value # may be positive or negative
+    # ratio = (newScore.value-oldScore.value) / oldScore.value # may be positive or negative
+    ratio = (newScore.value-oldScore.value)
 
-    #let noise be a random real number uniformly drawn into  rate; rate
+    u = 2.*RNG.random()-1. # -1 to 1
 
-    noise = 2*RNG.random() - 1.0
-
-    delta = ratio + r * noise
+    # if delta is positive and bigger  than +ru it returns True
+    # if delta is negative and smaller than -ru it returns False
+    # if |delta| is smaller than |r * u| it may return True or False
+    delta = ratio + r * u
 
     # writeDelta(f"{delta:.5f}")
 
@@ -115,10 +117,14 @@ def Solve(pallets, items, cfg, pi, k, nodeTime, nodeTorque, solDict, itemsDict):
         common.fillPallet(initPallets[i], items, k, initTorque, initSolDict, cfg, 1.0, initItemsDict, lock)
         initScore.value += initPallets[i].PCS
 
-    r_init = 0.001
+    # r_init = 0.002 # must be smaller than the ratio 0.004 - 0.008
+    r_init = 35.
 
-    numTrials = math.ceil( float(N * M) / 100 )
-    numIters = int(numTrials/2)
+    numIters = int(N/5) # number of elementary transformations in a trial solution
+    numTrials = int(numIters/5)
+
+    # numTrials = math.ceil( float(N * M) / 10 ) # too long
+    # numIters = int(numTrials/2)
 
     step = r_init/(numTrials-1)
 
@@ -137,6 +143,8 @@ def Solve(pallets, items, cfg, pi, k, nodeTime, nodeTorque, solDict, itemsDict):
     iterScore  = mp.Value('d', initTorque.value)
 
     """"""
+
+    maxNoise = 0.0
     trial = 0
     while trial < numTrials:
 
@@ -163,6 +171,12 @@ def Solve(pallets, items, cfg, pi, k, nodeTime, nodeTorque, solDict, itemsDict):
 
             # Transform makes a random elementary transformation in a randomly chosen pallet
             Transform(iterPallets, iterItemsDict, iterSolDict, iterScore, N, items, iterTorque, k, cfg, lock)
+
+
+            # noise = abs(iterScore.value - trialScore.value)/trialScore.value
+            noise = abs(iterScore.value - trialScore.value)
+            if noise > maxNoise:
+                maxNoise = noise
 
             if ProbAccept(iterScore, trialScore, r):
             # if iterScore.value > trialScore.value + 0.0001:
@@ -191,7 +205,7 @@ def Solve(pallets, items, cfg, pi, k, nodeTime, nodeTorque, solDict, itemsDict):
     bestScore.value  = bestScore.value
 
     """"""
-    print(f"trials:{numTrials}\titers:{numIters}\tstep:{step:.5f}\t ratio:{(bestScore.value-initScore.value)/initScore.value:.3f}\n")
+    print(f"trials:{numTrials}   iters:{numIters}   step:{step:.5f}   ratio:{(bestScore.value-initScore.value)/initScore.value:.3f}   maxNoise:{maxNoise:.3f}")
 
 
 if __name__ == "__main__":
